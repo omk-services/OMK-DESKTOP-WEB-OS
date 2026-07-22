@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════
+   Citadelle OS — PostHog-Light Design System
+   Forked from A'Space Life OS glass shell (proven canon)
+   Skin: warm paper light — #f4f5f0 canvas, #f08143 accent
+   ═══════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* Accent — PostHog orange */
+    --theme-accent: #f08143;
+    --theme-accent-rgb: 240, 129, 67;
+    --theme-accent-hover: #e07535;
+
+    /* Text — warm stone */
+    --theme-text: #292524;          /* stone-800 */
+    --theme-text-rgb: 41, 37, 36;
+    --theme-muted: #78716c;         /* stone-500 */
+
+    /* Surfaces */
+    --canvas: #f4f5f0;
+    --theme-bg: #ffffff;            /* window body */
+    --panel: rgba(255, 255, 255, 0.85);
+    --panel-solid: #ffffff;
+    --panel-border: #c4c6ba;
+    --panel-border-subtle: #e5e6dc;
+    --hairline: #e5e6dc;
+
+    /* Elevation */
+    --shadow-window: 0 24px 60px -20px rgba(41, 37, 36, 0.28);
+    --shadow-panel: 0 1px 2px rgba(41, 37, 36, 0.06), 0 8px 24px -16px rgba(41, 37, 36, 0.18);
+
+    /* Status */
+    --ok: #15803d;
+    --warn: #b45309;
+    --danger: #dc2626;
+
+    /* Layout */
+    --topbar-height: 40px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body, #root {
+    margin: 0;
+    height: 100%;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--canvas);
+    color: var(--theme-text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-outfit { font-family: 'Outfit', 'Inter', sans-serif; }
+}
+
+@layer utilities {
+  .top-bar { height: var(--topbar-height); }
+
+  /* Glass Level 1 — floating chrome (topbar, dock, window title strip) */
+  .glass {
+    background: var(--panel);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-panel);
+  }
+
+  /* Glass Level 2 — cards nested inside windows */
+  .glass-card {
+    background: var(--panel-solid);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-panel);
+  }
+
+  /* Custom scrollbar — thin, warm */
+  .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--panel-border);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--theme-muted); background-clip: content-box; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Toast slide-in */
+@keyframes toast-in {
+  from { transform: translateX(16px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-toast-in { animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
