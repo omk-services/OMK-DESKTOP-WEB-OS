@@ -21,15 +21,15 @@ export function Desktop() {
 
   useEffect(() => {
     try {
+      // Wipe the macro's persisted layout BEFORE restoreLayout so the
+      // first-visit branch actually fires. The macro's beforeunload saveLayout()
+      // persists whatever is open, which can accidentally skip first-visit.
+      // The citadel is a self-contained 5-window atomic setState in the
+      // demoShell store, so the macro layout doesn't need to remember anything.
+      try { localStorage.removeItem('coach-os-shell-layout-v1'); } catch { /* noop */ }
       restoreLayout();
       const restored = useShellStore.getState().windows.filter(w => w.isOpen);
       if (restored.length > 0) return;
-      // Migration: clear any macro-side persisted layout so the first-visit
-      // branch actually fires. The macro's beforeunload saveLayout() persists
-      // whatever is open, which can accidentally skip first-visit. The citadel
-      // seed is a single atomic setState, so we don't need the macro to remember
-      // anything from prior sessions.
-      try { localStorage.removeItem('coach-os-shell-layout-v1'); } catch { /* noop */ }
       const isFirstVisit = !hasSeenCitadel();
       if (isFirstVisit) {
         const onboarding = getApp('onboarding');
