@@ -24,18 +24,12 @@ export function Desktop() {
       restoreLayout();
       const restored = useShellStore.getState().windows.filter(w => w.isOpen);
       if (restored.length > 0) return;
-      // Migration: the previous Vercel build had a hydration race that left
-      // only the citadel window in the macro's persisted layout. Clear that
-      // legacy state so the first-visit branch can fire on a re-load.
-      try {
-        const raw = localStorage.getItem('coach-os-shell-layout-v1');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const wins = parsed?.state?.windows ?? [];
-          const citadelOnly = wins.length === 1 && wins[0].id === 'onboarding' && wins[0].isOpen;
-          if (citadelOnly) localStorage.removeItem('coach-os-shell-layout-v1');
-        }
-      } catch { /* noop */ }
+      // Migration: clear any macro-side persisted layout so the first-visit
+      // branch actually fires. The macro's beforeunload saveLayout() persists
+      // whatever is open, which can accidentally skip first-visit. The citadel
+      // seed is a single atomic setState, so we don't need the macro to remember
+      // anything from prior sessions.
+      try { localStorage.removeItem('coach-os-shell-layout-v1'); } catch { /* noop */ }
       const isFirstVisit = !hasSeenCitadel();
       if (isFirstVisit) {
         const onboarding = getApp('onboarding');
