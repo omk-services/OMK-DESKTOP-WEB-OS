@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useWindowPage } from '../contexts/WindowContext';
+import { useVoiceIntentStore } from '../lib/voiceIntent';
 
 export interface AppSection {
   id: string;
@@ -32,12 +33,29 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const { setActivePage } = useWindowPage();
+  const { windowId, setActivePage } = useWindowPage();
   const active = sections.find(s => s.id === activeId) ?? sections[0];
 
   useEffect(() => {
     if (active) setActivePage(active.label);
-  }, [activeId, active, setActivePage]);
+  }, [activeId, active?.label, setActivePage]);
+
+  // Voice-navigation bridge: a spoken "ouvre <app> sur <section>" command sets a
+  // pending section label on this window's intent slot. activeId is the only
+  // state that actually drives which section renders — setActivePage (above)
+  // is a one-way mirror to the breadcrumb, not the source of truth — so the
+  // intent must be consumed here, against activeId, not upstream in WindowFrame.
+  const sectionIntent = useVoiceIntentStore(s => (windowId ? s.byWindow[windowId]?.section : undefined));
+  const consumeSectionIntent = useVoiceIntentStore(s => s.consumeSection);
+  useEffect(() => {
+    if (!sectionIntent || !windowId) return;
+    const match = sections.find(s => s.label === sectionIntent);
+    if (match) {
+      setActiveId(match.id);
+      consumeSectionIntent(windowId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionIntent, windowId]);
 
   /* Watch this window's own content width — collapse the sidebar when the
      window is resized down to mobile-ish width, independent of the other windows. */

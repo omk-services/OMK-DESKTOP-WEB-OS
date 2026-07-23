@@ -1,13 +1,15 @@
 /** TopBar — Coach OS global bar: brand, ecosystem seal, bell, clock (light skin) */
 import { useState, useEffect } from 'react';
-import { Bell, RotateCcw, Leaf } from 'lucide-react';
+import { Bell, RotateCcw, Leaf, Mic, MicOff } from 'lucide-react';
 import { useShellStore } from '../stores/shell.store';
+import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 
 export function TopBar() {
   const [time, setTime] = useState(new Date());
   const bootClean = useShellStore(s => s.bootClean);
   const notificationCount = useShellStore(s => s.notificationCount);
   const clearNotifications = useShellStore(s => s.clearNotifications);
+  const voice = useVoiceNavigation();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -40,6 +42,21 @@ export function TopBar() {
           <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
             <span className="w-2 h-2 rounded-full bg-emerald-500" /> Ecosystem healthy · 24/7
           </span>
+
+          {voice.supported && (
+            <button
+              onClick={voice.toggle}
+              title={voice.listening ? `Écoute… dernier: "${voice.lastTranscript}"` : 'Activer le contrôle vocal'}
+              className={`relative flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all ${
+                voice.listening
+                  ? 'bg-[var(--theme-accent)] text-white'
+                  : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+              }`}
+            >
+              {voice.listening ? <Mic className="w-3 h-3 animate-pulse" /> : <MicOff className="w-3 h-3" />}
+              {voice.listening ? 'Écoute' : 'Voix'}
+            </button>
+          )}
 
           <button onClick={clearNotifications} className="relative group p-1" title="Notifications">
             <Bell className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors" />

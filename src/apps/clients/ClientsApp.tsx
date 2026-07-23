@@ -1,4 +1,4 @@
-import { Contact, UserPlus, TrendingDown, Building2, Users } from 'lucide-react';
+import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { ProgressRow } from '../_ui/widgets';
@@ -12,6 +12,7 @@ const ACCENT = '#2563eb';
 export function ClientsApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
   const drill = useCollectionDrill('clients', ['Active', 'Onboarding', 'Churn Risk', 'Directory']);
+  const vaultDrill = useCollectionDrill('session_notes', 'IP Vault');
 
   const activeClients = clients.filter(c => c.status === 'Active');
   const onboardingClients = clients.filter(c => c.status === 'Onboarding');
@@ -104,11 +105,22 @@ export function ClientsApp() {
     );
   };
 
+  const Vault = () => {
+    if (vaultDrill.openId) return <DynamicPageView collectionId="session_notes" itemId={vaultDrill.openId} onBack={vaultDrill.close} onNavigate={vaultDrill.open} />;
+    return (
+      <div className="p-7">
+        <SectionHead title="IP Vault" subtitle="Every session, captured — the coach's knowledge, sanctuarized" />
+        <CollectionRepeater collectionId="session_notes" onOpen={vaultDrill.open} />
+      </div>
+    );
+  };
+
   const sections: AppSection[] = [
     { id: 'active', label: 'Active', icon: Contact, render: Active },
     { id: 'onboarding', label: 'Onboarding', icon: UserPlus, render: Onboarding },
     { id: 'risk', label: 'Churn Risk', icon: TrendingDown, render: Risk },
     { id: 'directory', label: 'Directory', icon: Users, render: Directory },
+    { id: 'vault', label: 'IP Vault', icon: VaultIcon, render: Vault },
   ];
 
   return <AppFrame title="Clients" subtitle="Accounts" icon={Contact} accent={ACCENT} sections={sections} />;

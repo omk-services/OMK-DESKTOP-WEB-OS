@@ -365,6 +365,104 @@ const policiesItems: CmsItem[] = [
   { id: 'acceptable-use', name: 'Acceptable use', updated: '4mo ago', body: 'Defines what the AI agents may and may not do on the coach\'s behalf, and the human-in-the-loop boundaries.' },
 ];
 
+/* ═══ Session Notes — Clients app "IP Vault": the coach's captured knowledge,
+   the concrete product surface behind the "sanctuarize your IP" Nexus pitch ═══ */
+
+const sessionNotesDef = def({
+  id: 'session_notes', name: 'Session Notes', singular: 'Session Note', accent: '#2563eb',
+  titleField: 'topic', subtitleField: 'clientName', badgeField: 'sentiment',
+  fields: [
+    { key: 'clientName', label: 'Client', type: 'text' },
+    { key: 'date', label: 'Session date', type: 'text' },
+    { key: 'duration', label: 'Duration', type: 'text' },
+    { key: 'sentiment', label: 'Sentiment', type: 'badge' },
+    { key: 'body', label: 'Notes', type: 'longtext' },
+  ],
+});
+
+const sessionNotesItems: CmsItem[] = [
+  { id: 'sn-1', topic: 'Q3 pricing repositioning', clientName: 'Ava Chen', date: 'Thu, Jul 18', duration: '50 min', sentiment: 'Breakthrough', body: 'Ava is ready to raise her flagship offer from $1,800 to $2,400/mo starting Q4. Walked through the objection-handling script for existing clients grandfathered at the old rate. Action: draft the rate-change email by Friday, she reviews before sending.' },
+  { id: 'sn-2', topic: 'Burnout check-in', clientName: 'Marcus Reyes', date: 'Fri, Jul 12', duration: '45 min', sentiment: 'Watch', body: 'Marcus mentioned feeling stretched across 3 cohort launches at once. Recommended he pause new enrollment for 2 weeks. He pushed back — flag for next session, do not let this drop.' },
+  { id: 'sn-3', topic: 'IP framework: The Weight Method', clientName: 'Priya Nandan', date: 'Mon, Jul 8', duration: '60 min', sentiment: 'Breakthrough', body: 'Priya finally articulated her proprietary "Weight Method" clearly enough to document. Captured the 4-stage structure verbatim — this is the seed for her signature framework page and future book chapter 3.' },
+  { id: 'sn-4', topic: 'Contract renewal friction', clientName: 'Studio Nord', date: 'Tue, Jun 30', duration: '30 min', sentiment: 'Watch', body: 'Studio Nord has not scheduled a session in 21 days. Left a voicemail. If no response by next week, escalate to the at-risk retention sequence.' },
+];
+
+/* ═══ demo-coach Onboarding Citadel — Q4-2026 GTM launch (G2/Vercel "demo-coach" instance)
+   Represents the personalised snapshot a prospect sees INSIDE their assigned Nexus
+   instance after taking the 4-question onboarding quiz. All numbers/metrics are
+   precomputed against the prospect's quiz answers (see demo_coach_metrics in the
+   QuizResult panel of the Onboarding app). No fabricated pricing. ═══ */
+
+const demoCoachAppsDef = def({
+  id: 'demo_coach_apps', name: 'Demo Apps', singular: 'App', accent: '#059669',
+  titleField: 'name', subtitleField: 'tagline',
+  fields: [
+    { key: 'category', label: 'Category', type: 'badge' },
+    { key: 'tagline', label: 'Tagline', type: 'text' },
+    { key: 'metric', label: 'Saving (per month)', type: 'text' },
+    { key: 'story', label: 'Story', type: 'longtext' },
+  ],
+});
+
+const demoCoachAppsItems: CmsItem[] = [
+  { id: 'app-ip-vault', name: 'IP Vault', tagline: 'Every session, capturable. Yours forever.',
+    category: 'Sanctuary', metric: '~12h capture / month',
+    story: 'Ava drafted The Weight Method across three sessions. With Nexus, those notes are auto-structured into a vault the moment the session ends — searchable, exportable, fully owned by you. No SaaS trains on it. Zero data egress.' },
+  { id: 'app-session-transcript', name: 'Session Transcript → Content Dam', tagline: 'Speak once. Twelve assets publish.',
+    category: 'Compounding', metric: '~40h repurposing / quarter',
+    story: 'Marcus ran one podcast episode. Nexus drafted twelve assets from a single transcript: a LinkedIn post, a newsletter, three short social clips, a waitlist magnet, a follow-up nurture email — all drafted in your voice, ready for your approval before publish.' },
+  { id: 'app-quiz-result', name: 'QuizResult · Personalised Audit Preview', tagline: 'Diagnose your capture gaps.',
+    category: 'Diagnostic', metric: 'audit ready in ~22 min',
+    story: 'Your specific pattern: too many client notes still live on paper. Your Nexus recommendation: route everything through the Vault first, then let the agents structure it. Estimated first-month time saved: 6h.' },
+  { id: 'app-compliance', name: 'Compliance Dashboard', tagline: 'Audit log, ready when the regulators ask.',
+    category: 'Compliance', metric: '0 days to audit pack',
+    story: 'Every AI action logged with timestamp + agent id + reversibility flag. Export a CCPA / Colorado AI Act audit pack in two clicks. No public SaaS touches your client data — not for training, not for inference, not ever.' },
+];
+
+/* demo-coach: sample extracted session notes (used by IP Vault in the demo instance) */
+const demoCoachNotesDef = def({
+  id: 'demo_coach_notes', name: 'Demo Vault', singular: 'Note', accent: '#2563eb',
+  titleField: 'topic', subtitleField: 'clientName', badgeField: 'sentiment',
+  fields: [
+    { key: 'clientName', label: 'Client', type: 'text' },
+    { key: 'date', label: 'Session date', type: 'text' },
+    { key: 'duration', label: 'Duration', type: 'text' },
+    { key: 'sentiment', label: 'Sentiment', type: 'badge' },
+    { key: 'body', label: 'Notes', type: 'longtext' },
+  ],
+});
+
+const demoCoachNotesItems: CmsItem[] = [
+  { id: 'dn-1', topic: 'Q3 pricing repositioning', clientName: 'Ava Chen', date: 'Thu, Jul 18', duration: '50 min', sentiment: 'Breakthrough',
+    body: 'Ava is ready to raise her flagship offer from $1,800 to $2,400/mo starting Q4. Walked through the objection-handling script for existing clients grandfathered at the old rate. Action: draft the rate-change email by Friday, she reviews before sending.' },
+  { id: 'dn-2', topic: 'Burnout check-in', clientName: 'Marcus Reyes', date: 'Fri, Jul 12', duration: '45 min', sentiment: 'Watch',
+    body: 'Marcus mentioned feeling stretched across 3 cohort launches at once. Recommended he pause new enrollment for 2 weeks. He pushed back — flag for next session, do not let this drop.' },
+  { id: 'dn-3', topic: 'IP framework: The Weight Method', clientName: 'Priya Nandan', date: 'Mon, Jul 8', duration: '60 min', sentiment: 'Breakthrough',
+    body: 'Priya finally articulated her proprietary "Weight Method" clearly enough to document. Captured the 4-stage structure verbatim — this is the seed for her signature framework page and future book chapter 3.' },
+];
+
+/* demo-coach: lifecycle metrics for the QuizResult preview panel */
+const demoCoachMetricsDef = def({
+  id: 'demo_coach_metrics', name: 'Demo Metrics', singular: 'Metric', accent: '#0891b2',
+  titleField: 'label', subtitleField: 'unit',
+  fields: [
+    { key: 'value', label: 'Value', type: 'number' },
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'story', label: 'Story', type: 'longtext' },
+  ],
+});
+
+const demoCoachMetricsItems: CmsItem[] = [
+  { id: 'm-1', label: 'Time saved / month', unit: 'h', value: 6,
+    story: 'Estimated first-month time saved against your current paper-notes routine, based on your onboarding answers.' },
+  { id: 'm-2', label: 'Vault entries / week', unit: 'entries', value: 4,
+    story: 'How many session-note captures you would actually accumulate in the Vault once it is wired to your calendar.' },
+  { id: 'm-3', label: 'Compliance flags / quarter', unit: 'flags', value: 0,
+    story: 'Number of prospective compliance gaps Nexus would have flagged in your last 90 days of client interactions.' },
+  { id: 'm-4', label: 'Premium tier ready', unit: '/4', value: 4,
+    story: 'How many of the four demoed mini-apps match your routine on the audit trail. All four line up against your onboarding answers.' },
+];
+
 /* ═══ Registration ═══ */
 
 let seeded = false;
@@ -391,4 +489,9 @@ export function seedCms(): void {
   useCmsStore.getState().registerCollection(invoicesDef, invoicesItems);
   useCmsStore.getState().registerCollection(contractsDef, contractsItems);
   useCmsStore.getState().registerCollection(policiesDef, policiesItems);
+  useCmsStore.getState().registerCollection(sessionNotesDef, sessionNotesItems);
+  // demo-coach Onboarding Citadel (Q4-2026 GTM demo) — 4 mini-apps de vitrine
+  useCmsStore.getState().registerCollection(demoCoachAppsDef, demoCoachAppsItems);
+  useCmsStore.getState().registerCollection(demoCoachNotesDef, demoCoachNotesItems);
+  useCmsStore.getState().registerCollection(demoCoachMetricsDef, demoCoachMetricsItems);
 }

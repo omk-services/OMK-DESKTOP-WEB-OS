@@ -23,8 +23,29 @@ export function Desktop() {
     const restored = useShellStore.getState().windows.filter(w => w.isOpen);
     if (restored.length === 0) {
       console.log(`[Coach OS] Registry active: ${getAllApps().length} apps.`);
-      const home = getApp('dashboard');
-      if (home) openApp(home.id, home.name);
+      // Q4-2026 GTM launch: present the Onboarding Citadel (= demo-coach) on
+      // first launch, then fall back to the Dashboard home on every reload after.
+      // demo-coach's own persist middleware (demo-coach-shell-layout-v1) tracks
+      // `hasBooted` so we know whether this is the very first visit.
+      const persisted = localStorage.getItem('demo-coach-shell-layout-v1');
+      let isFirstVisit = false;
+      if (persisted) {
+        try {
+          const parsed = JSON.parse(persisted);
+          isFirstVisit = !parsed?.state?.hasBooted;
+        } catch {
+          isFirstVisit = true;
+        }
+      } else {
+        isFirstVisit = true;
+      }
+      if (isFirstVisit) {
+        const onboarding = getApp('onboarding');
+        if (onboarding) openApp(onboarding.id, onboarding.name);
+      } else {
+        const home = getApp('dashboard');
+        if (home) openApp(home.id, home.name);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

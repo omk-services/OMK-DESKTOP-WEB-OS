@@ -36,6 +36,7 @@ export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
   return (
     <div
       data-window-frame
+      data-window-id={id}
       onMouseDown={() => focusApp(id)}
       className={`absolute flex flex-col overflow-hidden bg-[var(--theme-bg)] ${isMax ? 'rounded-none' : 'rounded-2xl'}`}
       style={{
@@ -74,7 +75,7 @@ export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
           <div className="w-1/4" />
         </div>
 
-        <WindowContext.Provider value={{ activePage, setActivePage, detail, setDetail }}>
+        <WindowContext.Provider value={{ windowId: id, activePage, setActivePage, detail, setDetail }}>
           <div className="bg-white/50 border-b border-[var(--panel-border-subtle)] px-4 h-8 flex items-center shrink-0">
             <Breadcrumbs
               appTitle={title}

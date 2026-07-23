@@ -101,3 +101,11 @@
   to   { transform: translateX(0);    opacity: 1; }
 }
 .animate-toast-in { animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Onboarding Citadel: the Onboarding app in the Macro registry is a pure
+   lifecycle hook — it opens the citadel window (mini Desktop OS via portal).
+   The Macro WindowFrame that hosts OnboardingApp has its own title bar +
+   chrome we don't want visible while the citadel is active, so we hide it. */
+[data-window-id='onboarding'] {
+  display: none !important;
+}

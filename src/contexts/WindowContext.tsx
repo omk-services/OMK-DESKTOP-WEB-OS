@@ -9,6 +9,9 @@ export interface DetailCrumb {
 }
 
 interface WindowContextValue {
+  /** This window instance's shell-store id — lets hooks (e.g. useCollectionDrill)
+   *  address voice/automation intents scoped to "this app instance" without a prop. */
+  windowId: string;
   activePage: string;
   setActivePage: (page: string) => void;
   detail: DetailCrumb | null;
@@ -16,6 +19,7 @@ interface WindowContextValue {
 }
 
 export const WindowContext = createContext<WindowContextValue>({
+  windowId: '',
   activePage: 'Overview',
   setActivePage: () => {},
   detail: null,

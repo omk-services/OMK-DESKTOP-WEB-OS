@@ -3,7 +3,7 @@
 import { ChevronRight } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import type { CmsItem } from '../../lib/cms/types';
-import { Badge } from '../../apps/_ui/kit';
+import { badgeTone } from '../../lib/badgeTone';
 
 interface CollectionRepeaterProps {
   collectionId: string;
@@ -38,7 +38,14 @@ export function CollectionRepeater({ collectionId, onOpen, filter }: CollectionR
               {subtitle && <div className="text-xs text-stone-500 truncate mt-0.5">{subtitle}</div>}
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              {badge !== undefined && <Badge tone="accent">{String(badge)}</Badge>}
+              {badge != null && badge !== '' && (() => {
+                const tone = badgeTone(String(badge));
+                return (
+                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ background: tone.bg, color: tone.fg }}>
+                    {String(badge)}
+                  </span>
+                );
+              })()}
               <ChevronRight className="w-4 h-4 text-stone-300" />
             </div>
           </button>
