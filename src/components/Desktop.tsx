@@ -1,6 +1,7 @@
 /** Desktop — wallpaper + desktop-icon launcher + window rendering + persistence (Coach OS) */
 import { useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
+import { useDemoShellStore, hasSeenCitadel, markCitadelSeen } from '../lib/demoShell';
 import { TopBar } from './TopBar';
 import { Wallpaper } from './Wallpaper';
 import { DesktopIcons } from './DesktopIcons';
@@ -19,33 +20,44 @@ export function Desktop() {
   const openApp = useShellStore(s => s.openApp);
 
   useEffect(() => {
-    restoreLayout();
-    const restored = useShellStore.getState().windows.filter(w => w.isOpen);
-    if (restored.length === 0) {
-      console.log(`[Coach OS] Registry active: ${getAllApps().length} apps.`);
-      // Q4-2026 GTM launch: present the Onboarding Citadel (= demo-coach) on
-      // first launch, then fall back to the Dashboard home on every reload after.
-      // demo-coach's own persist middleware (demo-coach-shell-layout-v1) tracks
-      // `hasBooted` so we know whether this is the very first visit.
-      const persisted = localStorage.getItem('demo-coach-shell-layout-v1');
-      let isFirstVisit = false;
-      if (persisted) {
-        try {
-          const parsed = JSON.parse(persisted);
-          isFirstVisit = !parsed?.state?.hasBooted;
-        } catch {
-          isFirstVisit = true;
+    try {
+      restoreLayout();
+      const restored = useShellStore.getState().windows.filter(w => w.isOpen);
+      if (restored.length > 0) return;
+      // Migration: the previous Vercel build had a hydration race that left
+      // only the citadel window in the macro's persisted layout. Clear that
+      // legacy state so the first-visit branch can fire on a re-load.
+      try {
+        const raw = localStorage.getItem('coach-os-shell-layout-v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const wins = parsed?.state?.windows ?? [];
+          const citadelOnly = wins.length === 1 && wins[0].id === 'onboarding' && wins[0].isOpen;
+          if (citadelOnly) localStorage.removeItem('coach-os-shell-layout-v1');
         }
-      } else {
-        isFirstVisit = true;
-      }
+      } catch { /* noop */ }
+      const isFirstVisit = !hasSeenCitadel();
       if (isFirstVisit) {
         const onboarding = getApp('onboarding');
         if (onboarding) openApp(onboarding.id, onboarding.name);
+        // Pre-seed the citadel + 4 demo panels in a single atomic setState.
+        useDemoShellStore.setState({
+          windows: [
+            { id: '__citadel__', title: 'demo-coach · your Nexus preview', isOpen: true, isMinimized: false, isMaximized: false, zIndex: 100, position: { x: 443, y: 75 }, size: { width: 820, height: 640 } },
+            { id: 'ip-vault',    title: 'IP Vault',                 isOpen: true, isMinimized: false, isMaximized: false, zIndex: 101, position: { x: 18,  y: 16 }, size: { width: 320, height: 260 } },
+            { id: 'apps',         title: 'Mini-apps Library',        isOpen: true, isMinimized: false, isMaximized: false, zIndex: 102, position: { x: 350, y: 16 }, size: { width: 320, height: 260 } },
+            { id: 'quiz-result',  title: 'QuizResult',               isOpen: true, isMinimized: false, isMaximized: false, zIndex: 103, position: { x: 18,  y: 288 }, size: { width: 320, height: 260 } },
+            { id: 'compliance',  title: 'Compliance',               isOpen: true, isMinimized: false, isMaximized: false, zIndex: 104, position: { x: 350, y: 288 }, size: { width: 320, height: 260 } },
+          ],
+          activeWindowId: 'ip-vault',
+        });
+        markCitadelSeen();
       } else {
         const home = getApp('dashboard');
         if (home) openApp(home.id, home.name);
       }
+    } catch (err) {
+      console.error('[Desktop] boot effect failed', err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

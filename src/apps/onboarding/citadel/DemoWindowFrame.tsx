@@ -92,6 +92,7 @@ export function DemoWindowFrame({ id, title, accent, icon, children }: DemoWindo
   return (
     <div
       onMouseDown={() => focusApp(id)}
+      data-citadel-window={id}
       className={`absolute flex flex-col overflow-hidden bg-[var(--theme-bg)] ${isMax ? 'rounded-none' : 'rounded-xl'}`}
       style={{
         top: isMax ? 32 : windowState.position.y,

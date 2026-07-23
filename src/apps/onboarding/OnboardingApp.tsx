@@ -292,7 +292,7 @@ function CitadelLayer() {
                   transition={{ duration: 0.22 }}
                   className="absolute inset-x-0 top-7 bottom-0 flex flex-col"
                 >
-                  <div className="px-7 py-4 border-b border-emerald-100" style={{ background: band.bg }}>
+                  <div className="px-7 py-4 border-b border-emerald-100 shrink-0" style={{ background: band.bg }}>
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="w-5 h-5" style={{ color: band.color }} />
                       <div className="flex-1 min-w-0">
@@ -302,6 +302,14 @@ function CitadelLayer() {
                       </div>
                     </div>
                   </div>
+                  {/* Reveal-phase mini-app windows sit INSIDE the citadel (relative
+                      positioning context), so demo-shell coords match the citadel's
+                      inner box, not the full viewport. The wrapper provides the
+                      positioning context for the 4 absolutely-positioned mini-app
+                      DemoWindowFrames. */}
+                  <div className="relative flex-1 min-h-0">
+                    <RevealLayer />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -309,29 +317,19 @@ function CitadelLayer() {
         </DemoWindowFrame>
       </div>
 
-      {/* Reveal-phase mini-app windows sit on top of the citadel. */}
-      {phase === 'reveal' && <RevealLayer />}
+      {/* During the QUIZ phase, the citadel background dim stays; no RevealLayer yet. */}
     </div>
   );
 }
 
-/** Lifecycle hook — opens the citadel window + pre-opens the 4 mini-app windows
- *  on every mount. Boot order is intentional: citadel first (so opening via
- *  the desktop icon gives the user the quiz first), then mini-apps revealed. */
+/** Lifecycle hook — REFRESH the citadel window when the user re-opens the
+ *  Onboarding app (e.g. via double-clicking the desktop icon after closing).
+ *  Desktop.tsx's first-launch branch pre-seeds citadel + 4 demo panels; here
+ *  we just refresh the citadel (the 4 panels persist in the store). */
 function useCitadelBoot() {
-  const openApp = useDemoShellStore(s => s.openApp);
-  const closeAll = useDemoShellStore(s => s.closeAll);
-  const bootCitadel = useDemoShellStore(s => s.bootCitadel);
-  const windows = useDemoShellStore(s => s.windows);
-
+  const openApp = useDemoShellStore.getState().openApp;
   useEffect(() => {
-    closeAll();
     openApp('__citadel__', 'demo-coach · your Nexus preview');
-    DEMO_PANELS.forEach(p => {
-      if (!windows.some(w => w.id === p.id)) openApp(p.id, p.title);
-    });
-    bootCitadel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
 

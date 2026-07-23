@@ -157,6 +157,14 @@ export const useShellStore = create<ShellState>((set, get) => ({
 
   saveLayout: () => {
     const { windows } = get();
+    // Don't persist a state containing only the auto-launched citadel window —
+    // we don't want subsequent reloads to rehydrate that state and skip the
+    // demo seed. The citadel-only state is transient.
+    const citadelOnly = windows.length === 1 && windows[0].id === 'onboarding' && windows[0].isOpen;
+    if (citadelOnly) {
+      localStorage.removeItem(LAYOUT_KEY);
+      return;
+    }
     localStorage.setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
   },
 

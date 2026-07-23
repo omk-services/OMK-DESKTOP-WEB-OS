@@ -1,10 +1,10 @@
-/** Demo-coach Mini Desktop OS — second instance of the shell store, scoped to the
- *  onboarding citadel demo. Lives in its own localStorage key (no cross-talk with
- *  the Macro OS) so the demo stays visually pristine every reload. State interface
- *  mirrors useShellStore but only the methods the citadel needs (open/close/closeAll
- *  + focus/zIndex). */
+/** Demo-coach Mini Desktop OS — in-memory shell store scoped to the onboarding
+ *  citadel. NO Zustand persist middleware (the hydration race on the partial
+ *  hasBooted field was wiping the in-memory windows on first paint). Instead
+ *  the single boolean `hasBooted` is persisted via a small standalone localStorage
+ *  helper, keeping the in-memory windows store and the persisted flag fully
+ *  orthogonal. */
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface DemoAppWindow {
   id: string;
@@ -20,7 +20,6 @@ export interface DemoAppWindow {
 interface DemoShellState {
   windows: DemoAppWindow[];
   activeWindowId: string | null;
-  hasBooted: boolean; // tracks whether the onboarding Citadel has been presented
   openApp: (id: string, title: string) => void;
   closeApp: (id: string) => void;
   closeAll: () => void;
@@ -29,8 +28,6 @@ interface DemoShellState {
   focusApp: (id: string) => void;
   updatePosition: (id: string, x: number, y: number) => void;
   updateWindowState: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void;
-  bootCitadel: () => void;
-  dismissCitadel: () => void;
 }
 
 function nextZ(windows: DemoAppWindow[]): number {
@@ -38,106 +35,117 @@ function nextZ(windows: DemoAppWindow[]): number {
   return Math.min(1000, maxZ + 1);
 }
 
-const DEFAULT_W = 480;
-const DEFAULT_H = 360;
+const DEFAULT_W = 320;
+const DEFAULT_H = 260;
 
-const LAYOUT_KEY = 'demo-coach-shell-layout-v1';
+const FLAG_KEY = 'demo-coach-boot-flag-v1';
 
-export const useDemoShellStore = create<DemoShellState>()(
-  persist(
-    (set, get) => ({
-      windows: [],
-      activeWindowId: null,
-      hasBooted: false,
+export function hasSeenCitadel(): boolean {
+  try {
+    return localStorage.getItem(FLAG_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
 
-      openApp: (id, title) => set((s) => {
-        if (id === '__citadel__') {
-          // citadel window opens the dashboard-sized onboarding view, not a small app
-          const existing = s.windows.find(w => w.id === id);
-          if (existing) {
-            return {
-              windows: s.windows.map(w =>
-                w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: nextZ(s.windows) } : w
-              ),
-              activeWindowId: id,
-            };
-          }
-          return {
-            windows: [...s.windows, {
-              id, title, isOpen: true, isMinimized: false, isMaximized: false,
-              zIndex: nextZ(s.windows),
-              position: { x: 40, y: 50 },
-              size: { width: 760, height: 520 },
-            }],
-            activeWindowId: id,
-          };
-        }
-        const existing = s.windows.find(w => w.id === id);
-        if (existing) {
-          return {
-            windows: s.windows.map(w =>
-              w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: nextZ(s.windows) } : w
-            ),
-            activeWindowId: id,
-          };
-        }
-        const openCount = s.windows.filter(w => w.isOpen && !w.isMinimized).length;
-        const cols = 3;
-        const idx = openCount;
-        const col = idx % cols;
-        const row = Math.floor(idx / cols);
-        const xPos = 40 + col * (DEFAULT_W + 24);
-        const yPos = 50 + row * 80;
+export function markCitadelSeen(): void {
+  try {
+    localStorage.setItem(FLAG_KEY, 'true');
+  } catch {
+    // best-effort — localStorage may be unavailable in private browsing
+  }
+}
+
+export const useDemoShellStore = create<DemoShellState>()((set) => ({
+  windows: [],
+  activeWindowId: null,
+
+  openApp: (id, title) => set((s) => {
+    if (id === '__citadel__') {
+      // Citadel is the Onboarding playground — sized to a generous portion of
+      // viewport so the citadel panel + 4 mini-apps all breathe inside it.
+      const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+      const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+      const citadelW = Math.min(820, vw - 80);
+      const citadelH = Math.min(640, vh - 80);
+      const existing = s.windows.find(w => w.id === id);
+      if (existing) {
         return {
-          windows: [...s.windows, {
-            id, title, isOpen: true, isMinimized: false, isMaximized: false,
-            zIndex: nextZ(s.windows),
-            position: { x: xPos, y: yPos },
-            size: { width: DEFAULT_W, height: DEFAULT_H },
-          }],
+          windows: s.windows.map(w =>
+            w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: nextZ(s.windows) } : w
+          ),
           activeWindowId: id,
         };
-      }),
-
-      closeApp: (id) => set((s) => ({
-        windows: s.windows.map(w => w.id === id ? { ...w, isOpen: false } : w),
-        activeWindowId: s.activeWindowId === id ? null : s.activeWindowId,
-      })),
-
-      closeAll: () => set(() => ({ windows: [], activeWindowId: null })),
-
-      minimizeApp: (id) => set((s) => ({
-        windows: s.windows.map(w => w.id === id ? { ...w, isMinimized: true } : w),
-        activeWindowId: s.activeWindowId === id ? null : s.activeWindowId,
-      })),
-
-      maximizeApp: (id) => set((s) => ({
-        windows: s.windows.map(w => w.id === id ? { ...w, isMaximized: !w.isMaximized } : w),
-      })),
-
-      focusApp: (id) => set((s) => ({
+      }
+      return {
+        windows: [...s.windows, {
+          id, title, isOpen: true, isMinimized: false, isMaximized: false,
+          zIndex: nextZ(s.windows),
+          position: { x: Math.max(20, Math.floor((vw - citadelW) / 2)), y: Math.max(40, Math.floor((vh - citadelH) / 2)) },
+          size: { width: citadelW, height: citadelH },
+        }],
+        activeWindowId: id,
+      };
+    }
+    const existing = s.windows.find(w => w.id === id);
+    if (existing) {
+      return {
         windows: s.windows.map(w =>
-          w.id === id ? { ...w, zIndex: nextZ(s.windows), isMinimized: false } : w
+          w.id === id ? { ...w, isOpen: true, isMinimized: false, zIndex: nextZ(s.windows) } : w
         ),
         activeWindowId: id,
-      })),
+      };
+    }
+    const openCount = s.windows.filter(w => w.isOpen && !w.isMinimized).length;
+    const cols = 2;
+    const GAP_X = 12;
+    const GAP_Y = 12;
+    const xOff = 18;
+    const yOff = 16;
+    const idx = openCount;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const xPos = xOff + col * (DEFAULT_W + GAP_X);
+    const yPos = yOff + row * (DEFAULT_H + GAP_Y);
+    return {
+      windows: [...s.windows, {
+        id, title, isOpen: true, isMinimized: false, isMaximized: false,
+        zIndex: nextZ(s.windows),
+        position: { x: xPos, y: yPos },
+        size: { width: DEFAULT_W, height: DEFAULT_H },
+      }],
+      activeWindowId: id,
+    };
+  }),
 
-      updatePosition: (id, x, y) => set((s) => ({
-        windows: s.windows.map(w => w.id === id ? { ...w, position: { x, y } } : w),
-      })),
+  closeApp: (id) => set((s) => ({
+    windows: s.windows.map(w => w.id === id ? { ...w, isOpen: false } : w),
+    activeWindowId: s.activeWindowId === id ? null : s.activeWindowId,
+  })),
 
-      updateWindowState: (id, position, size) => set((s) => ({
-        windows: s.windows.map(w => w.id === id ? { ...w, position, size } : w),
-      })),
+  closeAll: () => set(() => ({ windows: [], activeWindowId: null })),
 
-      bootCitadel: () => set({ hasBooted: true }),
-      dismissCitadel: () => set({ hasBooted: true }),
-    }),
-    {
-      name: LAYOUT_KEY,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ hasBooted: s.hasBooted }),
-      version: 1,
-    },
-  ),
-);
+  minimizeApp: (id) => set((s) => ({
+    windows: s.windows.map(w => w.id === id ? { ...w, isMinimized: true } : w),
+    activeWindowId: s.activeWindowId === id ? null : s.activeWindowId,
+  })),
+
+  maximizeApp: (id) => set((s) => ({
+    windows: s.windows.map(w => w.id === id ? { ...w, isMaximized: !w.isMaximized } : w),
+  })),
+
+  focusApp: (id) => set((s) => ({
+    windows: s.windows.map(w =>
+      w.id === id ? { ...w, zIndex: nextZ(s.windows), isMinimized: false } : w
+    ),
+    activeWindowId: id,
+  })),
+
+  updatePosition: (id, x, y) => set((s) => ({
+    windows: s.windows.map(w => w.id === id ? { ...w, position: { x, y } } : w),
+  })),
+
+  updateWindowState: (id, position, size) => set((s) => ({
+    windows: s.windows.map(w => w.id === id ? { ...w, position, size } : w),
+  })),
+}));
