@@ -2,7 +2,6 @@
  *  four CMS-driven mini-apps in a unified gallery layout (not real shell windows;
  *  those come from DemoWindowFrame). Each panel is a "vitrine d'effet Wow" —
  *  visually polished, content-from-seed, no interactive state of its own. */
-import React from 'react';
 import { useCmsStore } from '../../../lib/cms/cms.store';
 import type { CmsItem } from '../../../lib/cms/types';
 import { ShieldCheck, Sparkles, FileSearch, ClipboardCheck } from 'lucide-react';

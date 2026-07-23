@@ -11,7 +11,7 @@ import { AppDrawer } from './AppDrawer';
 import { ViewportGuard } from './ViewportGuard';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useShellStore } from '../stores/shell.store';
-import { getApp, getAllApps } from '../lib/app-registry';
+import { getApp } from '../lib/app-registry';
 
 export function Desktop() {
   const windows = useShellStore(s => s.windows);

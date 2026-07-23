@@ -4,7 +4,6 @@
  *  citadel's windows never collide with Macro Coach OS state. */
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Minus, Maximize2 } from 'lucide-react';
 import { useDemoShellStore } from '../../../lib/demoShell';
 
 interface DemoWindowFrameProps {
