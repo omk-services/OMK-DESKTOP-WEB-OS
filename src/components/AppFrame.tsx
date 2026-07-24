@@ -66,8 +66,10 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const active = sections.find(s => s.id === activeId) ?? sections[0];
 
   // Per-app theme: resolve + apply tokens as scoped CSS variables on rootRef.
-  const activeThemeId = useThemeIdFor(title);
-  const tokens = useThemeStore((s) => s.tokensFor(title));
+  // Normalize the title to lowercase to match the app-registry IDs (e.g. "Product" → "product").
+  const appId = title.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const activeThemeId = useThemeIdFor(appId);
+  const tokens = useThemeStore((s) => s.tokensFor(appId));
   useEffect(() => {
     if (rootRef.current) applyThemeTokens(rootRef.current, tokens);
   }, [tokens, activeThemeId]);
