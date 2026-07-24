@@ -1,10 +1,10 @@
-import { LayoutDashboard, Wind, GitBranch, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Wind, GitBranch, BarChart3, Building2, Compass, AlertTriangle } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
-import { StatCard, Card, Badge } from '../_ui/kit';
-import { ProgressRow, Table } from '../_ui/widgets';
+import { StatCard, Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 
 const ACCENT = '#059669';
 
@@ -18,20 +18,21 @@ function Validation() {
   return (
     <div className="p-7">
       <SectionHead title="Wind Direction" subtitle="Things requiring your validation" />
-      <div className="flex flex-col gap-3">
+      <FleetItemGrid cols={2}>
         {validations.map((v, i) => (
-          <div key={i} className="flex items-center justify-between bg-white rounded-xl border border-[var(--panel-border)] shadow-sm px-5 py-4">
-            <div className="flex items-center gap-3">
-              <span className={`w-2 h-2 rounded-full ${v.tone === 'warn' ? 'bg-amber-500' : v.tone === 'danger' ? 'bg-red-500' : 'bg-blue-500'}`} />
-              <div>
-                <div className="text-sm font-medium text-stone-800">{v.t}</div>
-                <div className="text-xs text-stone-400">{v.when}</div>
-              </div>
-            </div>
-            <button className="text-xs font-semibold text-emerald-700 hover:underline">Review →</button>
-          </div>
+          <FleetItemCard
+            key={i}
+            title={v.t}
+            subtitle={v.when}
+            statusLabel={v.tone === 'warn' ? 'review' : v.tone === 'danger' ? 'blocker' : 'action'}
+            statusTone={v.tone}
+            accent={v.tone === 'warn' ? '#f59e0b' : v.tone === 'danger' ? '#dc2626' : '#3b82f6'}
+            icon={v.tone === 'warn' ? <AlertTriangle className="w-5 h-5" /> : v.tone === 'danger' ? <AlertTriangle className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
+            meta={`Reported ${v.when}`}
+            onClick={() => { /* TODO: open validation detail */ }}
+          />
         ))}
-      </div>
+      </FleetItemGrid>
     </div>
   );
 }
@@ -55,22 +56,27 @@ export function DashboardApp() {
           <StatCard label="Onboarding" value={onboardingCount} hint="awaiting first session" />
           <StatCard label="Total clients" value={clients.length} hint="across all statuses" />
         </div>
-        <Card title="Client pipeline" aside={<Badge tone="ok">{activeCount} active</Badge>}>
-          <div className="px-5 pb-5 pt-1 flex flex-col gap-4">
-            {clients.map(c => (
-              <button key={String(c.id)} onClick={() => drill.open(String(c.id))} className="w-full text-left">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-stone-800 hover:text-[var(--theme-accent)] transition-colors">{String(c.name)}</span>
-                    <span className="text-[11px] text-stone-400">{String(c.segment)}</span>
-                  </div>
-                  <Badge tone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}>{String(c.status)}</Badge>
-                </div>
-                <ProgressRow label="Status weight" value={weightOf(c)} accent={ACCENT} />
-              </button>
-            ))}
-          </div>
-        </Card>
+        <SectionHead title="Client pipeline" subtitle="Top accounts ranked by status weight" action={<Badge tone="ok">{activeCount} active</Badge>} />
+        <FleetItemGrid cols={2}>
+          {clients.map(c => {
+            const w = weightOf(c);
+            return (
+              <FleetItemCard
+                key={String(c.id)}
+                title={String(c.name)}
+                subtitle={String(c.segment)}
+                statusLabel={String(c.status)}
+                statusTone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}
+                accent={ACCENT}
+                icon={<Building2 className="w-5 h-5" />}
+                metricLabel="weight"
+                metricValue={`${w}%`}
+                meta={`Status: ${String(c.status)}`}
+                onClick={() => drill.open(String(c.id))}
+              />
+            );
+          })}
+        </FleetItemGrid>
       </div>
     );
   };
@@ -80,18 +86,23 @@ export function DashboardApp() {
     return (
       <div className="p-7">
         <SectionHead title="Client ledger" subtitle="Every account, every weight" />
-        <Card>
-          <Table
-            head={['Client', 'Segment', 'Weight', 'Status']}
-            onRowClick={(i) => drill.open(String(clients[i].id))}
-            rows={clients.map(c => [
-              <span className="font-semibold text-stone-800">{String(c.name)}</span>,
-              String(c.segment),
-              <span className="tabular-nums">{weightOf(c)}%</span>,
-              <Badge tone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}>{String(c.status)}</Badge>,
-            ])}
-          />
-        </Card>
+        <FleetItemGrid cols={2}>
+          {clients.map(c => (
+            <FleetItemCard
+              key={String(c.id)}
+              title={String(c.name)}
+              subtitle={String(c.segment)}
+              statusLabel={String(c.status)}
+              statusTone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}
+              accent={ACCENT}
+              icon={<GitBranch className="w-5 h-5" />}
+              metricLabel="weight"
+              metricValue={`${weightOf(c)}%`}
+              meta="Pipeline tier"
+              onClick={() => drill.open(String(c.id))}
+            />
+          ))}
+        </FleetItemGrid>
       </div>
     );
   };
