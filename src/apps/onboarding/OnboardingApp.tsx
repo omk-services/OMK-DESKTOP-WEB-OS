@@ -95,49 +95,38 @@ function ScoreBand({ score }: { score: number }) {
 
 const MINI_APP_ICONS = ['V', 'L', 'Q', 'C'] as const;
 
-/** RevealLayer — renders the 4 demo panels (the personal preview) INSIDE the
- *  citadel's reveal area. Position is RELATIVE to the citadel's reveal div.
- *  Panels are 332×160 in a 2×2 grid. */
-function RevealLayer() {
+/** OpenPanelsLayer — renders ALL demo panels currently open in the Mini
+ *  Desktop (the 4 reveal-phase panels + the audit panel, all dock-launched).
+ *  Each is a FULL free-floating Mini Desktop window with its own DemoWindowFrame
+ *  (traffic lights, drag, resize, focus). They render in the Mini Desktop's
+ *  window area, NOT nested inside the citadel. */
+function OpenPanelsLayer() {
   const demoWindows = useDemoShellStore(s => s.windows);
   return (
     <>
-      {DEMO_PANELS.slice(0, 4).map(p => {
-        const win = demoWindows.find(w => w.id === p.id);
-        if (!win) return null;
-        const PanelBody = p.render;
-        return (
-          <DemoWindowFrame key={p.id} id={p.id} title={p.title} accent={p.accent}>
-            <PanelBody />
-          </DemoWindowFrame>
-        );
-      })}
+      {demoWindows
+        .filter(w => w.id !== '__citadel__' && w.isOpen && !w.isMinimized)
+        .map(w => {
+          const panel = DEMO_PANELS.find(p => p.id === w.id);
+          if (!panel) return null;
+          const PanelBody = panel.render;
+          return (
+            <DemoWindowFrame key={w.id} id={w.id} title={panel.title} accent={panel.accent}>
+              <PanelBody />
+            </DemoWindowFrame>
+          );
+        })}
     </>
   );
 }
 
-/** OpenPanelsLayer — renders ONLY the audit panel (the new dock-launched
- *  mini-app), which lives in the Mini Desktop window area (NOT nested in
- *  the citadel). The 4 reveal-phase panels are handled by RevealLayer. */
-function OpenPanelsLayer() {
-  const demoWindows = useDemoShellStore(s => s.windows);
-  const auditWin = demoWindows.find(w => w.id === 'audit');
-  if (!auditWin || !auditWin.isOpen || auditWin.isMinimized) return null;
-  const panel = DEMO_PANELS.find(p => p.id === 'audit');
-  if (!panel) return null;
-  const PanelBody = panel.render;
-  return (
-    <DemoWindowFrame key="audit" id="audit" title={panel.title} accent={panel.accent}>
-      <PanelBody />
-    </DemoWindowFrame>
-  );
-}
-
-/** CitadelPanel — the citadel quiz + reveal flow, rendered as a single window
- *  inside the Mini Desktop's relative-positioned window area. On reveal phase
- *  entry, opens the 4 demo panels (IP Vault, Apps, QuizResult, Compliance)
- *  in the demoShell store so RevealLayer can render them inside the citadel's
- *  reveal area. */
+/** CitadelPanel — the citadel quiz + reveal flow. During QUIZ phase it shows
+ *  the full quiz UI (left panel = questions + options, right panel = future
+ *  demo instance preview). During REVEAL phase it shrinks to a slim score-band
+ *  window at the top, and the 4 personal-preview panels open as FREE-FLOATING
+ *  windows in the Mini Desktop window area (rendered by OpenPanelsLayer).
+ *  This makes the audit results feel like real desktop windows the prospect
+ *  can drag, resize, and arrange — matching the Life OS / Macro Desktop UX. */
 function CitadelPanel() {
   const windows = useDemoShellStore(s => s.windows);
   const [phase, setPhase] = useState<'quiz' | 'reveal'>('quiz');
@@ -147,12 +136,22 @@ function CitadelPanel() {
   const citadelId = '__citadel__';
   const citadelWin = windows.find(w => w.id === citadelId);
 
-  // When entering reveal phase, open the 4 personal-preview panels in the
-  // demoShell store (RevealLayer renders them inside the citadel's reveal
-  // area in a 2×2 grid). Also resize the citadel to fit the 4 panels.
+  // When entering reveal phase:
+  //   1. SHRINK the citadel to a slim score-band window at the top
+  //   2. OPEN the 4 personal-preview panels as FREE-FLOATING windows in the
+  //      Mini Desktop window area (2×2 grid, large)
   useEffect(() => {
     if (phase !== 'reveal') return;
     const store = useDemoShellStore.getState();
+    // 1. Shrink citadel to score-band only (no nested reveal UI)
+    useDemoShellStore.setState({
+      windows: useDemoShellStore.getState().windows.map(w =>
+        w.id === '__citadel__'
+          ? { ...w, position: { x: 12, y: 38 }, size: { width: 720, height: 90 } }
+          : w
+      ),
+    });
+    // 2. Open the 4 panels as large free-floating windows
     DEMO_PANELS.slice(0, 4).forEach((p, i) => {
       store.openApp(p.id, p.title);
       const col = i % 2;
@@ -160,18 +159,10 @@ function CitadelPanel() {
       useDemoShellStore.setState({
         windows: useDemoShellStore.getState().windows.map(w =>
           w.id === p.id
-            ? { ...w, position: { x: 12 + col * 354, y: 4 + row * 124 }, size: { width: 342, height: 120 } }
+            ? { ...w, position: { x: 12 + col * 358, y: 142 + row * 230 }, size: { width: 348, height: 218 } }
             : w
         ),
       });
-    });
-    // Grow the citadel to fit the 4 panels + score band header
-    useDemoShellStore.setState({
-      windows: useDemoShellStore.getState().windows.map(w =>
-        w.id === '__citadel__'
-          ? { ...w, position: { x: 12, y: 38 }, size: { width: 730, height: 350 } }
-          : w
-      ),
     });
   }, [phase]);
 
@@ -317,29 +308,23 @@ function CitadelPanel() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="absolute inset-x-0 top-7 bottom-0 flex flex-col"
+              className="absolute inset-0 flex items-center"
             >
-              <div className="px-4 py-2 border-b border-emerald-100 shrink-0 flex items-center gap-2.5" style={{ background: band.bg }}>
-                <ShieldCheck className="w-4 h-4 shrink-0" style={{ color: band.color }} />
-                <div className="flex-1 min-w-0">
+              <div className="w-full px-4 flex items-center gap-3" style={{ background: band.bg }}>
+                <ShieldCheck className="w-5 h-5 shrink-0" style={{ color: band.color }} />
+                <div className="flex-1 min-w-0 py-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[9.5px] font-bold uppercase tracking-[0.18em]" style={{ color: band.color }}>Fit band</span>
-                    <span className="text-[13px] font-bold" style={{ color: band.color }}>{band.tone} · {score}/12</span>
+                    <span className="text-[14px] font-bold" style={{ color: band.color }}>{band.tone} · {score}/12</span>
                   </div>
                   <p className="text-[10.5px] text-stone-700 mt-0.5 leading-snug truncate">{band.sub}</p>
                 </div>
                 <button
                   onClick={() => { setPhase('quiz'); setStepIdx(0); setAnswers({}); }}
-                  className="flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-800 shrink-0"
+                  className="flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-800 shrink-0 px-2 py-1 rounded-md hover:bg-white/50"
                 >
                   <RotateCcw className="w-2.5 h-2.5" /> Restart
                 </button>
-              </div>
-              {/* Reveal-phase mini-app windows render INSIDE the citadel
-                  (relative positioning context). 4 panels in a 2×2 grid with
-                  seeded sample data. */}
-              <div className="relative flex-1 min-h-0">
-                <RevealLayer />
               </div>
             </motion.div>
           )}
