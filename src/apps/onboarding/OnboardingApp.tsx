@@ -143,15 +143,15 @@ function CitadelPanel() {
   useEffect(() => {
     if (phase !== 'reveal') return;
     const store = useDemoShellStore.getState();
-    // 1. Shrink citadel to score-band only (no nested reveal UI)
+    // 1. Shrink citadel to score-band only (slim 60px)
     useDemoShellStore.setState({
       windows: useDemoShellStore.getState().windows.map(w =>
         w.id === '__citadel__'
-          ? { ...w, position: { x: 12, y: 38 }, size: { width: 720, height: 90 } }
+          ? { ...w, position: { x: 12, y: 38 }, size: { width: 720, height: 60 } }
           : w
       ),
     });
-    // 2. Open the 4 panels as large free-floating windows
+    // 2. Open the 4 panels as large free-floating windows (2×2 grid)
     DEMO_PANELS.slice(0, 4).forEach((p, i) => {
       store.openApp(p.id, p.title);
       const col = i % 2;
@@ -159,7 +159,7 @@ function CitadelPanel() {
       useDemoShellStore.setState({
         windows: useDemoShellStore.getState().windows.map(w =>
           w.id === p.id
-            ? { ...w, position: { x: 12 + col * 358, y: 142 + row * 230 }, size: { width: 348, height: 218 } }
+            ? { ...w, position: { x: 12 + col * 358, y: 110 + row * 200 }, size: { width: 348, height: 188 } }
             : w
         ),
       });
@@ -376,27 +376,48 @@ function MiniTopBar() {
   );
 }
 
-/** MiniWallpaper — distinct from Macro's paper-garden: emerald/teal gradient
- *  with soft paper texture. Sets the Onboarding app's identity separate from
- *  the Macro business product. */
+/** MiniWallpaper — emerald/teal gradient with sun glow + paper grain + rolling
+ *  hills (pattern forked from Macro Wallpaper for visual consistency). Stronger
+ *  contrast than the previous pastel version so the background reads as a real
+ *  "desktop" even when the citadel + panels cover the central area — the user
+ *  should see the wallpaper as a defined layer, not a flat field. */
 function MiniWallpaper() {
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden" style={{ background: 'linear-gradient(180deg, #ecfdf5 0%, #d1fae5 50%, #ccfbf1 100%)' }}>
+    <div className="absolute inset-0 -z-10 overflow-hidden" style={{ background: 'linear-gradient(180deg, #a7f3d0 0%, #6ee7b7 45%, #5eead4 100%)' }}>
       {/* Soft sun glow upper right */}
-      <div className="absolute -top-32 right-[10%] w-[420px] h-[420px] rounded-full"
-           style={{ background: 'radial-gradient(circle, rgba(255,225,150,0.45), transparent 62%)' }} />
+      <div
+        className="absolute -top-32 right-[8%] w-[520px] h-[520px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(255,225,150,0.6), transparent 62%)' }}
+      />
+      {/* Soft secondary glow lower left */}
+      <div
+        className="absolute -bottom-40 -left-20 w-[420px] h-[420px] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(45,212,191,0.35), transparent 60%)' }}
+      />
       {/* Paper grain */}
-      <div className="absolute inset-0 opacity-[0.4] mix-blend-multiply"
-           style={{
-             backgroundImage:
-               'repeating-linear-gradient(90deg, rgba(120,113,108,0.03) 0 1px, transparent 1px 3px),' +
-               'repeating-linear-gradient(0deg, rgba(120,113,108,0.025) 0 1px, transparent 1px 3px)',
-           }} />
-      {/* Subtle horizon line */}
-      <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 200" preserveAspectRatio="none" style={{ height: '28vh' }}>
-        <path d="M0,140 C260,100 480,160 720,130 C980,100 1180,160 1440,120 L1440,200 L0,200 Z" fill="#a7f3d0" opacity="0.7" />
-        <path d="M0,170 C340,140 620,180 960,160 C1200,144 1320,180 1440,160 L1440,200 L0,200 Z" fill="#6ee7b7" opacity="0.65" />
+      <div
+        className="absolute inset-0 opacity-[0.45] mix-blend-multiply"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(90deg, rgba(120,113,108,0.04) 0 1px, transparent 1px 3px),' +
+            'repeating-linear-gradient(0deg, rgba(120,113,108,0.035) 0 1px, transparent 1px 3px)',
+        }}
+      />
+      {/* Rolling paper hills */}
+      <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 280" preserveAspectRatio="none" style={{ height: '38vh' }}>
+        <path d="M0,160 C260,110 480,180 720,150 C980,118 1180,180 1440,140 L1440,280 L0,280 Z" fill="#34d399" opacity="0.55" />
+        <path d="M0,210 C300,170 560,220 860,200 C1120,182 1300,220 1440,194 L1440,280 L0,280 Z" fill="#10b981" opacity="0.6" />
+        <path d="M0,250 C340,222 620,260 960,242 C1200,228 1320,254 1440,240 L1440,280 L0,280 Z" fill="#059669" opacity="0.7" />
       </svg>
+      {/* Faint dot grid in upper area for "desktop wallpaper" texture */}
+      <div
+        className="absolute inset-0 opacity-[0.18]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(6,78,59,0.5) 0.5px, transparent 0.5px)',
+          backgroundSize: '22px 22px',
+          backgroundPosition: '0 0',
+        }}
+      />
     </div>
   );
 }
@@ -465,5 +486,25 @@ export function OnboardingApp() {
     }
     if (!hasSeenCitadel()) markCitadelSeen();
   }, []);
+
+  // When the audit panel is opened (via dock or any other path), reposition
+  // it into the visible Mini Desktop window area so it doesn't cascade
+  // off-screen by the default openApp grid logic.
+  const auditWin = useDemoShellStore(s => s.windows.find(w => w.id === 'audit'));
+  useEffect(() => {
+    if (!auditWin || !auditWin.isOpen || auditWin.isMinimized) return;
+    // Only reposition if it's currently at a default-cascade position
+    // (i.e., x=350, y=560 from openApp). If the user has dragged it,
+    // leave it alone.
+    if (auditWin.position.x === 350 && auditWin.position.y === 560) {
+      useDemoShellStore.setState({
+        windows: useDemoShellStore.getState().windows.map(w =>
+          w.id === 'audit'
+            ? { ...w, position: { x: 12, y: 524 }, size: { width: 720, height: 160 } }
+            : w
+        ),
+      });
+    }
+  }, [auditWin?.isOpen, auditWin?.isMinimized]);
   return <MiniDesktopShell />;
 }
