@@ -2,10 +2,15 @@
  *  in the Life OS app style. Each app supplies its sections & distinct content.
  *  The sidebar collapses to an icon rail — manually via toggle, or automatically
  *  once the window is resized narrow (desktop-first, but each window stays usable
- *  down to mobile widths since Coach OS windows are freely resizable). */
+ *  down to mobile widths since Coach OS windows are freely resizable).
+ *
+ *  Optional 3-column layout (AgenticOS-style "Tools" panel on the right):
+ *  apps can declare AI assistants via the `tools` prop — they render as a
+ *  collapsible right panel with per-tool status + action buttons. The pattern
+ *  mirrors Hugo's AgenticOS Monica/Sider cards. */
 import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, CircleDashed, AlertCircle } from 'lucide-react';
 import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 
@@ -16,6 +21,19 @@ export interface AppSection {
   render: () => React.ReactNode;
 }
 
+export type ToolStatus = 'idle' | 'running' | 'awaiting' | 'error';
+
+export interface ToolDef {
+  id: string;
+  name: string;
+  description: string;
+  status: ToolStatus;
+  lastActivity?: string;
+  icon: LucideIcon;
+  modelLabel?: string;
+  onRun?: () => void;
+}
+
 interface AppFrameProps {
   title: string;
   subtitle?: string;
@@ -24,14 +42,18 @@ interface AppFrameProps {
   sections: AppSection[];
   /** optional group labels: map section id -> group header shown above it */
   groups?: Record<string, string>;
+  /** optional AI tools rendered in the right panel (AgenticOS-style). */
+  tools?: ToolDef[];
 }
 
 const NARROW_BREAKPOINT = 640;
+const TOOLS_PANEL_WIDTH = 300;
 
-export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups }: AppFrameProps) {
+export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
+  const [toolsOpen, setToolsOpen] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const { windowId, setActivePage } = useWindowPage();
   const active = sections.find(s => s.id === activeId) ?? sections[0];
@@ -72,6 +94,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
 
   const collapsed = manualCollapsed ?? isNarrow;
   const toggleCollapsed = () => setManualCollapsed(!collapsed);
+  const hasTools = tools && tools.length > 0;
 
   return (
     <div ref={rootRef} className="flex h-full min-h-0 bg-[var(--theme-bg)] relative">
@@ -137,6 +160,45 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
       <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
         {active?.render()}
       </div>
+
+      {/* Optional AI Tools panel (right) — AgenticOS Monica/Sider pattern */}
+      {hasTools && (
+        <aside
+          className="shrink-0 border-l border-[var(--panel-border-subtle)] bg-[var(--canvas)] flex flex-col transition-[width] duration-200 overflow-hidden"
+          style={{ width: toolsOpen ? TOOLS_PANEL_WIDTH : 40 }}
+        >
+          <div className={`py-3 border-b border-[var(--panel-border-subtle)] flex items-center ${toolsOpen ? 'px-4 justify-between gap-2' : 'flex-col gap-2 px-0'}`}>
+            {toolsOpen && (
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${accent}1a` }}>
+                  <span className="text-base">⚡</span>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold text-stone-800 tracking-tight truncate font-outfit">AI Tools</div>
+                  <div className="text-[10px] text-stone-400 uppercase tracking-wide truncate">{tools.length} assistants</div>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => setToolsOpen(!toolsOpen)}
+              title={toolsOpen ? 'Collapse tools' : 'Expand tools'}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-white transition-colors shrink-0"
+            >
+              {toolsOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className={`flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2.5 ${toolsOpen ? '' : 'items-center'}`}>
+            {tools?.map(t => <ToolCard key={t.id} tool={t} accent={accent} collapsed={!toolsOpen} />)}
+          </div>
+
+          {toolsOpen && (
+            <div className="px-4 py-2.5 border-t border-[var(--panel-border-subtle)] text-[10px] text-stone-400 leading-snug">
+              Powered by OpenRouter · <span className="text-stone-500">free model router</span> on overload
+            </div>
+          )}
+        </aside>
+      )}
     </div>
   );
 }
@@ -150,6 +212,68 @@ export function SectionHead({ title, subtitle, action }: { title: string; subtit
         {subtitle && <p className="text-sm text-stone-500 mt-0.5">{subtitle}</p>}
       </div>
       {action}
+    </div>
+  );
+}
+
+/** ToolCard — single AI assistant card rendered in the right Tools panel.
+ *  Mirrors AgenticOS Monica/Sider card style. */
+function ToolCard({ tool, accent, collapsed }: { tool: ToolDef; accent: string; collapsed: boolean }) {
+  const statusMeta: Record<ToolStatus, { label: string; color: string; bg: string; Icon: LucideIcon }> = {
+    idle:      { label: 'Idle',     color: '#78716c', bg: '#f5f5f4', Icon: CircleDashed },
+    running:   { label: 'Running',  color: '#1d4ed8', bg: '#dbeafe', Icon: Play },
+    awaiting:  { label: 'Awaiting', color: '#b45309', bg: '#fef3c7', Icon: CircleDashed },
+    error:     { label: 'Error',    color: '#b91c1c', bg: '#fee2e2', Icon: AlertCircle },
+  };
+  const meta = statusMeta[tool.status];
+  const TIcon = tool.icon;
+  const SIcon = meta.Icon;
+
+  if (collapsed) {
+    return (
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: meta.bg }} title={`${tool.name} — ${meta.label}`}>
+        <TIcon className="w-4 h-4" style={{ color: meta.color }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm p-3 flex flex-col gap-2">
+      <div className="flex items-start gap-2.5">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${accent}1a` }}>
+          <TIcon className="w-4.5 h-4.5" style={{ color: accent }} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[12.5px] font-bold text-stone-900 truncate">{tool.name}</span>
+          </div>
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: meta.color, background: meta.bg }}>
+              <SIcon className="w-2.5 h-2.5" /> {meta.label}
+            </span>
+            {tool.lastActivity && (
+              <span className="text-[10px] text-stone-400 truncate">{tool.lastActivity}</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <p className="text-[11px] text-stone-600 leading-snug">{tool.description}</p>
+      {tool.modelLabel && (
+        <div className="text-[9.5px] font-mono text-stone-400">model · {tool.modelLabel}</div>
+      )}
+      <div className="flex items-center gap-1.5 mt-0.5">
+        <button
+          disabled={tool.status === 'running'}
+          onClick={tool.onRun}
+          className="flex-1 text-[11px] font-semibold text-white rounded-lg py-1 transition-all disabled:opacity-50"
+          style={{ background: accent }}
+        >
+          {tool.status === 'running' ? 'Running…' : 'Run'}
+        </button>
+        <button className="text-[11px] font-semibold text-stone-600 hover:text-stone-900 px-2 py-1 rounded-lg hover:bg-stone-50">
+          Logs
+        </button>
+      </div>
     </div>
   );
 }
