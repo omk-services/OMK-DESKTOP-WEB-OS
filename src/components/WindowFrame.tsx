@@ -56,10 +56,11 @@ export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
         transition={{ duration: 0.18 }}
         className="w-full h-full flex flex-col"
       >
-        {/* Title bar — draggable */}
+        {/* Title bar — draggable, rounded, no harsh borders (Codex/Buzz) */}
         <div
           onMouseDown={handleTitleBarMouseDown}
-          className="h-11 flex items-center justify-between px-4 bg-white/70 backdrop-blur border-b border-[var(--panel-border-subtle)] cursor-grab active:cursor-grabbing select-none shrink-0"
+          className="h-12 flex items-center justify-between px-4 cursor-grab active:cursor-grabbing select-none shrink-0"
+          style={{ background: 'var(--theme-bg)' }}
         >
           <div className="flex items-center gap-2 w-1/4">
             <TrafficLight color="red" onClick={() => closeApp(id)} label="Close window" icon={<X className="w-2.5 h-2.5" />} />
@@ -67,16 +68,27 @@ export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
             <TrafficLight color="green" onClick={() => maximizeApp(id)} label="Maximize window" icon={<Maximize2 className="w-2 h-2" />} />
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-[var(--canvas)] border border-[var(--panel-border-subtle)]">
-            {icon && <span className="text-[var(--theme-accent)] flex items-center">{icon}</span>}
-            <span className="text-[11px] font-semibold text-stone-600 tracking-tight truncate max-w-[220px]">{title}</span>
+          <div
+            className="flex items-center gap-2 px-3 py-1 rounded-full"
+            style={{
+              background: 'var(--theme-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--theme-border-subtle)',
+            }}
+          >
+            {icon && <span className="flex items-center" style={{ color: 'var(--theme-accent)' }}>{icon}</span>}
+            <span className="text-[11px] font-semibold tracking-tight truncate max-w-[220px]" style={{ color: 'var(--theme-text-muted)' }}>
+              {title}
+            </span>
           </div>
 
           <div className="w-1/4" />
         </div>
 
         <WindowContext.Provider value={{ windowId: id, activePage, setActivePage, detail, setDetail }}>
-          <div className="bg-white/50 border-b border-[var(--panel-border-subtle)] px-4 h-8 flex items-center shrink-0">
+          <div
+            className="px-4 h-8 flex items-center shrink-0"
+            style={{ background: 'var(--theme-bg)' }}
+          >
             <Breadcrumbs
               appTitle={title}
               activePage={activePage}
@@ -85,7 +97,10 @@ export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
             />
           </div>
 
-          <div className="flex-1 min-h-0 overflow-auto custom-scrollbar bg-[var(--theme-bg)] relative flex flex-col">
+          <div
+            className="flex-1 min-h-0 overflow-auto custom-scrollbar relative flex flex-col"
+            style={{ background: 'var(--theme-bg)' }}
+          >
             <div className="flex-1 w-full h-full min-h-[280px]">{children}</div>
           </div>
         </WindowContext.Provider>
