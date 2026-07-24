@@ -21,6 +21,11 @@ export interface FleetAgent {
   share: number;         // % of total cycles
   defaultModel: string;
   accent: string;        // hex
+  // Detail-page extras
+  bio: string;           // 1-paragraph agent description
+  capabilities: string[]; // 3-5 capability tags
+  recentRuns: { ts: string; task: string; status: 'ok' | 'warn' | 'err' }[];
+  peers: string[];       // agent codes it talks to (Manager→Worker pattern)
 }
 
 export const FLEET_AGENTS: FleetAgent[] = [
@@ -29,40 +34,76 @@ export const FLEET_AGENTS: FleetAgent[] = [
     channel: '#orchestrator', state: 'EXECUTING',
     task: 'Routing 14 inbound tasks to specialists',
     load: 64, tokens: '892k', latency: '12ms', success: 99.6, tasksToday: 218, share: 28,
-    defaultModel: 'gpt-5.5',
-    accent: '#f08143',
+    defaultModel: 'gpt-5.5', accent: '#f08143',
+    bio: 'Top-of-fleet coordinator. Receives every inbound task, classifies it by complexity, then routes to the cheapest competent specialist. Sober by default, never sleeps, never hallucinates routing.',
+    capabilities: ['Task classification', 'Specialist routing', 'SLA enforcement', 'Retry policy'],
+    recentRuns: [
+      { ts: '12:48', task: 'Route Q3 brief research to Scout', status: 'ok' },
+      { ts: '12:45', task: 'Escalate Compliance audit to Reach', status: 'ok' },
+      { ts: '12:42', task: 'Retry Dev cron sync (timeout)', status: 'warn' },
+      { ts: '12:39', task: 'Dispatch longform draft to Scribe', status: 'ok' },
+    ],
+    peers: ['A-01 Scout', 'A-02 Scribe', 'A-03 Reach', 'A-04 Dev'],
   },
   {
     code: 'A-01', initials: 'SC', name: 'Scout', role: 'Research',
     channel: '#scout', state: 'EXECUTING',
     task: 'Sweeping 14 sources for Q3 brief',
     load: 72, tokens: '1.24M', latency: '14ms', success: 99.9, tasksToday: 312, share: 34,
-    defaultModel: 'gemma-4-free',
-    accent: '#2563eb',
+    defaultModel: 'gemma-4-free', accent: '#2563eb',
+    bio: 'Research specialist. Sweeps 14+ configured sources (RSS, X, HuggingFace, arXiv, Notion) for the latest signal in the orchestrator\'s task topic. Free model on overload.',
+    capabilities: ['Multi-source sweep', 'Citation graph', 'Deduplication', 'Trend detection'],
+    recentRuns: [
+      { ts: '12:47', task: 'Sweep 14 sources for "Q3 brief"', status: 'ok' },
+      { ts: '12:31', task: 'Dedupe 124 raw signals → 18 unique', status: 'ok' },
+      { ts: '12:18', task: 'Detect trend: agentic UX > monolith', status: 'ok' },
+    ],
+    peers: ['A-00 Orchestrator', 'A-02 Scribe'],
   },
   {
     code: 'A-02', initials: 'SB', name: 'Scribe', role: 'Writing',
     channel: '#scribe', state: 'EXECUTING',
     task: 'Drafting longform · 1840 / 2400 words',
     load: 61, tokens: '450k', latency: '118ms', success: 98.7, tasksToday: 142, share: 22,
-    defaultModel: 'gpt-5-mini',
-    accent: '#9333ea',
+    defaultModel: 'gpt-5-mini', accent: '#9333ea',
+    bio: 'Long-form writer. Receives a brief + Scout citations, drafts a complete piece, never publishes without explicit human approval. Voice locked to "direct, never breathless".',
+    capabilities: ['Long-form drafting', 'Voice lock', 'Citation weaving', 'Editorial pass'],
+    recentRuns: [
+      { ts: '12:46', task: 'Draft chapter 3 of Q3 brief (1840/2400)', status: 'ok' },
+      { ts: '12:30', task: 'Editorial pass on chapter 2', status: 'ok' },
+      { ts: '12:14', task: 'Draft LinkedIn thread from brief', status: 'ok' },
+    ],
+    peers: ['A-00 Orchestrator', 'A-03 Reach'],
   },
   {
     code: 'A-03', initials: 'RE', name: 'Reach', role: 'Outreach',
     channel: '#reach', state: 'IDLE',
     task: 'Awaiting Scribe handoff · last cycle 4m 12s',
     load: 6, tokens: '0', latency: '—', success: 99.1, tasksToday: 96, share: 14,
-    defaultModel: 'gpt-5-mini',
-    accent: '#16a34a',
+    defaultModel: 'gpt-5-mini', accent: '#16a34a',
+    bio: 'Outreach specialist. Packages Scribe output into channel-specific cadences (LinkedIn / X / email). Never sends without approval. Tracks reply rates + warm handoffs.',
+    capabilities: ['Cadence design', 'Channel-aware copy', 'Reply tracking', 'Warm handoff'],
+    recentRuns: [
+      { ts: '12:44', task: 'Hand off LinkedIn thread to A+', status: 'ok' },
+      { ts: '12:35', task: 'Sequence 22 accounts on cadence Day 0', status: 'ok' },
+      { ts: '12:22', task: 'Personalize Day 5 follow-up', status: 'ok' },
+    ],
+    peers: ['A-00 Orchestrator', 'A-02 Scribe'],
   },
   {
     code: 'A-04', initials: 'DV', name: 'Dev', role: 'Engineering',
     channel: '#dev', state: 'RETRY',
     task: 'cron sync · node timeout · retry 1/3',
     load: 18, tokens: '92k', latency: '—', success: 97.2, tasksToday: 68, share: 12,
-    defaultModel: 'gpt-5',
-    accent: '#0891b2',
+    defaultModel: 'gpt-5', accent: '#0891b2',
+    bio: 'Engineering specialist. Owns cron sync, repo hygiene, deploy logs, and emergency rollbacks. Burns on infra issues, sleeps on green builds.',
+    capabilities: ['Cron sync', 'Repo hygiene', 'Deploy logs', 'Emergency rollback'],
+    recentRuns: [
+      { ts: '12:43', task: 'Cron sync attempt 1/3 (timeout 0x9f)', status: 'err' },
+      { ts: '12:30', task: 'Deploy v0.4.2 to staging', status: 'ok' },
+      { ts: '12:18', task: 'Run pre-deploy lint pass', status: 'ok' },
+    ],
+    peers: ['A-00 Orchestrator'],
   },
 ];
 
