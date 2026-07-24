@@ -1,14 +1,19 @@
-import { Handshake, GitBranch, Table2, LineChart } from 'lucide-react';
+import { Handshake, GitBranch, Table2, LineChart, Briefcase, Receipt } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
-import { Card, Badge, StatCard } from '../_ui/kit';
-import { KanbanBoard, KanbanCard, Table } from '../_ui/widgets';
+import { StatCard } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 
 const ACCENT = '#ea580c';
 
-const stageTone: Record<string, 'ok' | 'warn' | 'accent'> = { Won: 'ok', Qualified: 'warn', Proposal: 'accent' };
+const STAGE_TONE: Record<string, 'ok' | 'warn' | 'accent' | 'neutral' | 'danger'> = {
+  Won: 'ok', Qualified: 'warn', Proposal: 'accent', Lost: 'danger', Negotiation: 'accent',
+};
+const STAGE_ACCENT: Record<string, string> = {
+  Won: '#16a34a', Qualified: '#fb923c', Proposal: ACCENT, Lost: '#dc2626', Negotiation: ACCENT,
+};
 
 function Forecast() {
   return (
@@ -27,28 +32,30 @@ export function SalesApp() {
   const deals = useCmsStore(s => s.items['deals']) ?? [];
   const drill = useCollectionDrill('deals', ['Pipeline', 'Deals']);
 
-  const byStage = (stage: string) => deals.filter(d => d.stage === stage);
-
   const Pipeline = () => {
     if (drill.openId) {
       return <DynamicPageView collectionId="deals" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     }
     return (
-      <div className="p-7 h-full flex flex-col">
-        <SectionHead title="Sales pipeline" subtitle="Deals by stage" />
-        <div className="flex-1 min-h-0">
-          <KanbanBoard columns={[
-            { title: 'Qualified', accent: '#fb923c', items: byStage('Qualified').map(d => (
-              <KanbanCard key={String(d.id)} title={String(d.client)} meta={`$${d.value} · ${d.offer}`} accent="#fb923c" onClick={() => drill.open(String(d.id))} />
-            )) },
-            { title: 'Proposal', accent: ACCENT, items: byStage('Proposal').map(d => (
-              <KanbanCard key={String(d.id)} title={String(d.client)} meta={`$${d.value} · ${d.offer}`} accent={ACCENT} onClick={() => drill.open(String(d.id))} />
-            )) },
-            { title: 'Won', accent: '#16a34a', items: byStage('Won').map(d => (
-              <KanbanCard key={String(d.id)} title={String(d.client)} meta={`$${d.value}/mo · ${d.offer}`} accent="#16a34a" onClick={() => drill.open(String(d.id))} />
-            )) },
-          ]} />
-        </div>
+      <div className="p-7">
+        <SectionHead title="Sales pipeline" subtitle="Deals by stage (Fleet view)" />
+        <FleetItemGrid cols={2}>
+          {deals.map(d => (
+            <FleetItemCard
+              key={String(d.id)}
+              title={String(d.client)}
+              subtitle={String(d.offer)}
+              statusLabel={String(d.stage)}
+              statusTone={STAGE_TONE[String(d.stage)] ?? 'neutral'}
+              accent={STAGE_ACCENT[String(d.stage)] ?? ACCENT}
+              icon={<Briefcase className="w-5 h-5" />}
+              metricLabel="value"
+              metricValue={`$${d.value}/mo`}
+              meta={`stage: ${String(d.stage)}`}
+              onClick={() => drill.open(String(d.id))}
+            />
+          ))}
+        </FleetItemGrid>
       </div>
     );
   };
@@ -59,19 +66,24 @@ export function SalesApp() {
     }
     return (
       <div className="p-7">
-        <SectionHead title="Deals" subtitle="All open opportunities" />
-        <Card>
-          <Table
-            head={['Client', 'Offer', 'Value', 'Stage']}
-            onRowClick={(i) => drill.open(String(deals[i].id))}
-            rows={deals.map(d => [
-              <span className="font-semibold text-stone-800">{String(d.client)}</span>,
-              String(d.offer),
-              `$${d.value}`,
-              <Badge tone={stageTone[String(d.stage)] ?? 'neutral'}>{String(d.stage)}</Badge>,
-            ])}
-          />
-        </Card>
+        <SectionHead title="Deals" subtitle="All opportunities" />
+        <FleetItemGrid cols={2}>
+          {deals.map(d => (
+            <FleetItemCard
+              key={String(d.id)}
+              title={String(d.client)}
+              subtitle={String(d.offer)}
+              statusLabel={String(d.stage)}
+              statusTone={STAGE_TONE[String(d.stage)] ?? 'neutral'}
+              accent={STAGE_ACCENT[String(d.stage)] ?? ACCENT}
+              icon={<Receipt className="w-5 h-5" />}
+              metricLabel="MRR"
+              metricValue={`$${d.value}`}
+              meta={`updated: this week`}
+              onClick={() => drill.open(String(d.id))}
+            />
+          ))}
+        </FleetItemGrid>
       </div>
     );
   };

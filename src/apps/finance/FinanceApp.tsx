@@ -1,9 +1,9 @@
-import { Wallet, PiggyBank, Receipt, BarChart3 } from 'lucide-react';
+import { Wallet, PiggyBank, Receipt, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, StatCard } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { CMSCardList } from '../_ui/CMSCardList';
 
 const ACCENT = '#ca8a04';
 
@@ -59,7 +59,23 @@ export function FinanceApp() {
     return (
       <div className="p-7">
         <SectionHead title="Invoices" subtitle="Reconciled nightly via Stripe" />
-        <CollectionRepeater collectionId="invoices" onOpen={drill.open} />
+        <CMSCardList
+          collectionId="invoices"
+          onOpen={drill.open}
+          cols={2}
+          render={(inv: Record<string, unknown>) => ({
+            title: String(inv.client ?? inv.title ?? 'Invoice'),
+            subtitle: String(inv.number ?? inv.id),
+            description: String(inv.description ?? inv.memo ?? ''),
+            statusLabel: String(inv.status ?? 'open'),
+            statusTone: inv.status === 'paid' ? 'ok' : inv.status === 'overdue' ? 'danger' : 'warn',
+            accent: inv.status === 'paid' ? '#16a34a' : inv.status === 'overdue' ? '#dc2626' : ACCENT,
+            icon: inv.status === 'paid' ? <CheckCircle2 className="w-5 h-5" /> : <FileText className="w-5 h-5" />,
+            metricLabel: 'amount',
+            metricValue: `$${inv.amount ?? '—'}`,
+            meta: inv.dueDate ? `due ${String(inv.dueDate)}` : '',
+          })}
+        />
       </div>
     );
   };
