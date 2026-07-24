@@ -7,12 +7,19 @@
  *  Optional 3-column layout (AgenticOS-style "Tools" panel on the right):
  *  apps can declare AI assistants via the `tools` prop — they render as a
  *  collapsible right panel with per-tool status + action buttons. The pattern
- *  mirrors Hugo's AgenticOS Monica/Sider cards. */
+ *  mirrors Hugo's AgenticOS Monica/Sider cards.
+ *
+ *  Theming: AppFrame applies the per-app theme tokens (from the ThemeStore)
+ *  as scoped CSS variables on its root element, so each app window can render
+ *  with its own design identity (e.g. Brutalism for Product, Dark OLED for
+ *  Finance). The sidebar header shows the active theme name as a preview chip. */
 import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, CircleDashed, AlertCircle } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, CircleDashed, AlertCircle, Palette } from 'lucide-react';
 import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
+import { useThemeStore, applyThemeTokens, useThemeIdFor } from '../lib/themes/store';
+import { THEME_META } from '../lib/themes/tokens';
 
 export interface AppSection {
   id: string;
@@ -58,6 +65,21 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const { windowId, setActivePage } = useWindowPage();
   const active = sections.find(s => s.id === activeId) ?? sections[0];
 
+  // Per-app theme: resolve + apply tokens as scoped CSS variables on rootRef.
+  const activeThemeId = useThemeIdFor(title);
+  const tokens = useThemeStore((s) => s.tokensFor(title));
+  useEffect(() => {
+    if (rootRef.current) applyThemeTokens(rootRef.current, tokens);
+  }, [tokens, activeThemeId]);
+  const themeMeta = THEME_META.find(t => t.id === activeThemeId);
+  const openSettings = () => {
+    // Open the Settings app and navigate to the Themes section via a window intent.
+    // The Settings app is at id 'settings' in the app registry.
+    window.dispatchEvent(new CustomEvent('coach-os:open-app-section', {
+      detail: { appId: 'settings', sectionId: 'themes' }
+    }));
+  };
+
   useEffect(() => {
     if (active) setActivePage(active.label);
   }, [activeId, active?.label, setActivePage]);
@@ -100,19 +122,19 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
     <div ref={rootRef} className="flex h-full min-h-0 bg-[var(--theme-bg)] relative">
       {/* Internal sidebar — collapses to an icon rail */}
       <aside
-        className={`shrink-0 border-r border-[var(--panel-border-subtle)] bg-[var(--canvas)] flex flex-col transition-[width] duration-200 overflow-hidden ${
+        className={`shrink-0 border-r border-[var(--theme-border-subtle)] bg-[var(--canvas)] flex flex-col transition-[width] duration-200 overflow-hidden ${
           collapsed ? 'w-14' : 'w-52'
         }`}
       >
-        <div className={`py-3 border-b border-[var(--panel-border-subtle)] flex items-center ${collapsed ? 'flex-col gap-2 px-0' : 'px-4 justify-between gap-2'}`}>
+        <div className={`py-3 border-b border-[var(--theme-border-subtle)] flex items-center ${collapsed ? 'flex-col gap-2 px-0' : 'px-4 justify-between gap-2'}`}>
           <div className={`flex items-center gap-2.5 min-w-0 ${collapsed ? '' : 'flex-1'}`}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${accent}1a` }}>
               <Icon className="w-4.5 h-4.5" style={{ color: accent }} />
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <div className="text-sm font-bold text-stone-800 tracking-tight truncate font-outfit">{title}</div>
-                {subtitle && <div className="text-[10px] text-stone-400 uppercase tracking-wide truncate">{subtitle}</div>}
+                <div className="text-sm font-bold text-[var(--theme-text)] tracking-tight truncate font-outfit">{title}</div>
+                {subtitle && <div className="text-[10px] text-[var(--theme-text-dim)] uppercase tracking-wide truncate">{subtitle}</div>}
               </div>
             )}
           </div>
@@ -120,11 +142,27 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
           <button
             onClick={toggleCollapsed}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-white transition-colors shrink-0"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] hover:bg-[var(--theme-surface-hover)] transition-colors shrink-0"
           >
             {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
         </div>
+
+        {/* Theme chip — shows the active theme for this app + opens Settings.
+            Per A+ decision: "demo dans l'Onboarding" → preview card per-app. */}
+        {!collapsed && themeMeta && (
+          <button
+            onClick={openSettings}
+            title={`Theme: ${themeMeta.name} — click to change in Settings`}
+            className="mx-2 mt-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--theme-border-subtle)] bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] transition-colors text-left"
+          >
+            <Palette className="w-3 h-3 shrink-0" style={{ color: tokens.accent }} />
+            <span className="flex-1 min-w-0">
+              <span className="block text-[10.5px] font-bold text-[var(--theme-text)] truncate" style={{ fontFamily: 'var(--theme-font-display)' }}>{themeMeta.name}</span>
+              <span className="block text-[9px] text-[var(--theme-text-dim)] uppercase tracking-wider truncate">{tokens.isDark ? 'Dark' : 'Light'}</span>
+            </span>
+          </button>
+        )}
 
         <nav className={`flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-0.5 ${collapsed ? 'items-center' : ''}`}>
           {sections.map((s, i) => {
