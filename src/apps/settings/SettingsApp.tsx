@@ -5,6 +5,8 @@ import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
 import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
+import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
+import posthog from 'posthog-js';
 
 const ACCENT = '#78716c';
 
@@ -35,6 +37,19 @@ export function SettingsApp() {
     weeklyDigest: true,
   });
   const set = (k: keyof typeof flags) => setFlags(f => ({ ...f, [k]: !f[k] }));
+
+  const [observabilityOptIn, setObservabilityOptInState] = useState<boolean>(() => getObservabilityConsent());
+  const onToggleObservability = (next: boolean) => {
+    setObservabilityOptInState(next);
+    setObservabilityConsent(next);
+    if (next) {
+      try {
+        posthog.capture('observability_opt_in');
+      } catch {
+        // best-effort
+      }
+    }
+  };
 
   const Row = ({ label, hint, k }: { label: string; hint: string; k: keyof typeof flags }) => (
     <div className="flex items-center justify-between px-5 py-4">
@@ -69,6 +84,36 @@ export function SettingsApp() {
           <Row label="Require approval to publish" hint="Nothing goes out in your name unseen" k="voicePublish" />
         </div>
       </Card>
+
+      <div className="mt-6">
+        <SectionHead
+          title="Observability"
+          subtitle="Anonymous analytics & in-app onboarding (RGPD opt-in)"
+          action={
+            <Badge tone={observabilityOptIn ? 'ok' : 'neutral'}>
+              {observabilityOptIn ? 'On' : 'Off'}
+            </Badge>
+          }
+        />
+        <Card>
+          <div className="px-5 py-4 flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium text-stone-800">
+                Observability (anonymous analytics + onboarding)
+              </div>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Off by default. When on, PostHog Cloud (EU region) collects page navigation + feature usage;
+                UserTour can show in-app onboarding. RGPD-compliant: person profiles are only created if
+                you sign in. No PII collected unless you identify.
+              </p>
+            </div>
+            <Toggle
+              on={observabilityOptIn}
+              onClick={() => onToggleObservability(!observabilityOptIn)}
+            />
+          </div>
+        </Card>
+      </div>
     </div>
   );
 

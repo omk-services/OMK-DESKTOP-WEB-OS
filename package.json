@@ -13,8 +13,10 @@
     "@supabase/supabase-js": "^2.110.8",
     "lucide-react": "^1.25.0",
     "motion": "^12.42.2",
+    "posthog-js": "^1.407.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "usertour.js": "^0.0.24",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
