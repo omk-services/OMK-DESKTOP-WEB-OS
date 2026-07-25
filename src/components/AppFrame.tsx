@@ -62,8 +62,14 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
   const [toolsOpen, setToolsOpen] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
-  const { windowId, setActivePage } = useWindowPage();
+  const { windowId, setActivePage, detail, setDetail } = useWindowPage();
   const active = sections.find(s => s.id === activeId) ?? sections[0];
+  const navigateToSection = (nextId: string) => {
+    if (nextId === activeId) return;
+    detail?.onBack();
+    setDetail(null);
+    setActiveId(nextId);
+  };
 
   // Per-app theme: resolve + apply tokens as scoped CSS variables on rootRef.
   // Normalize the title to lowercase to match the app-registry IDs (e.g. "Product" → "product").
@@ -98,7 +104,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
     if (!sectionIntent || !windowId) return;
     const match = sections.find(s => s.label === sectionIntent);
     if (match) {
-      setActiveId(match.id);
+      navigateToSection(match.id);
       consumeSectionIntent(windowId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,7 +231,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
                   </div>
                 )}
                 <button
-                  onClick={() => setActiveId(s.id)}
+                  onClick={() => navigateToSection(s.id)}
                   title={collapsed ? s.label : undefined}
                   className={`relative flex items-center gap-2.5 rounded-xl text-[12.5px] font-medium transition-all ${
                     collapsed ? 'w-10 h-10 justify-center' : 'w-full px-2.5 py-2'
