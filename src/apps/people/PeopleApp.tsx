@@ -1,30 +1,48 @@
-/** People / Agents — Green Lantern domain (E-Myth B2-01 manager).
- *  Subpages (aligned to KomputerMechanic Hermes Mission Control template):
- *    - Team     → human squad (X-Men)
- *    - Agents   → basic agent list
- *    - Fleet    → 5 specialist AI agents with state/load/latency/tokens
- *                 (template: route-agents + AGENTS)
- *    - Content  → per-agent docs library
- *                 (template: route-content + DEMO_CONTENT_DOCS)
- *    - Schedule → 7-day × 24-hour activity heatmap + planned tasks
- *                 (template: route-schedule + HEAT + tasks)
- *    - Culture  → operating values
+/** People / Agents — Domaine 1 of the SOB Convergence: RH & Méta-Gouvernance.
+ *  Agent Factory where B2 Visionaries (Green Lanterns) design and B3 specialists
+ *  (X-Men) ship. B1 Gatekeeper (the coach) approves what ships.
+ *  Subpages:
+ *    - Overview  → operating doctrine + today's standup
+ *    - Team      → human squad (X-Men)
+ *    - Agents    → agent list
+ *    - Squads    → B3 bench: 5 specialist AI agents with state/load/latency/tokens
+ *    - Content   → per-agent docs library
+ *    - Cadence   → 7-day × 24-hour standup heatmap + sprint tasks
+ *    - Culture   → operating values
  *  2-level subpage nav: section (left sidebar) → item detail (drill via CMS). */
-import { useState } from 'react';
-import { Users, Bot, Heart, Cpu, FileText, Calendar, Clock, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Users, Bot, Heart, Cpu, FileText, Calendar, Clock, Zap,
+  Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
+} from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useWindowPage } from '../../contexts/WindowContext';
 import {
   FLEET_AGENTS, STATE_META, type FleetAgent,
   CONTENT_DOCS,
   DAYS, HOURS, SCHEDULE_GRID, SCHEDULE_TASKS, type ScheduleTask,
 } from './fleet';
 
-const ACCENT = '#0891b2';
+// Green Lantern accent — emerald. Matches Domaine 1 brand for the SOB convergence.
+const ACCENT = '#059669';
+const ACCENT_SOFT = '#10b981';
+
+/** Map agent roles to their squad. Green Lanterns = B2 Visionaries (design/governance),
+ *  X-Men = B3 Specialists (execute shippable work). */
+function squadForAgent(agent: FleetAgent): 'green-lanterns' | 'xmen' {
+  // Orchestrator is the B2 Visionary routing all work.
+  return agent.code === 'A-00' ? 'green-lanterns' : 'xmen';
+}
+
+const SQUAD_META: Record<'green-lanterns' | 'xmen', { label: string; tagline: string; accent: string }> = {
+  'green-lanterns': { label: 'Green Lanterns', tagline: 'B2 Visionaries · design and govern', accent: '#059669' },
+  'xmen':          { label: 'X-Men',          tagline: 'B3 Specialists · execute the work',  accent: '#0d9488' },
+};
 
 function Culture() {
   const values = ['Client outcomes first', 'Bias to shipped, not perfect', 'Sober by default', 'Own the mistake, keep the receipt'];
@@ -43,21 +61,182 @@ function Culture() {
   );
 }
 
+/** Overview — the default landing. Sets the doctrine (Agent Factory + B1 Gatekeeper),
+ *  shows the daily standup, and gives the coach ONE primary action.
+ *  Implements the Border Beam visual effect on the standup hero card. */
+function Overview() {
+  const active   = FLEET_AGENTS.filter(a => a.state === 'EXECUTING');
+  const idle     = FLEET_AGENTS.filter(a => a.state === 'IDLE');
+  const blocked  = FLEET_AGENTS.filter(a => a.state === 'RETRY' || a.state === 'BLOCKED' || a.state === 'AWAITING');
+
+  const steps: { n: string; title: string; body: string }[] = [
+    { n: '1', title: 'Standup at 9am',       body: 'Your agents post overnight work to your inbox.' },
+    { n: '2', title: 'Agents ship work',      body: 'Specialists run on autopilot inside the boundaries you set.' },
+    { n: '3', title: 'You approve in 10 min', body: 'Yes or no on the queue. Ship or kill. Move on.' },
+  ];
+
+  return (
+    <div className="p-7 h-full flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+      {/* Eyebrow + Headline */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[10.5px] font-extrabold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+          Domaine 01 · RH & Méta-Gouvernance
+        </span>
+        <h1 className="text-[28px] font-bold tracking-tight text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+          Your Agent Factory. Your daily standup.
+        </h1>
+        <p className="text-[13.5px] text-stone-600 max-w-2xl leading-relaxed">
+          You govern {FLEET_AGENTS.length} specialist agents here. Run a 10-minute standup every morning, approve what they ship, and bring new capabilities online through 2-week sprints. Your agents do the work. You stay the Gatekeeper.
+        </p>
+      </div>
+
+      {/* How it works — 3 steps, capped, concrete */}
+      <div className="flex flex-col gap-2.5">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— HOW IT WORKS</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {steps.map((s) => (
+            <div key={s.n} className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex items-start gap-3">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[13px] font-extrabold shrink-0"
+                style={{ background: ACCENT }}
+              >
+                {s.n}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-bold text-stone-900">{s.title}</div>
+                <div className="text-[11.5px] text-stone-600 mt-0.5 leading-snug">{s.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Today's Standup — Border Beam on the hero card */}
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— TODAY'S STANDUP</span>
+          <span className="text-[10px] font-mono text-stone-400">· {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+        </div>
+        <div className="relative rounded-2xl p-[2px] overflow-hidden" style={{ background: 'linear-gradient(120deg, transparent 0%, rgba(16,185,129,0.0) 30%, #10b981 50%, rgba(16,185,129,0.0) 70%, transparent 100%)', backgroundSize: '200% 200%', animation: 'border-beam 4s linear infinite' }}>
+          <style>{`
+            @keyframes border-beam {
+              0%   { background-position: 0% 50%; }
+              100% { background-position: 200% 50%; }
+            }
+          `}</style>
+          <div className="bg-white rounded-2xl p-6">
+            <div className="flex items-start gap-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0"
+                style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_SOFT})`, boxShadow: `0 6px 18px ${ACCENT}30` }}
+              >
+                <Crown className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-bold text-stone-900">B1 Gatekeeper standing by</span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">You</span>
+                </div>
+                <p className="text-[12.5px] text-stone-600 mt-1 leading-snug">
+                  {active.length} of {FLEET_AGENTS.length} agents ran overnight. {blocked.length > 0 ? `${blocked.length} need your call.` : 'No blockers.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 text-[12px] font-bold text-white px-3.5 py-2 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.99]"
+                style={{ background: ACCENT, boxShadow: `0 4px 12px ${ACCENT}30` }}
+              >
+                <Play className="w-3.5 h-3.5" /> Start standup
+              </button>
+            </div>
+
+            {/* Standup metrics — act / idle / blocked */}
+            <div className="grid grid-cols-3 gap-3 mt-5">
+              <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3.5">
+                <div className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-emerald-700" />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-emerald-700">Active</span>
+                </div>
+                <div className="text-[24px] font-bold text-emerald-900 mt-1 tabular-nums">{active.length}</div>
+                <div className="text-[10.5px] text-emerald-700/80 mt-0.5 truncate">
+                  {active.map(a => a.name).join(', ') || 'none'}
+                </div>
+              </div>
+              <div className="rounded-xl bg-stone-50 border border-stone-100 p-3.5">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-stone-500">Idle</span>
+                </div>
+                <div className="text-[24px] font-bold text-stone-900 mt-1 tabular-nums">{idle.length}</div>
+                <div className="text-[10.5px] text-stone-500 mt-0.5 truncate">
+                  {idle.map(a => a.name).join(', ') || 'none'}
+                </div>
+              </div>
+              <div className="rounded-xl bg-amber-50 border border-amber-100 p-3.5">
+                <div className="flex items-center gap-1.5">
+                  <Heart className="w-3.5 h-3.5 text-amber-700" />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-amber-700">Blocked</span>
+                </div>
+                <div className="text-[24px] font-bold text-amber-900 mt-1 tabular-nums">{blocked.length}</div>
+                <div className="text-[10.5px] text-amber-800/80 mt-0.5 truncate">
+                  {blocked.map(a => a.name).join(', ') || 'none'}
+                </div>
+              </div>
+            </div>
+
+            {/* Next concrete action */}
+            <div className="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2 text-[11.5px] text-stone-600">
+              <span className="text-[9.5px] font-mono uppercase tracking-wider text-stone-400">Next</span>
+              <span>Open <span className="font-semibold text-stone-800">Squads</span> to clear the {blocked.length > 0 ? 'blocked' : 'queue'}</span>
+              <span className="ml-auto text-[9.5px] font-mono text-stone-400">~10 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer micro-CTA (i-have-adhd: action-first, one primary) */}
+      <div className="flex items-center justify-between text-[11px] text-stone-500">
+        <span>Coach OS ships what you approve. Nothing more.</span>
+        <span className="font-mono uppercase tracking-wider text-[9.5px]">v2.0 · SOB Convergence</span>
+      </div>
+    </div>
+  );
+}
+
 /** Fleet card — per-agent status card matching the template's "agent-cards"
  *  section. Clickable to open the agent's detail page. */
 function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void }) {
   const state = STATE_META[agent.state];
+  const isProcessing = agent.state === 'EXECUTING' || agent.state === 'RETRY';
   return (
     <button
       onClick={onClick}
       className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex flex-col gap-3 text-left transition-all hover:scale-[1.015] hover:shadow-md active:scale-[0.99] cursor-pointer"
     >
       <div className="flex items-center gap-2.5">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-white shrink-0"
-          style={{ background: agent.accent }}
-        >
-          {agent.initials}
+        <div className="relative shrink-0">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-white"
+            style={{ background: agent.accent }}
+          >
+            {agent.initials}
+          </div>
+          <span
+            className="absolute -top-0.5 -right-0.5 inline-flex"
+            title={isProcessing ? 'Processing now' : 'Idle'}
+            aria-hidden="true"
+          >
+            {isProcessing ? (
+              <span className="relative inline-flex w-2.5 h-2.5">
+                <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                <span className="relative rounded-full w-2.5 h-2.5 bg-emerald-500 ring-2 ring-white" />
+              </span>
+            ) : (
+              <span className="relative inline-flex w-2.5 h-2.5">
+                <span className="absolute inset-0 rounded-full bg-stone-300" />
+              </span>
+            )}
+          </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -275,31 +454,65 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
 
 function Fleet() {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const { setDetail } = useWindowPage();
   const selected = selectedCode ? FLEET_AGENTS.find(a => a.code === selectedCode) : null;
+
+  useEffect(() => {
+    if (selected) {
+      setDetail({ label: selected.name, onBack: () => setSelectedCode(null) });
+    } else {
+      setDetail(null);
+    }
+  }, [selected, setDetail]);
 
   if (selected) {
     return <FleetDetail agent={selected} onBack={() => setSelectedCode(null)} />;
   }
 
+  const grouped: Array<{ key: 'green-lanterns' | 'xmen'; agents: FleetAgent[] }> = [
+    { key: 'green-lanterns', agents: FLEET_AGENTS.filter(a => squadForAgent(a) === 'green-lanterns') },
+    { key: 'xmen',          agents: FLEET_AGENTS.filter(a => squadForAgent(a) === 'xmen') },
+  ];
+
   return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
       <SectionHead
-        title="Fleet"
-        subtitle="5 specialist AI agents · live state"
+        title="B3 Agent Bench"
+        subtitle="Squads · live state by Green Lanterns and X-Men"
         action={
           <div className="flex items-center gap-2">
             <Badge tone="accent">{FLEET_AGENTS.length} agents</Badge>
             <Badge tone="ok">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
               {FLEET_AGENTS.filter(a => a.state === 'EXECUTING').length} executing
             </Badge>
           </div>
         }
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-        {FLEET_AGENTS.map(a => (
-          <FleetCard key={a.code} agent={a} onClick={() => setSelectedCode(a.code)} />
-        ))}
+      <div className="flex flex-col gap-6">
+        {grouped.map(({ key, agents }) => {
+          const meta = SQUAD_META[key];
+          if (agents.length === 0) return null;
+          return (
+            <div key={key} className="flex flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-1.5 h-5 rounded-full" style={{ background: meta.accent }} />
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-stone-700">{meta.label}</span>
+                  <span className="text-[10.5px] text-stone-500 truncate">{meta.tagline}</span>
+                </div>
+                <span className="ml-auto text-[9.5px] font-mono uppercase tracking-wider text-stone-400">
+                  {agents.length} on bench
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                {agents.map(a => (
+                  <FleetCard key={a.code} agent={a} onClick={() => setSelectedCode(a.code)} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -392,6 +605,15 @@ const TASK_KIND_COLOR: Record<ScheduleTask['kind'], string> = {
   'sync-up': '#b91c1c',
 };
 
+/** Map task kind to the SOB sprint cadence terminology coaches actually use. */
+const TASK_KIND_LABEL: Record<ScheduleTask['kind'], string> = {
+  sync:     'Daily Standup',
+  run:      'Sprint Work',
+  audit:    'Sprint Review',
+  review:   'Sprint Review',
+  'sync-up': 'Retrospective',
+};
+
 function Schedule() {
   // Stats: peak hour + quietest + weekday avg
   const colSums = Array.from({ length: 24 }, (_, h) =>
@@ -404,8 +626,8 @@ function Schedule() {
   return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
       <SectionHead
-        title="Schedule"
-        subtitle="7-day × 24-hour fleet activity"
+        title="Standup Cadence"
+        subtitle="Daily standup, sprint review, retrospective · 7-day × 24-hour"
         action={<Badge tone="accent">UTC</Badge>}
       />
 
@@ -414,7 +636,7 @@ function Schedule() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— ACTIVITY HEATMAP · 7d × 24h</div>
-            <div className="text-[12px] text-stone-600 mt-0.5">When the fleet is busiest, UTC</div>
+            <div className="text-[12px] text-stone-600 mt-0.5">When the squads are busiest, UTC</div>
           </div>
           <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-stone-400">
             <span>quiet</span>
@@ -445,7 +667,7 @@ function Schedule() {
                 {HOURS.map(h => (
                   <div
                     key={h}
-                    className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-cyan-400 cursor-pointer"
+                    className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-emerald-400 cursor-pointer"
                     style={{ background: heatColor(SCHEDULE_GRID[dayIdx][h]) }}
                     title={`${day} ${h}:00 — activity ${SCHEDULE_GRID[dayIdx][h]}`}
                   />
@@ -467,20 +689,21 @@ function Schedule() {
           </div>
           <div>
             <div className="text-[9px] font-mono uppercase tracking-wider text-stone-400">Weekday avg</div>
-            <div className="text-[20px] font-bold text-cyan-700 mt-0.5">{weekdayAvg}%</div>
+            <div className="text-[20px] font-bold text-emerald-700 mt-0.5">{weekdayAvg}%</div>
           </div>
         </div>
       </div>
 
-      {/* Planned tasks */}
+      {/* Planned tasks — reframed as Daily Standup / Sprint Review / Retrospective */}
       <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4 text-cyan-700" />
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— PLANNED TASKS · THIS WEEK</div>
+          <Zap className="w-4 h-4 text-emerald-700" />
+          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— SPRINT CADENCE · THIS WEEK</div>
         </div>
         <div className="flex flex-col gap-2">
           {SCHEDULE_TASKS.map(t => {
             const kindColor = TASK_KIND_COLOR[t.kind];
+            const cadenceLabel = TASK_KIND_LABEL[t.kind];
             return (
               <div key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-stone-500 w-10 shrink-0">{t.day}</span>
@@ -490,8 +713,9 @@ function Schedule() {
                 <span
                   className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
                   style={{ color: kindColor, background: `${kindColor}1a` }}
+                  title={`Kind: ${t.kind}`}
                 >
-                  {t.kind}
+                  {cadenceLabel}
                 </span>
                 <span className="text-[12.5px] text-stone-700 truncate flex-1">{t.label}</span>
                 <span className="text-[10px] font-mono text-stone-400 shrink-0">@ {t.agent}</span>
@@ -516,7 +740,7 @@ export function PeopleApp() {
     }
     return (
       <div className="p-7">
-        <SectionHead title="Team" subtitle="Your People squad (X-Men doctrine)" action={<Badge tone="accent">{teamCount} members</Badge>} />
+        <SectionHead title="Team" subtitle="Your human squad (X-Men doctrine)" action={<Badge tone="accent">{teamCount} members</Badge>} />
         <CollectionRepeater collectionId="team" onOpen={teamDrill.open} />
       </div>
     );
@@ -528,29 +752,31 @@ export function PeopleApp() {
     }
     return (
       <div className="p-7">
-        <SectionHead title="Agents" subtitle="Autonomous workers on the People domain" action={<Badge tone="accent">{agentsCount} configured</Badge>} />
+        <SectionHead title="Agents" subtitle="AI workers on the People domain" action={<Badge tone="accent">{agentsCount} configured</Badge>} />
         <CollectionRepeater collectionId="people_agents" onOpen={agentsDrill.open} />
       </div>
     );
   };
 
   const sections: AppSection[] = [
-    { id: 'team', label: 'Team', icon: Users, render: Team },
-    { id: 'agents', label: 'Agents', icon: Bot, render: Agents },
-    { id: 'fleet', label: 'Fleet', icon: Cpu, render: () => <Fleet /> },
-    { id: 'content', label: 'Content', icon: FileText, render: Content },
-    { id: 'schedule', label: 'Schedule', icon: Calendar, render: Schedule },
-    { id: 'culture', label: 'Culture', icon: Heart, render: Culture },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard, render: Overview },
+    { id: 'team',     label: 'Team',     icon: Users,           render: Team },
+    { id: 'agents',   label: 'Agents',   icon: Bot,             render: Agents },
+    { id: 'fleet',    label: 'Squads',   icon: Cpu,             render: () => <Fleet /> },
+    { id: 'content',  label: 'Content',  icon: FileText,        render: Content },
+    { id: 'schedule', label: 'Cadence',  icon: Calendar,        render: Schedule },
+    { id: 'culture',  label: 'Culture',  icon: Heart,           render: Culture },
   ];
 
   const groups: Record<string, string> = {
-    team: 'People',
-    agents: 'People',
-    fleet: 'AI Specialists',
-    content: 'AI Specialists',
-    schedule: 'AI Specialists',
-    culture: 'Ops',
+    overview: 'SOB',
+    team:     'Squads',
+    agents:   'Squads',
+    fleet:    'B3 Agents',
+    content:  'B3 Agents',
+    schedule: 'Cadence',
+    culture:  'Culture',
   };
 
-  return <AppFrame title="People / Agents" subtitle="Green Lantern domain" icon={Users} accent={ACCENT} sections={sections} groups={groups} />;
+  return <AppFrame title="RH & Méta-Gouvernance" subtitle="Agent Factory · B1 Gatekeeper" icon={Atom} accent={ACCENT} sections={sections} groups={groups} />;
 }

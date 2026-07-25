@@ -308,9 +308,22 @@ export function PricingGrid({ tiers }: { tiers: PricingTier[] }) {
           }`}
         >
           {t.highlight && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-extrabold uppercase tracking-[0.2em] bg-amber-300 text-stone-900 rounded-full px-3 py-1 shadow-md">
-              Most popular
-            </span>
+            <>
+              {/* Border Beam — single signature flourish on the highlighted tier.
+                  Fuchsia glow, slow breathe via Tailwind animate-pulse.
+                  Inspired by Jakub Antalik's Border Beam (one effect, one place). */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-2xl animate-pulse"
+                style={{
+                  boxShadow: '0 0 32px 6px rgba(232, 121, 249, 0.55)',
+                  animationDuration: '3s',
+                }}
+              />
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-extrabold uppercase tracking-[0.2em] bg-amber-300 text-stone-900 rounded-full px-3 py-1 shadow-md z-10">
+                Most popular
+              </span>
+            </>
           )}
           <div>
             <div className={`text-sm font-bold ${t.highlight ? 'text-indigo-100' : 'text-stone-500'}`}>{t.name}</div>

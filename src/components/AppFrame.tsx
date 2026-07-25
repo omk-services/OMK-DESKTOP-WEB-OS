@@ -56,6 +56,15 @@ interface AppFrameProps {
 const NARROW_BREAKPOINT = 640;
 const TOOLS_PANEL_WIDTH = 300;
 
+/** Stable component wrapper for the active section. Hoisted to module scope so
+ *  React treats it as a single component type across AppFrame re-renders —
+ *  the previous inline `function ActiveRender() {...}` was a new function
+ *  reference every render, forcing React to unmount/remount on every parent
+ *  update and wiping section-local useState (e.g. Fleet's `selectedCode`). */
+function ActiveSection({ section }: { section: AppSection }) {
+  return <>{section.render()}</>;
+}
+
 export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
@@ -270,7 +279,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
 
       {/* Content */}
       <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
-        {active?.render()}
+        {active ? <ActiveSection key={active.id} section={active} /> : null}
       </div>
 
       {/* Optional AI Tools panel (right) — AgenticOS Monica/Sider pattern */}

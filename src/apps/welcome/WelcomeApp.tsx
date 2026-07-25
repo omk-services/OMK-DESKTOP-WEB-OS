@@ -16,7 +16,10 @@
  *  and built up from the reusable blocks in ./landing/Blocks. */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Compass, Sparkles, Users, Handshake, ClipboardList, Play, ArrowUp, ArrowRight } from 'lucide-react';
+import {
+  Compass, Sparkles, Users, ClipboardList, Play, ArrowUp, ArrowRight,
+  Atom, Rocket, BrainCircuit, Banknote, ServerCog, ShieldCheck,
+} from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { LANDING_PAGES } from './landing/landingPages';
 import type { LandingPage } from './landing/pageSchema';
@@ -28,11 +31,37 @@ import {
 const ACCENT = '#4f46e5';
 
 const PAGE_ICON: Record<string, typeof Compass> = {
-  'people-agents': Users,
-  'sales-sanctum': Handshake,
-  'operations': ClipboardList,
+  'domaine-1-rh-meta-gouvernance': Atom,
+  'domaine-2-operations': ClipboardList,
+  'domaine-3-growth': Rocket,
+  'domaine-4-cognition-savoir': BrainCircuit,
+  'domaine-5-people-scalabilite': Users,
+  'domaine-6-finance': Banknote,
+  'domaine-7-it-rd': ServerCog,
+  'domaine-8-legal-conformite': ShieldCheck,
   'onboarding-demo': Play,
 };
+
+/** B2 leader per Domain (displayed on the OverviewPanel card). The Demo
+ *  page has no leader, so we map it to a friendly chip label. */
+const PAGE_LEADER: Record<string, string> = {
+  'domaine-1-rh-meta-gouvernance': 'Green Lanterns',
+  'domaine-2-operations': 'Batman',
+  'domaine-3-growth': 'Flash',
+  'domaine-4-cognition-savoir': "J'onn J'onzz",
+  'domaine-5-people-scalabilite': 'Superman',
+  'domaine-6-finance': 'Wonder Woman',
+  'domaine-7-it-rd': 'Light + Cyborg',
+  'domaine-8-legal-conformite': 'Aquaman',
+  'onboarding-demo': 'Free · 4 minutes',
+};
+
+/** Three-stage trajectory chips shown in the OverviewPanel hero. */
+const TRAJECTORY: { label: string; caption: string }[] = [
+  { label: 'PoC', caption: '48h deploy · $1k/mo founder offer' },
+  { label: 'SaaS', caption: 'Scale to 100s · Monday standup email' },
+  { label: 'White Label', caption: 'Your Agent Factory · Maintained by us' },
+];
 
 interface SectionMeta { id: string; label: string }
 
@@ -249,56 +278,126 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
 }
 
 function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
+  const domainPages = useMemo(
+    () => LANDING_PAGES.filter(p => p.id !== 'onboarding-demo'),
+    [],
+  );
+  const demoPage = useMemo(
+    () => LANDING_PAGES.find(p => p.id === 'onboarding-demo'),
+    [],
+  );
+
   return (
     <div className="h-full overflow-y-auto custom-scrollbar bg-stone-50">
       <div className="max-w-5xl mx-auto px-6 sm:px-10 py-10 flex flex-col gap-10">
+        {/* Hero — paradigm + 3-stage trajectory + fit check CTA */}
         <section className="rounded-3xl bg-gradient-to-br from-indigo-50 via-white to-rose-50 border border-stone-200/70 px-8 py-12 shadow-sm">
           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-700">
             <Sparkles className="w-4 h-4" />
-            Welcome
+            Self-Operating Business OS
           </div>
           <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
-            Circle.so-style landing pages for every Coach OS domain.
+            8 Domaines. 1 Coach Practice.
           </h1>
           <p className="mt-3 text-stone-600 max-w-2xl">
-            Pick a page from the sidebar (or below) to enter its full one-page canvas — hero, features, social proof, pricing, FAQ, and a closing CTA,
-            with a sticky header menu for in-page navigation.
+            PoC → SaaS → White Label. Built for premium US coaches ($500–$2,000/hr). US-hosted. CCPA + Colorado AI Act compliant.
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {TRAJECTORY.map(t => (
+              <span
+                key={t.label}
+                className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-700"
+              >
+                <span className="font-extrabold text-indigo-700">{t.label}</span>
+                <span className="text-stone-500">{t.caption}</span>
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {demoPage && (
+              <button
+                onClick={() => onSelect(demoPage.id)}
+                className="inline-flex items-center gap-2 rounded-full bg-stone-900 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:bg-stone-800 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Take the 4-question fit check
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+            <a
+              href="#domaines"
+              className="inline-flex items-center gap-2 rounded-full bg-white border border-stone-200 text-stone-800 px-5 py-2.5 text-sm font-semibold hover:bg-stone-50 transition-all"
+            >
+              Browse the 8 Domaines
+            </a>
             <span className="inline-flex items-center gap-2 text-xs text-stone-500">
               <Compass className="w-3.5 h-3.5" />
-              {LANDING_PAGES.length} pages available
+              9 pages · 8 Domaines + Demo
             </span>
           </div>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">Pick a page</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {LANDING_PAGES.map(p => {
+        {/* The 8 Domaines grid */}
+        <section id="domaines" className="flex flex-col gap-4 scroll-mt-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">The 8 Domaines</h2>
+            <span className="text-xs text-stone-400">SOB Convergence · B2 leader per card</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {domainPages.map(p => {
               const Icon = PAGE_ICON[p.id] ?? Compass;
+              const num = p.id.match(/domaine-(\d)/)?.[1] ?? '?';
+              const leader = PAGE_LEADER[p.id] ?? '';
               return (
                 <button
                   key={p.id}
                   onClick={() => onSelect(p.id)}
-                  className="text-left rounded-2xl bg-white border border-stone-200 shadow-sm p-5 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all"
+                  className="text-left rounded-2xl bg-white border border-stone-200 shadow-sm p-5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col gap-3 group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white" style={{ background: ACCENT }}>
+                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shrink-0" style={{ background: ACCENT }}>
                       <Icon className="w-5 h-5" />
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold text-stone-900">{p.brand}</div>
-                      <div className="text-[11px] text-stone-500">{p.domain}</div>
+                      <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-indigo-700">Domaine {num}</div>
+                      <div className="text-sm font-bold text-stone-900 truncate">{p.brand}</div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-stone-400" />
                   </div>
-                  <p className="mt-3 text-xs text-stone-600 leading-relaxed line-clamp-3">{p.tagline}</p>
+                  <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">{p.tagline}</p>
+                  <div className="mt-auto flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{leader}</span>
+                    <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-indigo-600 transition-colors" />
+                  </div>
                 </button>
               );
             })}
           </div>
         </section>
+
+        {/* Demo CTA strip — kept as 9th entry, separate visual treatment */}
+        {demoPage && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">Not sure yet?</h2>
+              <span className="text-xs text-stone-400">Free · 4 minutes</span>
+            </div>
+            <button
+              onClick={() => onSelect(demoPage.id)}
+              className="text-left rounded-2xl bg-stone-900 text-white border border-stone-900 shadow-md p-6 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center gap-5"
+            >
+              <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-amber-300 shrink-0">
+                <Play className="w-6 h-6" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-300">Demo · Free</div>
+                <div className="text-base font-bold mt-0.5">See the Coach OS in 4 questions.</div>
+                <div className="text-xs text-stone-400 mt-1">Zero-PII. Citadel preview. Audit log live.</div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-white/70 shrink-0" />
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );
@@ -333,7 +432,7 @@ export function WelcomeApp() {
   return (
     <AppFrame
       title="Welcome"
-      subtitle="Landing pages · Circle.so style"
+      subtitle="Landing pages · 8 Domaines SOB Convergence"
       icon={Compass}
       accent={ACCENT}
       sections={sections}

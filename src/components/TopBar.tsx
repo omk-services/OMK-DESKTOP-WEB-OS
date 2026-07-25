@@ -10,6 +10,7 @@ import { useShellStore } from '../stores/shell.store';
 import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
+import { BorderBeam, ThinkingOrbs } from './canvas-ui';
 
 export function TopBar() {
   const [time, setTime] = useState(new Date());
@@ -153,16 +154,23 @@ export function TopBar() {
 
         {/* RIGHT cluster — status + voice + bell + clock */}
         <div className="flex items-center gap-1.5">
-          <span
-            className="hidden sm:flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider"
-            style={{
-              color: globalTokens.isDark ? '#10b981' : '#047857',
-              background: globalTokens.isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.10)',
-              boxShadow: 'inset 0 0 0 1px rgba(16,185,129,0.20)',
-            }}
+          <BorderBeam
+            color="#10b981"
+            size={1.5}
+            duration={6}
+            borderRadius={10}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Ecosystem healthy · 24/7
-          </span>
+            <span
+              className="hidden sm:flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                color: globalTokens.isDark ? '#10b981' : '#047857',
+                background: globalTokens.isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.10)',
+                boxShadow: 'inset 0 0 0 1px rgba(16,185,129,0.20)',
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Ecosystem healthy · 24/7
+            </span>
+          </BorderBeam>
 
           {voice.supported && (
             <button
@@ -179,7 +187,14 @@ export function TopBar() {
                 boxShadow: 'inset 0 0 0 1px var(--theme-border-subtle)',
               }}
             >
-              {voice.listening ? <Mic className="w-3 h-3 animate-pulse" /> : <MicOff className="w-3 h-3" />}
+              {voice.listening ? (
+                <>
+                  <Mic className="w-3 h-3 animate-pulse" />
+                  <ThinkingOrbs color="#ffffff" size={6} stagger={120} />
+                </>
+              ) : (
+                <MicOff className="w-3 h-3" />
+              )}
               {voice.listening ? 'Écoute' : 'Voix'}
             </button>
           )}
