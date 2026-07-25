@@ -18,6 +18,7 @@
 import posthog from 'posthog-js';
 import usertour from 'usertour.js';
 import type { PostHogConfig } from 'posthog-js';
+import { resetAllTourGuards } from './tours';
 
 const CONSENT_KEY = 'coach-os:observability-opt-in';
 const PH_KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
@@ -113,6 +114,9 @@ export function setObservabilityConsent(granted: boolean): void {
       // `reset()` clears the identified user so no profile is retained.
       void usertour.endAll().catch(() => undefined);
       usertour.reset();
+      // Clear per-tour localStorage guards so a future opt-in can re-play
+      // the tours (RGPD: the user is no longer "the same" consenting user).
+      resetAllTourGuards();
     }
   }
 }

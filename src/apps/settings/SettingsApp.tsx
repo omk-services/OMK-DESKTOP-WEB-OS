@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw } from 'lucide-react';
+import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
 import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
+import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
 import posthog from 'posthog-js';
 
 const ACCENT = '#78716c';
@@ -74,7 +75,14 @@ export function SettingsApp() {
     </div>
   );
 
-  const Privacy = () => (
+  const Privacy = () => {
+    // T5 — privacy tour. Fires once the first time the user opens the
+    // Privacy section. Idempotent via the per-tour localStorage guard.
+    useEffect(() => {
+      void launchTour(TOUR_IDS.PRIVACY);
+    }, []);
+
+    return (
     <div className="p-7">
       <SectionHead title="Privacy" subtitle="The seal every app trusts" action={<Badge tone="ok">Zero-PII</Badge>} />
       <Card>
@@ -115,7 +123,8 @@ export function SettingsApp() {
         </Card>
       </div>
     </div>
-  );
+    );
+  };
 
   const Integrations = () => (
     <div className="p-7">
@@ -133,6 +142,73 @@ export function SettingsApp() {
       </div>
     </div>
   );
+
+  /* ════════════════════════════════════════════════════════════════════════
+   *  Help section — replay any of the 5 onboarding tours.
+   *  Matches SettingsApp visual language (rounded-2xl cards, stone palette).
+   *  Each button bypasses the per-tour localStorage guard via { force: true }.
+   *  Buttons are disabled when observability consent is off (no-op to the user).
+   * ════════════════════════════════════════════════════════════════════════ */
+  const REPLAY_TOURS: { id: TourId; label: string; hint: string }[] = [
+    { id: TOUR_IDS.WELCOME_SOB,     label: 'Welcome',  hint: 'SOB onboarding (first window-open)' },
+    { id: TOUR_IDS.FIRST_STANDUP,   label: 'Standup',  hint: 'People → Overview · your daily standup' },
+    { id: TOUR_IDS.SQUAD_DRILLDOWN, label: 'Squad',    hint: 'Drill into a squad agent' },
+    { id: TOUR_IDS.CADENCE,         label: 'Cadence',  hint: 'People → Cadence · sprint heatmap' },
+    { id: TOUR_IDS.PRIVACY,         label: 'Privacy',  hint: 'Settings → Privacy' },
+  ];
+
+  const Help = () => {
+    const consentOn = observabilityOptIn;
+    return (
+      <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+        <SectionHead
+          title="Help"
+          subtitle="Replay any onboarding tour"
+          action={
+            <Badge tone={consentOn ? 'ok' : 'neutral'}>
+              {consentOn ? 'Consent on' : 'Consent off'}
+            </Badge>
+          }
+        />
+        <Card>
+          <div className="px-5 py-4 border-b border-[var(--hairline)] flex items-center gap-3">
+            <HelpCircle className="w-4 h-4 text-stone-500" />
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-stone-800">Replay onboarding tour</div>
+              <div className="text-xs text-stone-400 mt-0.5">
+                {consentOn
+                  ? 'Each tour plays in the order you first saw it. Re-runs override the per-browser guard.'
+                  : 'Turn on Observability in Privacy to enable UserTour onboarding.'}
+              </div>
+            </div>
+          </div>
+          <div className="divide-y divide-[var(--hairline)]">
+            {REPLAY_TOURS.map(t => (
+              <div key={t.id} className="px-5 py-3 flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-stone-800">{t.label}</div>
+                  <div className="text-xs text-stone-400">{t.hint}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { void launchTour(t.id, { force: true }); }}
+                  disabled={!consentOn}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    color: consentOn ? '#0f766e' : '#78716c',
+                    background: consentOn ? '#ccfbf1' : '#f5f5f4',
+                    boxShadow: 'inset 0 0 0 1px rgba(15,118,110,0.25)',
+                  }}
+                >
+                  <Play className="w-3 h-3" /> Replay
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  };
 
   /* ════════════════════════════════════════════════════════════════════════
    *  Themes section — 12-theme picker with per-app assignment.
@@ -313,6 +389,7 @@ export function SettingsApp() {
     { id: 'themes', label: 'Themes', icon: Palette, render: Themes },
     { id: 'privacy', label: 'Privacy', icon: ShieldAlert, render: Privacy },
     { id: 'integrations', label: 'Integrations', icon: Plug, render: Integrations },
+    { id: 'help', label: 'Help', icon: HelpCircle, render: Help },
   ];
 
   // If cross-window intent asked us to focus Themes, force it on first render

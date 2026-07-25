@@ -22,6 +22,7 @@ import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
+import { launchTour, TOUR_IDS } from '../../lib/tours';
 import {
   FLEET_AGENTS, STATE_META, type FleetAgent,
   CONTENT_DOCS,
@@ -68,6 +69,12 @@ function Overview() {
   const active   = FLEET_AGENTS.filter(a => a.state === 'EXECUTING');
   const idle     = FLEET_AGENTS.filter(a => a.state === 'IDLE');
   const blocked  = FLEET_AGENTS.filter(a => a.state === 'RETRY' || a.state === 'BLOCKED' || a.state === 'AWAITING');
+
+  // T2 — first standup tour. Fires once when the user lands on the People
+  // Overview section (after the localStorage guard in launchTour is checked).
+  useEffect(() => {
+    void launchTour(TOUR_IDS.FIRST_STANDUP);
+  }, []);
 
   const steps: { n: string; title: string; body: string }[] = [
     { n: '1', title: 'Standup at 9am',       body: 'Your agents post overnight work to your inbox.' },
@@ -465,6 +472,14 @@ function Fleet() {
     }
   }, [selected, setDetail]);
 
+  // T3 — squad drill-down tour. Fires the first time the user opens an
+  // agent's detail page. The launchTour guard keeps it idempotent.
+  useEffect(() => {
+    if (selectedCode !== null) {
+      void launchTour(TOUR_IDS.SQUAD_DRILLDOWN);
+    }
+  }, [selectedCode]);
+
   if (selected) {
     return <FleetDetail agent={selected} onBack={() => setSelectedCode(null)} />;
   }
@@ -622,6 +637,11 @@ function Schedule() {
   const peakHour = colSums.indexOf(Math.max(...colSums));
   const quietestHour = colSums.indexOf(Math.min(...colSums));
   const weekdayAvg = Math.round(SCHEDULE_GRID.slice(0, 5).flat().reduce((s, v) => s + v, 0) / (5 * 24));
+
+  // T4 — cadence tour. Fires once on first mount of the Cadence section.
+  useEffect(() => {
+    void launchTour(TOUR_IDS.CADENCE);
+  }, []);
 
   return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">

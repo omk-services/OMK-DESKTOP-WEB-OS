@@ -12,6 +12,7 @@
 import { useShellStore } from '../stores/shell.store';
 import posthog from 'posthog-js';
 import { getObservabilityConsent, isObservabilityReady } from './observability';
+import { launchTour, TOUR_IDS } from './tours';
 
 const ONCE_KEY = 'coach-os:first-window-open-fired';
 const CONTENT_ID_ENV = (import.meta.env.VITE_USERTOUR_CONTENT_ID as string | undefined) ?? '';
@@ -58,6 +59,13 @@ export function initWindowOpenTracker(): void {
           return usertour.start(CONTENT_ID_ENV).catch(() => undefined);
         })
         .catch(() => undefined);
+    }
+
+    // T1 — fire the SOB welcome tour after the first window opens.
+    // Replaces the legacy single-content-id flow with the 5-tour paradigm;
+    // no-ops cleanly when consent is off or the env content id is missing.
+    if (utReady && getObservabilityConsent()) {
+      void launchTour(TOUR_IDS.WELCOME_SOB);
     }
   });
 }
