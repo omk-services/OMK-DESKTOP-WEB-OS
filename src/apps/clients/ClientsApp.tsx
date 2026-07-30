@@ -1,9 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, BookText, GraduationCap } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { ClientsDetailPage, type ClientsDetailItem } from './ClientsDetailPage';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { CMSCardList } from '../_ui/CMSCardList';
 
@@ -13,6 +17,16 @@ export function ClientsApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
   const drill = useCollectionDrill('clients', ['Active', 'Onboarding', 'Churn Risk', 'Directory']);
   const vaultDrill = useCollectionDrill('session_notes', 'IP Vault');
+  const [detail, setDetail] = useState<ClientsDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const activeClients = clients.filter(c => c.status === 'Active');
   const onboardingClients = clients.filter(c => c.status === 'Onboarding');
@@ -163,5 +177,19 @@ export function ClientsApp() {
     { id: 'vault', label: 'IP Vault', icon: VaultIcon, render: Vault },
   ];
 
-  return <AppFrame title="Clients" subtitle="Accounts" icon={Contact} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Clients" subtitle="Accounts" icon={Contact} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="clients"
+          accent="#2563eb"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'pop-scale', durationMs: 200 }}
+        >
+          <ClientsDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
