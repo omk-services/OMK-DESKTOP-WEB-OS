@@ -6,7 +6,7 @@ import { Toggle } from '../_ui/widgets';
 import { useShellStore } from '../../stores/shell.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
@@ -26,6 +26,8 @@ export function LegalApp() {
   const addToast = useShellStore(s => s.addToast);
   const contractsDrill = useCollectionDrill('contracts', 'Contracts');
   const policiesDrill = useCollectionDrill('policies', 'Policies');
+  const contracts = useCmsStore(s => s.items['contracts']) ?? [];
+  const policies = useCmsStore(s => s.items['policies']) ?? [];
   const [detail, setDetail] = useState<LegalDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -43,6 +45,45 @@ export function LegalApp() {
       addToast({ source: 'Legal', type: 'success', message: `AI-Act item cleared: ${current.label}` });
     }
     setChecks(cs => cs.map(c => c.id === id ? { ...c, done: !c.done } : c));
+  };
+
+  const openContract = (id: string): void => {
+    const item = contracts.find(c => c.id === id);
+    if (!item) { contractsDrill.open(id); return; }
+    const body = String(item.body ?? '');
+    const clauses = body
+      ? body.split('\n\n').filter(Boolean).slice(0, 6).map((b, i) => ({
+          title: `Clause ${i + 1}`,
+          body: b,
+        }))
+      : [];
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.party ?? item.subtitle ?? ''),
+      status: String(item.status ?? 'active'),
+      clauses,
+      fields: [],
+    });
+    contractsDrill.open(id);
+  };
+
+  const openPolicy = (id: string): void => {
+    const item = policies.find(c => c.id === id);
+    if (!item) { policiesDrill.open(id); return; }
+    const body = String(item.body ?? item.summary ?? '');
+    const clauses = body
+      ? [{ title: String(item.title ?? 'Policy'), body }]
+      : [];
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.subtitle ?? ''),
+      status: String(item.status ?? 'published'),
+      clauses,
+      fields: [],
+    });
+    policiesDrill.open(id);
   };
 
   const cleared = checks.filter(c => c.done).length;
@@ -64,25 +105,19 @@ export function LegalApp() {
   );
 
   const Contracts = () => {
-    if (contractsDrill.openId) {
-      return <DynamicPageView collectionId="contracts" itemId={contractsDrill.openId} onBack={contractsDrill.close} onNavigate={contractsDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Contracts" subtitle="Engagement letters & DPAs" />
-        <CollectionRepeater collectionId="contracts" onOpen={contractsDrill.open} />
+        <CollectionRepeater collectionId="contracts" onOpen={openContract} />
       </div>
     );
   };
 
   const Policies = () => {
-    if (policiesDrill.openId) {
-      return <DynamicPageView collectionId="policies" itemId={policiesDrill.openId} onBack={policiesDrill.close} onNavigate={policiesDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Policies" subtitle="Published to clients" />
-        <CollectionRepeater collectionId="policies" onOpen={policiesDrill.open} />
+        <CollectionRepeater collectionId="policies" onOpen={openPolicy} />
       </div>
     );
   };
