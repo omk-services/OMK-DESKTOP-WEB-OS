@@ -3,7 +3,7 @@ import { Wallet, PiggyBank, Receipt, BarChart3, FileText, CheckCircle2 } from 'l
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, StatCard } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
@@ -54,6 +54,7 @@ function Runway() {
 }
 
 export function FinanceApp() {
+  const invoices = useCmsStore(s => s.items['invoices']) ?? [];
   const drill = useCollectionDrill('invoices', 'Invoices');
   const [detail, setDetail] = useState<FinanceDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
@@ -66,16 +67,36 @@ export function FinanceApp() {
     }
   }, [detail, setWindowDetail]);
 
+  const openInvoice = (id: string): void => {
+    const item = invoices.find(c => c.id === id);
+    if (!item) { drill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.client ?? item.title ?? 'Invoice'),
+      subtitle: String(item.number ?? item.id),
+      status: String(item.status ?? 'open'),
+      kpis: [
+        { label: 'Amount', value: `$${Number(item.amount ?? 0).toLocaleString()}` },
+        { label: 'Status', value: String(item.status ?? 'open') },
+        { label: 'Due', value: String(item.dueDate ?? '—') },
+        { label: 'Issued', value: String(item.issued ?? '—') },
+      ],
+      rows: [
+        { label: 'Description', value: String(item.description ?? item.memo ?? '') },
+        { label: 'Client', value: String(item.client ?? '—') },
+      ],
+      fields: [],
+    });
+    drill.open(id);
+  };
+
   const Invoices = () => {
-    if (drill.openId) {
-      return <DynamicPageView collectionId="invoices" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Invoices" subtitle="Reconciled nightly via Stripe" />
         <CMSCardList
           collectionId="invoices"
-          onOpen={drill.open}
+          onOpen={openInvoice}
           cols={2}
           render={(inv: Record<string, unknown>) => ({
             title: String(inv.client ?? inv.title ?? 'Invoice'),
