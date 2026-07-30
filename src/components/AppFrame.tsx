@@ -137,7 +137,11 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const hasTools = tools && tools.length > 0;
 
   return (
-    <div ref={rootRef} className="flex h-full min-h-0 bg-[var(--theme-bg)] relative">
+    <div
+      ref={rootRef}
+      className="flex h-full min-h-0 bg-[var(--theme-bg)] relative"
+      style={{ ['--sidebar-w' as string]: collapsed ? '68px' : '240px' }}
+    >
       {/* Internal sidebar — Codex/Buzz style: rounded nav items, Header Menu + Search
           + grouped sections, soft hover states, prominent active fill. */}
       <aside
