@@ -13,7 +13,6 @@ import { AppFrame, SectionHead, type AppSection } from '../../components/AppFram
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
@@ -60,6 +59,7 @@ const ACCENT = '#9333ea';
 
 export function ProductApp() {
   const items = useCmsStore(s => s.items['product_items']) ?? [];
+  const releases = useCmsStore(s => s.items['product_releases']) ?? [];
   const drill = useCollectionDrill('product_items', ['Roadmap', 'Backlog', 'Specs']);
   const releasesDrill = useCollectionDrill('product_releases', 'Releases');
   const [detail, setDetail] = useState<ProductDetailItem | null>(null);
@@ -75,23 +75,53 @@ export function ProductApp() {
 
   const byStage = (stage: string) => items.filter(i => i.stage === stage);
 
+  const openItem = (id: string): void => {
+    const item = items.find(c => c.id === id);
+    if (!item) { drill.open(id); return; }
+    const stageState: 'doing' | 'done' | 'todo' = item.stage === 'now' ? 'doing' : item.stage === 'backlog' ? 'todo' : 'todo';
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.meta ?? ''),
+      status: String(item.stage ?? 'now'),
+      roadmap: [{ stage: String(item.stage ?? 'now'), state: stageState }],
+      spec: String(item.specStatus ?? 'draft'),
+      channels: [],
+      fields: [],
+    });
+    drill.open(id);
+  };
+
+  const openRelease = (id: string): void => {
+    const item = releases.find(c => c.id === id);
+    if (!item) { releasesDrill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.version ?? '—'),
+      status: String(item.status ?? 'shipped'),
+      roadmap: [{ stage: 'shipped', state: 'done' }],
+      spec: String(item.changelog ?? ''),
+      channels: [],
+      fields: [],
+    });
+    releasesDrill.open(id);
+  };
+
   const Roadmap = () => {
-    if (drill.openId) {
-      return <DynamicPageView collectionId="product_items" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
-    }
     return (
       <div className="p-7 h-full flex flex-col">
         <SectionHead title="Roadmap" subtitle="What ships now, next, later" />
         <div className="flex-1 min-h-0">
           <KanbanBoard columns={[
             { title: 'Now', accent: ACCENT, items: byStage('now').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} accent={ACCENT} onClick={() => drill.open(String(i.id))} />
+              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} accent={ACCENT} onClick={() => openItem(String(i.id))} />
             )) },
             { title: 'Next', accent: '#c084fc', items: byStage('next').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => drill.open(String(i.id))} />
+              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => openItem(String(i.id))} />
             )) },
             { title: 'Later', accent: '#a8a29e', items: byStage('later').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => drill.open(String(i.id))} />
+              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => openItem(String(i.id))} />
             )) },
           ]} />
         </div>
@@ -100,15 +130,12 @@ export function ProductApp() {
   };
 
   const Backlog = () => {
-    if (drill.openId) {
-      return <DynamicPageView collectionId="product_items" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Backlog" subtitle="Groomed, not yet scheduled" action={<Badge tone="neutral">{byStage('backlog').length}</Badge>} />
         <CMSCardList<ProductItem>
           collectionId="product_items"
-          onOpen={drill.open}
+          onOpen={openItem}
           cols={2}
           render={(it) => ({
             title: it.title,
@@ -128,15 +155,12 @@ export function ProductApp() {
   };
 
   const Releases = () => {
-    if (releasesDrill.openId) {
-      return <DynamicPageView collectionId="product_releases" itemId={releasesDrill.openId} onBack={releasesDrill.close} onNavigate={releasesDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Releases" subtitle="Shipped versions + draft notes" />
         <CMSCardList<ReleaseItem>
           collectionId="product_releases"
-          onOpen={releasesDrill.open}
+          onOpen={openRelease}
           cols={2}
           render={(r) => ({
             title: r.title,
@@ -156,15 +180,12 @@ export function ProductApp() {
   };
 
   const Specs = () => {
-    if (drill.openId) {
-      return <DynamicPageView collectionId="product_items" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Specs" subtitle="Every product_items row has a spec (CMS-driven)" action={<Badge tone="accent">{items.length}</Badge>} />
         <CMSCardList<ProductItem>
           collectionId="product_items"
-          onOpen={drill.open}
+          onOpen={openItem}
           cols={2}
           render={(it) => ({
             title: it.title,
