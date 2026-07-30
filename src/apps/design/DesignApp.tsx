@@ -44,7 +44,7 @@ const STYLES: StyleMeta[] = [
 
 function GlassHero() {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl p-10"
+    <div className="relative h-full w-full overflow-hidden p-8"
       style={{
         background: 'radial-gradient(at 20% 10%, #c4b5fd 0%, transparent 50%), radial-gradient(at 80% 0%, #7dd3fc 0%, transparent 50%), radial-gradient(at 50% 100%, #fbcfe8 0%, transparent 60%), linear-gradient(135deg, #f8fafc, #e0e7ff 60%, #cffafe)',
       }}>
@@ -118,7 +118,7 @@ function GlassHero() {
 
 function ClayHero() {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl p-10"
+    <div className="relative h-full w-full overflow-hidden p-8"
       style={{ background: 'linear-gradient(135deg, #fef9c3 0%, #fce7f3 50%, #dbeafe 100%)' }}>
       <div className="absolute -top-12 -right-12 h-72 w-72 rounded-full"
         style={{ background: 'radial-gradient(circle at 30% 30%, #fde68a 0%, #f59e0b 60%, #c2410c 100%)',
@@ -197,7 +197,7 @@ function ClayHero() {
 
 function BrutalismHero() {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl p-10"
+    <div className="relative h-full w-full overflow-hidden p-8"
       style={{ background: '#fef3c7' }}>
       {/* Grid lines on canvas */}
       <div className="pointer-events-none absolute inset-0"
@@ -391,7 +391,7 @@ function CyberHero() {
 
 function SoftUiHero() {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl p-10"
+    <div className="relative h-full w-full overflow-hidden p-8"
       style={{ background: '#e0e5ec' }}>
       <header className="relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -576,31 +576,6 @@ function EditorialHero() {
   );
 }
 
-/* ─────────────────────────── STYLE PROFILE FOOTER ─────────────────────────── */
-
-function StyleProfile({ meta }: { meta: StyleMeta }) {
-  const Icon = meta.icon;
-  return (
-    <div className="mt-6 grid grid-cols-2 gap-4 rounded-2xl border border-[var(--panel-border)] bg-white/40 p-5 backdrop-blur">
-      <div>
-        <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-500">Style profile</div>
-        <div className="mt-2 flex items-center gap-2">
-          <Icon className="h-4 w-4 text-stone-700" strokeWidth={1.8} />
-          <div className="text-base font-bold text-stone-900">{meta.label}</div>
-        </div>
-        <p className="mt-2 text-[12px] leading-relaxed text-stone-600">{meta.caption}</p>
-      </div>
-      <div>
-        <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-500">Palette anchor</div>
-        <div className="mt-2 text-[12px] font-medium text-stone-700">{meta.palette}</div>
-        <div className="mt-3 text-[10px] font-mono uppercase tracking-widest text-stone-400">
-          // rendered live · not a mockup
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─────────────────────────── TOP PANEL: WHICH STYLE ARE YOU? ─────────────────────────── */
 
 function StylePickerPanel({ active, onPick }: { active: string; onPick: (id: string) => void }) {
@@ -666,54 +641,48 @@ function OverviewPanel({ activeId, onPick }: { activeId: string; onPick: (id: st
 
 function GlassSection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <GlassHero />
-      <StyleProfile meta={STYLES[0]} />
     </div>
   );
 }
 
 function ClaySection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <ClayHero />
-      <StyleProfile meta={STYLES[1]} />
     </div>
   );
 }
 
 function BrutalismSection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <BrutalismHero />
-      <StyleProfile meta={STYLES[2]} />
     </div>
   );
 }
 
 function CyberSection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <CyberHero />
-      <StyleProfile meta={STYLES[3]} />
     </div>
   );
 }
 
 function SoftUiSection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <SoftUiHero />
-      <StyleProfile meta={STYLES[4]} />
     </div>
   );
 }
 
 function EditorialSection() {
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-6">
+    <div className="h-full w-full overflow-hidden">
       <EditorialHero />
-      <StyleProfile meta={STYLES[5]} />
     </div>
   );
 }
