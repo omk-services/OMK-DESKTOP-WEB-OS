@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Scale, FileSignature, ShieldCheck, BookMarked } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
@@ -7,6 +7,9 @@ import { useShellStore } from '../../stores/shell.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
 
 const ACCENT = '#64748b';
 
@@ -23,6 +26,16 @@ export function LegalApp() {
   const addToast = useShellStore(s => s.addToast);
   const contractsDrill = useCollectionDrill('contracts', 'Contracts');
   const policiesDrill = useCollectionDrill('policies', 'Policies');
+  const [detail, setDetail] = useState<LegalDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const toggle = (id: string) => {
     const current = checks.find(c => c.id === id);
@@ -80,5 +93,19 @@ export function LegalApp() {
     { id: 'policies', label: 'Policies', icon: BookMarked, render: Policies },
   ];
 
-  return <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="legal"
+          accent="#64748b"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'unfold', durationMs: 240 }}
+        >
+          <LegalDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
