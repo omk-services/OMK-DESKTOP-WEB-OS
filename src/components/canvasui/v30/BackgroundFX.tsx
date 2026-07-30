@@ -1,15 +1,21 @@
 // BackgroundFX.tsx — Per-window or per-global canvas-ui effect dispatcher.
 //
-// Reads the theme id from props (preferred) or from the per-app theme store
-// (fallback) and renders the matching effect via `theme-canvas-mapping.ts`.
+// Renders THREE layers stacked vertically (z-index layered):
+//   1. <CssFallback> — pure-CSS animated gradient, always-visible. Provides
+//      motion even on browsers without Chrome's `chrome://flags/#canvas-draw-element`.
+//   2. <WebGLFallbackBoundary><Wrapper/></> — upstream canvas-ui WebGL effect.
+//      Silent no-op without the Chrome flag (the upstream components return
+//      a children-only subtree in that case), BUT renders real WebGL where
+//      the flag is enabled.
+//   3. children pass-through for capture-style effects.
 //
 // Usage:
-//   - Global wallpaper: <BackgroundFX themeId="glassmorphism" accent="#6366f1" />
+//   - Global wallpaper: <BackgroundFX themeId="glassmorphism" />
 //   - Per-app signature: <BackgroundFX themeId="dark-oled" nuanceSlot={0} />
-//   - Auto-detect per app: <BackgroundFX />  (no themeId, reads from useThemeIdFor)
 //
-// Per-app override store (Phase F) takes priority over the theme default;
-// this file is the dispatcher, not the override store itself.
+// D7 honest: this layer is mounted BENEATH the CssFallback so the CssFallback
+// is always visible. On a flag-enabled Chrome the CssFallback sits under the
+// real WebGL canvas, which floats on top via z-index.
 
 import { type ReactElement, type ReactNode } from 'react';
 import {
@@ -27,6 +33,7 @@ import {
   type CanvasEffectId,
 } from './theme-canvas-mapping';
 import { WebGLFallbackBoundary, withWebGLFallback } from './fallback';
+import { CssFallback } from './CssFallback';
 
 export interface BackgroundFXProps {
   /** Theme id (e.g. 'glassmorphism', 'aurora'). If absent, reads from per-app token store. */
@@ -41,6 +48,9 @@ export interface BackgroundFXProps {
   className?: string;
   /** Optional inline style passthrough. */
   style?: React.CSSProperties;
+  /** Set true to suppress the always-visible CssFallback layer (e.g. when stacking
+   *  multiple effects that shouldn't overlap). */
+  disableCssFallback?: boolean;
   /** Children — passed through to wrapper effects; *Object family ignores. */
   children?: ReactNode;
 }
@@ -117,64 +127,104 @@ const OBJECT_EFFECTS: ReadonlySet<CanvasEffectId> = new Set([
 ]);
 
 /**
- * Render the correct canvas-ui effect for a given theme id.
- * If the effect is an Object family and `objectSrc` is provided, renders it.
- * Otherwise renders a wrapper (with children fallback to nothing if absent).
+ * Resolve the requested effect id from props.
+ */
+function resolveEffectId(props: BackgroundFXProps): CanvasEffectId {
+  return props.nuanceSlot !== undefined
+    ? resolveNuanceEffect(props.themeId, props.nuanceSlot)
+    : resolveDominantEffect(props.themeId);
+}
+
+/**
+ * Imperative render for callers that need the rendered tree (e.g. Wallpaper).
+ * Same effect-resolution rules as <BackgroundFX> but returns the element directly.
  */
 export function renderCanvasForTheme(
   themeId: string | null | undefined,
   children?: ReactNode,
-  opts?: { accent?: string; objectSrc?: string; className?: string; style?: React.CSSProperties },
+  opts?: { accent?: string; objectSrc?: string; className?: string; style?: React.CSSProperties; disableCssFallback?: boolean },
 ): ReactElement {
-  const mapping = getCanvasMapping(themeId);
-  const effectId = resolveDominantEffect(themeId);
+  const effectId = resolveEffectId({
+    themeId,
+    objectSrc: opts?.objectSrc,
+    accent: opts?.accent,
+    className: opts?.className,
+    style: opts?.style,
+    disableCssFallback: opts?.disableCssFallback,
+  });
+  const cssLayer = opts?.disableCssFallback ? null : (
+    <CssFallback effectId={effectId} themeId={themeId ?? 'warm-paper'} className={opts?.className} style={opts?.style} />
+  );
 
   if (OBJECT_EFFECTS.has(effectId)) {
     if (!opts?.objectSrc) {
-      // Object effect requested but no src supplied → fall back to inner wrapper
-      // so we never render an empty canvas.
       return (
-        <div className={opts?.className} style={opts?.style}>
-          {children ?? <></>}
-        </div>
+        <>
+          {cssLayer}
+          <WebGLFallbackBoundary fallback={children}>
+            <div data-fx={effectId} className={opts?.className} style={opts?.style}>
+              {children ?? <></>}
+            </div>
+          </WebGLFallbackBoundary>
+        </>
       );
     }
-    return renderObjectEffect(effectId, {
+    const objEl = renderObjectEffect(effectId, {
       src: opts.objectSrc,
       className: opts?.className,
       style: opts?.style,
-    })!;
+    });
+    return (
+      <>
+        {cssLayer}
+        <WebGLFallbackBoundary fallback={children}>
+          {objEl ?? <></>}
+        </WebGLFallbackBoundary>
+      </>
+    );
   }
 
+  const el = renderWrapperEffect(effectId, {
+    className: opts?.className,
+    style: { '--fx-accent': opts?.accent ?? getCanvasMapping(themeId).accent, ...opts?.style } as React.CSSProperties,
+    children,
+  });
   return (
-    renderWrapperEffect(effectId, {
-      className: opts?.className,
-      style: opts?.style,
-      children,
-    }) ?? <div className={opts?.className}>{children ?? <></>}</div>
+    <>
+      {cssLayer}
+      {el ?? <div data-fx-missing={effectId} className={opts?.className} style={opts?.style} />}
+    </>
   );
 }
 
 export function BackgroundFX(props: BackgroundFXProps): ReactElement {
-  const effectId = props.nuanceSlot !== undefined
-    ? resolveNuanceEffect(props.themeId, props.nuanceSlot)
-    : resolveDominantEffect(props.themeId);
+  const effectId = resolveEffectId(props);
   const tone = props.accent ?? getCanvasMapping(props.themeId).accent;
-
   const wrapperProps = {
     className: props.className,
-    style: { '--fx-accent': tone, ...props.style } as React.CSSProperties,
+    style: { '--fx-accent': tone, zIndex: 1, ...props.style } as React.CSSProperties,
     children: props.children,
   };
+  const cssLayer = props.disableCssFallback ? null : (
+    <CssFallback
+      effectId={effectId}
+      themeId={props.themeId ?? 'warm-paper'}
+      className={props.className}
+      style={{ zIndex: 0, ...props.style }}
+    />
+  );
 
   if (OBJECT_EFFECTS.has(effectId)) {
     if (!props.objectSrc) {
       return (
-        <WebGLFallbackBoundary fallback={props.children}>
-          <div data-fx={effectId} data-accent={tone} className={props.className} style={props.style}>
-            {props.children ?? <></>}
-          </div>
-        </WebGLFallbackBoundary>
+        <>
+          {cssLayer}
+          <WebGLFallbackBoundary fallback={props.children}>
+            <div data-fx={effectId} data-accent={tone} className={props.className} style={props.style}>
+              {props.children ?? <></>}
+            </div>
+          </WebGLFallbackBoundary>
+        </>
       );
     }
     const objEl = renderObjectEffect(effectId, {
@@ -183,14 +233,22 @@ export function BackgroundFX(props: BackgroundFXProps): ReactElement {
       style: props.style,
     });
     return (
-      <WebGLFallbackBoundary fallback={props.children}>
-        {objEl ?? <></>}
-      </WebGLFallbackBoundary>
+      <>
+        {cssLayer}
+        <WebGLFallbackBoundary fallback={props.children}>
+          {objEl ?? <></>}
+        </WebGLFallbackBoundary>
+      </>
     );
   }
 
   const el = renderWrapperEffect(effectId, wrapperProps);
-  return el ?? <div data-fx-missing={effectId} />;
+  return (
+    <>
+      {cssLayer}
+      {el ?? <div data-fx-missing={effectId} />}
+    </>
+  );
 }
 
 export default BackgroundFX;

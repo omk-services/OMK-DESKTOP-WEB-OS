@@ -112,6 +112,84 @@
   50%      { opacity: 1;   transform: scale(1.15); }
 }
 
+/* canvas-ui v30 always-visible CssFallback keyframes.
+   Mapped 1:1 to the 33 upstream effects by name (see CssFallback.tsx). */
+@keyframes blaze-flicker {
+  0%, 100% { opacity: 0.4; transform: scaleY(0.6); }
+  50%      { opacity: 1;   transform: scaleY(1.05); }
+}
+@keyframes bubble-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-8px, -10px) scale(1.05); }
+  66%      { transform: translate(10px, -6px) scale(0.96); }
+}
+@keyframes cloth-drape {
+  0%, 100% { transform: skewX(-2deg); }
+  50%      { transform: skewX(2deg); }
+}
+@keyframes clouds-drift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-30%); }
+}
+@keyframes displacement-ripple {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(4px, -3px); }
+  50%      { transform: translate(-3px, 4px); }
+  75%      { transform: translate(3px, 3px); }
+}
+@keyframes droplets-run {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 40px; }
+}
+@keyframes flame-burn {
+  0%, 100% { box-shadow: 0 0 24px currentColor inset; }
+  50%      { box-shadow: 0 0 48px currentColor inset, 0 0 12px currentColor; }
+}
+@keyframes force-shimmer {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.9; }
+}
+@keyframes glitch-shift {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(-2px, 1px); }
+  66%  { transform: translate(2px, -1px); }
+}
+@keyframes glyph-fall {
+  0%   { transform: translateY(-20%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(20%); opacity: 0; }
+}
+@keyframes hex-tilt {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  50%      { transform: rotate(3deg) scale(1.02); }
+}
+@keyframes laser-sweep {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+@keyframes liquid-wave {
+  0%, 100% { border-radius: 46% 54% 38% 62% / 52% 38% 62% 48%; }
+  33%      { border-radius: 38% 62% 54% 46% / 62% 38% 46% 54%; }
+  66%      { border-radius: 54% 46% 62% 38% / 38% 62% 54% 46%; }
+}
+@keyframes magnify-radial {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+@keyframes particle-fall {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 80px; }
+}
+@keyframes ripple-out {
+  0%   { transform: scale(0.96); opacity: 0.6; }
+  100% { transform: scale(1.06); opacity: 0.2; }
+}
+@keyframes shatter-pulse {
+  0%, 100% { transform: rotate(-1.5deg) scale(1); }
+  50%      { transform: rotate(1.5deg) scale(1.04); }
+}
+
 /* Onboarding Citadel: the Onboarding app now IS a Mini Desktop OS rendered
    inside the Macro WindowFrame (with mac-style traffic lights from Macro).
    The Macro WindowFrame chrome IS the prospect's window controls. */
