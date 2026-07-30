@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDetailPage';
@@ -60,6 +60,9 @@ export function OperationsApp() {
   const runbooksDrill = useCollectionDrill('runbooks', 'Runbooks');
   const knowledgeDrill = useCollectionDrill('articles', 'Knowledge Base');
   const incidentsDrill = useCollectionDrill('incidents', 'Incidents');
+  const runbooks = useCmsStore(s => s.items['runbooks']) ?? [];
+  const articles = useCmsStore(s => s.items['articles']) ?? [];
+  const incidents = useCmsStore(s => s.items['incidents']) ?? [];
   const [detail, setDetail] = useState<OperationsDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -71,16 +74,74 @@ export function OperationsApp() {
     }
   }, [detail, setWindowDetail]);
 
+  const openRunbook = (id: string): void => {
+    const item = runbooks.find(c => c.id === id);
+    if (!item) { runbooksDrill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.category ?? ''),
+      status: String(item.category ?? 'active'),
+      body: String(item.steps ?? ''),
+      sidebar: [
+        { label: 'Category', value: String(item.category ?? '—') },
+        { label: 'Updated', value: String(item.updated ?? '—') },
+        { label: 'Steps', value: `${String(item.steps ?? '').split('→').length}` },
+      ],
+      incidents: [],
+      fields: [],
+    });
+    runbooksDrill.open(id);
+  };
+
+  const openArticle = (id: string): void => {
+    const item = articles.find(c => c.id === id);
+    if (!item) { knowledgeDrill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.topic ?? ''),
+      status: String(item.topic ?? 'active'),
+      body: String(item.body ?? ''),
+      sidebar: [
+        { label: 'Topic', value: String(item.topic ?? '—') },
+        { label: 'Citations', value: `${Number(item.citations ?? 0)} this month` },
+        { label: 'Updated', value: String(item.updated ?? '—') },
+      ],
+      incidents: [],
+      fields: [],
+    });
+    knowledgeDrill.open(id);
+  };
+
+  const openIncident = (id: string): void => {
+    const item = incidents.find(c => c.id === id);
+    if (!item) { incidentsDrill.open(id); return; }
+    const sev = String(item.severity ?? 'ok');
+    const sevLevel: 'low' | 'medium' | 'high' = sev === 'danger' ? 'high' : sev === 'warn' ? 'medium' : 'low';
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: String(item.when ?? ''),
+      status: sev,
+      body: String(item.resolution ?? ''),
+      sidebar: [
+        { label: 'When', value: String(item.when ?? '—') },
+        { label: 'Severity', value: sev },
+      ],
+      incidents: [{ severity: sevLevel, title: String(item.title ?? 'Incident'), at: String(item.when ?? '') }],
+      fields: [],
+    });
+    incidentsDrill.open(id);
+  };
+
   const Runbooks = () => {
-    if (runbooksDrill.openId) {
-      return <DynamicPageView collectionId="runbooks" itemId={runbooksDrill.openId} onBack={runbooksDrill.close} onNavigate={runbooksDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Runbooks" subtitle="The operating procedures your agents follow" />
         <CMSCardList<RunbookItem>
           collectionId="runbooks"
-          onOpen={runbooksDrill.open}
+          onOpen={openRunbook}
           cols={2}
           render={(r) => ({
             title: r.title,
@@ -100,15 +161,12 @@ export function OperationsApp() {
   };
 
   const Knowledge = () => {
-    if (knowledgeDrill.openId) {
-      return <DynamicPageView collectionId="articles" itemId={knowledgeDrill.openId} onBack={knowledgeDrill.close} onNavigate={knowledgeDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Knowledge base" subtitle="Answers your agents cite — one shared page template (CMS-driven)" />
         <CMSCardList<ArticleItem>
           collectionId="articles"
-          onOpen={knowledgeDrill.open}
+          onOpen={openArticle}
           cols={2}
           render={(a) => ({
             title: a.title,
@@ -128,15 +186,12 @@ export function OperationsApp() {
   };
 
   const Incidents = () => {
-    if (incidentsDrill.openId) {
-      return <DynamicPageView collectionId="incidents" itemId={incidentsDrill.openId} onBack={incidentsDrill.close} onNavigate={incidentsDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Incidents" subtitle="What the ops watchdog caught" />
         <CMSCardList<IncidentItem>
           collectionId="incidents"
-          onOpen={incidentsDrill.open}
+          onOpen={openIncident}
           cols={2}
           render={(i) => ({
             title: i.title,
