@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Cpu, FlaskConical, Rocket, Server } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
@@ -6,6 +7,9 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { ItRdDetailPage, type ItRdDetailItem } from './ItRdDetailPage';
 
 const ACCENT = '#7c3aed';
 
@@ -13,6 +17,16 @@ export function ItRdApp() {
   const servicesDrill = useCollectionDrill('services', 'Kernel');
   const experimentsDrill = useCollectionDrill('it_experiments', 'Experiments');
   const deploysDrill = useCollectionDrill('deploys', 'Deploys');
+  const [detail, setDetail] = useState<ItRdDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
   const experiments = useCmsStore(s => s.items['it_experiments']) ?? [];
   const okCount = useCmsStore(s => (s.items['services'] ?? []).filter(x => x.status === 'ok').length);
   const totalServices = useCmsStore(s => s.items['services']?.length ?? 0);
@@ -72,5 +86,19 @@ export function ItRdApp() {
     { id: 'deploys', label: 'Deploys', icon: Rocket, render: Deploys },
   ];
 
-  return <AppFrame title="IT / R&D" subtitle="Cyborg domain" icon={Cpu} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="IT / R&D" subtitle="Cyborg domain" icon={Cpu} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="it-rd"
+          accent="#7c3aed"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'type-in', durationMs: 280 }}
+        >
+          <ItRdDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
