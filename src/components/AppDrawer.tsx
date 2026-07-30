@@ -4,18 +4,22 @@ import { motion } from 'motion/react';
 import { X, Search } from 'lucide-react';
 import { useShellStore } from '../stores/shell.store';
 import { getAllApps } from '../lib/app-registry';
+import { useAppVisibility } from '../stores/appVisibility.store';
 
 export function AppDrawer() {
   const isDrawerOpen = useShellStore(s => s.windows.some(w => w.id === 'drawer' && w.isOpen));
   const closeApp = useShellStore(s => s.closeApp);
   const openApp = useShellStore(s => s.openApp);
+  const userHidden = useAppVisibility((s) => s.hidden);
   const [query, setQuery] = useState('');
 
   if (!isDrawerOpen) return null;
 
   const apps = getAllApps().filter(a =>
-    a.name.toLowerCase().includes(query.toLowerCase()) ||
-    a.description.toLowerCase().includes(query.toLowerCase())
+    userHidden[a.id] !== true && (
+      a.name.toLowerCase().includes(query.toLowerCase()) ||
+      a.description.toLowerCase().includes(query.toLowerCase())
+    )
   );
 
   return (

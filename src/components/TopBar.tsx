@@ -5,11 +5,15 @@
  *  - Theme-aware accents (var(--theme-*)) + soft drop shadow (no border-b)
  *  - Global theme quick-switcher dropdown in the middle. */
 import { useState, useEffect, useRef } from 'react';
-import { Bell, RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown } from 'lucide-react';
+import { Bell, RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown, User, Power, CreditCard, Sparkles, LogOut, Settings as SettingsIcon, ListChecks, History } from 'lucide-react';
 import { useShellStore } from '../stores/shell.store';
 import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
+import { getAllApps } from '../lib/app-registry';
+import { useAppVisibility } from '../stores/appVisibility.store';
+import { CHANGELOG } from '../data/changelog';
+import { TopBarMenu } from './TopBarMenu';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -19,6 +23,10 @@ export function TopBar() {
   const bootClean = useShellStore((s) => s.bootClean);
   const notificationCount = useShellStore((s) => s.notificationCount);
   const clearNotifications = useShellStore((s) => s.clearNotifications);
+  const openApp = useShellStore((s) => s.openApp);
+  const userHidden = useAppVisibility((s) => s.hidden);
+  const toggleAppVisibility = useAppVisibility((s) => s.toggle);
+  const resetAppVisibility = useAppVisibility((s) => s.reset);
   const voice = useVoiceNavigation();
 
   // Theme quick-switcher state
@@ -78,18 +86,114 @@ export function TopBar() {
             </span>
           </div>
 
-          {/* Menu items — soft rounded pills */}
+          {/* Menu items — Profile / Apps / Changelog */}
           <div className="hidden md:flex items-center gap-0.5 px-1">
-            {['File', 'View', 'Window'].map(m => (
-              <button
-                key={m}
-                className="px-2.5 h-7 text-[11.5px] font-medium rounded-lg transition-colors hover:bg-[var(--theme-surface-hover)]"
-                style={{ color: 'var(--theme-text-muted)' }}
-                onClick={() => {}}
-              >
-                {m}
+            {/* Profile menu */}
+            <TopBarMenu
+              triggerLabel="Profile"
+              triggerIcon={<User className="w-3.5 h-3.5" />}
+              width={260}
+              isDark={globalTokens.isDark}
+              ariaLabel="Profile menu"
+            >
+              <div className="flex items-center gap-3 px-2 py-2.5 mb-1 rounded-xl" style={{ background: 'var(--theme-surface-hover)' }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  AK
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] font-semibold truncate" style={{ color: 'var(--theme-text)' }}>Amadou Kone</div>
+                  <div className="text-[10px] truncate" style={{ color: 'var(--theme-text-muted)' }}>amdkn777@gmail.com</div>
+                </div>
+              </div>
+              <button onClick={() => { openApp('settings', 'Settings'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
+                <SettingsIcon className="w-3.5 h-3.5" /> Account settings
               </button>
-            ))}
+              <button onClick={() => { openApp('finance', 'Finance'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
+                <CreditCard className="w-3.5 h-3.5" /> Billing & subscription
+              </button>
+              <button onClick={() => { openApp('cognition', 'Cognition'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
+                <Sparkles className="w-3.5 h-3.5" /> AI preferences
+              </button>
+              <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />
+              <button onClick={() => { console.info('[Coach OS] Sign out clicked (stub)'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text-muted)' }}>
+                <LogOut className="w-3.5 h-3.5" /> Sign out
+              </button>
+            </TopBarMenu>
+
+            {/* Apps menu — toggle visibility */}
+            <TopBarMenu
+              triggerLabel="Apps"
+              triggerIcon={<ListChecks className="w-3.5 h-3.5" />}
+              width={320}
+              isDark={globalTokens.isDark}
+              ariaLabel="Apps menu"
+            >
+              <div className="text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{ color: 'var(--theme-text-muted)' }}>Desktop visibility</div>
+              <div className="max-h-[420px] overflow-y-auto pr-1">
+                {getAllApps().map((app) => {
+                  const Icon = app.icon;
+                  const hidden = userHidden[app.id] === true;
+                  return (
+                    <div key={app.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--theme-surface-hover)]">
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: (app.accent ?? '#64748b') + '22' }}>
+                        <Icon className="w-3.5 h-3.5" style={{ color: app.accent ?? '#64748b' }} />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <div className="text-[11.5px] font-medium truncate" style={{ color: 'var(--theme-text)' }}>{app.name}</div>
+                        <div className="text-[10px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{app.description}</div>
+                      </span>
+                      <button
+                        onClick={() => toggleAppVisibility(app.id)}
+                        role="switch"
+                        aria-checked={!hidden}
+                        aria-label={`Toggle ${app.name} visibility`}
+                        className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+                        style={{ background: hidden ? 'var(--theme-border-subtle)' : 'var(--theme-accent)' }}
+                      >
+                        <span
+                          className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                          style={{ transform: hidden ? 'translateX(2px)' : 'translateX(18px)' }}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t mt-1 pt-1" style={{ borderColor: 'var(--theme-border-subtle)' }}>
+                <button onClick={() => resetAppVisibility()} className="w-full px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left rounded-lg hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text-muted)' }}>
+                  Reset all to visible
+                </button>
+              </div>
+            </TopBarMenu>
+
+            {/* Changelog menu */}
+            <TopBarMenu
+              triggerLabel="Changelog"
+              triggerIcon={<History className="w-3.5 h-3.5" />}
+              width={320}
+              isDark={globalTokens.isDark}
+              ariaLabel="Changelog menu"
+            >
+              <div className="text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{ color: 'var(--theme-text-muted)' }}>Dev milestones</div>
+              <div className="max-h-[420px] overflow-y-auto pr-1">
+                {CHANGELOG.map((m) => (
+                  <div key={m.version} className="px-2 py-2 rounded-lg hover:bg-[var(--theme-surface-hover)]">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-[12px] font-bold" style={{ color: 'var(--theme-text)' }}>{m.title}</span>
+                      <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{m.version} · {m.date}</span>
+                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {m.highlights.map((h, i) => (
+                        <li key={i} className="text-[10.5px] flex gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+                          <span style={{ color: 'var(--theme-accent)' }}>•</span>
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </TopBarMenu>
           </div>
 
           {/* Action chips: Reset + Theme */}

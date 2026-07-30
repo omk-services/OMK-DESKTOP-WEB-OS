@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import { useShellStore } from '../stores/shell.store';
 import { getAllApps } from '../lib/app-registry';
+import { useAppVisibility } from '../stores/appVisibility.store';
 
 export function DesktopIcons() {
   const openApp = useShellStore(s => s.openApp);
   const [selected, setSelected] = useState<string | null>(null);
-  const apps = getAllApps();
+  const userHidden = useAppVisibility((s) => s.hidden);
+  // Hide apps flagged with hidden: true (sister Drawbridge Task 1 2026-07-28) OR toggled off by the user.
+  const apps = getAllApps().filter(a => !a.hidden && userHidden[a.id] !== true);
 
   return (
     <div
