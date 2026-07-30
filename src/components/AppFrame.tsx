@@ -20,6 +20,7 @@ import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 import { useThemeStore, applyThemeTokens, useThemeIdFor } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
+import { BackgroundFX } from './canvasui/v30';
 
 export interface AppSection {
   id: string;
@@ -51,6 +52,9 @@ interface AppFrameProps {
   groups?: Record<string, string>;
   /** optional AI tools rendered in the right panel (AgenticOS-style). */
   tools?: ToolDef[];
+  /** set false to suppress the per-app signature canvas-ui FX.
+   * Used by apps that are picker / showcase / shell (settings, design). */
+  disableSignatureFx?: boolean;
 }
 
 const NARROW_BREAKPOINT = 640;
@@ -65,7 +69,7 @@ function ActiveSection({ section }: { section: AppSection }) {
   return <>{section.render()}</>;
 }
 
-export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps) {
+export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools, disableSignatureFx }: AppFrameProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
@@ -282,8 +286,27 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
       </aside>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
-        {active ? <ActiveSection key={active.id} section={active} /> : null}
+      <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar relative">
+        {/* Per-app signature canvas-ui FX (v30, WebGL).
+            Renders the theme's nuance-1 effect as a transparent header strip.
+            disabled for picker/showcase apps (settings, design). */}
+        {!disableSignatureFx && active ? (
+          <div
+            className="pointer-events-none absolute top-0 left-0 right-0 h-24 z-0"
+            aria-hidden
+            style={{ mixBlendMode: 'screen' }}
+          >
+            <BackgroundFX
+              themeId={activeThemeId}
+              accent={accent}
+              nuanceSlot={0}
+              className="h-full w-full"
+            />
+          </div>
+        ) : null}
+        <div className={disableSignatureFx ? '' : 'relative z-10'}>
+          {active ? <ActiveSection key={active.id} section={active} /> : null}
+        </div>
       </div>
 
       {/* Optional AI Tools panel (right) — AgenticOS Monica/Sider pattern */}

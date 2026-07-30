@@ -71,27 +71,28 @@ export function BorderBeam({
       style={{ borderRadius }}
     >
       {children}
-      {visible ? (
+      {visible && duration > 0 ? (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
             borderRadius,
             padding: size,
-            background: `conic-gradient(from 0deg, transparent 0deg, ${color} 60deg, transparent 120deg)`,
+            background: `linear-gradient(90deg, transparent 0%, ${color} 50%, transparent 100%)`,
+            backgroundSize: '300% 100%',
             WebkitMask:
               'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
             WebkitMaskComposite: 'xor',
             maskComposite: 'exclude',
-            animation: `canvasui-border-beam-spin ${duration}s linear ${delay}s infinite`,
-            willChange: 'transform',
+            animation: `canvasui-border-beam-slide ${duration}s linear ${delay}s infinite`,
+            willChange: 'background-position',
           }}
         />
       ) : null}
       <style>{`
-        @keyframes canvasui-border-beam-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes canvasui-border-beam-slide {
+          from { background-position: 100% 0%; }
+          to { background-position: -100% 0%; }
         }
       `}</style>
     </div>

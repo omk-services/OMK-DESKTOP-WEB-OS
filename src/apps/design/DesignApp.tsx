@@ -1860,6 +1860,7 @@ export function DesignApp() {
       accent={ACCENT}
       icon={Wand2}
       sections={sections}
+      disableSignatureFx
     />
   );
 }

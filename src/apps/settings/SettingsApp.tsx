@@ -7,6 +7,7 @@ import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
 import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
+import { ThemeDetailPage } from './ThemeDetailPage';
 import posthog from 'posthog-js';
 
 const ACCENT = '#78716c';
@@ -277,7 +278,14 @@ export function SettingsApp() {
     );
   };
 
-  const Themes = () => (
+  const Themes = () => {
+    const [detailTheme, setDetailTheme] = useState<string | null>(null);
+
+    if (detailTheme) {
+      return <ThemeDetailPage themeId={detailTheme} onBack={() => setDetailTheme(null)} />;
+    }
+
+    return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
       <SectionHead
         title="Themes"
@@ -309,6 +317,8 @@ export function SettingsApp() {
               <button
                 key={t.id}
                 onClick={() => setGlobalTheme(t.id)}
+                onDoubleClick={() => setDetailTheme(t.id)}
+                title={`Click to set as global · Double-click to preview ${t.name}`}
                 className={`relative text-left rounded-lg overflow-hidden border-2 transition-all ${
                   isActive ? 'border-stone-800 ring-2 ring-stone-800/30' : 'border-stone-200 hover:border-stone-400'
                 }`}
@@ -382,7 +392,8 @@ export function SettingsApp() {
         </div>
       </Card>
     </div>
-  );
+    );
+  };
 
   const sections: AppSection[] = [
     { id: 'general', label: 'General', icon: SlidersHorizontal, render: General },
@@ -402,6 +413,7 @@ export function SettingsApp() {
       icon={Settings}
       accent={ACCENT}
       sections={sections}
+      disableSignatureFx
       // AppFrame's internal activeId is local state; we can't pre-select from
       // props without extending it. The cross-window intent is best-effort: it
       // flashes a console hint so the user knows to click "Themes".

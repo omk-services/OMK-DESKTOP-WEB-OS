@@ -10,7 +10,10 @@ import { useShellStore } from '../stores/shell.store';
 import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
-import { BorderBeam, ThinkingOrbs } from './canvas-ui';
+// canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
+// (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
+// on the ecosystem seal + a CSS pulse dot in the voice button.
+import { Grid } from './canvasui/v30';
 
 export function TopBar() {
   const [time, setTime] = useState(new Date());
@@ -154,14 +157,19 @@ export function TopBar() {
 
         {/* RIGHT cluster — status + voice + bell + clock */}
         <div className="flex items-center gap-1.5">
-          <BorderBeam
-            color="#10b981"
-            size={1.5}
-            duration={6}
-            borderRadius={10}
+          {/* Ecosystem seal — wrap pill in a thin animated accent strip (BorderBeam replacement).
+              The strip travels along the bottom edge of the pill, mimicking the v1 BorderBeam
+              but as a single keyframe'd box-shadow rather than a sibling component. */}
+          <div
+            className="relative hidden sm:block"
+            style={{
+              padding: 1,
+              borderRadius: 10,
+              background: 'transparent',
+            }}
           >
             <span
-              className="hidden sm:flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider"
+              className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider"
               style={{
                 color: globalTokens.isDark ? '#10b981' : '#047857',
                 background: globalTokens.isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.10)',
@@ -170,7 +178,21 @@ export function TopBar() {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Ecosystem healthy · 24/7
             </span>
-          </BorderBeam>
+            {/* Trailing accent strip — replaces BorderBeam's beam with a CSS-animated bottom border. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-0 bottom-0 h-[1.5px] w-full overflow-hidden"
+              style={{ borderRadius: '0 0 9px 9px' }}
+            >
+              <span
+                className="block h-full w-1/3"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, #10b981, transparent)',
+                  animation: 'topbar-beam-slide 6s linear infinite',
+                }}
+              />
+            </span>
+          </div>
 
           {voice.supported && (
             <button
@@ -190,7 +212,18 @@ export function TopBar() {
               {voice.listening ? (
                 <>
                   <Mic className="w-3 h-3 animate-pulse" />
-                  <ThinkingOrbs color="#ffffff" size={6} stagger={120} />
+                  {/* ThinkingOrbs replacement — three CSS-pulse dots. No upstream equivalent. */}
+                  <span className="flex items-center gap-[2px]" aria-hidden>
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="block w-[3px] h-[3px] rounded-full bg-white"
+                        style={{
+                          animation: `topbar-orb-pulse 1.2s ease-in-out ${i * 0.18}s infinite`,
+                        }}
+                      />
+                    ))}
+                  </span>
                 </>
               ) : (
                 <MicOff className="w-3 h-3" />

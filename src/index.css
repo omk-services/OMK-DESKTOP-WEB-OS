@@ -102,6 +102,16 @@
 }
 .animate-toast-in { animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
 
+/* TopBar replacements for retired BorderBeam + ThinkingOrbs (CSS-only, no upstream equivalent). */
+@keyframes topbar-beam-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+@keyframes topbar-orb-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+
 /* Onboarding Citadel: the Onboarding app now IS a Mini Desktop OS rendered
    inside the Macro WindowFrame (with mac-style traffic lights from Macro).
    The Macro WindowFrame chrome IS the prospect's window controls. */
