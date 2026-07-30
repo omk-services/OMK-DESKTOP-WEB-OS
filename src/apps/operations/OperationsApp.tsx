@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react';
 import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDetailPage';
 import { CMSCardList } from '../_ui/CMSCardList';
 
 const ACCENT = '#4f46e5';
@@ -56,6 +60,16 @@ export function OperationsApp() {
   const runbooksDrill = useCollectionDrill('runbooks', 'Runbooks');
   const knowledgeDrill = useCollectionDrill('articles', 'Knowledge Base');
   const incidentsDrill = useCollectionDrill('incidents', 'Incidents');
+  const [detail, setDetail] = useState<OperationsDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const Runbooks = () => {
     if (runbooksDrill.openId) {
@@ -145,5 +159,19 @@ export function OperationsApp() {
     { id: 'incidents', label: 'Incidents', icon: AlertOctagon, render: Incidents },
   ];
 
-  return <AppFrame title="Operations" subtitle="Batman domain" icon={ClipboardList} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Operations" subtitle="Batman domain" icon={ClipboardList} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="operations"
+          accent="#4f46e5"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'fade-up', durationMs: 200 }}
+        >
+          <OperationsDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
