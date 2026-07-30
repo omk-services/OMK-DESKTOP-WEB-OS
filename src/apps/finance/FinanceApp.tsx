@@ -1,8 +1,12 @@
+import { useEffect, useState } from 'react';
 import { Wallet, PiggyBank, Receipt, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, StatCard } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
 import { CMSCardList } from '../_ui/CMSCardList';
 
 const ACCENT = '#ca8a04';
@@ -51,6 +55,16 @@ function Runway() {
 
 export function FinanceApp() {
   const drill = useCollectionDrill('invoices', 'Invoices');
+  const [detail, setDetail] = useState<FinanceDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const Invoices = () => {
     if (drill.openId) {
@@ -86,5 +100,19 @@ export function FinanceApp() {
     { id: 'invoices', label: 'Invoices', icon: Receipt, render: Invoices },
   ];
 
-  return <AppFrame title="Finance" subtitle="Wonder Woman domain" icon={Wallet} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Finance" subtitle="Wonder Woman domain" icon={Wallet} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="finance"
+          accent="#ca8a04"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'fade-up', durationMs: 240 }}
+        >
+          <FinanceDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
