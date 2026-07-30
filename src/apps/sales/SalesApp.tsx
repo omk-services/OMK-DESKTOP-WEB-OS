@@ -287,7 +287,7 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
         <StatCard label="Open deals" value="6" tone="warn" hint="$67k mock pipeline view" />
         <StatCard label="Rep score" value={repScore} tone={cognition.eventCount > 0 ? 'ok' : 'neutral'} hint="cognition.events count" />
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-stone-200 bg-white/55 px-4 py-3 text-xs text-stone-600">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600">
         <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Knowledge sovereignty {cognition.manifest ? Math.round(cognition.manifest.knowledge_sovereignty_score * 100) + '%' : 'not published'}</span>
         <span className="inline-flex items-center gap-1.5"><CircleDashed className="h-3.5 w-3.5 text-orange-600" /> Trust {trustScore.toFixed(2)} · {trustLabel(trustScore)}</span>
         <span className="font-mono text-[10px] text-stone-400">{cognition.live ? 'live cognition' : 'local configuration'}</span>
@@ -302,7 +302,7 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
           <SectionHead title="Calls" subtitle="Open a call brief and route it to the Sovereign Gate" />
           <div className="grid gap-3">
             {CALLS.map((call) => (
-              <button type="button" key={call.id} onClick={() => onSelect(callDetail(call))} className="flex w-full items-start gap-3 rounded-xl border border-[var(--panel-border)] bg-white/70 p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <button type="button" key={call.id} onClick={() => onSelect(callDetail(call))} className="flex w-full items-start gap-3 rounded-xl border border-[var(--panel-border)] bg-white p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><Phone className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-semibold text-stone-800">{call.title}</span><Badge tone={call.tone}>{call.time}</Badge></div>
@@ -316,7 +316,7 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
           <SectionHead title="Tasks" subtitle="Execution stays connected to the Tasks app" />
           <div className="grid gap-2">
             {TASKS.map((task) => (
-              <button type="button" key={task.id} onClick={() => onSelect(taskDetail(task))} className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--panel-border)] bg-white/65 px-3 py-2.5 text-left transition-colors hover:bg-white">
+              <button type="button" key={task.id} onClick={() => onSelect(taskDetail(task))} className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--panel-border)] bg-white px-3 py-2.5 text-left transition-colors hover:bg-white">
                 <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: task.tone === 'danger' ? '#dc2626' : task.tone === 'warn' ? '#d97706' : task.tone === 'ok' ? '#16a34a' : ACCENT }} />
                 <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-stone-700">{task.title}</span>
                 <span className="shrink-0 text-[10px] text-stone-400">{task.when.split(' · ')[0]}</span>
@@ -345,7 +345,7 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
           />
         ))}
       </div>
-      <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white/55 px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
         <span className="text-xs text-stone-600">{cognition.loading ? 'Hydrating event funnel…' : cognition.eventTypes.length + ' event types grouped from cognition.events'}</span>
         <span className="font-mono text-[10px] text-stone-400">{cognition.live ? 'live' : 'offline'}</span>
       </div>
@@ -380,7 +380,7 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
         {DOCUMENTS.map((doc) => {
           const Icon = doc.icon;
           return (
-            <button type="button" key={doc.id} onClick={() => onSelect(docDetail(doc))} className="rounded-2xl border border-[var(--panel-border)] bg-white/70 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <button type="button" key={doc.id} onClick={() => onSelect(docDetail(doc))} className="rounded-2xl border border-[var(--panel-border)] bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-700"><Icon className="h-4 w-4" /></span>
                 <span className="text-sm font-bold text-stone-800">{doc.title}</span>
@@ -399,7 +399,7 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
       <SectionHead title="Sales skills + routines" subtitle="Nine skills canon plus the live cognition.routines execution layer" />
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {SKILLS.map(([name, description]) => (
-          <div key={name} className="rounded-xl border border-[var(--panel-border)] bg-white/65 p-3">
+          <div key={name} className="rounded-xl border border-[var(--panel-border)] bg-white p-3">
             <div className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5 text-orange-600" /><span className="text-sm font-semibold text-stone-800">{name}</span></div>
             <p className="mt-1 text-xs leading-relaxed text-stone-500">{description}</p>
           </div>
@@ -412,7 +412,7 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
         </div>
         <div className="grid gap-2">
           {cognition.routines.map((routine) => (
-            <button type="button" key={routine.id} onClick={() => onSelect(routineDetail(routine))} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border)] bg-white/65 p-3 text-left transition-colors hover:bg-white">
+            <button type="button" key={routine.id} onClick={() => onSelect(routineDetail(routine))} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border)] bg-white p-3 text-left transition-colors hover:bg-white">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
                 {routine.cadence === 'daily' ? <Sun className="h-4 w-4" /> : routine.cadence === 'weekly' ? <Calendar className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
               </span>
@@ -436,7 +436,7 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
       <SectionHead title="Stack connectors" subtitle="Eight categories with explicit connector status — connected sources are the only live inputs" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {STACK.map((category) => (
-          <section key={category.name} className="rounded-2xl border border-[var(--panel-border)] bg-white/65 p-4">
+          <section key={category.name} className="rounded-2xl border border-[var(--panel-border)] bg-white p-4">
             <div className="mb-3 flex items-center gap-2"><Settings2 className="h-4 w-4 text-stone-500" /><h3 className="text-xs font-bold uppercase tracking-wider text-stone-600">{category.name}</h3></div>
             <div className="space-y-2">
               {category.tools.map((tool) => (
