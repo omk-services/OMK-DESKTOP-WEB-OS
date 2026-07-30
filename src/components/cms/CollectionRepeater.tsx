@@ -1,5 +1,8 @@
-/** CollectionRepeater — renders a CMS collection as a clickable list (Wix "repeater"
- *  bound to a collection). Same component works for any collection definition. */
+/**
+ * CollectionRepeater — renders a CMS collection as a grid of real cards (not
+ * horizontal rows). Each card has a title, optional subtitle, optional badge,
+ * and a chevron affordance. Used by every app that lists a CMS collection.
+ */
 import { ChevronRight } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import type { CmsItem } from '../../lib/cms/types';
@@ -20,8 +23,8 @@ export function CollectionRepeater({ collectionId, onOpen, filter }: CollectionR
   if (!def) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm overflow-hidden">
-      {items.map((item, i) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      {items.map((item) => {
         const title = String(item[def.titleField] ?? '');
         const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : undefined;
         const badge = def.badgeField ? item[def.badgeField] : undefined;
@@ -29,30 +32,35 @@ export function CollectionRepeater({ collectionId, onOpen, filter }: CollectionR
           <button
             key={item.id}
             onClick={() => onOpen(item.id)}
-            className={`w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-stone-50 transition-colors ${
-              i !== items.length - 1 ? 'border-b border-[var(--hairline)]' : ''
-            }`}
+            className="group flex flex-col items-start gap-2 rounded-2xl border border-[var(--panel-border)] bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-cyan-400 active:translate-y-0"
           >
-            <div className="min-w-0">
-              <div className="text-sm font-semibold text-stone-800 truncate">{title}</div>
-              {subtitle && <div className="text-xs text-stone-500 truncate mt-0.5">{subtitle}</div>}
+            <div className="flex w-full items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="text-[13.5px] font-semibold text-stone-800 line-clamp-2">{title}</div>
+                {subtitle && (
+                  <div className="mt-1 text-xs text-stone-500 line-clamp-2">{subtitle}</div>
+                )}
+              </div>
+              <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-cyan-500 shrink-0 transition-colors" />
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-              {badge != null && badge !== '' && (() => {
-                const tone = badgeTone(String(badge));
-                return (
-                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ background: tone.bg, color: tone.fg }}>
-                    {String(badge)}
-                  </span>
-                );
-              })()}
-              <ChevronRight className="w-4 h-4 text-stone-300" />
-            </div>
+            {badge != null && badge !== '' && (() => {
+              const tone = badgeTone(String(badge));
+              return (
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full self-start"
+                  style={{ background: tone.bg, color: tone.fg }}
+                >
+                  {String(badge)}
+                </span>
+              );
+            })()}
           </button>
         );
       })}
       {items.length === 0 && (
-        <div className="px-5 py-8 text-center text-sm text-stone-400">No {def.name.toLowerCase()} yet.</div>
+        <div className="col-span-full rounded-2xl border border-dashed border-[var(--panel-border)] bg-white/50 px-5 py-8 text-center text-sm text-stone-400">
+          No {def.name.toLowerCase()} yet.
+        </div>
       )}
     </div>
   );
