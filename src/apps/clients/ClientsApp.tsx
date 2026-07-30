@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, BookText, GraduationCap } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
@@ -31,9 +30,52 @@ export function ClientsApp() {
   const activeClients = clients.filter(c => c.status === 'Active');
   const onboardingClients = clients.filter(c => c.status === 'Onboarding');
   const riskClients = clients.filter(c => c.status === 'At risk');
+  const sessionNotes = useCmsStore(s => s.items['session_notes']) ?? [];
+
+  const openClient = (id: string): void => {
+    const item = clients.find(c => c.id === id);
+    if (!item) { drill.open(id); return; }
+    const health = Number(item.health ?? 0);
+    const initials = String(item.name ?? '?').split(' ').map(p => p[0] ?? '').slice(0, 2).join('').toUpperCase() || '?';
+    setDetail({
+      id: String(item.id),
+      title: String(item.name ?? 'Untitled'),
+      subtitle: String(item.segment ?? ''),
+      status: String(item.status ?? 'Active'),
+      portrait: { initials, gradient: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' },
+      pills: [
+        { label: 'Health', value: `${health || '—'}%`, tone: health >= 80 ? 'good' : health >= 50 ? 'warn' : health > 0 ? 'bad' : 'neutral' },
+        { label: 'Ticket', value: `$${Number(item.ticket ?? 0).toLocaleString()}`, tone: 'neutral' },
+        { label: 'Open threads', value: String(item.openThreads ?? 0), tone: 'neutral' },
+        { label: 'Next session', value: String(item.nextSession ?? '—'), tone: 'neutral' },
+        { label: 'Onboarding', value: String(item.onboardingStep ?? 'complete'), tone: item.status === 'Onboarding' ? 'warn' : 'good' },
+      ],
+      fields: [],
+    });
+    drill.open(id);
+  };
+
+  const openNote = (id: string): void => {
+    const item = sessionNotes.find(c => c.id === id);
+    if (!item) { vaultDrill.open(id); return; }
+    const initials = String(item.client ?? '?').split(' ').map(p => p[0] ?? '').slice(0, 2).join('').toUpperCase() || '?';
+    setDetail({
+      id: String(item.id),
+      title: String(item.title ?? 'Untitled'),
+      subtitle: `${String(item.client ?? '—')} · ${String(item.date ?? '')}`,
+      status: String(item.tag ?? 'note'),
+      portrait: { initials, gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' },
+      pills: [
+        { label: 'Duration', value: String(item.duration ?? '—'), tone: 'neutral' },
+        { label: 'Tag', value: String(item.tag ?? 'session note'), tone: 'good' },
+        { label: 'Date', value: String(item.date ?? ''), tone: 'neutral' },
+      ],
+      fields: [],
+    });
+    vaultDrill.open(id);
+  };
 
   const Active = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return (
       <div className="p-7">
         <SectionHead title="Active clients" subtitle="Health from engagement + outcomes" action={<Badge tone="ok">{activeClients.length}</Badge>} />
@@ -52,7 +94,7 @@ export function ClientsApp() {
                 metricLabel="health"
                 metricValue={`${health}%`}
                 meta="Active · High-touch"
-                onClick={() => drill.open(String(c.id))}
+                onClick={() => openClient(String(c.id))}
               />
             );
           })}
@@ -62,7 +104,6 @@ export function ClientsApp() {
   };
 
   const Onboarding = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return (
       <div className="p-7">
         <SectionHead title="Onboarding" subtitle="Agents run the 7-step welcome" />
@@ -82,7 +123,7 @@ export function ClientsApp() {
                 metricLabel="progress"
                 metricValue={`${pct}%`}
                 meta={`${step} of ${total} steps complete`}
-                onClick={() => drill.open(String(c.id))}
+                onClick={() => openClient(String(c.id))}
               />
             );
           })}
@@ -92,7 +133,6 @@ export function ClientsApp() {
   };
 
   const Risk = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return (
       <div className="p-7">
         <SectionHead title="Churn risk" subtitle="Flagged by the retention agent" />
@@ -109,7 +149,7 @@ export function ClientsApp() {
               metricLabel="next"
               metricValue={String(c.nextSession)}
               meta="Retention agent flagged"
-              onClick={() => drill.open(String(c.id))}
+              onClick={() => openClient(String(c.id))}
             />
           ))}
         </FleetItemGrid>
@@ -118,13 +158,12 @@ export function ClientsApp() {
   };
 
   const Directory = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return (
       <div className="p-7">
         <SectionHead title="Directory" subtitle="Every client — one shared page template (CMS-driven)" />
         <CMSCardList
           collectionId="clients"
-          onOpen={drill.open}
+          onOpen={openClient}
           cols={2}
           render={(c: Record<string, unknown>) => ({
             title: String(c.name),
@@ -144,13 +183,12 @@ export function ClientsApp() {
   };
 
   const Vault = () => {
-    if (vaultDrill.openId) return <DynamicPageView collectionId="session_notes" itemId={vaultDrill.openId} onBack={vaultDrill.close} onNavigate={vaultDrill.open} />;
     return (
       <div className="p-7">
         <SectionHead title="IP Vault" subtitle="Every session, captured — the coach's knowledge, sanctuarized" />
         <CMSCardList
           collectionId="session_notes"
-          onOpen={vaultDrill.open}
+          onOpen={openNote}
           cols={2}
           render={(n: Record<string, unknown>) => ({
             title: String(n.title),
