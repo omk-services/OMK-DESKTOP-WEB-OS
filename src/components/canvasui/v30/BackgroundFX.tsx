@@ -159,14 +159,12 @@ export function renderCanvasForTheme(
   if (OBJECT_EFFECTS.has(effectId)) {
     if (!opts?.objectSrc) {
       return (
-        <>
+        <div style={{ position: 'relative', width: '100%', height: '100%', ...opts?.style }} className={opts?.className}>
           {cssLayer}
           <WebGLFallbackBoundary fallback={children}>
-            <div data-fx={effectId} className={opts?.className} style={opts?.style}>
-              {children ?? <></>}
-            </div>
+            <div data-fx={effectId}>{children ?? <></>}</div>
           </WebGLFallbackBoundary>
-        </>
+        </div>
       );
     }
     const objEl = renderObjectEffect(effectId, {
@@ -175,12 +173,12 @@ export function renderCanvasForTheme(
       style: opts?.style,
     });
     return (
-      <>
+      <div style={{ position: 'relative', width: '100%', height: '100%', ...opts?.style }} className={opts?.className}>
         {cssLayer}
         <WebGLFallbackBoundary fallback={children}>
           {objEl ?? <></>}
         </WebGLFallbackBoundary>
-      </>
+      </div>
     );
   }
 
@@ -190,10 +188,10 @@ export function renderCanvasForTheme(
     children,
   });
   return (
-    <>
+    <div style={{ position: 'relative', width: '100%', height: '100%', ...opts?.style }} className={opts?.className}>
       {cssLayer}
-      {el ?? <div data-fx-missing={effectId} className={opts?.className} style={opts?.style} />}
-    </>
+      {el ?? <div data-fx-missing={effectId} />}
+    </div>
   );
 }
 
@@ -217,14 +215,12 @@ export function BackgroundFX(props: BackgroundFXProps): ReactElement {
   if (OBJECT_EFFECTS.has(effectId)) {
     if (!props.objectSrc) {
       return (
-        <>
+        <div style={{ position: 'relative', width: '100%', height: '100%', ...props.style }} className={props.className}>
           {cssLayer}
           <WebGLFallbackBoundary fallback={props.children}>
-            <div data-fx={effectId} data-accent={tone} className={props.className} style={props.style}>
-              {props.children ?? <></>}
-            </div>
+            <div data-fx={effectId} data-accent={tone}>{props.children ?? <></>}</div>
           </WebGLFallbackBoundary>
-        </>
+        </div>
       );
     }
     const objEl = renderObjectEffect(effectId, {
@@ -233,21 +229,21 @@ export function BackgroundFX(props: BackgroundFXProps): ReactElement {
       style: props.style,
     });
     return (
-      <>
+      <div style={{ position: 'relative', width: '100%', height: '100%', ...props.style }} className={props.className}>
         {cssLayer}
         <WebGLFallbackBoundary fallback={props.children}>
           {objEl ?? <></>}
         </WebGLFallbackBoundary>
-      </>
+      </div>
     );
   }
 
   const el = renderWrapperEffect(effectId, wrapperProps);
   return (
-    <>
+    <div style={{ position: 'relative', width: '100%', height: '100%', ...props.style }} className={props.className}>
       {cssLayer}
       {el ?? <div data-fx-missing={effectId} />}
-    </>
+    </div>
   );
 }
 
