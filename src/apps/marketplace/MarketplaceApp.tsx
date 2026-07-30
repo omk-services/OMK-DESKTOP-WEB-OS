@@ -4,7 +4,6 @@ import { AppFrame, SectionHead, type AppSection } from '../../components/AppFram
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { MarketplaceDetailPage, type MarketplaceDetailItem } from './MarketplaceDetailPage';
@@ -35,6 +34,29 @@ export function MarketplaceApp() {
     updateItem('marketplace_listings', id, { installed: 'Yes' });
   };
 
+  const openListing = (id: string): void => {
+    const item = items.find(c => c.id === id);
+    if (!item) { drill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.name ?? 'Untitled'),
+      subtitle: String(item.blurb ?? ''),
+      status: String(item.installed === 'Yes' ? 'installed' : 'available'),
+      install: {
+        installed: item.installed === 'Yes',
+        version: String(item.version ?? '1.0.0'),
+        size: String(item.size ?? '—'),
+      },
+      stats: [
+        { label: 'Tag', value: String(item.tag ?? '—') },
+        { label: 'Version', value: String(item.version ?? '1.0.0') },
+        { label: 'Featured', value: item.featured ? 'Yes' : 'No' },
+      ],
+      fields: [],
+    });
+    drill.open(id);
+  };
+
   const grid = (filter: (l: typeof items[number]) => boolean, title: string) => {
     const list = items.filter(filter);
     return (
@@ -47,7 +69,7 @@ export function MarketplaceApp() {
                 <span className="w-9 h-9 rounded-lg bg-pink-50 flex items-center justify-center"><Package className="w-4.5 h-4.5 text-pink-600" /></span>
                 {l.featured ? <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-pink-600"><Sparkles className="w-3 h-3" /> Featured</span> : null}
               </div>
-              <button onClick={() => drill.open(String(l.id))} className="text-sm font-semibold text-stone-800 text-left hover:text-[var(--theme-accent)] transition-colors">{String(l.name)}</button>
+              <button onClick={() => openListing(String(l.id))} className="text-sm font-semibold text-stone-800 text-left hover:text-[var(--theme-accent)] transition-colors">{String(l.name)}</button>
               <div className="text-xs text-stone-500 mt-0.5 flex-1">{String(l.blurb)}</div>
               <div className="flex items-center justify-between mt-3">
                 <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide">{String(l.tag)}</span>
@@ -64,15 +86,9 @@ export function MarketplaceApp() {
     );
   };
 
-  const Browse = () => drill.openId
-    ? <DynamicPageView collectionId="marketplace_listings" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />
-    : grid(() => true, 'Marketplace');
-  const Installed = () => drill.openId
-    ? <DynamicPageView collectionId="marketplace_listings" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />
-    : grid(l => l.installed === 'Yes', 'Installed');
-  const Featured = () => drill.openId
-    ? <DynamicPageView collectionId="marketplace_listings" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />
-    : grid(l => !!l.featured, 'Featured');
+  const Browse = () => grid(() => true, 'Marketplace');
+  const Installed = () => grid(l => l.installed === 'Yes', 'Installed');
+  const Featured = () => grid(l => !!l.featured, 'Featured');
 
   const sections: AppSection[] = [
     { id: 'browse', label: 'Browse', icon: Store, render: Browse },
