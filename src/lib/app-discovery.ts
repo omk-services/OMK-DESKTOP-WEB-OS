@@ -1,6 +1,6 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass } from 'lucide-react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, BrainCircuit, Shield, Wand2 } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 
@@ -21,6 +21,9 @@ import { LegalApp } from '../apps/legal/LegalApp';
 import { SettingsApp } from '../apps/settings/SettingsApp';
 import { OnboardingApp } from '../apps/onboarding/OnboardingApp';
 import { WelcomeApp } from '../apps/welcome/WelcomeApp';
+import { CognitionApp } from '../apps/cognition/CognitionApp';
+import { AuditApp } from '../apps/audit/AuditApp';
+import { DesignApp } from '../apps/design/DesignApp';
 
 registerApp({ id: 'dashboard',   name: 'Dashboard',            icon: LayoutDashboard, accent: '#059669', description: 'Ecosystem Vitals — the home view',              component: DashboardApp });
 registerApp({ id: 'people',      name: 'People / Agents',      icon: UserCog,         accent: '#0891b2', description: 'Your team and the agents on the People domain',  component: PeopleApp });
@@ -32,6 +35,10 @@ registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,     
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
 registerApp({ id: 'sales',       name: 'Sales Sanctum',        icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
+// Cognition SovereignGate (dwelled inside Sales sidebar per Drawbridge Task 1 2026-07-28)
+registerApp({ id: 'cognition',   name: 'Cognition SovereignGate', icon: BrainCircuit,    accent: '#7c3aed', description: 'Knowledge sovereignty + routines + audit',      component: CognitionApp, hidden: true });
+// Audit Diagnostic IA (Drawbridge Task 4 2026-07-28: extrait from C:\Users\amado\Downloads\audit.pdf)
+registerApp({ id: 'audit',       name: 'Audit Diagnostic IA',    icon: Shield,          accent: '#b91c1c', description: 'Manuel de diagnostic IA · 6 grilles canon',     component: AuditApp,     hidden: true });
 registerApp({ id: 'finance',     name: 'Finance',              icon: Wallet,          accent: '#ca8a04', description: 'Unit economics, runway, invoices',               component: FinanceApp });
 registerApp({ id: 'legal',       name: 'Legal',                icon: Scale,           accent: '#64748b', description: 'Contracts and AI-Act compliance',                component: LegalApp });
 registerApp({ id: 'settings',    name: 'Settings',             icon: Settings,        accent: '#78716c', description: 'General, privacy, integrations',                 component: SettingsApp });
@@ -42,3 +49,7 @@ registerApp({ id: 'onboarding',  name: 'Onboarding (demo)',     icon: Sparkles, 
 // lists pages; canvas renders each as a one-page experience with sticky
 // header-menu in-page navigation.
 registerApp({ id: 'welcome',     name: 'Welcome',               icon: Compass,         accent: '#4f46e5', description: 'Landing pages · Circle.so style',              component: WelcomeApp,   dockSlot: 1 });
+// Design — Six-Front-end showcase (drawbridge task #8 2026-07-30): pure-presentation
+// canvas that re-skins per sidebar style (Glassmorphism, Claymorphism, Brutalism,
+// Cyberpunk, Soft UI / Neumorphism, Editorial). No Supabase, no cognition hydration.
+registerApp({ id: 'design',      name: 'Design',                icon: Wand2,           accent: '#0f172a', description: 'Six front-end styles · one showcase canvas',   component: DesignApp   });
