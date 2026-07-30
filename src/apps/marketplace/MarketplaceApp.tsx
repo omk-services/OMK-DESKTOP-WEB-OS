@@ -1,15 +1,29 @@
+import { useEffect, useState } from 'react';
 import { Store, Sparkles, Package, Check } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { MarketplaceDetailPage, type MarketplaceDetailItem } from './MarketplaceDetailPage';
 
 const ACCENT = '#db2777';
 
 export function MarketplaceApp() {
   const items = useCmsStore(s => s.items['marketplace_listings']) ?? [];
   const updateItem = useCmsStore(s => s.updateItem);
+  const [detail, setDetail] = useState<MarketplaceDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
   const addToast = useShellStore(s => s.addToast);
   const drill = useCollectionDrill('marketplace_listings', ['Browse', 'Installed', 'Featured']);
 
@@ -66,5 +80,19 @@ export function MarketplaceApp() {
     { id: 'featured', label: 'Featured', icon: Sparkles, render: Featured },
   ];
 
-  return <AppFrame title="Marketplace" subtitle="Integrations" icon={Store} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Marketplace" subtitle="Integrations" icon={Store} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="marketplace"
+          accent="#db2777"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'fade-blur', durationMs: 240 }}
+        >
+          <MarketplaceDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
