@@ -1,14 +1,28 @@
+import { useEffect, useState } from 'react';
 import { CheckSquare, Sun, CalendarClock, CheckCheck, Check } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { TasksDetailPage, type TasksDetailItem } from './TasksDetailPage';
 
 const ACCENT = '#0d9488';
 
 export function TasksApp() {
   const tasks = useCmsStore(s => s.items['tasks']) ?? [];
+  const [detail, setDetail] = useState<TasksDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
   const updateItem = useCmsStore(s => s.updateItem);
   const addToast = useShellStore(s => s.addToast);
   const drill = useCollectionDrill('tasks', ['Today', 'Upcoming', 'Done']);
@@ -73,5 +87,19 @@ export function TasksApp() {
     { id: 'done', label: 'Done', icon: CheckCheck, render: Done },
   ];
 
-  return <AppFrame title="Tasks" subtitle="What needs you" icon={CheckSquare} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Tasks" subtitle="What needs you" icon={CheckSquare} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="tasks"
+          accent="#0d9488"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'slide-bottom', durationMs: 220 }}
+        >
+          <TasksDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
