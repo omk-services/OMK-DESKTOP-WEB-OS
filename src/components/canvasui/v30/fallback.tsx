@@ -29,7 +29,7 @@ export class WebGLFallbackBoundary extends Component<FallbackProps, FallbackStat
     return { failed: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo): void {
+  componentDidCatch(error: Error, _info: ErrorInfo): void {
     // D7 honest log: surface to console.error once per failure, never spam.
     console.warn('[canvas-ui/fallback] WebGLRenderer init failed:', error.message);
     this.props.onError?.(error);

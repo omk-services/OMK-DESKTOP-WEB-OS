@@ -7,6 +7,7 @@
  *  AppFrame refactor (3-column + tools) stays in the codebase for future
  *  apps that want it, but Product itself uses the standard 2-column layout.
  */
+import { useEffect, useState } from 'react';
 import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
@@ -14,6 +15,9 @@ import { KanbanBoard, KanbanCard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { ProductDetailPage, type ProductDetailItem } from './ProductDetailPage';
 import { CMSCardList } from '../_ui/CMSCardList';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
 
@@ -58,6 +62,16 @@ export function ProductApp() {
   const items = useCmsStore(s => s.items['product_items']) ?? [];
   const drill = useCollectionDrill('product_items', ['Roadmap', 'Backlog', 'Specs']);
   const releasesDrill = useCollectionDrill('product_releases', 'Releases');
+  const [detail, setDetail] = useState<ProductDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const byStage = (stage: string) => items.filter(i => i.stage === stage);
 
@@ -225,5 +239,19 @@ export function ProductApp() {
     channels: 'Orchestration',
   };
 
-  return <AppFrame title="Product" subtitle="Flash domain" icon={Boxes} accent={ACCENT} sections={sections} groups={groups} />;
+  return (
+    <>
+      <AppFrame title="Product" subtitle="Flash domain" icon={Boxes} accent={ACCENT} sections={sections} groups={groups} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="product"
+          accent="#9333ea"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'slide-right', durationMs: 220 }}
+        >
+          <ProductDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }

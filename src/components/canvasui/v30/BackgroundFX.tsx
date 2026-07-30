@@ -156,11 +156,10 @@ export function renderCanvasForTheme(
 }
 
 export function BackgroundFX(props: BackgroundFXProps): ReactElement {
-  const mapping = getCanvasMapping(props.themeId);
   const effectId = props.nuanceSlot !== undefined
     ? resolveNuanceEffect(props.themeId, props.nuanceSlot)
     : resolveDominantEffect(props.themeId);
-  const tone = props.accent ?? mapping.accent;
+  const tone = props.accent ?? getCanvasMapping(props.themeId).accent;
 
   const wrapperProps = {
     className: props.className,

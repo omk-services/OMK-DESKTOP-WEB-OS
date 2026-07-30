@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play } from 'lucide-react';
+import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play, Wand2 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
@@ -8,6 +8,12 @@ import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
 import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
 import { ThemeDetailPage } from './ThemeDetailPage';
+import { useCanvasFxStore } from '../../stores/canvasFx.store';
+import {
+  THEME_TO_CANVAS_UI,
+  NEUTRAL_POOL,
+  type CanvasEffectId,
+} from '../../components/canvasui/v30/theme-canvas-mapping';
 import posthog from 'posthog-js';
 
 const ACCENT = '#78716c';
@@ -24,10 +30,176 @@ const APP_REGISTRY: Array<{ id: string; name: string; }> = [
   { id: 'product', name: 'Product' },
   { id: 'growth', name: 'Growth' },
   { id: 'sales', name: 'Sales Sanctum' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'legal', name: 'Legal' },
-  { id: 'settings', name: 'Settings' },
+
 ];
+
+// Helper: the available effect pool for the picker = 12 dominants ∪ 24 nuances ∪ 6 neutrals.
+// In practice many theme nuance slots reuse effects from other themes, so the
+// de-duped set is < 36 — the picker builds a flat de-duped list at render time.
+function buildPickerPalette(): CanvasEffectId[] {
+  const seen = new Set<CanvasEffectId>();
+  for (const t of Object.values(THEME_TO_CANVAS_UI)) {
+    seen.add(t.dominant);
+    seen.add(t.nuance[0]);
+    seen.add(t.nuance[1]);
+  }
+  for (const n of NEUTRAL_POOL) seen.add(n);
+  return Array.from(seen).sort();
+}
+
+const PICKER_PALETTE = buildPickerPalette();
+
+const FX_TILE_BG: Record<CanvasEffectId, string> = {
+  Asciify: '#1c1917',
+  Bend: '#000000',
+  Blaze: '#00ff9d',
+  Bubble: '#f97316',
+  Canvas: '#0f172a',
+  Cloth: '#0891b2',
+  Clouds: '#818cf8',
+  DecryptReveal: '#1c1917',
+  Displacement: '#0f172a',
+  Droplets: '#f97316',
+  FlameWrap: '#dc2626',
+  ForceField: '#ec4899',
+  Frost: '#6366f1',
+  Glass: '#0ea5e9',
+  Glitch: '#06b6d4',
+  GlyphRain: '#f08143',
+  Grid: '#000000',
+  HexFloat: '#0891b2',
+  Laser: '#00ff9d',
+  Liquid: '#ec4899',
+  Magnify: '#6366f1',
+  ParticleReveal: '#ec4899',
+  ParticleScroll: '#0ea5e9',
+  Peel: '#1c1917',
+  RetroDither: '#e11d48',
+  Ripple: '#0ea5e9',
+  Shatter: '#000000',
+  VHS: '#06b6d4',
+  AsciiObject: '#1c1917',
+  DitheredObject: '#1c1917',
+  GlassObject: '#0ea5e9',
+  ParticleObject: '#ec4899',
+  LiquidObject: '#0ea5e9',
+};
+
+function CanvasFxTile({
+  effectId,
+  selected,
+  onClick,
+}: {
+  effectId: CanvasEffectId | 'auto';
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const bg = effectId === 'auto' ? 'var(--theme-text-muted)' : (FX_TILE_BG[effectId as CanvasEffectId] ?? '#444');
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={effectId}
+      className={`relative h-9 w-full rounded-md transition-all hover:scale-[1.04] active:scale-[0.96] ${
+        selected
+          ? 'outline outline-2 outline-offset-2 outline-[var(--theme-accent)] scale-105'
+          : 'opacity-90 hover:opacity-100'
+      }`}
+      style={{ background: bg }}
+    >
+      <span className="absolute inset-0 grid place-items-center text-[8px] font-bold uppercase text-white mix-blend-difference">
+        {effectId === 'auto' ? 'AUTO' : effectId.slice(0, 6)}
+      </span>
+    </button>
+  );
+}
+
+function CanvasFxPicker() {
+  const overrides = useCanvasFxStore((s) => s.appFxOverrides);
+  const setAppFx = useCanvasFxStore((s) => s.setAppFx);
+  const clearAppFx = useCanvasFxStore((s) => s.clearAppFx);
+  const clearAll = useCanvasFxStore((s) => s.clearAll);
+
+  return (
+    <div className="p-7">
+      <SectionHead
+        title="Canvas FX per app"
+        subtitle="Pick the signature canvas-ui v30 effect for each app. Default = theme dominant."
+        action={
+          <div className="flex items-center gap-2">
+            <Badge tone="accent">{PICKER_PALETTE.length} effects</Badge>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-stone-600 transition-colors hover:bg-stone-50"
+            >
+              Reset all
+            </button>
+          </div>
+        }
+      />
+
+      <Card>
+        <div className="divide-y divide-[var(--hairline)]">
+          {APP_REGISTRY.filter((a) => a.id !== 'settings').map((app) => {
+            const override = overrides[app.id];
+            const themeId = CANONICAL_APP_THEMES[app.id] ?? 'warm-paper';
+            const themeMapping = THEME_TO_CANVAS_UI[themeId];
+            const dominantLabel = themeMapping?.dominant ?? 'GlyphRain';
+            return (
+              <div key={app.id} className="px-5 py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-stone-800">{app.name}</div>
+                    <p className="text-[11px] text-stone-400 mt-0.5">
+                      Theme · <span className="font-mono">{themeId}</span> · dominant ·{' '}
+                      <span className="font-mono">{dominantLabel}</span>
+                      {override && override !== 'auto' ? (
+                        <> · override · <span className="font-mono text-[var(--theme-accent)]">{override}</span></>
+                      ) : null}
+                    </p>
+                  </div>
+                  {override && override !== 'auto' ? (
+                    <button
+                      type="button"
+                      onClick={() => clearAppFx(app.id)}
+                      className="rounded-md border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-stone-600 hover:bg-stone-50"
+                    >
+                      Reset
+                    </button>
+                  ) : (
+                    <Badge tone="neutral">auto</Badge>
+                  )}
+                </div>
+                <div className="mt-3 grid grid-cols-12 gap-1.5">
+                  <CanvasFxTile
+                    effectId="auto"
+                    selected={!override || override === 'auto'}
+                    onClick={() => clearAppFx(app.id)}
+                  />
+                  {PICKER_PALETTE.filter((e) => e !== dominantLabel).map((e) => (
+                    <CanvasFxTile
+                      key={e}
+                      effectId={e}
+                      selected={override === e}
+                      onClick={() => setAppFx(app.id, e)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <p className="mt-4 text-[11px] text-stone-500 leading-relaxed">
+        The signature effect renders as a transparent header strip inside each app window.
+        WebGL effects inherit the per-app theme tokens (accent, duration, dominant).
+        On low-power hardware the wrapper falls back to a plain DOM subtree automatically.
+      </p>
+    </div>
+  );
+}
 
 export function SettingsApp() {
   const [flags, setFlags] = useState({
@@ -395,9 +567,12 @@ export function SettingsApp() {
     );
   };
 
+  const CanvasFx = () => <CanvasFxPicker />;
+
   const sections: AppSection[] = [
     { id: 'general', label: 'General', icon: SlidersHorizontal, render: General },
     { id: 'themes', label: 'Themes', icon: Palette, render: Themes },
+    { id: 'canvas-fx', label: 'Canvas FX', icon: Wand2, render: CanvasFx },
     { id: 'privacy', label: 'Privacy', icon: ShieldAlert, render: Privacy },
     { id: 'integrations', label: 'Integrations', icon: Plug, render: Integrations },
     { id: 'help', label: 'Help', icon: HelpCircle, render: Help },

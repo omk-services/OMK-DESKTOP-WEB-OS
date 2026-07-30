@@ -13,7 +13,6 @@ import { THEME_META } from '../lib/themes/tokens';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
-import { Grid } from './canvasui/v30';
 
 export function TopBar() {
   const [time, setTime] = useState(new Date());
