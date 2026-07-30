@@ -3,7 +3,6 @@ import { LayoutDashboard, Wind, GitBranch, BarChart3, Building2, Compass, AlertT
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { StatCard, Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
@@ -60,8 +59,33 @@ export function DashboardApp() {
 
   const weightOf = (c: (typeof clients)[number]) => Number(c.health ?? (c.status === 'Onboarding' ? 45 : 20));
 
+  const handleDrill = (): void => {
+    if (!drill.openId) return;
+    const item = clients.find(c => c.id === drill.openId);
+    if (!item) return;
+    const w = weightOf(item);
+    setDetail({
+      id: String(item.id),
+      title: String(item.name ?? 'Untitled'),
+      subtitle: String(item.segment ?? ''),
+      status: String(item.status ?? 'active'),
+      heroMetric: { value: `${w}%`, label: 'Health weight' },
+      kpis: [
+        { label: 'Ticket', value: `$${Number(item.ticket ?? 0).toLocaleString()}` },
+        { label: 'Open threads', value: String(item.openThreads ?? 0) },
+        { label: 'Next session', value: String(item.nextSession ?? '—') },
+        { label: 'Onboarding', value: String(item.onboardingStep ?? 'complete') },
+      ],
+      activity: [
+        { at: 'Today', text: `Status: ${String(item.status ?? 'active')}` },
+        { at: 'Live', text: `Segment: ${String(item.segment ?? '—')}` },
+      ],
+      fields: [],
+    });
+  };
+
   const Overview = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
+    handleDrill();
     return (
       <div className="p-7">
         <SectionHead title="Ecosystem Vitals" subtitle="Live data from omk_saas.clients and omk_saas.agents" />
@@ -97,7 +121,7 @@ export function DashboardApp() {
   };
 
   const Pipeline = () => {
-    if (drill.openId) return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
+    handleDrill();
     return (
       <div className="p-7">
         <SectionHead title="Client ledger" subtitle="Every account, every weight" />
