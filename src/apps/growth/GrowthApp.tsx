@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Sprout, Filter, Radio, FlaskConical } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge, StatCard } from '../_ui/kit';
@@ -6,6 +7,9 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { GrowthDetailPage, type GrowthDetailItem } from './GrowthDetailPage';
 
 const ACCENT = '#16a34a';
 
@@ -34,6 +38,16 @@ export function GrowthApp() {
   const channels = useCmsStore(s => s.items['growth_channels']) ?? [];
   const channelsDrill = useCollectionDrill('growth_channels', 'Channels');
   const experimentsDrill = useCollectionDrill('growth_experiments', 'Experiments');
+  const [detail, setDetail] = useState<GrowthDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const Channels = () => {
     if (channelsDrill.openId) {
@@ -76,5 +90,19 @@ export function GrowthApp() {
     { id: 'experiments', label: 'Experiments', icon: FlaskConical, render: Experiments },
   ];
 
-  return <AppFrame title="Growth" subtitle="Superman domain" icon={Sprout} accent={ACCENT} sections={sections} />;
+  return (
+    <>
+      <AppFrame title="Growth" subtitle="Superman domain" icon={Sprout} accent={ACCENT} sections={sections} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="growth"
+          accent="#16a34a"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'fade-up', durationMs: 220 }}
+        >
+          <GrowthDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
