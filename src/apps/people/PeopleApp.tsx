@@ -22,7 +22,9 @@ import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { launchTour, TOUR_IDS } from '../../lib/tours';
+import { PeopleDetailPage, type PeopleDetailItem } from './PeopleDetailPage';
 import {
   FLEET_AGENTS, STATE_META, type FleetAgent,
   CONTENT_DOCS,
@@ -753,6 +755,16 @@ export function PeopleApp() {
   const agentsDrill = useCollectionDrill('people_agents', 'Agents');
   const teamCount = useCmsStore(s => s.items['team']?.length ?? 0);
   const agentsCount = useCmsStore(s => s.items['people_agents']?.length ?? 0);
+  const [detail, setDetail] = useState<PeopleDetailItem | null>(null);
+  const { setDetail: setWindowDetail } = useWindowPage();
+
+  useEffect(() => {
+    if (detail) {
+      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [detail, setWindowDetail]);
 
   const Team = () => {
     if (teamDrill.openId) {
@@ -798,5 +810,19 @@ export function PeopleApp() {
     culture:  'Culture',
   };
 
-  return <AppFrame title="RH & Méta-Gouvernance" subtitle="Agent Factory · B1 Gatekeeper" icon={Atom} accent={ACCENT} sections={sections} groups={groups} />;
+  return (
+    <>
+      <AppFrame title="RH & Méta-Gouvernance" subtitle="Agent Factory · B1 Gatekeeper" icon={Atom} accent={ACCENT} sections={sections} groups={groups} />
+      {detail ? (
+        <AppDetailOverlay
+          appId="people"
+          accent="#0891b2"
+          onBack={() => setDetail(null)}
+          motion={{ kind: 'slide-left', durationMs: 220 }}
+        >
+          <PeopleDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+    </>
+  );
 }
