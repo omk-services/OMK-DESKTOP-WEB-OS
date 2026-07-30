@@ -1,0 +1,14 @@
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"dashboard","file":"src/apps/dashboard/DashboardDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"people","file":"src/apps/people/PeopleDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"operations","file":"src/apps/operations/OperationsDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"it-rd","file":"src/apps/it-rd/ItRdDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"clients","file":"src/apps/clients/ClientsDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"tasks","file":"src/apps/tasks/TasksDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"marketplace","file":"src/apps/marketplace/MarketplaceDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"product","file":"src/apps/product/ProductDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"growth","file":"src/apps/growth/GrowthDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"sales","file":"src/apps/sales/SalesApp.tsx (refactored)"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"finance","file":"src/apps/finance/FinanceDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"legal","file":"src/apps/legal/LegalDetailPage.tsx"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"page_detail_delivered","app":"settings","file":"src/apps/settings/SettingsDetailPage.tsx (conditional)"}
+{"ts":"2026-07-30T12:00:00Z","actor":"a0","event":"app_detail_overlay_extracted","file":"src/components/cms/AppDetailOverlay.tsx"}
