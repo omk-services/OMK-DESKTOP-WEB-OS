@@ -4,7 +4,6 @@ import { AppFrame, SectionHead, type AppSection } from '../../components/AppFram
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { TasksDetailPage, type TasksDetailItem } from './TasksDetailPage';
@@ -35,6 +34,21 @@ export function TasksApp() {
     updateItem('tasks', id, { done: !current?.done });
   };
 
+  const openTask = (id: string): void => {
+    const item = tasks.find(c => c.id === id);
+    if (!item) { drill.open(id); return; }
+    setDetail({
+      id: String(item.id),
+      title: String(item.label ?? 'Untitled'),
+      subtitle: String(item.when ?? ''),
+      status: item.done ? 'done' : String(item.group ?? 'today'),
+      dueAt: String(item.when ?? ''),
+      body: String(item.notes ?? item.body ?? ''),
+      fields: [],
+    });
+    drill.open(id);
+  };
+
   const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string) => {
     const items = tasks.filter(filter);
     return (
@@ -53,7 +67,7 @@ export function TasksApp() {
                 >
                   {t.done ? <Check className="w-3.5 h-3.5 text-white" /> : null}
                 </button>
-                <button onClick={() => drill.open(String(t.id))} className={`flex-1 text-left text-sm ${t.done ? 'line-through text-stone-400' : 'text-stone-800 font-medium hover:text-[var(--theme-accent)]'} transition-colors`}>
+                <button onClick={() => openTask(String(t.id))} className={`flex-1 text-left text-sm ${t.done ? 'line-through text-stone-400' : 'text-stone-800 font-medium hover:text-[var(--theme-accent)]'} transition-colors`}>
                   {String(t.label)}
                 </button>
                 <span className="text-xs text-stone-400">{String(t.when)}</span>
@@ -69,15 +83,12 @@ export function TasksApp() {
   const isUpcoming = (t: typeof tasks[number]) => t.group === 'upcoming' && !t.done;
 
   const Today = () => {
-    if (drill.openId) return <DynamicPageView collectionId="tasks" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return list(isToday, 'Today', 'Nothing left today — nicely done.');
   };
   const Upcoming = () => {
-    if (drill.openId) return <DynamicPageView collectionId="tasks" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return list(isUpcoming, 'Upcoming', 'Nothing on the horizon.');
   };
   const Done = () => {
-    if (drill.openId) return <DynamicPageView collectionId="tasks" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
     return list(t => !!t.done, 'Done', 'No completed tasks yet.');
   };
 
