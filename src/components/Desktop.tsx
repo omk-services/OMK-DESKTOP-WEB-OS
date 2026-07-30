@@ -39,7 +39,6 @@ export function Desktop() {
       // persists whatever is open, which can accidentally skip first-visit.
       // The citadel is a self-contained setState in the demoShell store, so
       // the macro layout doesn't need to remember anything.
-      try { localStorage.removeItem('coach-os-shell-layout-v1'); } catch { /* noop */ }
       restoreLayout();
       const restored = useShellStore.getState().windows.filter(w => w.isOpen);
       if (restored.length > 0) {
@@ -56,12 +55,12 @@ export function Desktop() {
       }
       const onboardingPath = isOnboardingPath();
       const onboarding = getApp('onboarding');
-      if (onboarding) {
+      if (onboardingPath && onboarding) {
         openApp(onboarding.id, onboarding.name);
-        if (onboardingPath) {
-          // Maximize so the Mini Desktop fills the screen for the prospect.
-          requestAnimationFrame(() => maximizeApp(onboarding.id));
-        }
+        requestAnimationFrame(() => maximizeApp(onboarding.id));
+      } else {
+        // No persisted layout + normal URL — leave the desktop empty. Do NOT force onboarding.
+        return;
       }
       // Pre-seed the citadel + 4 demo panels in the demoShell store. Panels
       // start CLOSED — they're opened by the citadel's reveal phase OR by the
