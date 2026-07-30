@@ -5,7 +5,6 @@ import { Card, Badge, StatCard } from '../_ui/kit';
 import { FunnelStep, Table } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
@@ -36,6 +35,7 @@ function Funnel() {
 
 export function GrowthApp() {
   const channels = useCmsStore(s => s.items['growth_channels']) ?? [];
+  const experiments = useCmsStore(s => s.items['growth_experiments']) ?? [];
   const channelsDrill = useCollectionDrill('growth_channels', 'Channels');
   const experimentsDrill = useCollectionDrill('growth_experiments', 'Experiments');
   const [detail, setDetail] = useState<GrowthDetailItem | null>(null);
@@ -49,17 +49,49 @@ export function GrowthApp() {
     }
   }, [detail, setWindowDetail]);
 
+  const openChannel = (id: string): void => {
+    const item = channels.find(c => c.id === id);
+    if (!item) { channelsDrill.open(id); return; }
+    const leads = Number(item.leads ?? 0);
+    setDetail({
+      id: String(item.id),
+      title: String(item.name ?? 'Untitled'),
+      subtitle: String(item.subtitle ?? ''),
+      status: String(item.trend ?? '—'),
+      funnel: [
+        { stage: 'Leads', pct: 100, absolute: leads },
+        { stage: 'CAC', pct: Math.min(100, Math.round((Number(item.cac ?? 0) / Math.max(leads, 1)) * 100)), absolute: Number(item.cac ?? 0) },
+      ],
+      experiments: [],
+      fields: [],
+    });
+    channelsDrill.open(id);
+  };
+
+  const openExperiment = (id: string): void => {
+    const item = experiments.find(c => c.id === id);
+    if (!item) { experimentsDrill.open(id); return; }
+    const status = String(item.status ?? 'live') as 'live' | 'done' | 'draft';
+    setDetail({
+      id: String(item.id),
+      title: String(item.name ?? 'Untitled'),
+      subtitle: String(item.subtitle ?? ''),
+      status,
+      funnel: [],
+      experiments: [{ name: String(item.name ?? 'Experiment'), variant: String(item.variant ?? 'control'), lift: String(item.lift ?? '—'), status }],
+      fields: [],
+    });
+    experimentsDrill.open(id);
+  };
+
   const Channels = () => {
-    if (channelsDrill.openId) {
-      return <DynamicPageView collectionId="growth_channels" itemId={channelsDrill.openId} onBack={channelsDrill.close} onNavigate={channelsDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Channels" subtitle="Where diagnosed leads come from" />
         <Card>
           <Table
             head={['Channel', 'Leads', 'CAC', 'Trend']}
-            onRowClick={(i) => channelsDrill.open(String(channels[i].id))}
+            onRowClick={(i) => openChannel(String(channels[i].id))}
             rows={channels.map(c => [
               String(c.name),
               String(c.leads),
@@ -73,13 +105,10 @@ export function GrowthApp() {
   };
 
   const Experiments = () => {
-    if (experimentsDrill.openId) {
-      return <DynamicPageView collectionId="growth_experiments" itemId={experimentsDrill.openId} onBack={experimentsDrill.close} onNavigate={experimentsDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Experiments" subtitle="Growth bets & results" />
-        <CollectionRepeater collectionId="growth_experiments" onOpen={experimentsDrill.open} />
+        <CollectionRepeater collectionId="growth_experiments" onOpen={openExperiment} />
       </div>
     );
   };
