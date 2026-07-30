@@ -524,7 +524,26 @@ function Fleet() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                 {agents.map(a => (
-                  <FleetCard key={a.code} agent={a} onClick={() => setSelectedCode(a.code)} />
+                  <FleetCard
+                    key={a.code}
+                    agent={a}
+                    onClick={() => {
+                      setDetail({
+                        id: a.code,
+                        title: a.name,
+                        subtitle: a.role ?? '',
+                        status: a.squad ?? 'agent',
+                        initials: (a.name ?? '?').slice(0, 2).toUpperCase(),
+                        meta: [
+                          { label: 'Squad', value: a.squad ?? '—' },
+                          { label: 'Code', value: a.code },
+                          { label: 'Role', value: a.role ?? '—' },
+                        ],
+                        squad: [{ name: a.squad ?? 'Unassigned', color: '#0891b2' }],
+                        fields: [],
+                      });
+                    }}
+                  />
                 ))}
               </div>
             </div>
