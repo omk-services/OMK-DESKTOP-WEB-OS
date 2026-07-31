@@ -105,7 +105,7 @@ export function AppDetailOverlay({
         aria-label={`${label} detail`}
         data-testid="app-detail-overlay"
         data-app={appId}
-        className="absolute top-0 right-0 bottom-0 z-50 overflow-y-auto custom-scrollbar bg-[var(--theme-bg)]"
+        className="absolute top-0 right-0 bottom-0 z-50 overflow-y-auto custom-scrollbar bg-white"
         style={{ left: 'var(--sidebar-w, 240px)' }}
         variants={variants}
         initial="hidden"

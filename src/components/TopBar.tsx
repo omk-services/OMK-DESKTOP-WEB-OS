@@ -111,7 +111,7 @@ export function TopBar() {
               <button onClick={() => { openApp('finance', 'Finance'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
                 <CreditCard className="w-3.5 h-3.5" /> Billing & subscription
               </button>
-              <button onClick={() => { openApp('cognition', 'Cognition'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
+              <button onClick={() => { openApp('sales', 'Sales'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
                 <Sparkles className="w-3.5 h-3.5" /> AI preferences
               </button>
               <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />

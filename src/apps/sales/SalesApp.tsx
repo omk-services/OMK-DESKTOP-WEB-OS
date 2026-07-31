@@ -460,7 +460,6 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
   const navigate = (appId: string): void => {
     if (appId === 'tasks') openApp('tasks', 'Tasks');
     if (appId === 'settings') openApp('settings', 'Settings');
-    if (appId === 'cognition') openApp('cognition', 'Cognition SovereignGate');
     if (appId === 'sales') openApp('sales', SALES_TITLE);
     setDetail(null);
   };
