@@ -21,7 +21,6 @@ import { LegalApp } from '../apps/legal/LegalApp';
 import { SettingsApp } from '../apps/settings/SettingsApp';
 import { OnboardingApp } from '../apps/onboarding/OnboardingApp';
 import { WelcomeApp } from '../apps/welcome/WelcomeApp';
-import { CognitionApp } from '../apps/cognition/CognitionApp';
 import { AuditApp } from '../apps/audit/AuditApp';
 import { DesignApp } from '../apps/design/DesignApp';
 
@@ -35,8 +34,6 @@ registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,     
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
 registerApp({ id: 'sales',       name: 'Sales Sanctum',        icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
-// Cognition SovereignGate (dwelled inside Sales sidebar per Drawbridge Task 1 2026-07-28)
-registerApp({ id: 'cognition',   name: 'Cognition SovereignGate', icon: BrainCircuit,    accent: '#7c3aed', description: 'Knowledge sovereignty + routines + audit',      component: CognitionApp, hidden: true });
 // Audit Diagnostic IA (Drawbridge Task 4 2026-07-28: extrait from C:\Users\amado\Downloads\audit.pdf)
 registerApp({ id: 'audit',       name: 'Audit Diagnostic IA',    icon: Shield,          accent: '#b91c1c', description: 'Manuel de diagnostic IA · 6 grilles canon',     component: AuditApp,     hidden: true });
 registerApp({ id: 'finance',     name: 'Finance',              icon: Wallet,          accent: '#ca8a04', description: 'Unit economics, runway, invoices',               component: FinanceApp });

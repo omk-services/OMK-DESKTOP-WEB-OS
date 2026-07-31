@@ -4,7 +4,6 @@
  * paper-garden scene. */
 import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
-import { BackgroundFX } from './canvasui/v30';
 
 export function Wallpaper() {
   const globalTheme = useThemeStore((s) => s.globalTheme);
@@ -44,12 +43,10 @@ export function Wallpaper() {
           ))}
         </svg>
       </div>
-      {/* Theme-driven canvas FX overlay (transparent, layered on top) */}
-      {themeMeta ? (
-        <div className="absolute inset-0 pointer-events-none" style={{ mixBlendMode: 'screen' }}>
-          <BackgroundFX themeId={themeMeta.id} accent={themeMeta.accent} />
-        </div>
-      ) : null}
+      {/* No canvas-ui effect on the desktop wallpaper. Canvas FX belongs to each app
+          window (see AppFrame.tsx signature FX). Wallpaper stays a clean static scene
+          so the per-app effects can carry visual weight without competing layers. */}
+      {themeMeta ? null : null}
     </div>
   );
 }
