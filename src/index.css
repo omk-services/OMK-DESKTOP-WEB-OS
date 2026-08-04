@@ -8,6 +8,30 @@
    ═══════════════════════════════════════════════════ */
 
 @layer base {
+  /* ── Selection : comportement d'OS, pas de page web ──────────────────
+     Un shell de bureau ne laisse pas selectionner ses libelles, ses onglets
+     ni ses cartes. Sans cette regle, le navigateur affiche un curseur I-beam
+     sur toute l'interface et, si la navigation au caret est active (F7 sous
+     Chrome), y depose un caret clignotant — comme si on pouvait ecrire dans
+     un titre de fenetre.
+
+     La selection reste active la ou elle a un sens : champs de saisie, et
+     tout element portant `data-selectable` ou la classe `.selectable`.
+     Pour rendre un bloc de donnees copiable, lui ajouter `data-selectable`. */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"],
+  [data-selectable],
+  .selectable {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
   :root {
     /* Accent — PostHog orange */
     --theme-accent: #f08143;

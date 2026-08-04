@@ -732,6 +732,17 @@ export function createMagnify(
 
   return {
     setOptions(next) {
+      // Garde-fou amont (PR #23, 2026-08-03) : sortir si aucune option n'a change.
+      // Le wrapper React appelle setOptions() dans un useEffect SANS tableau de
+      // dependances, avec un objet `options` neuf a chaque rendu. Sans ce test,
+      // chaque rendu du parent relance la boucle rAF — d'ou un tremblement visible.
+      if (
+        !Object.entries(next).some(
+          ([key, value]) => config[key as keyof MagnifyOptions] !== value,
+        )
+      ) {
+        return;
+      }
       const previousZoom = config.zoom;
       Object.assign(config, next);
       if (!config.scrollZoom || config.zoom !== previousZoom) {
