@@ -124,6 +124,7 @@ export function AuditApp() {
       accent={ACCENT}
       icon={Shield}
       sections={sections}
+      canvasNuance={1}
     />
   );
 }

@@ -42,6 +42,8 @@ export interface BackgroundFXProps {
   accent?: string;
   /** 0 or 1 to render that theme's nuance effect instead of the dominant. */
   nuanceSlot?: 0 | 1;
+  /** Override direct de l'effet, court-circuite la résolution par thème. */
+  effectId?: CanvasEffectId;
   /** Required for *Object family (3D model / image URL). Ignored otherwise. */
   objectSrc?: string;
   /** Optional wrapper className. */
@@ -130,6 +132,7 @@ const OBJECT_EFFECTS: ReadonlySet<CanvasEffectId> = new Set([
  * Resolve the requested effect id from props.
  */
 function resolveEffectId(props: BackgroundFXProps): CanvasEffectId {
+  if (props.effectId) return props.effectId;
   return props.nuanceSlot !== undefined
     ? resolveNuanceEffect(props.themeId, props.nuanceSlot)
     : resolveDominantEffect(props.themeId);

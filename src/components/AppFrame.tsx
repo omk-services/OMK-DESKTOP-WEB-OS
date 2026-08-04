@@ -20,7 +20,7 @@ import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 import { useThemeStore, applyThemeTokens, useThemeIdFor } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
-import { BackgroundFX } from './canvasui/v30';
+import { BackgroundFX, type CanvasEffectId } from './canvasui/v30';
 
 export interface AppSection {
   id: string;
@@ -55,6 +55,11 @@ interface AppFrameProps {
   /** set false to suppress the per-app signature canvas-ui FX.
    * Used by apps that are picker / showcase / shell (settings, design). */
   disableSignatureFx?: boolean;
+  /** Which nuance index of the theme's canvas effect to render. Defaults to 0.
+   *  Use 1 to differentiate apps that share the same theme. */
+  canvasNuance?: 0 | 1;
+  /** Override the resolved effect id directly, bypassing theme resolution. */
+  canvasEffect?: CanvasEffectId;
 }
 
 const NARROW_BREAKPOINT = 640;
@@ -72,7 +77,7 @@ function ActiveSection({ section }: { section: AppSection }) {
   return <>{section.render()}</>;
 }
 
-export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools, disableSignatureFx }: AppFrameProps) {
+export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools, disableSignatureFx, canvasNuance, canvasEffect }: AppFrameProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
@@ -330,7 +335,8 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
             <BackgroundFX
               themeId={activeThemeId}
               accent={accent}
-              nuanceSlot={0}
+              nuanceSlot={canvasNuance ?? 0}
+              effectId={canvasEffect}
               className="h-full w-full"
             />
           </div>

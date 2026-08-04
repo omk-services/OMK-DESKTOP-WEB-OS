@@ -220,7 +220,7 @@ export function OperationsApp() {
 
   return (
     <>
-      <AppFrame title="Operations" subtitle="Batman domain" icon={ClipboardList} accent={ACCENT} sections={sections} />
+      <AppFrame title="Operations" subtitle="Batman domain" icon={ClipboardList} accent={ACCENT} sections={sections} canvasNuance={1} />
       {detail ? (
         <AppDetailOverlay
           appId="operations"

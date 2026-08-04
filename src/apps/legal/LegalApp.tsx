@@ -134,7 +134,7 @@ export function LegalApp() {
 
   return (
     <>
-      <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} />
+      <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} canvasNuance={1} />
       {detail ? (
         <AppDetailOverlay
           appId="legal"
