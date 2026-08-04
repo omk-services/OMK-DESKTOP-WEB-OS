@@ -89,7 +89,16 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
 
   // Per-app theme: resolve + apply tokens as scoped CSS variables on rootRef.
   // Normalize the title to lowercase to match the app-registry IDs (e.g. "Product" → "product").
-  const appId = title.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  // `windowId` EST l'id du registre (Desktop rend <WindowFrame id={win.id}> et
+  // resout le manifeste par ce meme id). C'est donc la seule cle qui coincide
+  // avec celle qu'ecrit Settings via setAppTheme(app.id, ...).
+  //
+  // La slugification du titre affiche — l'ancienne methode, gardee en repli —
+  // produisait une cle differente des que le nom contenait autre chose que des
+  // lettres : "People / Agents" donnait `people---agents` la ou le registre dit
+  // `people`. Resultat : 5 apps sur 17 ignoraient silencieusement leur override
+  // de theme ET leur theme canonique.
+  const appId = windowId ?? title.toLowerCase().replace(/[^a-z0-9-]/g, '-');
   const activeThemeId = useThemeIdFor(appId);
   const tokens = useThemeStore((s) => s.tokensFor(appId));
   useEffect(() => {
