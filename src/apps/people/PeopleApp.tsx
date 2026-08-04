@@ -20,9 +20,13 @@ import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { PeopleItemDetail } from './PeopleItemDetail';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+
+registerItemDetail('people', PeopleItemDetail);
 import { launchTour, TOUR_IDS } from '../../lib/tours';
 import { PeopleDetailPage, type PeopleDetailItem } from './PeopleDetailPage';
 import {

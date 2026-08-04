@@ -1,0 +1,76 @@
+[
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_Fsgz5GWMN2gLvGwVdXGLIpZs",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Read",
+    "tool_use_id": "call_uS1PEftztXpv2nm4ur4knm8E",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "TodoWrite",
+    "tool_use_id": "call_VrgdUNm6HOXWCs1WvUvFei04",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Read",
+    "tool_use_id": "call_uNq5i1bNmRoDSsR2mT8PL7Cg",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_OlX3Msq8d47DYNHF8j3oTII9",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_2VMxhX0JJhyhmzZfFO2P5DOa",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "mcp__playwright__browser_navigate",
+    "tool_use_id": "call_o17pJcepXhuAr8A86rXF5Of3",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": true,
+    "mcp_server": "playwright",
+    "mcp_tool_name": "browser_navigate",
+    "input_keys": [
+      "url"
+    ]
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_IrPhFynMBqflNAfvNzeMCQux",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_ob5NCyXNLNXMQIJsznwgiwCR",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": true,
+    "mcp_server": "playwright",
+    "mcp_tool_name": "browser_take_screenshot",
+    "input_keys": [
+      "type",
+      "filename"
+    ]
+  }
+]

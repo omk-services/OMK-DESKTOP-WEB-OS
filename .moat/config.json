@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "projectName": "coach-os",
+  "createdAt": "2026-07-28T06:58:44.272Z",
+  "streaming": {
+    "enabled": true,
+    "format": "jsonl",
+    "cursorIntegration": true
+  },
+  "ui": {
+    "autoShowMoat": true,
+    "confirmBeforeSend": false
+  }
+}

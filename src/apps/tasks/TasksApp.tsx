@@ -7,6 +7,10 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { TasksDetailPage, type TasksDetailItem } from './TasksDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { TasksItemDetail } from './TasksItemDetail';
+
+registerItemDetail('tasks', TasksItemDetail);
 
 const ACCENT = '#0d9488';
 

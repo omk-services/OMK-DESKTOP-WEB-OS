@@ -7,6 +7,10 @@ import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDetailPage';
 import { CMSCardList } from '../_ui/CMSCardList';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { OperationsItemDetail } from './OperationsItemDetail';
+
+registerItemDetail('operations', OperationsItemDetail);
 
 const ACCENT = '#4f46e5';
 

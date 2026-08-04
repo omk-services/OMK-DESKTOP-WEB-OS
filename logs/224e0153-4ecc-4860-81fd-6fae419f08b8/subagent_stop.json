@@ -1,0 +1,130 @@
+[
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a14ee7cedca10076b",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a14ee7cedca10076b.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "aaea3885f119b22dc",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-aaea3885f119b22dc.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a847b591afb5c8424",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a847b591afb5c8424.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a48620972aff5f398",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a48620972aff5f398.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "ab78cc876abb11ab3",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-ab78cc876abb11ab3.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a37679fc96ac8b8be",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a37679fc96ac8b8be.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "aeb059e0089364f40",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-aeb059e0089364f40.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a38d211485abcf163",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a38d211485abcf163.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "ac51d5ae0e8ccd492",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-ac51d5ae0e8ccd492.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "aa799ba21f6a321a0",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-aa799ba21f6a321a0.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a6d08387ddf0c6262",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a6d08387ddf0c6262.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a81ef434e1e550277",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a81ef434e1e550277.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a9bdf61932a3b2bc8",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a9bdf61932a3b2bc8.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "ae62d5f7c8d4934ad",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-ae62d5f7c8d4934ad.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "aeda396f73946956a",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-aeda396f73946956a.jsonl"
+  },
+  {
+    "session_id": "224e0153-4ecc-4860-81fd-6fae419f08b8",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_id": "a92cb48d794a50995",
+    "agent_type": "general-purpose",
+    "agent_transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\224e0153-4ecc-4860-81fd-6fae419f08b8\\subagents\\agent-a92cb48d794a50995.jsonl"
+  }
+]

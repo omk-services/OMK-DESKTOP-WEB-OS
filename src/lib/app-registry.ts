@@ -11,6 +11,7 @@ export interface AppManifest {
   description: string;
   component: ComponentType;
   dockSlot?: number;
+  hidden?: boolean;         // hide from desktop dock (still openable via openApp)
 }
 
 const GLOBAL_KEY = '__CITADELLE_APP_REGISTRY__';

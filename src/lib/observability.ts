@@ -50,6 +50,28 @@ function writePersistedConsent(granted: boolean): void {
   }
 }
 
+/** Cognition — read trust score for the sovereign gate (Black Bolt, ADR-COGNITION-001 §3.1).
+ *  Default 0.5 (between floor 0.62 and ceiling 1.0). Override via localStorage `cognition:trust_score`. */
+export function readTrustScore(): number {
+  try {
+    const raw = localStorage.getItem('cognition:trust_score');
+    if (raw !== null) {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0 && n <= 1) return n;
+    }
+  } catch {
+    // localStorage unavailable — fall through to default
+  }
+  return 0.5;
+}
+
+/** Cognition — log a silent reject (Black Bolt silence-as-power). D1 receipt only, no UI. */
+export function silentReject(surface: string, reason: string): void {
+  if (typeof console !== 'undefined') {
+    console.info(`[cognition:silent-reject] ${surface} :: ${reason}`);
+  }
+}
+
 /** Initialises both SDKs once at app boot. Safe to call multiple times. */
 export function initObservability(): void {
   if (initialized) return;
@@ -164,3 +186,15 @@ function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
 }
+
+// =============================================================================
+// Cognition sovereignty primitives — ADR-COGNITION-001 §3.1 contract.
+// Canonical signatures live at lines 55 and 69 above (localStorage trust floor
+// + 2-string silentReject). This appendix only exposes the floor constant for
+// callers that prefer an explicit threshold reference.
+// =============================================================================
+
+/** Trust score floor that arms the sovereign gate per ADR-COGNITION-001 §3.1.
+ *  The localised default (0.5) sits between this floor and a perfect 1.0, so
+ *  the surface arms cleanly on first render before any DB hydration. */
+export const COGNITION_TRUST_FLOOR = 0.62;

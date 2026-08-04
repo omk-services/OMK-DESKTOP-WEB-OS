@@ -17,6 +17,10 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ProductDetailPage, type ProductDetailItem } from './ProductDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { ProductItemDetail } from './ProductItemDetail';
+
+registerItemDetail('product', ProductItemDetail);
 import { CMSCardList } from '../_ui/CMSCardList';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
 

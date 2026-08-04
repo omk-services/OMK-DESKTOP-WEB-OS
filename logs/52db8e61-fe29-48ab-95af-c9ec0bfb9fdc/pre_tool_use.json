@@ -1,0 +1,180 @@
+[
+  {
+    "tool_name": "Read",
+    "tool_use_id": "call_uS1PEftztXpv2nm4ur4knm8E",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Read",
+      "file_path": "C:\\Users\\amado\\coach-os\\src\\components\\AppFrame.tsx",
+      "limit": 80
+    }
+  },
+  {
+    "tool_name": "TodoWrite",
+    "tool_use_id": "call_VrgdUNm6HOXWCs1WvUvFei04",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "TodoWrite"
+    }
+  },
+  {
+    "tool_name": "Read",
+    "tool_use_id": "call_uNq5i1bNmRoDSsR2mT8PL7Cg",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Read",
+      "file_path": "C:\\Users\\amado\\coach-os\\src\\components\\AppFrame.tsx",
+      "offset": 80,
+      "limit": 100
+    }
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_OlX3Msq8d47DYNHF8j3oTII9",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Bash",
+      "command": "cd \"C:/Users/amado/coach-os\" && npx tsc --noEmit 2>&1 | head -10 && echo \"TSC_EXIT=$?\"",
+      "description": "Verify TypeScript still clean after tokens.ts edit"
+    }
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_2VMxhX0JJhyhmzZfFO2P5DOa",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Bash",
+      "command": "curl -s -o /dev/null -w \"%{http_code}\\n\" http://localhost:5174/ 2>&1 || echo \"DEV_DOWN\"",
+      "description": "Check if Coach OS dev server still responds on :5174"
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_navigate",
+    "tool_use_id": "call_o17pJcepXhuAr8A86rXF5Of3",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_navigate",
+      "mcp_tool": "mcp__playwright__browser_navigate",
+      "input_keys": [
+        "url"
+      ]
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_yfubUBN7mQ5lkq5w9v3lpqkn",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename",
+        "fullPage"
+      ]
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_1e3kQXZ7QG827hNti4ggJBbU",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename",
+        "fullPage"
+      ]
+    }
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_IrPhFynMBqflNAfvNzeMCQux",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Bash",
+      "command": "mkdir -p \"C:/Users/amado/.playwright-mcp/screenshots-2026-07-30-styles-par-app\"",
+      "description": "Create screenshot output dir"
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_090UAMICNpofP6nxPXXqoIus",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename",
+        "fullPage"
+      ]
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_amTPc2Z8vRLjZnqaXhJX0GYA",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename",
+        "fullPage"
+      ]
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_o78YcCsVo4gYIYT84RjEsBsy",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename",
+        "fullPage"
+      ]
+    }
+  },
+  {
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_use_id": "call_ob5NCyXNLNXMQIJsznwgiwCR",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "mcp__playwright__browser_take_screenshot",
+      "mcp_tool": "mcp__playwright__browser_take_screenshot",
+      "input_keys": [
+        "type",
+        "filename"
+      ]
+    }
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_u2ukGgtWQdfAIVlfe0Ae0ZwZ",
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Bash",
+      "command": "cd \"C:/Users/amado\" && date +\"%Y-%m-%d %H:%M:%S\" && mkdir -p \"_TRASH_2026-07-30_pre_agentsroom_removal\" && cp -r \".agentsroom\" \"_TRASH_2026-07-30_pre_agentsroom_removal/.agentsroom\" && cp \".mcp.json\" ",
+      "description": "Snapshot .agentsroom + .mcp.json to TRASH dir for AgentsRoom removal reversal path"
+    }
+  }
+]

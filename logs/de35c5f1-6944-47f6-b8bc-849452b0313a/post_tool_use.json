@@ -1,0 +1,37 @@
+[
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_cf893d04bd9c49e799cff912",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "TodoWrite",
+    "tool_use_id": "call_e27377943a5e4fc3b4f6c16a",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_3586f37523504e46a3b66f3d",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Write",
+    "tool_use_id": "call_6fc63fe7afa3405d86ce7e5f",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  },
+  {
+    "tool_name": "Write",
+    "tool_use_id": "call_f52ad9ece9be43819867868e",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PostToolUse",
+    "is_mcp_tool": false
+  }
+]

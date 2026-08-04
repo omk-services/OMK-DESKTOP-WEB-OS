@@ -8,6 +8,10 @@ import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
 import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
 import { ThemeDetailPage } from './ThemeDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { SettingsItemDetail } from './SettingsItemDetail';
+
+registerItemDetail('settings', SettingsItemDetail);
 import { useCanvasFxStore } from '../../stores/canvasFx.store';
 import {
   THEME_TO_CANVAS_UI,

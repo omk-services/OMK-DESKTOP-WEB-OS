@@ -5,7 +5,8 @@
  * Spec: docs/superpowers/specs/2026-07-30-coach-os-app-detail-pages-design.md §3.1
  *
  * Contract:
- *  - Renders position:absolute overlay, left: var(--sidebar-w, 240px).
+ *  - Renders position:absolute overlay filling its parent (left:0; the parent
+ *    is the AppFrame content area which already accounts for sidebar width).
  *  - Dispatches one of 8 entry motions (per overlayMotions).
  *  - Focuses the first <h1> in children on mount.
  *  - Exposes role="main" + aria-label="<appName> detail".
@@ -105,8 +106,8 @@ export function AppDetailOverlay({
         aria-label={`${label} detail`}
         data-testid="app-detail-overlay"
         data-app={appId}
-        className="absolute top-0 right-0 bottom-0 z-50 overflow-y-auto custom-scrollbar bg-white"
-        style={{ left: 'var(--sidebar-w, 240px)' }}
+        className="absolute top-0 right-0 bottom-0 z-50 overflow-y-auto custom-scrollbar"
+        style={{ left: 0, background: 'var(--theme-bg)', color: 'var(--theme-text)' }}
         variants={variants}
         initial="hidden"
         animate="visible"

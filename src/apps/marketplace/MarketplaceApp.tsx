@@ -7,6 +7,10 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { MarketplaceDetailPage, type MarketplaceDetailItem } from './MarketplaceDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { MarketplaceItemDetail } from './MarketplaceItemDetail';
+
+registerItemDetail('marketplace', MarketplaceItemDetail);
 
 const ACCENT = '#db2777';
 

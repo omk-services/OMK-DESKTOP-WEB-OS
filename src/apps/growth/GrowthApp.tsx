@@ -9,6 +9,10 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { GrowthDetailPage, type GrowthDetailItem } from './GrowthDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { GrowthItemDetail } from './GrowthItemDetail';
+
+registerItemDetail('growth', GrowthItemDetail);
 
 const ACCENT = '#16a34a';
 

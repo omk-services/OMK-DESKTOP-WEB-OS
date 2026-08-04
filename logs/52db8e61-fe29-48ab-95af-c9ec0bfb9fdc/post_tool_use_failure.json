@@ -1,0 +1,107 @@
+[
+  {
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\52db8e61-fe29-48ab-95af-c9ec0bfb9fdc.jsonl",
+    "cwd": "C:\\Users\\amado\\coach-os",
+    "prompt_id": "bd00fe0d-cd5d-4cd8-9006-315d4085fa0b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "xhigh"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_input": {
+      "type": "png",
+      "filename": "wiki/hand_offs/2026-07-30_styles-par-app/screenshots/home-after.png",
+      "fullPage": true
+    },
+    "tool_use_id": "call_yfubUBN7mQ5lkq5w9v3lpqkn",
+    "error": "### Error\nError: ENOENT: no such file or directory, open 'c:\\Users\\amado\\wiki\\hand_offs\\2026-07-30_styles-par-app\\screenshots\\home-after.png'",
+    "is_interrupt": false,
+    "duration_ms": 529
+  },
+  {
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\52db8e61-fe29-48ab-95af-c9ec0bfb9fdc.jsonl",
+    "cwd": "C:\\Users\\amado\\coach-os",
+    "prompt_id": "bd00fe0d-cd5d-4cd8-9006-315d4085fa0b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "xhigh"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_input": {
+      "type": "png",
+      "filename": "C:/Users/amado/.claude/memory/wiki/hand_offs/2026-07-30_styles-par-app/screenshots/home-after.png",
+      "fullPage": true
+    },
+    "tool_use_id": "call_1e3kQXZ7QG827hNti4ggJBbU",
+    "error": "### Error\nError: File access denied: C:\\Users\\amado\\.claude\\memory\\wiki\\hand_offs\\2026-07-30_styles-par-app\\screenshots\\home-after.png is outside allowed roots. Allowed roots: c:\\Users\\amado\\.playwright-mcp, c:\\Users\\amado",
+    "is_interrupt": false,
+    "duration_ms": 325
+  },
+  {
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\52db8e61-fe29-48ab-95af-c9ec0bfb9fdc.jsonl",
+    "cwd": "C:\\Users\\amado\\coach-os",
+    "prompt_id": "bd00fe0d-cd5d-4cd8-9006-315d4085fa0b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "xhigh"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_input": {
+      "type": "png",
+      "filename": "C:/Users/amado/.playwright-mcp/screenshots-2026-07-30-styles-par-app/home-after.png",
+      "fullPage": true
+    },
+    "tool_use_id": "call_090UAMICNpofP6nxPXXqoIus",
+    "error": "### Error\nError: File access denied: C:\\Users\\amado\\.playwright-mcp\\screenshots-2026-07-30-styles-par-app\\home-after.png is outside allowed roots. Allowed roots: c:\\Users\\amado\\.playwright-mcp, c:\\Users\\amado",
+    "is_interrupt": false,
+    "duration_ms": 346
+  },
+  {
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\52db8e61-fe29-48ab-95af-c9ec0bfb9fdc.jsonl",
+    "cwd": "C:\\Users\\amado\\coach-os",
+    "prompt_id": "bd00fe0d-cd5d-4cd8-9006-315d4085fa0b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "xhigh"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_input": {
+      "type": "png",
+      "filename": "C:/Users/amado/.playwright-mcp/home-after.png",
+      "fullPage": true
+    },
+    "tool_use_id": "call_amTPc2Z8vRLjZnqaXhJX0GYA",
+    "error": "### Error\nError: File access denied: C:\\Users\\amado\\.playwright-mcp\\home-after.png is outside allowed roots. Allowed roots: c:\\Users\\amado\\.playwright-mcp, c:\\Users\\amado",
+    "is_interrupt": false,
+    "duration_ms": 392
+  },
+  {
+    "session_id": "52db8e61-fe29-48ab-95af-c9ec0bfb9fdc",
+    "transcript_path": "C:\\Users\\amado\\.claude\\projects\\c--Users-amado\\52db8e61-fe29-48ab-95af-c9ec0bfb9fdc.jsonl",
+    "cwd": "C:\\Users\\amado\\coach-os",
+    "prompt_id": "bd00fe0d-cd5d-4cd8-9006-315d4085fa0b",
+    "permission_mode": "bypassPermissions",
+    "effort": {
+      "level": "xhigh"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "mcp__playwright__browser_take_screenshot",
+    "tool_input": {
+      "type": "png",
+      "filename": "C:/Users/amado/home-after.png",
+      "fullPage": true
+    },
+    "tool_use_id": "call_o78YcCsVo4gYIYT84RjEsBsy",
+    "error": "### Error\nError: File access denied: C:\\Users\\amado\\home-after.png is outside allowed roots. Allowed roots: c:\\Users\\amado\\.playwright-mcp, c:\\Users\\amado",
+    "is_interrupt": false,
+    "duration_ms": 325
+  }
+]

@@ -208,7 +208,7 @@ export function BackgroundFX(props: BackgroundFXProps): ReactElement {
       effectId={effectId}
       themeId={props.themeId ?? 'warm-paper'}
       className={props.className}
-      style={{ zIndex: 0, ...props.style }}
+      style={props.style}
     />
   );
 

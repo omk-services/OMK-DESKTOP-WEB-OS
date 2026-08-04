@@ -1,0 +1,44 @@
+[
+  {
+    "tool_name": "TodoWrite",
+    "tool_use_id": "call_e27377943a5e4fc3b4f6c16a",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "TodoWrite"
+    }
+  },
+  {
+    "tool_name": "Bash",
+    "tool_use_id": "call_3586f37523504e46a3b66f3d",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Bash",
+      "command": "find \"/c/Users/amado/ASpace_OS_V2/20_Life_OS/24_PARA_Enterprise/03_Resources_Geordi/01_Guides/\" -name \"*.md\" 2>&1 | head -8\necho \"---themes related?---\"\ngrep -l -i \"theme\\|design system\\|UX\\|UI\" \"/c/U",
+      "description": "Find YouTube guides for theme/content inspiration"
+    }
+  },
+  {
+    "tool_name": "Write",
+    "tool_use_id": "call_6fc63fe7afa3405d86ce7e5f",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Write",
+      "file_path": "C:\\Users\\amado\\coach-os\\src\\apps\\settings\\ThemeDetailPage.tsx",
+      "content_length": 5335
+    }
+  },
+  {
+    "tool_name": "Write",
+    "tool_use_id": "call_f52ad9ece9be43819867868e",
+    "session_id": "de35c5f1-6944-47f6-b8bc-849452b0313a",
+    "hook_event_name": "PreToolUse",
+    "tool_summary": {
+      "tool_name": "Write",
+      "file_path": "C:\\Users\\amado\\coach-os\\src\\apps\\settings\\theme-details.tsx",
+      "content_length": 15582
+    }
+  }
+]

@@ -28,11 +28,15 @@ export const useThemeStore = create<ThemeStore>()(
       appThemes: {},
       setGlobalTheme: (id) => set({ globalTheme: id }),
       setAppTheme: (appId, themeId) => set((s) => ({
-        appThemes: { ...s.appThemes, [appId]: themeId },
+        // _v sentinel: forces Zustand to detect a change even when the same themeId is re-set.
+        // Without this, Zustand sees `{...s.appThemes, [appId]: themeId}` as shallow-equal and skips re-render.
+        appThemes: { ...s.appThemes, [appId]: themeId, _v: Date.now() },
       })),
       resetAppTheme: (appId) => set((s) => {
         const next = { ...s.appThemes };
         delete next[appId];
+        delete next._v; // also bump the sentinel so the UI re-renders on reset
+        (next as Record<string, string>)._v = String(Date.now());
         return { appThemes: next };
       }),
       resetAll: () => set({ globalTheme: 'warm-paper', appThemes: {} }),
@@ -83,13 +87,15 @@ export function applyThemeTokens(target: HTMLElement, t: ThemeTokens, prefix = '
 
 /** Convenience: returns the active theme tokens for an app (subscribed). */
 export function useThemeFor(appId: string): ThemeTokens {
-  const id = useThemeStore((s) => s.resolveTheme(appId));
+  // Subscribe to the raw appThemes + globalTheme slices so changes trigger re-render.
+  // (Subscribing to resolveTheme() function ref would be stable → no re-render.)
+  const id = useThemeStore((s) => s.appThemes[appId] ?? CANONICAL_APP_THEMES[appId] ?? s.globalTheme);
   return THEMES[id] ?? THEMES['warm-paper'];
 }
 
 /** Returns the effective theme id only (no tokens) — useful for label rendering. */
 export function useThemeIdFor(appId: string): string {
-  return useThemeStore((s) => s.resolveTheme(appId));
+  return useThemeStore((s) => s.appThemes[appId] ?? CANONICAL_APP_THEMES[appId] ?? s.globalTheme);
 }
 
 export { THEMES, THEME_LIST, CANONICAL_APP_THEMES };

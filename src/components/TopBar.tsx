@@ -5,15 +5,15 @@
  *  - Theme-aware accents (var(--theme-*)) + soft drop shadow (no border-b)
  *  - Global theme quick-switcher dropdown in the middle. */
 import { useState, useEffect, useRef } from 'react';
-import { Bell, RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown, User, Power, CreditCard, Sparkles, LogOut, Settings as SettingsIcon, ListChecks, History } from 'lucide-react';
+import { Bell, RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown, User, CreditCard, Sparkles, LogOut, Settings as SettingsIcon, ListChecks, History } from 'lucide-react';
 import { useShellStore } from '../stores/shell.store';
 import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
 import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
-import { CHANGELOG } from '../data/changelog';
 import { TopBarMenu } from './TopBarMenu';
+import { ChangelogTabs } from './ChangelogTabs';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -166,33 +166,15 @@ export function TopBar() {
               </div>
             </TopBarMenu>
 
-            {/* Changelog menu */}
+            {/* Changelog menu — Dev milestones + Roadmap tabs */}
             <TopBarMenu
               triggerLabel="Changelog"
               triggerIcon={<History className="w-3.5 h-3.5" />}
-              width={320}
+              width={360}
               isDark={globalTokens.isDark}
               ariaLabel="Changelog menu"
             >
-              <div className="text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{ color: 'var(--theme-text-muted)' }}>Dev milestones</div>
-              <div className="max-h-[420px] overflow-y-auto pr-1">
-                {CHANGELOG.map((m) => (
-                  <div key={m.version} className="px-2 py-2 rounded-lg hover:bg-[var(--theme-surface-hover)]">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[12px] font-bold" style={{ color: 'var(--theme-text)' }}>{m.title}</span>
-                      <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{m.version} · {m.date}</span>
-                    </div>
-                    <ul className="mt-1 space-y-0.5">
-                      {m.highlights.map((h, i) => (
-                        <li key={i} className="text-[10.5px] flex gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-                          <span style={{ color: 'var(--theme-accent)' }}>•</span>
-                          <span>{h}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+              <ChangelogTabs />
             </TopBarMenu>
           </div>
 

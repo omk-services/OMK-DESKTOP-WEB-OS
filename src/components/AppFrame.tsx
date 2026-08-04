@@ -58,6 +58,9 @@ interface AppFrameProps {
 }
 
 const NARROW_BREAKPOINT = 640;
+// Marge morte entre replier et deplier : sans elle, une largeur pile sur le
+// seuil fait osciller la sidebar a l infini.
+const NARROW_HYSTERESIS = 48;
 const TOOLS_PANEL_WIDTH = 300;
 
 /** Stable component wrapper for the active section. Hoisted to module scope so
@@ -128,9 +131,17 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   useEffect(() => {
     const el = rootRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
+    // Hysteresis obligatoire : cet observer surveille le MEME element dont il
+    // fait varier la largeur du contenu (la sidebar passe de 240px a 68px).
+    // Avec un seuil unique, une fenetre posee pile sur NARROW_BREAKPOINT
+    // oscille indefiniment — replier elargit, ce qui deplie, ce qui replie.
+    // Les deux seuils separes rendent cette boucle impossible.
     const ro = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? el.clientWidth;
-      setIsNarrow(width < NARROW_BREAKPOINT);
+      setIsNarrow((wasNarrow) =>
+        wasNarrow
+          ? width < NARROW_BREAKPOINT + NARROW_HYSTERESIS
+          : width < NARROW_BREAKPOINT);
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -294,7 +305,18 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
           <div
             className="pointer-events-none absolute top-0 left-0 right-0 h-24 z-0"
             aria-hidden
-            style={{ mixBlendMode: 'screen' }}
+            style={{
+              mixBlendMode: 'screen',
+              // `mix-blend-mode` sur un canvas anime force le navigateur a
+              // recomposer TOUTE la fenetre a chaque frame du canvas, ce qui se
+              // voit comme un tremblement global. `isolation` borne la fusion a
+              // ce sous-arbre, `contain` borne la zone repeinte, et
+              // `will-change` promeut la couche pour qu'elle soit composee sur
+              // le GPU au lieu d'etre repeinte.
+              isolation: 'isolate',
+              contain: 'paint',
+              willChange: 'transform',
+            }}
           >
             <BackgroundFX
               themeId={activeThemeId}

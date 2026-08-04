@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
-import { LayoutDashboard, Wind, GitBranch, BarChart3, Building2, Compass, AlertTriangle, Handshake, BrainCircuit, Wallet, UserCog, ClipboardList, Cpu } from 'lucide-react';
+import { Wind, GitBranch, BarChart3, Building2, Compass, AlertTriangle, Handshake, BrainCircuit, Wallet, UserCog, ClipboardList, Cpu, LayoutDashboard } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { StatCard, Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
-import { useWindowPage } from '../../contexts/WindowContext';
-import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
-import { DashboardDetailPage, type DashboardDetailItem } from './DashboardDetailPage';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { DashboardItemDetail } from './DashboardItemDetail';
+
+registerItemDetail('dashboard', DashboardItemDetail);
 
 const ACCENT = '#059669';
 
@@ -46,46 +47,13 @@ export function DashboardApp() {
   const drill = useCollectionDrill('clients', ['Overview', 'Client Pipeline']);
   const activeCount = clients.filter(c => c.status === 'Active').length;
   const onboardingCount = clients.filter(c => c.status === 'Onboarding').length;
-  const [detail, setDetail] = useState<DashboardDetailItem | null>(null);
-  const { setDetail: setWindowDetail } = useWindowPage();
-
-  useEffect(() => {
-    if (detail) {
-      setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
-    } else {
-      setWindowDetail(null);
-    }
-  }, [detail, setWindowDetail]);
 
   const weightOf = (c: (typeof clients)[number]) => Number(c.health ?? (c.status === 'Onboarding' ? 45 : 20));
 
-  const handleDrill = (): void => {
-    if (!drill.openId) return;
-    const item = clients.find(c => c.id === drill.openId);
-    if (!item) return;
-    const w = weightOf(item);
-    setDetail({
-      id: String(item.id),
-      title: String(item.name ?? 'Untitled'),
-      subtitle: String(item.segment ?? ''),
-      status: String(item.status ?? 'active'),
-      heroMetric: { value: `${w}%`, label: 'Health weight' },
-      kpis: [
-        { label: 'Ticket', value: `$${Number(item.ticket ?? 0).toLocaleString()}` },
-        { label: 'Open threads', value: String(item.openThreads ?? 0) },
-        { label: 'Next session', value: String(item.nextSession ?? '—') },
-        { label: 'Onboarding', value: String(item.onboardingStep ?? 'complete') },
-      ],
-      activity: [
-        { at: 'Today', text: `Status: ${String(item.status ?? 'active')}` },
-        { at: 'Live', text: `Segment: ${String(item.segment ?? '—')}` },
-      ],
-      fields: [],
-    });
-  };
-
   const Overview = () => {
-    handleDrill();
+    if (drill.openId) {
+      return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
+    }
     return (
       <div className="p-7">
         <SectionHead title="Ecosystem Vitals" subtitle="Live data from omk_saas.clients and omk_saas.agents" />
@@ -121,7 +89,9 @@ export function DashboardApp() {
   };
 
   const Pipeline = () => {
-    handleDrill();
+    if (drill.openId) {
+      return <DynamicPageView collectionId="clients" itemId={drill.openId} onBack={drill.close} onNavigate={drill.open} />;
+    }
     return (
       <div className="p-7">
         <SectionHead title="Client ledger" subtitle="Every account, every weight" />
@@ -226,18 +196,6 @@ export function DashboardApp() {
   ];
 
   return (
-    <>
-      <AppFrame title="Dashboard" subtitle="Ecosystem Vitals" icon={LayoutDashboard} accent={ACCENT} sections={sections} />
-      {detail ? (
-        <AppDetailOverlay
-          appId="dashboard"
-          accent="#059669"
-          onBack={() => setDetail(null)}
-          motion={{ kind: 'fade-up', durationMs: 220 }}
-        >
-          <DashboardDetailPage item={detail} onBack={() => setDetail(null)} />
-        </AppDetailOverlay>
-      ) : null}
-    </>
+    <AppFrame title="Dashboard" subtitle="Ecosystem Vitals" icon={LayoutDashboard} accent={ACCENT} sections={sections} />
   );
 }

@@ -112,6 +112,7 @@ export function CssFallback({ effectId, themeId, className, style }: CssFallback
     <div
       data-cssfx={effectId}
       data-cssfx-theme={themeId ?? 'unknown'}
+      data-cssfx-accent={accent}
       aria-hidden
       className={className}
       style={{

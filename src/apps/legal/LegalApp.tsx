@@ -10,6 +10,10 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { LegalItemDetail } from './LegalItemDetail';
+
+registerItemDetail('legal', LegalItemDetail);
 
 const ACCENT = '#64748b';
 

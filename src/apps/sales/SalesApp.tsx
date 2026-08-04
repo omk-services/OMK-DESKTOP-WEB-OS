@@ -15,6 +15,10 @@ import {
 import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { SalesDetailPage, type DetailField, type DetailItem } from './SalesDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { SalesItemDetail } from './SalesItemDetail';
+
+registerItemDetail('sales', SalesItemDetail);
 import { CognitionOverviewContent } from '../cognition/CognitionApp';
 
 const ACCENT = '#ea580c';

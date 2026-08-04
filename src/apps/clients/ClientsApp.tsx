@@ -9,6 +9,10 @@ import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ClientsDetailPage, type ClientsDetailItem } from './ClientsDetailPage';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { CMSCardList } from '../_ui/CMSCardList';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { ClientsItemDetail } from './ClientsItemDetail';
+
+registerItemDetail('clients', ClientsItemDetail);
 
 const ACCENT = '#2563eb';
 

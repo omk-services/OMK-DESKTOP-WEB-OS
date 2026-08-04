@@ -9,6 +9,10 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ItRdDetailPage, type ItRdDetailItem } from './ItRdDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { ItRdItemDetail } from './ItRdItemDetail';
+
+registerItemDetail('it-rd', ItRdItemDetail);
 
 const ACCENT = '#7c3aed';
 

@@ -7,6 +7,10 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { FinanceItemDetail } from './FinanceItemDetail';
+
+registerItemDetail('finance', FinanceItemDetail);
 import { CMSCardList } from '../_ui/CMSCardList';
 
 const ACCENT = '#ca8a04';

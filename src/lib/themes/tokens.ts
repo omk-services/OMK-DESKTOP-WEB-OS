@@ -246,22 +246,26 @@ export const THEME_META: ThemeMeta[] = THEME_META_RAW.map(m => ({
 }));
 
 /** Canonical mapping — business-domain app → theme.
- *  Source: ADR-CANON-001 + 8 B2 Managers domain doctrine. */
+ *  Source: ADR-CANON-001 + 8 B2 Managers domain doctrine.
+ *  2026-07-30 ext: covers 17 apps (ajout audit/cognition/welcome + 3 rééquilibrages). */
 export const CANONICAL_APP_THEMES: Record<string, string> = {
-  'dashboard': 'dark-oled',         // data-dense, terminal-grade metrics
-  'product': 'brutalism',            // bold spec/roadmap cards
-  'growth': 'vibrant-block',        // growth-hacker bold blocks
-  'sales': 'trust',                 // sober, classical, deal-closing
-  'operations': 'neumorphism',      // tactile, calm, runbooks
-  'finance': 'dark-oled',           // financial-grade contrast, terminal
-  'legal': 'trust',                 // noir sobre, classical restraint
-  'people': 'aurora',               // warm north star, gradient people
-  'it-rd': 'cyberpunk',             // neon, code, dev
-  'clients': 'claymorphism',        // squishy warmth, human-facing
-  'tasks': 'editorial',             // long-form, calm, magazine
-  'marketplace': 'glassmorphism',   // translucent cards
-  'settings': 'warm-paper',         // utility, default
-  'onboarding': 'liquid-glass',     // hero demo, vision-pro
+  'dashboard':   'dark-oled',         // data-dense, terminal-grade metrics
+  'product':     'brutalism',         // bold spec/roadmap cards
+  'growth':      'vibrant-block',     // growth-hacker bold blocks
+  'sales':       'liquid-glass',      // CRM riche, multi-layer translucency
+  'operations':  'brutalism',         // load-bearing, hard borders
+  'finance':     'trust',             // CFO sobre, noir
+  'legal':       'trust',             // classical restraint
+  'people':      'aurora',            // warm north star, gradient
+  'it-rd':       'cyberpunk',         // neon, code, dev
+  'clients':     'claymorphism',      // squishy warmth, human-facing
+  'tasks':       'editorial',         // long-form, calm, magazine
+  'marketplace': 'glassmorphism',     // translucent cards
+  'settings':    'warm-paper',        // utility, default, silent
+  'onboarding':  'liquid-glass',      // hero demo, vision-pro
+  'welcome':     'neumorphism',       // soft UI, tactile, hero accueil
+  'audit':       'glassmorphism',     // diagnostic précis, frosted data
+  'cognition':   'editorial',         // sovereign gate, sobre serif
 };
 
 export const THEME_LIST = THEME_META.map(m => m.id);

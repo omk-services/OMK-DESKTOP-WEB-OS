@@ -95,3 +95,27 @@ export async function upsertItem(collectionId: string, item: CmsItem): Promise<v
     // best-effort — local state is the source of truth until Supabase confirms
   }
 }
+
+/** Append-only event sink used by domain surfaces to record state-changing
+ *  decisions without mutating existing rows. D4 append-only compliance, no
+ *  UPSERT semantics, no PATCH semantics. */
+export async function appendCmsEvent(args: {
+  collectionId: string;
+  data: Record<string, unknown>;
+}): Promise<string | null> {
+  const orgId = await getCurrentOrgId();
+  if (!orgId) return null;
+  const id = `evt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    await supabase.from('cms_items').insert({
+      id,
+      collection_id: args.collectionId,
+      org_id: orgId,
+      data: args.data,
+      updated_at: new Date().toISOString(),
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
