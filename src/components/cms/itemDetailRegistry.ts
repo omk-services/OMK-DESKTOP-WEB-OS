@@ -59,6 +59,9 @@ export const COLLECTION_OWNERSHIP: Readonly<Record<string, string>> = Object.fre
   // People
   team: 'people',
   people_agents: 'people',
+  personas: 'people',
+  memory: 'people',
+  codex: 'people',
   // Operations
   runbooks: 'operations',
   articles: 'operations',

@@ -14,12 +14,14 @@ import { useEffect, useState } from 'react';
 import {
   Users, Bot, Heart, Cpu, FileText, Calendar, Clock, Zap,
   Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
+  UserSearch, Brain, BookMarked, ShieldCheck, AlertTriangle,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { PeopleItemDetail } from './PeopleItemDetail';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -34,6 +36,10 @@ import {
   CONTENT_DOCS,
   DAYS, HOURS, SCHEDULE_GRID, SCHEDULE_TASKS, type ScheduleTask,
 } from './fleet';
+import { seedPeopleCms } from './seed';
+import type { CmsItem } from '../../lib/cms/types';
+
+seedPeopleCms();
 
 // Green Lantern accent — emerald. Matches Domaine 1 brand for the SOB convergence.
 const ACCENT = '#059669';
@@ -776,8 +782,14 @@ function Schedule() {
 export function PeopleApp() {
   const teamDrill = useCollectionDrill('team', 'Team');
   const agentsDrill = useCollectionDrill('people_agents', 'Agents');
+  const personasDrill = useCollectionDrill('personas', 'Personas');
+  const memoryDrill = useCollectionDrill('memory', 'Mémoire');
+  const codexDrill = useCollectionDrill('codex', 'Codex');
   const teamCount = useCmsStore(s => s.items['team']?.length ?? 0);
   const agentsCount = useCmsStore(s => s.items['people_agents']?.length ?? 0);
+  const personasCount = useCmsStore(s => s.items['personas']?.length ?? 0);
+  const memoryCount = useCmsStore(s => s.items['memory']?.length ?? 0);
+  const codexCount = useCmsStore(s => s.items['codex']?.length ?? 0);
   const [detail, setDetail] = useState<PeopleDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -813,6 +825,140 @@ export function PeopleApp() {
     );
   };
 
+  /* Cyan accent for the 3 depth sections (per the brief). Mirrors the
+   * AppDetailOverlay accent and the load-bar mid range in Fleet cards. */
+  const DEPTH_ACCENT = '#0891b2';
+
+  const ANCHOR_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
+    entretien: 'accent',
+    appel:     'accent',
+    atelier:   'accent',
+    ticket:    'neutral',
+    informel:  'warn',
+    'no-anchor': 'danger',
+  };
+
+  const VERIFY_TONE: Record<string, 'ok' | 'warn' | 'danger'> = {
+    confirmed:    'ok',
+    contradicted: 'danger',
+    'to-verify':  'warn',
+  };
+
+  const Personas = () => {
+    if (personasDrill.openId) {
+      return <DynamicPageView collectionId="personas" itemId={personasDrill.openId} onBack={personasDrill.close} onNavigate={personasDrill.open} />;
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Personas"
+          subtitle="Premier-class profiles drawn from real sources. The anchor makes the difference — a persona without one is an invention."
+          action={<Badge tone="accent">{personasCount} profiles</Badge>}
+        />
+        <CMSCardList<CmsItem>
+          collectionId="personas"
+          onOpen={personasDrill.open}
+          cols={2}
+          render={(p) => {
+            const anchorKind = String(p.anchorKind ?? '—');
+            const domain = String(p.domain ?? '');
+            const wants = String(p.wants ?? '');
+            return {
+              title: String(p.name ?? '—'),
+              subtitle: `${String(p.role ?? '')}${domain ? ' · ' + domain : ''}`,
+              description: wants.split(/(?<=\.)/)[0]?.trim() ?? wants,
+              statusLabel: anchorKind,
+              statusTone: ANCHOR_TONE[anchorKind] ?? 'neutral',
+              accent: DEPTH_ACCENT,
+              icon: <UserSearch className="w-5 h-5" />,
+              metricLabel: 'anchored',
+              metricValue: String(p.anchorDate ?? '—'),
+              meta: p.anchor ? `${String(p.anchor).split(/[.·]/)[0].trim().slice(0, 48)}…` : 'no anchor — invention',
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
+  const Memoire = () => {
+    if (memoryDrill.openId) {
+      return <DynamicPageView collectionId="memory" itemId={memoryDrill.openId} onBack={memoryDrill.close} onNavigate={memoryDrill.open} />;
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Mémoire"
+          subtitle="Curated organisational memory. Raw memory is a dump — what matters here is what has been checked."
+          action={<Badge tone="accent">{memoryCount} facts</Badge>}
+        />
+        <CMSCardList<CmsItem>
+          collectionId="memory"
+          onOpen={memoryDrill.open}
+          cols={2}
+          render={(m) => {
+            const verification = String(m.verification ?? '');
+            const provenance = String(m.provenance ?? '');
+            const fact = String(m.fact ?? '');
+            return {
+              title: fact.split(/(?<=\.)/)[0]?.trim() ?? fact,
+              subtitle: provenance,
+              description: fact.split(/(?<=\.)/)[1]?.trim() ?? fact,
+              statusLabel: verification,
+              statusTone: VERIFY_TONE[verification] ?? 'neutral',
+              accent: verification === 'contradicted' ? '#dc2626'
+                    : verification === 'to-verify'  ? '#f59e0b'
+                    : '#16a34a',
+              icon: verification === 'contradicted' ? <AlertTriangle className="w-5 h-5" />
+                    : verification === 'to-verify'  ? <ShieldCheck className="w-5 h-5" />
+                    : <Brain className="w-5 h-5" />,
+              metricLabel: 'retained',
+              metricValue: String(m.retainedOn ?? '—'),
+              meta: m.recheckOn ? `re-check ${m.recheckOn}` : '',
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
+  const Codex = () => {
+    if (codexDrill.openId) {
+      return <DynamicPageView collectionId="codex" itemId={codexDrill.openId} onBack={codexDrill.close} onNavigate={codexDrill.open} />;
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Codex"
+          subtitle="Patterns that have proven themselves. A success repeated once is an anecdote; a method is a success repeated enough."
+          action={<Badge tone="accent">{codexCount} patterns</Badge>}
+        />
+        <CMSCardList<CmsItem>
+          collectionId="codex"
+          onOpen={codexDrill.open}
+          cols={2}
+          render={(c) => {
+            const situation = String(c.situation ?? '');
+            const recipe = String(c.recipe ?? '');
+            const count = Number(c.appliedCount ?? 0);
+            return {
+              title: situation.split(/(?<=\.)/)[0]?.trim() ?? situation,
+              subtitle: recipe.split(/\.\s/)[0]?.trim() ?? recipe,
+              description: recipe.split(/\.\s/).slice(1, 3).join('. ').trim(),
+              statusLabel: String(c.domain ?? '—'),
+              statusTone: 'accent',
+              accent: DEPTH_ACCENT,
+              icon: <BookMarked className="w-5 h-5" />,
+              metricLabel: 'applied',
+              metricValue: `${count}×`,
+              meta: c.lastApplied ? `last ${c.lastApplied}` : '',
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
   const sections: AppSection[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, render: Overview },
     { id: 'team',     label: 'Team',     icon: Users,           render: Team },
@@ -821,6 +967,9 @@ export function PeopleApp() {
     { id: 'content',  label: 'Content',  icon: FileText,        render: Content },
     { id: 'schedule', label: 'Cadence',  icon: Calendar,        render: Schedule },
     { id: 'culture',  label: 'Culture',  icon: Heart,           render: Culture },
+    { id: 'personas', label: 'Personas', icon: UserSearch,      render: Personas },
+    { id: 'memory',   label: 'Mémoire',  icon: Brain,           render: Memoire },
+    { id: 'codex',    label: 'Codex',    icon: BookMarked,      render: Codex },
   ];
 
   const groups: Record<string, string> = {
@@ -831,6 +980,9 @@ export function PeopleApp() {
     content:  'B3 Agents',
     schedule: 'Cadence',
     culture:  'Culture',
+    personas: 'Profondeur',
+    memory:   'Profondeur',
+    codex:    'Profondeur',
   };
 
   return (
