@@ -313,7 +313,13 @@ def _publish(destination: Path, outputs: dict[str, bytes], manifest: dict[str, A
             if destination.exists():
                 _verify_existing(destination, manifest)
             else:
-                raise
+                # WSL/DrvFS workaround: the underlying MoveFile rejects `os.rename`
+                # of a directory that contains subdirectories when the source is
+                # on a Windows mount, even with fully permissive modes. shutil.move
+                # falls back to copytree + rmtree, which works across the boundary.
+                shutil.move(str(staging), str(destination))
+                if not destination.exists():
+                    raise
     finally:
         if staging.exists():
             shutil.rmtree(staging, ignore_errors=True)
