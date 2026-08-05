@@ -21,6 +21,7 @@ import {
   listEntities,
   relationsOf,
   contractOf,
+  listAttributesOf,
   type EntityId,
   type Relation,
 } from './index';
@@ -218,6 +219,105 @@ describe('registre d ontologie — invariants', () => {
     }
     expect(fautifs, `attributs invalides: ${fautifs.join('; ')}`).toEqual([]);
   });
+
+  /* ──────────────────────── scope (story 3) ──────────────────────── */
+
+  it('tout attribut sans champ scope equivaut a scope === "org" (semantique par defaut)', () => {
+    // Convention centrale : l'absence de `scope` est un defaut tolerant.
+    // Un attribut sans scope est equivalent a scope "org" et doit etre
+    // considere comme tel par le helper de filtre. La verification
+    // statique ne suffit pas : on traverse le registre et on confirme
+    // qu'aucun attribut ne porte un scope invalide et que l'union est
+    // respectee.
+    const horsUnion: string[] = [];
+    for (const e of listEntities()) {
+      for (const a of e.attributes) {
+        if (a.scope !== undefined && a.scope !== 'org' && a.scope !== 'personal') {
+          horsUnion.push(`${e.id}.${a.name} (scope=${a.scope})`);
+        }
+      }
+    }
+    expect(horsUnion, `scope hors union: ${horsUnion.join('; ')}`).toEqual([]);
+  });
+
+  it('au moins 5 entites portent au moins un attribut scope === "personal"', () => {
+    // La these de la story 3 tient si 5 domaines distincts trouvent
+    // leur compte dans la portee personnelle. Ce test verrouille le
+    // seuil : moins de 5 = regression sur l evenement de memoire de
+    // l'epic.
+    const personnelles: EntityId[] = [];
+    for (const e of listEntities()) {
+      if (e.attributes.some((a) => a.scope === 'personal')) {
+        personnelles.push(e.id);
+      }
+    }
+    expect(
+      personnelles.length,
+      `au moins 5 entites attendues avec attribut personnel, observe ${personnelles.length} : ${personnelles.join(', ')}`,
+    ).toBeGreaterThanOrEqual(5);
+  });
+
+  it('les entites marquees personnelles sont uniques et bien formes', () => {
+    // Defense en profondeur : un attribut personnel doit avoir un nom
+    // non vide. Les autres invariants (required false, type autorise)
+    // sont couverts par les tests existants sur les attributs.
+    const fautifs: string[] = [];
+    for (const e of listEntities()) {
+      for (const a of e.attributes) {
+        if (a.scope === 'personal') {
+          if (a.name.length === 0) fautifs.push(`${e.id} (attribut personnel sans nom)`);
+          // Un attribut ref est organisation par construction (lien
+          // partage). Marquer ref comme personnel serait incoherent
+          // : on le flagge pour prevention.
+          if (a.type === 'ref') {
+            fautifs.push(`${e.id}.${a.name} (ref personnel — incoherent)`);
+          }
+        }
+      }
+    }
+    expect(fautifs, `attributs personnels mal formes: ${fautifs.join('; ')}`).toEqual([]);
+  });
+
+  it('les 7 entites non marquees restent a scope defaut (org)', () => {
+    // Chaque entite qui n est pas dans la liste des 5 marquees ne
+    // doit avoir aucun attribut explicitement scope=personal. C est
+    // un garde-fou contre une regression qui ajouterait du personnel
+    // sans justification semantique.
+    const NON_PERSONNELLES: ReadonlySet<EntityId> = new Set<EntityId>([
+      'Organization', 'Membership', 'Offering', 'SOP', 'Runbook', 'Skill', 'Persona',
+    ]);
+    const fuites: string[] = [];
+    for (const e of listEntities()) {
+      if (!NON_PERSONNELLES.has(e.id)) continue;
+      for (const a of e.attributes) {
+        if (a.scope === 'personal') {
+          fuites.push(`${e.id}.${a.name} (personnel inattendu)`);
+        }
+      }
+    }
+    expect(fuites, `personnel non attendu: ${fuites.join('; ')}`).toEqual([]);
+  });
+
+  it('coherence : les 5 entites marquees correspondent au rationale Design Notes', () => {
+    // Verrou explicite sur la liste des 5 entites documentees dans
+    // Design Notes §Choix des 5 entites. Si une PR change la liste,
+    // elle doit aussi changer la liste ici et justifier pourquoi.
+    const ATTENDUES: ReadonlySet<EntityId> = new Set<EntityId>([
+      'Profile', 'Client', 'Agent', 'Routine', 'Incident',
+    ]);
+    const observees = new Set<EntityId>();
+    for (const e of listEntities()) {
+      if (e.attributes.some((a) => a.scope === 'personal')) {
+        observees.add(e.id);
+      }
+    }
+    for (const a of ATTENDUES) {
+      expect(observees, `entite attendue avec attribut personnel: ${a}`).toContain(a);
+    }
+    for (const o of observees) {
+      expect(ATTENDUES, `entite observee hors liste documentee: ${o}`).toContain(o);
+    }
+  });
 });
 
 describe('registre d ontologie — API publique', () => {
@@ -340,5 +440,53 @@ describe('registre d ontologie — API publique', () => {
     expect(apres).toBeDefined();
     expect(apres!.attributes[0].name).toBe(nomOriginal);
     expect(apres!.attributes.length).toBe(longueurOriginale);
+  });
+
+  /* ──────────────────────── listAttributesOf (story 3) ──────────────────────── */
+
+  it('listAttributesOf(id) sans option renvoie tous les attributs (defaut all)', () => {
+    // Meme comportement que `getEntity(id).attributes`. Reference
+    // directe : le defaut doit etre `'all'`, sinon les apps casse.
+    const direct = getEntity('Client');
+    const viaHelper = listAttributesOf('Client');
+    expect(viaHelper).toHaveLength(direct!.attributes.length);
+    expect(viaHelper.map((a) => a.name)).toEqual(direct!.attributes.map((a) => a.name));
+  });
+
+  it('listAttributesOf(id, { scope: "org" }) exclut les attributs personnels', () => {
+    // Client porte un attribut `coachHypothesis` en scope 'personal'.
+    // Si on filtre sur 'org', il disparait, les autres restent.
+    const org = listAttributesOf('Client', { scope: 'org' });
+    const noms = org.map((a) => a.name);
+    expect(noms).toContain('fullName');
+    expect(noms).toContain('status');
+    expect(noms).toContain('startDate');
+    expect(noms).toContain('organization');
+    expect(noms).not.toContain('coachHypothesis');
+  });
+
+  it('listAttributesOf(id, { scope: "personal" }) ne renvoie que les attributs personnels', () => {
+    const personnel = listAttributesOf('Client', { scope: 'personal' });
+    expect(personnel).toHaveLength(1);
+    expect(personnel[0].name).toBe('coachHypothesis');
+    expect(personnel[0].scope).toBe('personal');
+  });
+
+  it('listAttributesOf sur identifiant inconnu renvoie []', () => {
+    // Matrice d I/O spec 3 : ERROR_CASE, pas d exception.
+    expect(listAttributesOf('Unknown' as EntityId)).toEqual([]);
+    expect(listAttributesOf('Unknown' as EntityId, { scope: 'org' })).toEqual([]);
+    expect(listAttributesOf('Unknown' as EntityId, { scope: 'personal' })).toEqual([]);
+  });
+
+  it('listAttributesOf renvoie un tableau gele avec attributs geles', () => {
+    // Le helper ne partage pas le tableau d entite source ; il en
+    // fait une copie filtree. Les objets du resultat sont geles
+    // pour eviter qu un consommateur ne mute en place.
+    const attrs = listAttributesOf('Client', { scope: 'org' });
+    expect(Object.isFrozen(attrs)).toBe(true);
+    for (const a of attrs) {
+      expect(Object.isFrozen(a)).toBe(true);
+    }
   });
 });

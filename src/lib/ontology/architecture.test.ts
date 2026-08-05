@@ -268,4 +268,35 @@ describe('architecture du module ontology — fermeture', () => {
     }
     expect(fuites).toEqual([]);
   });
+
+  it('scope-store.ts n importe pas React (store vanilla)', () => {
+    // Story 3 de l epic couche-ontologie : le store de portee doit
+    // rester testable hors React. Un import `from 'react'` (ou
+    // `from "react"`, casse la barriere et oblige a monter un
+    // environnement React pour les tests. On grep le contenu
+    // directement : analyse statique, pas de resolution de module.
+    const SCOPE_STORE_FILE = path.join(ONTOLOGY_DIR, 'scope-store.ts');
+    expect(fs.existsSync(SCOPE_STORE_FILE), 'scope-store.ts doit exister').toBe(true);
+
+    const src = fs.readFileSync(SCOPE_STORE_FILE, 'utf8');
+
+    // Couvre toutes les formes qui tirent React dans le module :
+    //  - `from 'react'`, `from "react"`, `from 'react/...'`, `from "react/..."`
+    //  - `import type { X } from 'react'` (meme motif `from`)
+    //  - `require('react')`, `require("react")`, `require('react/...')`
+    //  - `import('react')` dynamique (meme `from`-equivalent au runtime)
+    //  - `from 'zustand/react'` et `from "zustand/react"` — l'entree
+    //    Zustand qui appelle useSyncExternalStore et force un env React.
+    const reactImportRe =
+      /(?:from|require|import)\s*(?:\(\s*)?['"](?:[^'"]*\/)?react(?:\/[^'"]+)?['"]/g;
+    const hits = src.match(reactImportRe);
+    if (hits && hits.length > 0) {
+      throw new Error(
+        `scope-store.ts importe React ou un adapter React — le store doit rester vanilla pour la testabilite :\n` +
+          hits.map((h) => `  - ${h}`).join('\n') +
+          `\n\nZustand fournit un create vanilla ; c'est le consommateur qui s'abonne via le hook. Voir themes/store.ts pour le patron.`,
+      );
+    }
+    expect(hits).toBeNull();
+  });
 });

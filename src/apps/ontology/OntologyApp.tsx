@@ -1,10 +1,18 @@
 /** OntologyApp — lecteur de `src/lib/ontology/index.ts`.
  *
- *  Story 2 de l'epic couche-ontologie. L'app expose 4 sections dans la
- *  barre laterale (Entities / Relations / Contracts / Versions) ; chaque
+ *  Story 2 de l'epic couche-ontologie, etendue story 3 (portee
+ *  personnelle / organisation). L'app expose 4 sections dans la barre
+ *  laterale (Entities / Relations / Contracts / Versions) ; chaque
  *  section lit *exclusivement* l'API publique d'ontologie. Aucun chemin
  *  vers `entities.ts` / `relations.ts` / `contracts.ts` n'est importe
  *  ici : c'est verrouille par `architecture.test.ts` (cf. spec §Boundaries).
+ *
+ *  Story 3 ajoute un interrupteur « Organisation seule / Tout » dans la
+ *  section Entities, pilote par le store Zustand
+ *  `src/lib/ontology/scope-store.ts` (cle de persistance
+ *  `coach-os-ontology-scope-v1`). Les attributs marques `scope` 'personal'
+ *  disparaissent du detail en mode 'org' et reapparaissent avec un badge
+ *  `personnel` (tone 'warn') en mode 'all'.
  *
  *  Le composant suit le meme patron que `OperationsApp` / `ItRdApp` :
  *  `AppFrame` + 4 `AppSection`, sous-vue locale par `useState<EntityId |
@@ -25,6 +33,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   RotateCcw,
+  User,
+  Filter,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { StatCard, Card, Badge } from '../_ui/kit';
@@ -33,10 +43,13 @@ import {
   listEntities,
   relationsOf,
   contractOf,
+  listAttributesOf,
   type EntityId,
   type EntityDef,
+  type EntityAttribute,
   type Relation,
 } from '../../lib/ontology';
+import { useOntologyScope, useOntologyScopeStore, type ScopeFilter as UIScopeFilter } from '../../lib/ontology/scope-store';
 
 /** Accent dedie au registre. Distinct des 17 accents deja deployes dans
  *  `app-discovery.ts` ; `#0f766e` est un teal plus fonce que le teal
@@ -195,11 +208,27 @@ export function validateRegistry(): ValidationIssue[] {
 /* ──────────────────────────── Entities ──────────────────────────── */
 
 /** Carte cliquable d'une entite — ouverte dans la grille. */
-function EntityCard({ entity, accent, onOpen }: {
+function EntityCard({ entity, scope, accent, onOpen }: {
   entity: EntityDef;
+  scope: UIScopeFilter;
   accent: string;
   onOpen: (id: EntityId) => void;
 }) {
+  // Marqueur visuel : badge 'personnel' si l'entite porte au moins un
+  // attribut scope 'personal' ET le filtre actif n'exclut pas ces
+  // attributs (mode 'all'). En mode 'org' on cache le badge : il
+  // annoncerait l'existence de contenu qu'on a decide de ne pas
+  // montrer. Cf. spec story 3 Design Notes §"Pourquoi masquer plutot
+  // que voiler".
+  const hasPersonal = entity.attributes.some((a) => a.scope === 'personal');
+  const showPersonalMarker = hasPersonal && scope === 'all';
+  // Compteur d'attributs visible : on suit le filtre actif pour rester
+  // coherent avec le detail. Sinon l'utilisateur voit "5 attr." sur la
+  // carte puis un tableau de 4 lignes en mode 'org', ce qui est
+  // trompeur.
+  const visibleAttrs = entity.attributes.filter((a) =>
+    scope === 'all' ? true : (a.scope ?? 'org') === scope,
+  );
   return (
     <button
       type="button"
@@ -215,11 +244,21 @@ function EntityCard({ entity, accent, onOpen }: {
           <Database className="w-4 h-4" />
         </div>
         <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
-          {entity.attributes.length} attr.
+          {visibleAttrs.length} attr.
         </span>
       </div>
-      <div className="font-bold text-[var(--theme-text)] text-[14px] tracking-tight">
-        {entity.label}
+      <div className="flex items-center justify-between gap-2">
+        <div className="font-bold text-[var(--theme-text)] text-[14px] tracking-tight">
+          {entity.label}
+        </div>
+        {showPersonalMarker ? (
+          <Badge tone="warn">
+            <span className="inline-flex items-center gap-1">
+              <User className="w-3 h-3" />
+              personnel
+            </span>
+          </Badge>
+        ) : null}
       </div>
       <div className="text-[12px] text-[var(--theme-text-dim)] line-clamp-3">
         {entity.description}
@@ -228,8 +267,74 @@ function EntityCard({ entity, accent, onOpen }: {
   );
 }
 
-/** Detail inline : tableau d'attributs typés + bouton retour. */
-function EntityDetail({ entity, onBack }: { entity: EntityDef; onBack: () => void }) {
+/**
+ * Interrupteur 2 positions : « Organisation seule » / « Tout ».
+ * Persiste via le store Zustand `scope-store`. Spec §Design notes :
+ * le mode 'personnel seul' n'est pas expose cote UI — le helper
+ * `listAttributesOf` le supporte pour les tests et futures stories.
+ */
+function ScopeToggle(): React.ReactElement {
+  const scope = useOntologyScope();
+  const setScope = useOntologyScopeStore((s) => s.setScope);
+  const value: 'org' | 'all' = scope;
+
+  const boutonClasses = (actif: boolean): string =>
+    [
+      'inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors',
+      actif
+        ? 'bg-[var(--panel)] text-[var(--theme-text)] border border-[var(--panel-border)] shadow-sm'
+        : 'text-[var(--theme-text-dim)] hover:text-[var(--theme-text)]',
+    ].join(' ');
+
+  return (
+    <div
+      role="group"
+      aria-label="Filtrer les attributs par portee"
+      className="inline-flex items-center gap-1 rounded-xl border border-[var(--panel-border)] bg-[var(--panel)] p-1"
+    >
+      <button
+        type="button"
+        aria-pressed={value === 'org'}
+        onClick={() => setScope('org')}
+        className={boutonClasses(value === 'org')}
+      >
+        <Filter className="w-3.5 h-3.5" />
+        Organisation seule
+      </button>
+      <button
+        type="button"
+        aria-pressed={value === 'all'}
+        onClick={() => setScope('all')}
+        className={boutonClasses(value === 'all')}
+      >
+        Tout
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Detail inline : tableau d'attributs typés + bouton retour.
+ * Spec §Design notes : choix justifie « masquer » plutot que « voiler »
+ * — les attributs personnels disparaissent en mode 'org', reapparaissent
+ * avec un badge en mode 'all'.
+ */
+function EntityDetail({
+  entity,
+  scope,
+  onBack,
+}: {
+  entity: EntityDef;
+  scope: UIScopeFilter;
+  onBack: () => void;
+}) {
+  const attrs: readonly EntityAttribute[] = listAttributesOf(entity.id, { scope });
+
+  // En mode 'org', on peut tomber sur une entite qui n'a que des
+  // attributs personnels (cas degenere mais verrouille par les
+  // invariants : on garde l'entite visible pour servir de plan).
+  const empty = attrs.length === 0;
+
   return (
     <div className="flex flex-col gap-5">
       <button
@@ -247,39 +352,61 @@ function EntityDetail({ entity, onBack }: { entity: EntityDef; onBack: () => voi
       </Card>
 
       <Card title="Attributs">
-        <table className="w-full text-[12.5px]">
-          <thead>
-            <tr className="text-left text-[10.5px] uppercase tracking-wider text-[var(--theme-text-dim)]">
-              <th className="px-5 py-2 font-semibold">Nom</th>
-              <th className="px-5 py-2 font-semibold">Type</th>
-              <th className="px-5 py-2 font-semibold">Requis</th>
-              <th className="px-5 py-2 font-semibold">Cible</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entity.attributes.map((a) => (
-              <tr
-                key={a.name}
-                className="border-t border-[var(--panel-border-subtle)]"
-              >
-                <td className="px-5 py-2 font-mono text-[var(--theme-text)]">{a.name}</td>
-                <td className="px-5 py-2">
-                  <Badge tone={a.type === 'ref' ? 'accent' : 'neutral'}>{a.type}</Badge>
-                </td>
-                <td className="px-5 py-2">
-                  {a.required ? (
-                    <Badge tone="ok">requis</Badge>
-                  ) : (
-                    <Badge tone="neutral">optionnel</Badge>
-                  )}
-                </td>
-                <td className="px-5 py-2 font-mono text-[var(--theme-text-dim)]">
-                  {a.ref ?? '—'}
-                </td>
+        {empty ? (
+          <div className="px-5 pb-4 text-[12.5px] text-[var(--theme-text-dim)] italic">
+            Aucun attribut organisationnel pour cette entite. Basculez sur
+            « Tout » pour voir les notes personnelles.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12.5px]">
+            <thead>
+              <tr className="text-left text-[10.5px] uppercase tracking-wider text-[var(--theme-text-dim)]">
+                <th className="px-5 py-2 font-semibold">Nom</th>
+                <th className="px-5 py-2 font-semibold">Type</th>
+                <th className="px-5 py-2 font-semibold">Requis</th>
+                <th className="px-5 py-2 font-semibold">Cible</th>
+                <th className="px-5 py-2 font-semibold">Portee</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {attrs.map((a) => (
+                <tr
+                  key={a.name}
+                  className="border-t border-[var(--panel-border-subtle)]"
+                >
+                  <td className="px-5 py-2 font-mono text-[var(--theme-text)]">{a.name}</td>
+                  <td className="px-5 py-2">
+                    <Badge tone={a.type === 'ref' ? 'accent' : 'neutral'}>{a.type}</Badge>
+                  </td>
+                  <td className="px-5 py-2">
+                    {a.required ? (
+                      <Badge tone="ok">requis</Badge>
+                    ) : (
+                      <Badge tone="neutral">optionnel</Badge>
+                    )}
+                  </td>
+                  <td className="px-5 py-2 font-mono text-[var(--theme-text-dim)]">
+                    {a.ref ?? '—'}
+                  </td>
+                  <td className="px-5 py-2">
+                    {a.scope === 'personal' ? (
+                      <Badge tone="warn">
+                        <span className="inline-flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          personnel
+                        </span>
+                      </Badge>
+                    ) : (
+                      <span className="text-[11px] text-[var(--theme-text-dim)]">org</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        )}
       </Card>
     </div>
   );
@@ -566,6 +693,13 @@ export function OntologyApp() {
   /** Idem pour Contracts. */
   const [selectedContract, setSelectedContract] = useState<EntityId | null>(null);
 
+  /** Story 3 : portee (scope) de l'interrupteur dans la section Entities.
+   *  Lu via le hook minimaliste `useOntologyScope` qui extrait juste la
+   *  valeur courante — on n'a pas besoin du compteur `version` ici.
+   *  Persiste dans `localStorage` sous la cle `coach-os-ontology-scope-v1`
+   *  via le store Zustand (cf. scope-store.ts). */
+  const scope = useOntologyScope();
+
   /** Reset defensif : si la selection pointe sur une entite inconnue du
    *  registre (cas degrade : registre modifie a chaud via HMR, fixture
    *  de dev...), on retombe sur la grille. COTE EFFET, jamais pendant
@@ -589,19 +723,26 @@ export function OntologyApp() {
       {selectedEntity && getEntity(selectedEntity) ? (
         <EntityDetail
           entity={getEntity(selectedEntity)!}
+          scope={scope}
           onBack={() => setSelectedEntity(null)}
         />
       ) : (
         <>
-          <SectionHead
-            title="Entites metier"
-            subtitle="Les 12 types du registre — cliquables pour voir leurs attributs types."
-          />
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+            <SectionHead
+              title="Entites metier"
+              subtitle="Les 12 types du registre — cliquables pour voir leurs attributs types."
+            />
+            <div className="pt-1">
+              <ScopeToggle />
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {entities.map((e) => (
               <EntityCard
                 key={e.id}
                 entity={e}
+                scope={scope}
                 accent={ACCENT}
                 onOpen={setSelectedEntity}
               />

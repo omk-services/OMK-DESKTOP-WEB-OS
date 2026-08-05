@@ -14,12 +14,26 @@
 
 export type AttributeType = 'string' | 'number' | 'boolean' | 'date' | 'ref';
 
+/**
+ * Portee d'un attribut.
+ * - 'org' (defaut implicite : attribut sans champ `scope`) : partage par tous, socle commun.
+ * - 'personal' : note ou observation d'un seul humain (coach, observateur, admin),
+ *   en attente de promotion au niveau organisation. Cf. story 3 de l'epic
+ *   couche-ontologie pour le rationale des 5 entites marquees.
+ */
+export type AttributeScope = 'org' | 'personal';
+
 export interface EntityAttribute {
   name: string;
   type: AttributeType;
   required: boolean;
   /** cible obligatoire quand type === 'ref' ; la cle est l'identifiant d'une entite du registre. */
   ref?: EntityId;
+  /**
+   * Portee de l'attribut. Champ optionnel : l'absence equivaut a `scope === 'org'`.
+   * Ne s'applique pas aux attributs `ref` : un lien organisation par construction.
+   */
+  scope?: AttributeScope;
 }
 
 export interface EntityDef {
@@ -76,6 +90,10 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'displayName', type: 'string', required: true },
       { name: 'email', type: 'string', required: true },
       { name: 'createdAt', type: 'date', required: true },
+      // Personnel : notes de posture, pensees biaisees conscientes, hypotheses
+      // sur son propre style. Le coach tient ces notes pour lui-meme avant
+      // qu'elles ne meritent (ou non) d'etre promeues au niveau org.
+      { name: 'selfNotes', type: 'string', required: false, scope: 'personal' },
     ],
   },
   {
@@ -87,6 +105,10 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'status', type: 'string', required: true },
       { name: 'startDate', type: 'date', required: true },
       { name: 'organization', type: 'ref', required: true, ref: 'Organization' },
+      // Personnel : intuitions, hypotheses de blocage, signaux faibles, notes
+      // de carto relationnelle. Avant qu'un echange ne devienne un fait
+      // partage, le coach tient ces hypotheses pour lui-meme.
+      { name: 'coachHypothesis', type: 'string', required: false, scope: 'personal' },
     ],
   },
   {
@@ -141,6 +163,10 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'isAi', type: 'boolean', required: true },
       { name: 'createdAt', type: 'date', required: true },
       { name: 'organization', type: 'ref', required: true, ref: 'Organization' },
+      // Personnel : prompts prives, derives, tentatives avortees. Ces notes
+      // n'ont rien a faire dans la fiche partagee d'un agent — c'est le
+      // journal de bord du coach qui l'entraine.
+      { name: 'privatePromptNotes', type: 'string', required: false, scope: 'personal' },
     ],
   },
   {
@@ -152,6 +178,11 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'cadence', type: 'string', required: true },
       { name: 'lastRunAt', type: 'date', required: false },
       { name: 'organization', type: 'ref', required: true, ref: 'Organization' },
+      // Personnel : avant qu'une routine ne devienne un standard partage,
+      // elle peut demarrer comme une habitude personnelle d'un coach
+      // (« je relis mes notes tous les lundi »). originNote raconte le
+      // pourquoi avant promotion.
+      { name: 'originNote', type: 'string', required: false, scope: 'personal' },
     ],
   },
   {
@@ -164,6 +195,10 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'detectedAt', type: 'date', required: true },
       { name: 'resolved', type: 'boolean', required: true },
       { name: 'organization', type: 'ref', required: true, ref: 'Organization' },
+      // Personnel : un incident peut etre detecte par un coach en avance de
+      // phase, avant qu'il ne merite d'etre publie. privateSignal est la
+      // trace du soupcon, le coach decide ensuite s'il publie.
+      { name: 'privateSignal', type: 'string', required: false, scope: 'personal' },
     ],
   },
   {
