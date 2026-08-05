@@ -29,3 +29,7 @@ _bmad/render/
 # journaux de delegation M3 — bruit local, jamais versionne
 m3_audit.log
 *.m3.log
+
+# worktrees d agents Claude Code — artefacts locaux, jamais versionnes
+# (committes par erreur en bc4a1d9 puis d40955d, sous forme de gitlink)
+.claude/worktrees/
