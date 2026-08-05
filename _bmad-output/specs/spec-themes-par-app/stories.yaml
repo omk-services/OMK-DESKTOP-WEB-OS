@@ -1,0 +1,86 @@
+# Story Breakdown — spec-themes-par-app
+# Liste plate, ordre d'exécution strict, pas de graphe de dépendances.
+# `status` est volontairement absent : seul bmad-dev-auto écrit le statut, dans
+# le spec de chaque story.
+
+- id: '1'
+  title: Câbler les 9 variables CSS orphelines
+  description: >-
+    Dans `src/lib/themes/store.ts`, la fonction `applyThemeTokens` écrit 22
+    variables toutes préfixées `--theme-`. Le code en utilise 385 fois neuf
+    autres, que rien n'écrit : elles se résolvent contre le bloc `:root` statique
+    de `src/index.css`, gelé sur warm-paper. Ajouter les alias manquants à la
+    FIN de `applyThemeTokens`, en réutilisant l'objet `t` déjà en paramètre :
+
+    --theme-muted -> t.textMuted | --canvas -> t.canvas |
+    --panel -> t.surface | --panel-solid -> t.surface |
+    --panel-border -> t.border | --panel-border-subtle -> t.borderSubtle |
+    --hairline -> t.borderSubtle | --shadow-panel -> t.shadow |
+    --shadow-window -> t.shadowLg
+
+    Aucune valeur nouvelle n'est requise : l'interface `ThemeTokens`
+    (`src/lib/themes/tokens.ts`) porte déjà chacun de ces champs et les 12 thèmes
+    les renseignent tous. Ne PAS modifier `tokens.ts`. Ne PAS modifier la
+    signature de `applyThemeTokens`.
+
+    Dans `src/index.css`, le bloc `:root` garde ces mêmes noms — ils deviennent
+    le repli avant le premier rendu React. Ne rien y supprimer.
+
+    Poser un commentaire au-dessus du groupe d'alias expliquant POURQUOI ces
+    doublons existent : deux conventions de nommage ont coexisté, `--panel-*` /
+    `--hairline` (shell d'origine) et `--theme-*` (store de thèmes), et la
+    seconde n'a jamais recouvert la première.
+  spec_checkpoint: true
+  done_checkpoint: true
+
+- id: '2'
+  title: Garde-fou contre le retour des variables orphelines
+  description: >-
+    Empêcher que la story 1 se défasse silencieusement. Ajouter un test qui
+    échoue quand une variable CSS utilisée dans `src/` n'est écrite ni par
+    `applyThemeTokens` ni par un bloc `:root`/`[data-theme]` de `src/index.css`.
+
+    Implémentation attendue : un test Vitest (le dépôt utilise déjà Vitest —
+    vérifier `package.json` avant de supposer quoi que ce soit ; s'il n'y a pas
+    de runner de test, dire-le dans le rapport et livrer à la place un script
+    Node autonome sous `scripts/`, câblé dans `package.json`).
+
+    Le test lit les fichiers de `src/`, extrait toute occurrence de
+    `var(--nom)`, retire la liste des noms écrits, et échoue en nommant les
+    orphelines restantes.
+
+    Exclure explicitement, avec un commentaire justifiant chaque exclusion :
+    `--ok`, `--warn`, `--danger` (couleurs sémantiques hors `ThemeTokens`),
+    `--nm-shade`, `--nm-glow`, `--nm-accent` (locales au thème neumorphism),
+    `--topbar-height` (constante de mise en page), `--canvasui-cursor`
+    (posée par canvas-ui à l'exécution).
+
+    Le test doit passer au vert une fois la story 1 appliquée. S'il est rouge,
+    c'est que la story 1 est incomplète : le corriger côté store, pas en
+    élargissant la liste d'exclusions.
+  done_checkpoint: true
+
+- id: '3'
+  title: Faire suivre son thème à l'app Settings
+  description: >-
+    `src/apps/settings/` compte 78 classes de palette Tailwind en dur
+    (`bg-white`, `text-stone-800`, `border-stone-200`, `bg-emerald-100`…) contre
+    25 usages de `var(--theme-…)`. Résultat : le panneau où l'utilisateur CHOISIT
+    les thèmes ne suit pas le sien. C'est le symptôme le plus visible du bug.
+
+    Remplacer les classes de palette en dur par les variables de thème :
+    bg-white / bg-stone-50 -> var(--theme-surface) |
+    text-stone-900 / text-stone-800 -> var(--theme-text) |
+    text-stone-500 / text-stone-400 -> var(--theme-muted) |
+    border-stone-200 / border-stone-300 -> var(--panel-border) |
+    hover:bg-stone-100 -> var(--theme-surface-hover)
+
+    NE PAS toucher aux couleurs qui portent un SENS et non un style :
+    - `bg-emerald-100 text-emerald-700` du badge "On" — état de succès ;
+    - les pastilles de prévisualisation de thème (`ThemePreview`), qui doivent
+      afficher les couleurs du thème qu'elles représentent, pas celles du thème
+      courant. Les toucher casserait le sélecteur.
+
+    En cas de doute sur une couleur, la laisser et la signaler dans le rapport.
+    Une couleur laissée et signalée vaut mieux qu'un sélecteur cassé.
+  done_checkpoint: true
