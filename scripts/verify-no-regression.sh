@@ -2,7 +2,7 @@
 # Garde de non-regression, appele par bmad-loop apres chaque session.
 #
 # POURQUOI PAS `npm run build` : il enchaine `tsc -b && vite build`, et le depot
-# porte 88 erreurs TypeScript preexistantes (dont 32 TS2503, React 19 ayant
+# porte 79 erreurs TypeScript preexistantes (dont 32 TS2503, React 19 ayant
 # retire le namespace global JSX). Un build rouge des le depart ferait echouer
 # toutes les stories sans rien prouver. On mesure donc la NON-REGRESSION :
 #   1. le nombre d'erreurs TS n'augmente pas au-dela de la reference ;
@@ -16,7 +16,7 @@
 # de vraisemblance ci-dessous.
 
 set -u
-BASELINE=88
+BASELINE=79
 cd "$(dirname "$0")/.." || exit 1
 
 echo "== erreurs TypeScript =="

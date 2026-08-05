@@ -1,0 +1,139 @@
+# Story Breakdown — spec-couche-ontologie
+# Liste plate, ordre d'execution strict. `status` volontairement absent :
+# seul bmad-build-auto ecrit le statut, dans le spec de chaque story.
+
+- id: '1'
+  title: Le registre d'entites, en TypeScript pur
+  description: >-
+    Creer `src/lib/ontology/` : le modele, sans aucune interface. C'est la
+    fondation ; tout le reste de l'epic la lit.
+
+    Fichiers attendus :
+
+    `entities.ts` — les 12 entites, chacune avec un identifiant stable, un
+    libelle, une description d'une phrase, et ses attributs typés (nom, type
+    parmi `string | number | boolean | date | ref`, obligatoire ou non). Les 12,
+    sans en ajouter ni en retirer : Organization, Membership, Profile, Client,
+    Offering, SOP, Runbook, Skill, Agent, Routine, Incident, Persona.
+
+    `relations.ts` — les relations typées entre entites : source, cible, verbe,
+    cardinalite (`1-1`, `1-n`, `n-n`). Vise 15 a 25 relations. Toute relation
+    doit pointer vers deux entites qui existent dans `entities.ts` — c'est un
+    invariant a tester.
+
+    `contracts.ts` — un contrat semantique par entite : ce qui la declenche
+    (`triggers`) et les actions permises sur elle (`allowedActions`). Une entite
+    sans contrat est une erreur.
+
+    `index.ts` — l'API publique du module. Expose au minimum :
+    `getEntity(id)`, `listEntities()`, `relationsOf(entityId)`,
+    `contractOf(entityId)`. Les consommateurs ne doivent JAMAIS importer
+    `entities.ts` directement — c'est ce qui permettra de changer le stockage
+    plus tard sans toucher aux apps.
+
+    INTERDIT dans cette story : tout composant React, tout fichier `.tsx`, tout
+    appel reseau, toute dependance nouvelle. C'est du TypeScript pur.
+
+    Tests obligatoires dans `src/lib/ontology/ontology.test.ts` (vitest + jsdom
+    sont installes, `npm test` -> `vitest run`) :
+    - les 12 entites sont presentes, ni plus ni moins ;
+    - chaque entite a au moins un attribut et un contrat ;
+    - toute relation pointe vers deux entites existantes ;
+    - aucun identifiant d'entite n'est duplique.
+  spec_checkpoint: true
+  done_checkpoint: true
+
+- id: '2'
+  title: L'app ontology et ses quatre sections
+  description: >-
+    Creer `src/apps/ontology/OntologyApp.tsx` et l'enregistrer dans
+    `src/lib/app-discovery.ts` avec `registerApp({...})`, en suivant EXACTEMENT
+    le motif des apps voisines (voir `registerApp` pour `operations` et `it-rd`).
+    Choisir une icone `lucide-react` non deja utilisee et un accent distinct.
+
+    Quatre sections dans la barre laterale, via `AppFrame` et le type
+    `AppSection` (voir `src/apps/operations/OperationsApp.tsx` pour le motif
+    exact) :
+
+    - **Entities** — les 12 entites, chacune ouvrant une page de detail listant
+      ses attributs typés.
+    - **Relations** — les relations, filtrables par entite source ou cible.
+    - **Contracts** — par entite : ses declencheurs et ses actions permises.
+    - **Versions** — une page qui affiche l'etat du registre (nombre d'entites,
+      de relations, de contrats) et signale les incoherences detectees. Pas
+      d'historique de versions : il n'y a pas encore de persistance. Dis-le
+      dans l'interface plutot que de simuler un historique vide.
+
+    Toute lecture passe par l'API publique `src/lib/ontology/index.ts`. Aucun
+    import direct de `entities.ts` depuis l'app — c'est un invariant de l'epic.
+
+    Utiliser les variables CSS de theme (`var(--theme-*)`, `var(--panel-*)`,
+    `var(--theme-muted)`) et non des classes de palette Tailwind en dur : un
+    epic precedent vient de corriger ce defaut sur 385 usages, ne le
+    reintroduis pas.
+
+    INTERDIT : modifier `src/lib/ontology/` (fige par la story 1), toucher aux
+    autres apps, ajouter une dependance.
+  done_checkpoint: true
+
+- id: '3'
+  title: La portee personnelle ou organisation
+  description: >-
+    Un attribut d'entite peut relever de l'organisation (partage par tous) ou
+    d'une personne (note privee, en attente de promotion). C'est la distinction
+    que la synthese appelle « portee personnelle ».
+
+    Ajouter dans `src/lib/ontology/` un champ `scope` valant `'org' | 'personal'`
+    sur les attributs, avec `'org'` par defaut — l'absence de `scope` doit se
+    comporter exactement comme aujourd'hui, aucune regression.
+
+    Marquer au moins **5 entites** comme portant des attributs de portee
+    personnelle. Choisis-les et justifie-les dans le rapport : ce sont celles ou
+    une note privee a du sens avant d'etre partagee.
+
+    Dans l'app `ontology`, section Entities : un interrupteur qui bascule entre
+    « organisation seule » et « tout », et un marqueur visuel sur les attributs
+    personnels. Le choix se persiste dans un store Zustand avec
+    `persist` + `createJSONStorage(() => localStorage)`, sous une cle
+    `coach-os-ontology-scope-v1`, en suivant le motif de
+    `src/lib/themes/store.ts`.
+
+    Attention : ce depot a deja paye un bug de ce type. Un `set` Zustand qui
+    reecrit la meme valeur dans un objet est vu comme egal en surface et ne
+    declenche pas de rendu. Si tu rencontres ce cas, traite-le — mais ne
+    recopie pas la sentinelle `_v: Date.now()` de `themes/store.ts`, qui pollue
+    l'objet persiste. Utilise une valeur de premier niveau.
+
+    Etendre les tests : le defaut `'org'` est bien applique, le filtre retourne
+    le bon sous-ensemble, et la persistance relit ce qu'elle a ecrit.
+  done_checkpoint: true
+
+- id: '4'
+  title: Brancher it-rd et operations sur le registre
+  description: >-
+    La story qui teste toute la these de l'epic : deux apps existantes lisent le
+    MEME registre, sans recopier ses donnees.
+
+    Dans `src/apps/it-rd/ItRdApp.tsx`, ajouter une section **Ontology** qui
+    affiche les entites du registre et ouvre le detail de chacune. Elle ne
+    duplique pas l'app `ontology` : elle montre les entites sous l'angle
+    technique — attributs, types, contrats.
+
+    Dans `src/apps/operations/OperationsApp.tsx`, ajouter une section
+    **Context Layer** qui affiche les entites pertinentes pour l'operation
+    (`SOP`, `Runbook`, `Incident`, `Routine`, `Skill`) et leurs relations. Elle
+    ne remplace pas Knowledge Base : elle s'ajoute.
+
+    Les deux sections lisent `src/lib/ontology/index.ts`. **Aucune constante
+    recopiee, aucun tableau en dur.** C'est le point verifie par le critere
+    d'acceptation de l'epic : renommer un attribut dans le registre doit se voir
+    dans les trois apps sans toucher a leur code.
+
+    Ecrire un test qui le prouve : modifier le libelle d'une entite dans une
+    fixture et verifier que les deux vues le refletent. Si tu ne peux pas
+    l'ecrire, c'est que le branchement recopie quelque part — corrige le
+    branchement, pas le test.
+
+    INTERDIT : refondre les sections existantes de ces deux apps, retirer
+    Knowledge Base, toucher a `src/lib/ontology/`.
+  done_checkpoint: true
