@@ -67,6 +67,10 @@ export const COLLECTION_OWNERSHIP: Readonly<Record<string, string>> = Object.fre
   services: 'it-rd',
   it_experiments: 'it-rd',
   deploys: 'it-rd',
+  it_journal: 'it-rd',
+  it_loops: 'it-rd',
+  it_drift: 'it-rd',
+  it_evals: 'it-rd',
   // Clients
   session_notes: 'clients',
   // Tasks

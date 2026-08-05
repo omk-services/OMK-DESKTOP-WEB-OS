@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Network } from 'lucide-react';
+import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Network, Workflow, Gauge, GitBranch, Siren } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -10,7 +10,9 @@ import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDet
 import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { OperationsItemDetail } from './OperationsItemDetail';
+import { seedOperationsCms } from './seed';
 
+seedOperationsCms();
 registerItemDetail('operations', OperationsItemDetail);
 
 const ACCENT = '#4f46e5';
@@ -20,6 +22,8 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   'Finance ops': <FileWarning className="w-5 h-5" />,
   Security: <ShieldCheck className="w-5 h-5" />,
   Support: <BookText className="w-5 h-5" />,
+  Knowledge: <BookOpen className="w-5 h-5" />,
+  Sales: <ClipboardList className="w-5 h-5" />,
 };
 
 const CATEGORY_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'primary' | 'neutral'> = {
@@ -27,6 +31,8 @@ const CATEGORY_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'prima
   'Finance ops': 'warn',
   Security: 'danger',
   Support: 'ok',
+  Knowledge: 'accent',
+  Sales: 'accent',
 };
 
 const CATEGORY_ACCENT: Record<string, string> = {
@@ -34,6 +40,8 @@ const CATEGORY_ACCENT: Record<string, string> = {
   'Finance ops': '#f59e0b',
   Security: '#dc2626',
   Support: '#16a34a',
+  Knowledge: '#4f46e5',
+  Sales: '#ea580c',
 };
 
 interface RunbookItem extends Record<string, unknown> {
@@ -61,10 +69,83 @@ interface IncidentItem extends Record<string, unknown> {
   resolution: string;
 }
 
+interface ProcessItem extends Record<string, unknown> {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  owner: string;
+  inputs: string;
+  outputs: string;
+  dependsOn: string;
+  cadence: string;
+}
+
+interface BenchmarkItem extends Record<string, unknown> {
+  id: string;
+  title: string;
+  target: string;
+  difficulty: string;
+  passRate: number;
+  lastRun: string;
+  status: 'passed' | 'failed' | 'flaky';
+  failureMode: string;
+}
+
+interface ChangeItem extends Record<string, unknown> {
+  id: string;
+  title: string;
+  summary: string;
+  why: string;
+  risk: 'low' | 'med' | 'high';
+  policy: string;
+  status: 'proposed' | 'approved' | 'rejected';
+  proposedBy: string;
+}
+
+interface AlertItem extends Record<string, unknown> {
+  id: string;
+  title: string;
+  when: string;
+  severity: 'ok' | 'warn' | 'danger';
+  enrichment: 'enriched' | 'raw';
+  source: string;
+  riskScore: string;
+  hypothesis: string;
+  trace: string;
+}
+
+const BENCHMARK_TONE: Record<BenchmarkItem['status'], 'ok' | 'warn' | 'danger' | 'neutral'> = {
+  passed: 'ok',
+  failed: 'danger',
+  flaky: 'warn',
+};
+
+const BENCHMARK_ACCENT: Record<BenchmarkItem['status'], string> = {
+  passed: '#16a34a',
+  failed: '#dc2626',
+  flaky: '#f59e0b',
+};
+
+const CHANGE_TONE: Record<ChangeItem['status'], 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
+  proposed: 'accent',
+  approved: 'ok',
+  rejected: 'danger',
+};
+
+const ENRICHMENT_TONE: Record<AlertItem['enrichment'], 'ok' | 'warn'> = {
+  enriched: 'ok',
+  raw: 'warn',
+};
+
 export function OperationsApp() {
   const runbooksDrill = useCollectionDrill('runbooks', 'Runbooks');
   const knowledgeDrill = useCollectionDrill('articles', 'Knowledge Base');
   const incidentsDrill = useCollectionDrill('incidents', 'Incidents');
+  useCollectionDrill('processes', 'Processus');
+  useCollectionDrill('benchmarks', 'Benchmarks');
+  useCollectionDrill('changes', 'Changements');
+  useCollectionDrill('alerts', 'Alertes');
   const runbooks = useCmsStore(s => s.items['runbooks']) ?? [];
   const articles = useCmsStore(s => s.items['articles']) ?? [];
   const incidents = useCmsStore(s => s.items['incidents']) ?? [];
@@ -213,10 +294,126 @@ export function OperationsApp() {
     );
   };
 
+  const Processus = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Processus"
+          subtitle="Cartographie des processus de l'organisation — qui depend de quoi, et quoi faire quand ca casse"
+        />
+        <CMSCardList<ProcessItem>
+          collectionId="processes"
+          cols={2}
+          render={(p) => ({
+            title: p.name,
+            subtitle: `${p.cadence} · owner ${p.owner}`,
+            description: `Inputs: ${p.inputs}`,
+            statusLabel: p.category,
+            statusTone: CATEGORY_TONE[p.category] ?? 'neutral',
+            accent: CATEGORY_ACCENT[p.category] ?? ACCENT,
+            icon: CATEGORY_ICON[p.category] ?? <Workflow className="w-5 h-5" />,
+            metricLabel: 'depends on',
+            metricValue: `${p.dependsOn.split('·').length} upstream`,
+            meta: `outputs · ${p.outputs.split('·').length}`,
+          })}
+        />
+      </div>
+    );
+  };
+
+  const Benchmarks = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Benchmarks"
+          subtitle="Les tests qui savent dire non — passe, echoue, instable"
+        />
+        <CMSCardList<BenchmarkItem>
+          collectionId="benchmarks"
+          cols={2}
+          render={(b) => ({
+            title: b.title,
+            subtitle: `${b.difficulty} · last run ${b.lastRun}`,
+            description: b.target,
+            statusLabel: b.status,
+            statusTone: BENCHMARK_TONE[b.status],
+            accent: BENCHMARK_ACCENT[b.status],
+            icon: <Gauge className="w-5 h-5" />,
+            metricLabel: 'pass rate',
+            metricValue: `${b.passRate}%`,
+            meta: b.failureMode.split('.')[0] ?? '',
+          })}
+        />
+      </div>
+    );
+  };
+
+  const Changements = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Changements"
+          subtitle="File des modifications proposees par les agents, en attente de decision humaine"
+        />
+        <CMSCardList<ChangeItem>
+          collectionId="changes"
+          cols={2}
+          render={(c) => ({
+            title: c.title,
+            subtitle: c.summary,
+            description: c.why.split('.')[0] ?? c.why,
+            statusLabel: c.status,
+            statusTone: CHANGE_TONE[c.status],
+            accent: ACCENT,
+            icon: <GitBranch className="w-5 h-5" />,
+            metricLabel: 'risk',
+            metricValue: c.risk,
+            meta: `${c.policy} · ${c.proposedBy}`,
+          })}
+        />
+      </div>
+    );
+  };
+
+  const Alertes = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Alertes"
+          subtitle="Incidents pre-enrichis a froid — traces, extrait de log, hypothese et risque deja poses"
+        />
+        <CMSCardList<AlertItem>
+          collectionId="alerts"
+          cols={2}
+          render={(a) => {
+            const sevTone = a.severity === 'danger' ? 'danger' : a.severity === 'warn' ? 'warn' : 'ok';
+            const sevAccent = a.severity === 'danger' ? '#dc2626' : a.severity === 'warn' ? '#f59e0b' : '#16a34a';
+            return {
+              title: a.title,
+              subtitle: `${a.when} · ${a.source}`,
+              description: a.hypothesis.split('.')[0] ?? a.hypothesis,
+              statusLabel: a.enrichment,
+              statusTone: ENRICHMENT_TONE[a.enrichment],
+              accent: sevAccent,
+              icon: <Siren className="w-5 h-5" />,
+              metricLabel: 'severity',
+              metricValue: a.severity === 'danger' ? 'high' : a.severity === 'warn' ? 'medium' : 'low',
+              meta: `risk ${a.riskScore} · ${sevTone === 'danger' ? 'page on-call' : sevTone === 'warn' ? 'monitored' : 'clear'}`,
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
   const sections: AppSection[] = [
     { id: 'runbooks', label: 'Runbooks', icon: ClipboardList, render: Runbooks },
     { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen, render: Knowledge },
     { id: 'incidents', label: 'Incidents', icon: AlertOctagon, render: Incidents },
+    { id: 'processus', label: 'Processus', icon: Workflow, render: Processus },
+    { id: 'benchmarks', label: 'Benchmarks', icon: Gauge, render: Benchmarks },
+    { id: 'changements', label: 'Changements', icon: GitBranch, render: Changements },
+    { id: 'alertes', label: 'Alertes', icon: Siren, render: Alertes },
     {
       id: 'context-layer',
       label: 'Context Layer',
