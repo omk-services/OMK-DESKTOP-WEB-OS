@@ -58,6 +58,21 @@
     Le test doit passer au vert une fois la story 1 appliquée. S'il est rouge,
     c'est que la story 1 est incomplète : le corriger côté store, pas en
     élargissant la liste d'exclusions.
+
+    OBLIGATOIRE — retirer `--passWithNoTests` de `scripts/verify-no-regression.sh`.
+    La story 1 l'y a ajouté parce qu'aucun test n'existait encore, et a inscrit
+    la dette au registre (DW-1). Tant que ce drapeau reste, la suite peut être
+    vidée sans que le garde ne bronche : il ne garde plus rien. Cette story est
+    précisément celle qui crée les tests, donc celle qui doit le retirer.
+    Retirer aussi le commentaire qui le justifiait, devenu faux.
+
+    Vitest et jsdom SONT installés (commit 91c8490), avec `npm test` ->
+    `vitest run` et `environment: 'jsdom'` dans `vite.config.ts`. Ne pas
+    réinstaller, ne pas reconfigurer.
+
+    Preuve attendue dans le rapport : la sortie de `bash scripts/verify-no-regression.sh`
+    montrant les tests passés ET l'absence de `--passWithNoTests` dans le script.
+  closes_deferred: [DW-1]
   done_checkpoint: true
 
 - id: '3'
