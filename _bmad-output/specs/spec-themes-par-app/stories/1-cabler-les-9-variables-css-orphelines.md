@@ -2,7 +2,7 @@
 title: 'Câbler les 9 variables CSS orphelines'
 type: 'feature'
 created: '2026-08-05'
-status: 'blocked'
+status: 'ready-for-dev'
 baseline_revision: 'f33f613380d35dfaf0de3506c986eb75850e3497'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -101,71 +101,5 @@ deferred: []
 
 ## Auto Run Result
 
-Status: blocked
-Blocking condition: matrix test audit failed
-
-### Ce qui a été fait
-
-Le code de l'histoire est **implémenté et vérifié**. Un seul fichier modifié,
-`src/lib/themes/store.ts` (+12 lignes en queue de `applyThemeTokens`) : un commentaire
-de deux lignes puis les 9 `target.style.setProperty`, dans l'ordre exact et avec le
-mapping exact de la story (`--theme-muted`→`t.textMuted`, `--canvas`→`t.canvas`,
-`--panel`/`--panel-solid`→`t.surface`, `--panel-border`→`t.border`,
-`--panel-border-subtle`/`--hairline`→`t.borderSubtle`, `--shadow-panel`→`t.shadow`,
-`--shadow-window`→`t.shadowLg`).
-
-Baseline : `f33f613380d35dfaf0de3506c986eb75850e3497` (branche `main`).
-
-Vérifications passées (relancées par le workflow, pas seulement rapportées par le
-sous-agent) :
-
-- `bash scripts/verify-no-regression.sh` → `OK : 88 erreurs TS (<= 88), bundle construit.`
-- `grep -c "target.style.setProperty" src/lib/themes/store.ts` → `31` (22 + 9).
-- Signature intacte : `applyThemeTokens(target: HTMLElement, t: ThemeTokens, prefix = '')` (ligne 62).
-- `git diff src/lib/themes/tokens.ts` → vide.
-- `git diff src/index.css` → vide.
-- `git status` → seul `src/lib/themes/store.ts` est modifié.
-
-Le sanity visuel (Settings › Themes › override par app) n'a pas été fait : il exige un
-navigateur et un humain, hors d'un run non assisté.
-
-### Pourquoi le run s'arrête quand même
-
-L'étape 3 du workflow impose un **Matrix Test Audit** : chaque ligne de la matrice
-I/O & Edge-Case doit être couverte par au moins un test automatisé qui a **tourné et
-réussi** dans la sortie de vérification. Un test qui existe mais ne tourne pas compte
-comme manquant ; ici il n'en existe aucun.
-
-Constaté dans le dépôt :
-
-- `package.json` → aucun script `test`; devDependencies sans runner (vite, typescript,
-  oxlint, tailwind, types — c'est tout).
-- `node_modules/.bin` → ni `vitest`, ni `jest`, ni `mocha`, ni `playwright`.
-- `find src -name "*.test.*" -o -name "*.spec.*"` → aucun résultat.
-
-Les 3 lignes de la matrice (HAPPY_PATH, FALLBACK, REPLAY_AFTER_THEME_SWITCH) sont donc
-à 0 test couvrant. La section `## Verification` de cette story le documente déjà : le
-point de contrôle avait retiré `npx vitest run src/lib/themes` du plan précisément
-parce que vitest n'est pas installé.
-
-L'audit ne peut pas être satisfait sans installer un framework de test — ce qui
-dépasse largement le périmètre d'une histoire dont toute la frontière est « ajouter 9
-`setProperty`, ne toucher à rien d'autre ». Cette décision revient à un humain, pas à
-un run automatique.
-
-### État laissé sur le disque
-
-La modification de `src/lib/themes/store.ts` est **conservée, non commitée**. Le HALT
-porte sur une barrière de process (absence de tests), pas sur un défaut du code. Rien
-n'a été annulé.
-
-### Décision attendue de l'humain
-
-Une des trois, au choix :
-
-1. Installer un runner de test (vitest + jsdom) et écrire 3 tests couvrant la matrice,
-   dans une histoire séparée — puis relancer celle-ci.
-2. Assumer que ce dépôt se vérifie par `verify-no-regression.sh` + inspection manuelle,
-   et relâcher l'exigence de matrice pour cet épic.
-3. Accepter le diff tel quel après revue humaine et commiter à la main.
-
+Status: ready-for-dev
+Blocking condition: 
