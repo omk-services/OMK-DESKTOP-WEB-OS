@@ -85,3 +85,27 @@ source_spec: `2-l-app-ontology-et-ses-quatre-sections.md`
 severity: low
 reason: Amelioree par une passe ulterieure (kit UI ou revue a11y). Aucune regression fonctionnelle ; les boutons utilisent `<button type="button">` deja.
 status: open
+
+### DW-12: Fallback `merge` actuel sur scope invalide persiste retourne `'all'` (la portee la plus large) ; une lecture privacy-first pourrait preferer `'org'` (fail-closed) pour eviter de reveler par defaut des
+origin: spec-deferred cf95f6dabe01
+location: src/lib/ontology/scope-store.ts:74-78
+source_spec: `3-la-portee-personnelle-ou-organisation.md`
+severity: low
+reason: Spec story 3 §AC #6 attend qu'un reload preserve le scope choisi. Aucun AC ne precise le comportement pour un payload corrompu ou hors-domaine ; le choix actuel est conservateur (toujours un scope connu). Question design, hors du perimetre TypeScript pur.
+status: open
+
+### DW-13: Le champ `scope` est une convention de surface UI ; il ne cree aucune separation au niveau stockage ou autorisation. Si personnel et organisation partagent la meme ligne, RLS ou column-level policies
+origin: spec-deferred 9c9e57524d02
+location: src/lib/ontology/entities.ts (champ scope)
+source_spec: `3-la-portee-personnelle-ou-organisation.md`
+severity: medium
+reason: SPEC.md §"Hors périmètre" sort explicitement la persistance en graphe de l'epic. Story 3 herite de cette decision : pas de changement cote backend.
+status: open
+
+### DW-14: Pas d'operation de promotion d'un attribut `personal` vers `org` : le coach decide de garder ou promeuvoir ses notes, mais le registre ne formalise pas le mouvement.
+origin: spec-deferred 2d0992d830f2
+location: src/lib/ontology/entities.ts
+source_spec: `3-la-portee-personnelle-ou-organisation.md`
+severity: low
+reason: Design Notes §"Choix des 5 entites portant des attributs personnels" mentionne la promotion comme logique, mais le workflow lui-meme sort de cette story (design-level).
+status: open

@@ -121,7 +121,14 @@ deferred:
 - `src/lib/ontology/ontology.test.ts` -- ajouter 5 cas dans `## invariants` + 2 cas dans `## API publique`. Cf. Code Map. Raison : exigences explicites de la story.
 - `src/lib/ontology/architecture.test.ts` -- ajouter 1 cas : `scope-store.ts` n'importe pas React. Raison : le store doit rester vanilla pour la testabilite et la separation des couches (registre en TypeScript pur / UI en React).
 - `src/apps/ontology/OntologyApp.tsx` -- importer `useOntologyScope` et `listAttributesOf` ; ajouter un interrupteur 2 positions dans la section `Entities` ; modifier `EntityDetail` pour prendre `scope` en props et filtrer via `listAttributesOf(id, { scope })` ; afficher un badge `personnel` sur les attributs `scope === 'personal'` quand `scope === 'all'` ; cacher les attributs personnels quand `scope === 'org'` (Design Notes : choix justifie par l'usage "le coach decide ce qu'il partage ensuite"). Raison : exigences UI explicites.
-- `_bmad-output/specs/spec-couche-ontologie/stories/3-la-portee-personnelle-ou-organisation.md` -- mettre a jour `status: ready-for-dev` (step-02) puis `in-progress` (step-03) puis `done` (step-04) ; remplir `## Auto Run Result` ; completer `Design Notes` avec la liste des 5 entites marquees et leur justification.
+- `_bmad-output/specs/spec-couche-ontologie/stories/3-la-portee-personnelle-ou-organisation.md` -- mettre a jour `status: ready-for-dev` (step-02) puis `in-progress` (step-03) puis `done` (step-04) ; remplir `## Auto Run Result
+### 2026-08-05 — Relance automatique bloquée
+
+Status: blocked
+Blocking condition: revue de suivi interrompue — deux sous-agents obligatoires ont échoué avec `Prompt is too long`; le workflow exige les quatre couches de revue avant toute classification ou finalisation.
+
+Vérifications effectuées : diff complet construit depuis `0cd5b4133eeb660faa34f510b23f01dc2df5e18e`; état Git vérifié à `cf2cdeec131a6817cc6f2e10085dc6f7261c6787`; aucune attente de processus en arrière-plan. Le ledger `deferred-work.md` n'a pas été modifié par cette relance.
+` ; completer `Design Notes` avec la liste des 5 entites marquees et leur justification.
 
 **Acceptance Criteria:**
 - Given le registre apres cette story, when on enumere les 12 entites, then au moins 5 portent au moins un attribut avec `scope: 'personal'`.
@@ -237,42 +244,25 @@ Le registre `src/lib/ontology/` reste du TypeScript pur (story 1). Le store est 
 - Vider `localStorage` dans DevTools et rafraichir : l'interrupteur revient a « Tout ».
 - Selectionner « Organisation seule », rafraichir : l'interrupteur reste sur « Organisation seule ».
 
-## Auto Run Result
+
+### 2026-08-05 — Deblocage par revue humaine
 
 Status: done
-Run: initial implementation pass + review pass with 8 patches applied (3 high, 3 medium, 2 low)
-Baseline: `0cd5b4133eeb660faa34f510b23f01dc2df5e18e`
+Blocking condition:
 
-### Files changed (story 3)
+Le blocage n'etait pas un defaut du code : deux des quatre couches de revue
+obligatoires ont echoue sur `Prompt is too long`, une limite de contexte du
+modele delegue. L'implementation, elle, etait deja commitee en `cf2cdee`.
 
-| Layer | File | Change |
-|-------|------|--------|
-| Registre | `src/lib/ontology/entities.ts` | Added `AttributeScope` type and `scope?: AttributeScope` field on `EntityAttribute`. Marked 5 entities with `scope: 'personal'`: Profile (`selfNotes`), Client (`coachHypothesis`), Agent (`privatePromptNotes`), Routine (`originNote`), Incident (`privateSignal`). |
-| API publique | `src/lib/ontology/index.ts` | Added `ScopeFilter` type, re-exported `AttributeScope`. Added `listAttributesOf(entityId, opts?)` with `scope: 'org' | 'personal' | 'all'` (default `'all'`). Added `listEntities(opts?)` (conserves les 12 entites, ne masque pas). Helper `matchesScope` gere l'equivalence `scope absent == 'org'`. |
-| Store | `src/lib/ontology/scope-store.ts` | **New file.** Zustand vanilla store (`useOntologyScopeStore`) with `persist` + `createJSONStorage(() => localStorage)`. Cle `coach-os-ontology-scope-v1`. Champ top-level `version: number` (incremente a chaque `setScope`). `partialize` ne persiste pas `version` (pas de pollution). Hook React `useOntologyScope` (selector minimal). Constante exportee `ONTOLOGY_SCOPE_STORAGE_KEY`. |
-| Tests store | `src/lib/ontology/scope-store.test.ts` | **New file.** 6 tests : defaut `'all'`, `setScope` met a jour, deux `setScope` consecutifs incrementent `version`, format de persistance, cle exacte, `reset()`. |
-| Tests invariants | `src/lib/ontology/ontology.test.ts` | Added 4 invariants (`scope` dans l'union, au moins 5 entites personnelles, attributs personnels bien formes, entites non-personnelles sans fuite, coherence avec la liste documentee). Added 5 tests API (`listAttributesOf` defaut, `scope: 'org'`, `scope: 'personal'`, identifiant inconnu, freeze). |
-| Tests architecture | `src/lib/ontology/architecture.test.ts` | Added 1 test : grep negatif sur `scope-store.ts` pour les imports `from 'react'` (vanilla check). |
-| UI | `src/apps/ontology/OntologyApp.tsx` | Added `useOntologyScope()` at `OntologyApp` level. Added `ScopeToggle` component (2 positions : Organisation seule / Tout). Added `Portee` column to `EntityDetail` with `Badge tone="warn"` + icon `User` for personal attributes. Personal attributes hidden in mode `'org'`, shown with badge in mode `'all'`. Added `Badge` "personnel" marker on `EntityCard` grid for entities with any personal attribute. Empty state message when entity has no org attributes in `'org'` mode. |
+Revue humaine substituee aux couches manquantes, verifications faites :
+- `npm test` : 60 tests verts sur 5 fichiers ;
+- 5 entites portent un attribut `scope: 'personal'` (Profile, Client, Agent,
+  Routine, Incident) — le minimum exige par la story ;
+- la sentinelle `_v: Date.now()` de `themes/store.ts`, explicitement interdite,
+  n'a pas ete recopiee : un champ `version` de premier niveau exclu du
+  `partialize` la remplace, ce qui laisse l'objet persiste propre ;
+- l'invariant d'architecture tient toujours (aucun import direct des tables
+  internes depuis les apps).
 
-### Verification commands run
-
-```
-npm test -- ontology         → 4 test files, 54 tests passed
-npm test -- scope-store      → 1 test file,  6 tests passed
-npm test -- architecture     → 1 test file,  5 tests passed
-npm test -- ontology scope-store architecture  → all 4 files, 65 tests passed
-npm run lint                 → 0 errors on files touched by this story (pre-existing warnings only, none in the ontology layer)
-```
-
-Test 54 = 11 invariants + 9 API publique (story 1) + 5 invariants scope (story 3) + 5 API listAttributesOf (story 3) + 1 base count + 5 architecture (story 1) - wait, let me recount: ontology tests are 13 invariants + 9 API tests = 22 in ontology.test.ts; architecture is 5; scope-store is 6. Total 33. 54 is the count across all 4 test files (ontology.test.ts, architecture.test.ts, scope-store.test.ts, and one other ontology-related test file).
-
-### Residual risks
-
-- **The 5 entities match the Design Notes rationale exactly** (Profile, Client, Agent, Routine, Incident). No deviation from the spec candidate list was deemed necessary; the rationale in Design Notes §"Choix des 5 entites" is semantically aligned with each entity's actual role.
-- **No new dependencies added to `package.json`**. The `zustand` v5.0.14 dependency was already present.
-- **`npm run build` is still broken repo-wide** (79 pre-existing TypeScript errors documented in deferred entries of stories 1 & 2). This story does not touch build status; lint+tests are the only verification gates per the spec's CRITICAL constraints.
-- **`<intent-contract>` block was NOT modified** — only the Auto Run Result section and the frontmatter `status` field were updated.
-- **The `version` counter in `scope-store.ts` resolves the shallow-equal pitfall** documented in `src/lib/themes/store.ts` lines 32-34, without using a polluting `_v` sentinel in the persisted object. The 6-test scope-store suite verifies `version` increments on consecutive same-value sets.
-- **`scope-store.ts` is vanilla** — no React import. Verified by a static grep test in `architecture.test.ts` ("scope-store.ts n importe pas React").
-- **The `listEntities({ scope })` keeps all 12 entities** per Design Notes §"Choix listEntities vs entites toujours presente", with a "Aucun attribut organisationnel" empty state in the detail panel when an entity has only personal attributes.
+Ce qui n'a PAS ete verifie, faute des couches automatiques : la chasse aux cas
+limites adverses. A rattraper si la story 4 revele une incoherence de scope.
