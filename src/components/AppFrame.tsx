@@ -19,8 +19,10 @@ import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, C
 import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 import { useThemeStore, applyThemeTokens, useThemeIdFor } from '../lib/themes/store';
+import { useCanvasFxStore } from '../stores/canvasFx.store';
 import { THEME_META } from '../lib/themes/tokens';
 import { BackgroundFX, type CanvasEffectId } from './canvasui/v30';
+import fxObjectSrc from '../assets/hero.png';
 
 export interface AppSection {
   id: string;
@@ -105,6 +107,16 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   // de theme ET leur theme canonique.
   const appId = windowId ?? title.toLowerCase().replace(/[^a-z0-9-]/g, '-');
   const activeThemeId = useThemeIdFor(appId);
+
+  // Override d'effet canvas choisi dans Settings > Canvas FX. Le picker ecrivait
+  // dans useCanvasFxStore depuis toujours, mais RIEN ne le lisait : le choix
+  // etait persiste puis ignore. C'est le branchement manquant.
+  //
+  // On lit l'override BRUT plutot que le hook useCanvasFxFor du store : celui-ci
+  // retombe sur `getCanvasMapping(undefined).dominant`, c'est-a-dire le dominant
+  // de warm-paper, ce qui imposerait GlyphRain a toutes les apps sans override.
+  // Ici, absence d'override = undefined = resolution par theme inchangee.
+  const fxOverride = useCanvasFxStore((s) => s.appFxOverrides[appId]);
   const tokens = useThemeStore((s) => s.tokensFor(appId));
   useEffect(() => {
     if (rootRef.current) applyThemeTokens(rootRef.current, tokens);
@@ -336,7 +348,13 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
               themeId={activeThemeId}
               accent={accent}
               nuanceSlot={canvasNuance ?? 0}
-              effectId={canvasEffect}
+              effectId={canvasEffect ?? fxOverride}
+              /* Requis par la famille Object (AsciiObject, DitheredObject,
+                 GlassObject, LiquidObject, ParticleObject) : sans objectSrc,
+                 BackgroundFX ne rend QUE le calque CSS et aucun WebGL. Les 28
+                 autres effets l'ignorent. Il n'etait passe nulle part dans le
+                 depot, donc ces 5 effets n'avaient jamais pu s'afficher. */
+              objectSrc={fxObjectSrc}
               className="h-full w-full"
             />
           </div>
