@@ -83,6 +83,24 @@ export function applyThemeTokens(target: HTMLElement, t: ThemeTokens, prefix = '
   target.style.setProperty(`${p}--theme-font-display`, t.fontDisplay);
   target.style.setProperty(`${p}--theme-font-body`, t.fontBody);
   target.style.setProperty(`${p}--theme-is-dark`, t.isDark ? '1' : '0');
+
+  // Two naming conventions have coexisted in `src/index.css`: the original
+  // shell's `--panel-*` / `--hairline` / `--canvas` / `--shadow-*` (some of
+  // them bare, some prefixed `--theme-` like `--theme-muted` which landed in
+  // the canonical namespace by accident) and the canonical `--theme-*` names
+  // that this store writes. The store never overwrote the shell names, so 385
+  // reads silently resolved against the static `:root` block (warm-paper).
+  // These 9 aliases bridge the gap by writing the legacy names from the same
+  // ThemeTokens values, until every consumer migrates to the canonical form.
+  target.style.setProperty(`${p}--theme-muted`, t.textMuted);
+  target.style.setProperty(`${p}--canvas`, t.canvas);
+  target.style.setProperty(`${p}--panel`, t.surface);
+  target.style.setProperty(`${p}--panel-solid`, t.surface);
+  target.style.setProperty(`${p}--panel-border`, t.border);
+  target.style.setProperty(`${p}--panel-border-subtle`, t.borderSubtle);
+  target.style.setProperty(`${p}--hairline`, t.borderSubtle);
+  target.style.setProperty(`${p}--shadow-panel`, t.shadow);
+  target.style.setProperty(`${p}--shadow-window`, t.shadowLg);
 }
 
 /** Convenience: returns the active theme tokens for an app (subscribed). */
