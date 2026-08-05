@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Cpu, FlaskConical, Rocket, Server } from 'lucide-react';
+import { Cpu, FlaskConical, Rocket, Server, Network } from 'lucide-react';
+import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
@@ -136,6 +137,18 @@ export function ItRdApp() {
     { id: 'kernel', label: 'Kernel', icon: Server, render: Kernel },
     { id: 'experiments', label: 'Experiments', icon: FlaskConical, render: Experiments },
     { id: 'deploys', label: 'Deploys', icon: Rocket, render: Deploys },
+    {
+      id: 'ontology',
+      label: 'Ontology',
+      icon: Network,
+      render: () => (
+        <OntologySection
+          accent={ACCENT}
+          title="Les 12 entites du registre"
+          subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
+        />
+      ),
+    },
   ];
 
   return (

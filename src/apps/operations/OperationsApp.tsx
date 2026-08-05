@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck } from 'lucide-react';
+import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Network } from 'lucide-react';
+import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -216,6 +217,20 @@ export function OperationsApp() {
     { id: 'runbooks', label: 'Runbooks', icon: ClipboardList, render: Runbooks },
     { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen, render: Knowledge },
     { id: 'incidents', label: 'Incidents', icon: AlertOctagon, render: Incidents },
+    {
+      id: 'context-layer',
+      label: 'Context Layer',
+      icon: Network,
+      render: () => (
+        <OntologySection
+          accent={ACCENT}
+          only={['SOP', 'Runbook', 'Incident', 'Routine', 'Skill']}
+          showRelationCount
+          title="La couche de contexte operationnel"
+          subtitle="Les entites que l operation manipule, et leurs relations. Meme registre que it-rd et Ontology."
+        />
+      ),
+    },
   ];
 
   return (
