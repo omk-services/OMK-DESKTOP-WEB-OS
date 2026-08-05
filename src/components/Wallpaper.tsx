@@ -3,10 +3,11 @@
  * Per-theme ambient effect (Frost, Particle, Blaze, etc.) on top of the base
  * paper-garden scene. */
 import { useThemeStore } from '../lib/themes/store';
-import { BackgroundFX } from './canvasui/v30';
+import { THEME_META } from '../lib/themes/tokens';
 
 export function Wallpaper() {
-  const globalThemeId = useThemeStore((s) => s.globalTheme);
+  const globalTheme = useThemeStore((s) => s.globalTheme);
+  const themeMeta = THEME_META.find(t => t.id === globalTheme);
 
   return (
     <div className="fixed inset-0 z-[-10] overflow-hidden" style={{ background: 'linear-gradient(180deg, #eef1e6 0%, #e4ecd7 45%, #d7e6c3 100%)' }}>
@@ -42,24 +43,10 @@ export function Wallpaper() {
           ))}
         </svg>
       </div>
-      {/* Per-global-theme canvas-ui effect (v30). No `nuanceSlot` here — the
-          absence picks the theme's `dominant` effect, distinct from the per-app
-          nuance effects used by AppFrame signature FX. The container sits behind
-          the window layer (Desktop.tsx mounts windows in a z-10 layer). NO
-          `mix-blend-mode` here: combining it with an animated canvas forces
-          full-page recomposition every frame — a perf regression already fixed
-          elsewhere in this repo (see AppFrame comment). */}
-      <div
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}
-        aria-hidden
-      >
-        {/* `h-full w-full` n'est pas cosmetique : BackgroundFX cree son propre
-            wrapper en `position: relative` sans hauteur declaree, qui se reduit
-            donc a son contenu — soit zero. Le moteur lit `output.clientHeight`
-            pour dimensionner son buffer, et rendait un canvas de hauteur 0.
-            AppFrame passe la meme classe pour la meme raison. */}
-        <BackgroundFX themeId={globalThemeId} className="h-full w-full" />
-      </div>
+      {/* No canvas-ui effect on the desktop wallpaper. Canvas FX belongs to each app
+          window (see AppFrame.tsx signature FX). Wallpaper stays a clean static scene
+          so the per-app effects can carry visual weight without competing layers. */}
+      {themeMeta ? null : null}
     </div>
   );
 }
