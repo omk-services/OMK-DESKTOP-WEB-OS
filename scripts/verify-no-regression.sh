@@ -37,6 +37,12 @@ if [ "$COUNT" -gt "$BASELINE" ]; then
   exit 1
 fi
 
+echo "== tests =="
+if ! cmd.exe /c "npm test"; then
+  echo "ECHEC : des tests sont rouges."
+  exit 1
+fi
+
 echo "== build vite =="
 if ! cmd.exe /c "npx vite build --logLevel warn"; then
   echo "ECHEC : le bundle ne se construit plus."
