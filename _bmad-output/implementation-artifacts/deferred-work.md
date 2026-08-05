@@ -29,3 +29,27 @@ source_spec: `2-garde-fou-contre-le-retour-des-variables-orphelines.md`
 severity: low
 reason: Le nouveau test file pose `/// <reference types="node" />` (necessaire pour `verbatimModuleSyntax: true` + imports `node:fs`/`node:path`), ce qui resout 9 erreurs TS2591 preexistantes dans `src/components/canvasui/_v1_css_retired/theme-canvas-mapping.ts` (folder archive, jamais compile). Net : -9 erreurs, 0 regression.
 status: open
+
+### DW-5: `npm run build` echoue avant cette story : `tsc -b` remonte 79 erreurs de type preexistantes dans les apps et les composants retires.
+origin: spec-deferred 19d7596d27dd
+location: repo-wide (hors src/lib/ontology/)
+source_spec: `1-le-registre-dentites-en-typescript-pur.md`
+severity: medium
+reason: `npx tsc -b --noEmit` sur le HEAD de reference 036b5ccb rapporte 79 erreurs, reparties surtout sur src/apps/tasks/TasksDetailPage.tsx (6), src/apps/cognition/CognitionApp.tsx (6), src/components/canvasui/_v1_css_retired/BackgroundFX.tsx (5), src/apps/marketplace/MarketplaceDetailPage.tsx (5). Aucune n'est dans src/lib/ontology/ : le module ajoute par cette story compile a zero erreur. Consequence : `npm run build` (= `tsc -b && vite build`) est casse au niveau du depot, donc la verification de type n'est de fait pas une barriere en CI tant que ces 79 erreurs subsistent. `npm test` et `npm run lint` sont verts et restent les garde-fous effectifs.
+status: open
+
+### DW-6: Choices de modele du registre a revisiter : relations et attributs dont l'absence ou la forme releve d'un arbitrage non couvert par cette story.
+origin: spec-deferred ac3cd621d027
+location: src/lib/ontology/entities.ts, src/lib/ontology/relations.ts
+source_spec: `1-le-registre-dentites-en-typescript-pur.md`
+severity: medium
+reason: Revue 2026-08-05 (run 2) releve : (a) `Incident` est decrit comme rattache a un Agent mais n'a aucune relation correspondante dans `relations.ts` ; (b) `Persona` est decrit comme incarne "dans un contexte Client" mais n'a pas de relation Persona ↔ Client ; (c) `Skill` et `Persona` n'ont pas d'attribut `organization` alors que toutes les autres entites tenant-scoped en ont un ; (d) `Routine` expose `allowedActions: rerun` mais `Runbook` n'a pas d'equivalent (asymetrie) ; (e) nommage date incoherent entre entites (`createdAt` / `updatedAt` / `lastTestedAt`). Decisions prises dans cette story par defaut d'arbitrage, a reprendre dans une revue d'architecture ou en surface par les stories 2/3/4 consommatrices. Egalement reporte : renforcement type-level de `EntityAttribute.ref` via discriminated union (`RefAttribute | NonRefAttribute`) — le runtime test couvre deja l'invariant, l'enforcement compile-time est un polish separable.
+status: open
+
+### DW-7: Follow-up review still recommended for 1 after the damping cap was spent
+origin: review-budget-followup
+location: n/a
+source_spec: `1-le-registre-dentites-en-typescript-pur.md`
+severity: low
+reason: The follow-up-review damping cap (limits.max_followup_reviews = 1) was spent with the story finalized (status: done, verify green) while the review pass still recommended an independent follow-up. The work was committed by bmad-loop run 20260805-091730-9034; this entry preserves the lingering recommendation for a deliberate later review.
+status: open
