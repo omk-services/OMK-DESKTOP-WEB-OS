@@ -83,11 +83,23 @@ export const COLLECTION_OWNERSHIP: Readonly<Record<string, string>> = Object.fre
   // Product
   product_items: 'product',
   product_releases: 'product',
+  product_rankings: 'product',
+  product_launches: 'product',
+  product_mvps: 'product',
+  product_ideas: 'product',
   // Growth
   growth_channels: 'growth',
   growth_experiments: 'growth',
+  growth_acquisition: 'growth',
+  growth_strategie: 'growth',
+  growth_partenariats: 'growth',
+  growth_aeo: 'growth',
   // Finance
   invoices: 'finance',
+  plancher_marges: 'finance',
+  courbe_demande: 'finance',
+  budget_tokens: 'finance',
+  formes_prix: 'finance',
   // Legal
   contracts: 'legal',
   policies: 'legal',

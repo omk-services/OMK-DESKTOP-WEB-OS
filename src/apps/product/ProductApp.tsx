@@ -8,7 +8,7 @@
  *  apps that want it, but Product itself uses the standard 2-column layout.
  */
 import { useEffect, useState } from 'react';
-import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode } from 'lucide-react';
+import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode, Trophy, Send, Hammer, Sparkles } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
@@ -16,13 +16,16 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { ProductDetailPage, type ProductDetailItem } from './ProductDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { ProductItemDetail } from './ProductItemDetail';
-
-registerItemDetail('product', ProductItemDetail);
 import { CMSCardList } from '../_ui/CMSCardList';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
+import { seedProductCms } from './seed';
+
+registerItemDetail('product', ProductItemDetail);
+seedProductCms();
 
 const STAGE_TONE: Record<string, 'accent' | 'warn' | 'neutral'> = {
   now: 'accent', next: 'warn', later: 'neutral', backlog: 'neutral',
@@ -38,6 +41,38 @@ const STAGE_ICON: Record<string, React.ReactNode> = {
 };
 const SPEC_TONE: Record<string, 'ok' | 'warn' | 'neutral'> = {
   approved: 'ok', review: 'warn', draft: 'neutral',
+};
+
+const TIER_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral' | 'accent'> = {
+  S: 'ok', A: 'accent', B: 'neutral', F: 'danger',
+};
+const TIER_ACCENT: Record<string, string> = {
+  S: '#16a34a', A: '#1d4ed8', B: '#57534e', F: '#dc2626',
+};
+
+const STAGE2_TONE: Record<string, 'ok' | 'warn' | 'accent' | 'primary' | 'neutral'> = {
+  validate: 'accent',
+  presell: 'warn',
+  launch: 'ok',
+  audience: 'primary',
+  productize: 'primary',
+};
+const STAGE2_ACCENT: Record<string, string> = {
+  validate: '#7c3aed', presell: '#f59e0b', launch: '#16a34a', audience: '#0c0a09', productize: '#0c0a09',
+};
+
+const OVERFLOW_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'accent'> = {
+  ok: 'ok', feature: 'accent', client: 'warn', problem: 'danger',
+};
+const OVERFLOW_ACCENT: Record<string, string> = {
+  ok: '#16a34a', feature: '#7c3aed', client: '#f59e0b', problem: '#dc2626',
+};
+
+const TREND_TONE: Record<string, 'ok' | 'warn' | 'neutral'> = {
+  high: 'ok', med: 'warn', low: 'neutral',
+};
+const TREND_ACCENT: Record<string, string> = {
+  high: '#16a34a', med: '#f59e0b', low: '#a8a29e',
 };
 
 interface ProductItem extends Record<string, unknown> {
@@ -59,13 +94,65 @@ interface ReleaseItem extends Record<string, unknown> {
   changelog?: string;
 }
 
-const ACCENT = '#9333ea';
+interface RankingItem extends Record<string, unknown> {
+  id: string;
+  name: string;
+  tier: 'S' | 'A' | 'B' | 'F';
+  body: string;
+  score: number;
+  area: string;
+  owner: string;
+  source: string;
+}
+
+interface LaunchItem extends Record<string, unknown> {
+  id: string;
+  name: string;
+  stage: 'validate' | 'presell' | 'launch' | 'audience' | 'productize';
+  state: 'done' | 'doing' | 'todo';
+  cohort: string;
+  body: string;
+  eta: string;
+  owner: string;
+  metric: string;
+}
+
+interface MvpItem extends Record<string, unknown> {
+  id: string;
+  name: string;
+  feature: string;
+  client: string;
+  body: string;
+  overflow: 'ok' | 'feature' | 'client' | 'problem';
+  weeksToShip: number;
+  eta: string;
+  owner: string;
+  successMetric: string;
+}
+
+interface IdeaItem extends Record<string, unknown> {
+  id: string;
+  name: string;
+  trend: 'high' | 'med' | 'low';
+  opportunity: 'high' | 'med' | 'low';
+  demand: 'observed' | 'latent' | 'none';
+  economicSize: 'large' | 'mid' | 'small';
+  summary: string;
+  body: string;
+  source: string;
+}
+
+const ACCENT = '#ea580c';
 
 export function ProductApp() {
   const items = useCmsStore(s => s.items['product_items']) ?? [];
   const releases = useCmsStore(s => s.items['product_releases']) ?? [];
   const drill = useCollectionDrill('product_items', ['Roadmap', 'Backlog', 'Specs']);
   const releasesDrill = useCollectionDrill('product_releases', 'Releases');
+  const rankingsDrill = useCollectionDrill('product_rankings', 'Classement');
+  const launchesDrill = useCollectionDrill('product_launches', 'Lancement');
+  const mvpsDrill = useCollectionDrill('product_mvps', 'MVP');
+  const ideasDrill = useCollectionDrill('product_ideas', 'Idéation');
   const [detail, setDetail] = useState<ProductDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -248,11 +335,174 @@ export function ProductApp() {
     );
   };
 
+  const Classement = () => {
+    if (rankingsDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="product_rankings"
+          itemId={rankingsDrill.openId}
+          onBack={rankingsDrill.close}
+          onNavigate={rankingsDrill.open}
+        />
+      );
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Classement"
+          subtitle="S / A / B / F — chaque placement porte son critère de justification"
+          action={<Badge tone="warn">placement ≠ opinion</Badge>}
+        />
+        <CMSCardList<RankingItem>
+          collectionId="product_rankings"
+          onOpen={rankingsDrill.open}
+          cols={2}
+          render={(it) => ({
+            title: it.name,
+            subtitle: `${it.area} · ${it.owner}`,
+            description: it.body,
+            statusLabel: `tier ${it.tier}`,
+            statusTone: TIER_TONE[it.tier] ?? 'neutral',
+            accent: TIER_ACCENT[it.tier] ?? ACCENT,
+            icon: <Trophy className="w-5 h-5" />,
+            metricLabel: 'score',
+            metricValue: `${it.score}/100`,
+            meta: it.source,
+          })}
+          emptyMessage="Aucun classement pour l'instant."
+        />
+      </div>
+    );
+  };
+
+  const Lancement = () => {
+    if (launchesDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="product_launches"
+          itemId={launchesDrill.openId}
+          onBack={launchesDrill.close}
+          onNavigate={launchesDrill.open}
+        />
+      );
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Lancement"
+          subtitle="5 étapes canoniques : valider · pré-vendre · lancer · audience · produitiser"
+        />
+        <CMSCardList<LaunchItem>
+          collectionId="product_launches"
+          onOpen={launchesDrill.open}
+          cols={2}
+          render={(it) => ({
+            title: it.name,
+            subtitle: `${it.cohort} · ${it.owner}`,
+            description: it.body,
+            statusLabel: it.stage,
+            statusTone: STAGE2_TONE[it.stage] ?? 'neutral',
+            accent: STAGE2_ACCENT[it.stage] ?? ACCENT,
+            icon: <Send className="w-5 h-5" />,
+            metricLabel: it.state === 'done' ? 'état' : 'ETA',
+            metricValue: it.state === 'done' ? '✓' : it.eta,
+            meta: it.metric,
+          })}
+          emptyMessage="Aucun lancement suivi pour l'instant."
+        />
+      </div>
+    );
+  };
+
+  const MVP = () => {
+    if (mvpsDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="product_mvps"
+          itemId={mvpsDrill.openId}
+          onBack={mvpsDrill.close}
+          onNavigate={mvpsDrill.open}
+        />
+      );
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="MVP"
+          subtitle="Plus petit livrable : une fonctionnalité, un client, un problème — signal quand l'un déborde"
+          action={<Badge tone="accent">discipline du plus petit</Badge>}
+        />
+        <CMSCardList<MvpItem>
+          collectionId="product_mvps"
+          onOpen={mvpsDrill.open}
+          cols={2}
+          render={(it) => ({
+            title: it.name,
+            subtitle: `client · ${it.client}`,
+            description: it.body,
+            statusLabel: it.overflow === 'ok' ? 'discipliné' : `overflow · ${it.overflow}`,
+            statusTone: OVERFLOW_TONE[it.overflow] ?? 'neutral',
+            accent: OVERFLOW_ACCENT[it.overflow] ?? ACCENT,
+            icon: <Hammer className="w-5 h-5" />,
+            metricLabel: 'semaines',
+            metricValue: `${it.weeksToShip}`,
+            meta: `${it.feature.split(' ').slice(0, 6).join(' ')}…`,
+          })}
+          emptyMessage="Aucun MVP défini pour l'instant."
+        />
+      </div>
+    );
+  };
+
+  const Ideation = () => {
+    if (ideasDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="product_ideas"
+          itemId={ideasDrill.openId}
+          onBack={ideasDrill.close}
+          onNavigate={ideasDrill.open}
+        />
+      );
+    }
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Idéation"
+          subtitle="Idées à l'état brut — 4 angles : tendance, opportunité, demande, taille économique"
+          action={<Badge tone="neutral">triage = lire la table</Badge>}
+        />
+        <CMSCardList<IdeaItem>
+          collectionId="product_ideas"
+          onOpen={ideasDrill.open}
+          cols={2}
+          render={(it) => ({
+            title: it.name,
+            subtitle: it.summary,
+            description: it.source,
+            statusLabel: `tendance · ${it.trend}`,
+            statusTone: TREND_TONE[it.trend] ?? 'neutral',
+            accent: TREND_ACCENT[it.trend] ?? ACCENT,
+            icon: <Sparkles className="w-5 h-5" />,
+            metricLabel: 'économie',
+            metricValue: it.economicSize,
+            meta: `demande ${it.demand} · opp ${it.opportunity}`,
+          })}
+          emptyMessage="Aucune idée en idéation pour l'instant."
+        />
+      </div>
+    );
+  };
+
   const sections: AppSection[] = [
     { id: 'roadmap', label: 'Roadmap', icon: Map, render: Roadmap },
     { id: 'backlog', label: 'Backlog', icon: ListTodo, render: Backlog },
     { id: 'releases', label: 'Releases', icon: Tag, render: Releases },
     { id: 'specs', label: 'Specs', icon: ClipboardList, render: Specs },
+    { id: 'classement', label: 'Classement', icon: Trophy, render: Classement },
+    { id: 'lancement', label: 'Lancement', icon: Send, render: Lancement },
+    { id: 'mvp', label: 'MVP', icon: Hammer, render: MVP },
+    { id: 'ideation', label: 'Idéation', icon: Sparkles, render: Ideation },
     { id: 'channels', label: 'Channels', icon: CHANNEL_ICON, render: Channels },
   ];
 
@@ -261,6 +511,10 @@ export function ProductApp() {
     backlog: 'Plan',
     releases: 'Ship',
     specs: 'Ship',
+    classement: 'Strategy',
+    lancement: 'Strategy',
+    mvp: 'Discovery',
+    ideation: 'Discovery',
     channels: 'Orchestration',
   };
 
@@ -270,7 +524,7 @@ export function ProductApp() {
       {detail ? (
         <AppDetailOverlay
           appId="product"
-          accent="#9333ea"
+          accent="#ea580c"
           onBack={() => setDetail(null)}
           motion={{ kind: 'slide-right', durationMs: 220 }}
         >

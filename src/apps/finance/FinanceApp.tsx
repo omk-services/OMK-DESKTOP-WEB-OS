@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Wallet, PiggyBank, Receipt, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
+import { Wallet, PiggyBank, Receipt, BarChart3, FileText, CheckCircle2, Scale, LineChart, Coins, CircleDollarSign } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, StatCard } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -9,11 +9,13 @@ import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { FinanceItemDetail } from './FinanceItemDetail';
+import { CMSCardList } from '../_ui/CMSCardList';
+import { seedFinanceCms } from './seed';
 
 registerItemDetail('finance', FinanceItemDetail);
-import { CMSCardList } from '../_ui/CMSCardList';
+seedFinanceCms();
 
-const ACCENT = '#ca8a04';
+const ACCENT = '#0d9488';
 
 // projected cash (k$) over 12 months — declining runway
 const runway = [42, 40, 39, 37, 36, 34, 33, 31, 30, 28, 27, 25];
@@ -59,7 +61,13 @@ function Runway() {
 
 export function FinanceApp() {
   const invoices = useCmsStore(s => s.items['invoices']) ?? [];
-  const drill = useCollectionDrill('invoices', 'Invoices');
+  const plancherItems = useCmsStore(s => s.items['plancher_marges']) ?? [];
+  const budgetItems = useCmsStore(s => s.items['budget_tokens']) ?? [];
+  const invoicesDrill = useCollectionDrill('invoices', 'Invoices');
+  const plancherDrill = useCollectionDrill('plancher_marges', 'Planchers');
+  const courbeDrill = useCollectionDrill('courbe_demande', 'Courbes');
+  const budgetDrill = useCollectionDrill('budget_tokens', 'Tokens');
+  const formesDrill = useCollectionDrill('formes_prix', 'Formes');
   const [detail, setDetail] = useState<FinanceDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -73,7 +81,7 @@ export function FinanceApp() {
 
   const openInvoice = (id: string): void => {
     const item = invoices.find(c => c.id === id);
-    if (!item) { drill.open(id); return; }
+    if (!item) { invoicesDrill.open(id); return; }
     setDetail({
       id: String(item.id),
       title: String(item.client ?? item.title ?? 'Invoice'),
@@ -91,7 +99,184 @@ export function FinanceApp() {
       ],
       fields: [],
     });
-    drill.open(id);
+    invoicesDrill.open(id);
+  };
+
+  const PLANCHER_STATUS_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral'> = {
+    ok: 'ok',
+    warn: 'warn',
+    danger: 'danger',
+  };
+  const PLANCHER_STATUS_ACCENT: Record<string, string> = {
+    ok: '#16a34a',
+    warn: '#d97706',
+    danger: '#dc2626',
+  };
+
+  const Planchers = () => {
+    const belowFloor = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'danger').length;
+    const tangential = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'warn').length;
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Planchers de marge"
+          subtitle="Le seuil sous lequel une prestation ne se vend pas — pas une marge cible, un plancher"
+        />
+        {(belowFloor > 0 || tangential > 0) && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {belowFloor > 0 && (
+              <span
+                className="text-[10.5px] font-extrabold uppercase tracking-[0.22em] px-2.5 py-1 rounded-full"
+                style={{ background: '#fee2e2', color: '#b91c1c' }}
+              >
+                {belowFloor} sous le plancher
+              </span>
+            )}
+            {tangential > 0 && (
+              <span
+                className="text-[10.5px] font-extrabold uppercase tracking-[0.22em] px-2.5 py-1 rounded-full"
+                style={{ background: '#fef3c7', color: '#b45309' }}
+              >
+                {tangential} tangente
+              </span>
+            )}
+          </div>
+        )}
+        <CMSCardList
+          collectionId="plancher_marges"
+          onOpen={plancherDrill.open}
+          cols={2}
+          render={(p: Record<string, unknown>) => {
+            const status = String(p.status ?? 'ok').toLowerCase();
+            const price = Number(p.price ?? 0);
+            const floor = Number(p.floor ?? 0);
+            const gap = Number(p.gap ?? price - floor);
+            return {
+              title: String(p.offer ?? 'Offre'),
+              subtitle: `${String(p.category ?? '')} · ${String(p.unit ?? '')}`,
+              description: String(p.note ?? '').slice(0, 140),
+              statusLabel: status.toUpperCase(),
+              statusTone: PLANCHER_STATUS_TONE[status] ?? 'neutral',
+              accent: PLANCHER_STATUS_ACCENT[status] ?? ACCENT,
+              icon: <Scale className="w-5 h-5" />,
+              metricLabel: 'price / floor',
+              metricValue: `$${price} / $${floor}`,
+              meta: gap >= 0 ? `marge +$${gap.toLocaleString('en-US')}` : `${gap.toLocaleString('en-US')}€ sous`,
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
+  const Courbes = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Courbes de demande"
+          subtitle="Scénarios de prix et volume estimé · la pente plutôt qu'un chiffre isolé"
+        />
+        <CMSCardList
+          collectionId="courbe_demande"
+          onOpen={courbeDrill.open}
+          cols={2}
+          render={(c: Record<string, unknown>) => {
+            const elasticity = String(c.elasticity ?? 'med').toLowerCase();
+            const eTone = elasticity === 'low' ? 'ok' : elasticity === 'med' ? 'warn' : 'danger';
+            const eColor = elasticity === 'low' ? '#16a34a' : elasticity === 'med' ? '#d97706' : '#dc2626';
+            const sweetSpot = Number(c.sweetSpot ?? 0);
+            const scenariosRaw = String(c.scenarios ?? '');
+            const points = scenariosRaw.split('·').filter(Boolean).length;
+            return {
+              title: String(c.offer ?? 'Offre'),
+              subtitle: `${String(c.category ?? '')} · ${points} scénarios`,
+              description: String(c.notes ?? '').slice(0, 140),
+              statusLabel: elasticity,
+              statusTone: eTone,
+              accent: eColor,
+              icon: <LineChart className="w-5 h-5" />,
+              metricLabel: 'sweet spot',
+              metricValue: `$${sweetSpot.toLocaleString('en-US')}`,
+              meta: String(c.sensitivity ?? ''),
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
+  const Budgets = () => {
+    const totalModel = budgetItems.reduce((s, b) => s + Number(b.modelCost ?? 0), 0);
+    const totalSaving = budgetItems.reduce((s, b) => s + Number(b.monthlySaving ?? 0), 0);
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Budget de tokens"
+          subtitle="Coût modèle vs ETP remplacé · la métrique qui justifie l'automatisation"
+        />
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <StatCard label="Dépense modèle / mois" value={`$${totalModel.toLocaleString('en-US')}`} hint={`${budgetItems.length} usages suivis`} />
+          <StatCard label="Économie nette / mois" value={`$${totalSaving.toLocaleString('en-US')}`} tone="ok" hint="vs ETP remplacés" />
+        </div>
+        <CMSCardList
+          collectionId="budget_tokens"
+          onOpen={budgetDrill.open}
+          cols={2}
+          render={(b: Record<string, unknown>) => {
+            const status = String(b.status ?? 'ok').toLowerCase();
+            return {
+              title: String(b.use ?? 'Usage'),
+              subtitle: `${String(b.category ?? '')} · ${String(b.fteRole ?? '')}`,
+              description: String(b.notes ?? '').slice(0, 140),
+              statusLabel: status.toUpperCase(),
+              statusTone: status === 'ok' ? 'ok' : status === 'warn' ? 'warn' : 'danger',
+              accent: status === 'ok' ? '#16a34a' : status === 'warn' ? '#d97706' : '#dc2626',
+              icon: <Coins className="w-5 h-5" />,
+              metricLabel: 'coût modèle',
+              metricValue: `$${Number(b.modelCost ?? 0).toLocaleString('en-US')} / mois`,
+              meta: `économie +$${Number(b.monthlySaving ?? 0).toLocaleString('en-US')}`,
+            };
+          }}
+        />
+      </div>
+    );
+  };
+
+  const Formes = () => {
+    return (
+      <div className="p-7">
+        <SectionHead
+          title="Formes de prix"
+          subtitle="Comment facturer une même prestation · cashflow, engagement client, risque"
+        />
+        <CMSCardList
+          collectionId="formes_prix"
+          onOpen={formesDrill.open}
+          cols={2}
+          render={(f: Record<string, unknown>) => {
+            const cashflow = String(f.cashflow ?? 'recurring').toLowerCase();
+            const cfColor = cashflow === 'immediate' ? '#16a34a'
+              : cashflow === 'upfront' ? '#1d4ed8'
+              : cashflow === 'recurring' ? '#0d9488'
+              : cashflow === 'event' ? '#d97706'
+              : cashflow === 'deferred' ? '#7c3aed'
+              : ACCENT;
+            return {
+              title: String(f.shape ?? 'Forme'),
+              subtitle: String(f.offer ?? ''),
+              description: String(f.bestFor ?? '').slice(0, 140),
+              statusLabel: cashflow,
+              statusTone: 'accent',
+              accent: cfColor,
+              icon: <CircleDollarSign className="w-5 h-5" />,
+              metricLabel: 'engagement',
+              metricValue: String(f.commitment ?? '—').split('—')[0]!.trim().slice(0, 28) || '—',
+              meta: String(f.risk ?? '').slice(0, 60),
+            };
+          }}
+        />
+      </div>
+    );
   };
 
   const Invoices = () => {
@@ -122,6 +307,10 @@ export function FinanceApp() {
   const sections: AppSection[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3, render: Overview },
     { id: 'runway', label: 'Runway', icon: PiggyBank, render: Runway },
+    { id: 'planchers', label: 'Planchers', icon: Scale, render: Planchers },
+    { id: 'courbes', label: 'Courbes', icon: LineChart, render: Courbes },
+    { id: 'tokens', label: 'Tokens', icon: Coins, render: Budgets },
+    { id: 'formes', label: 'Formes', icon: CircleDollarSign, render: Formes },
     { id: 'invoices', label: 'Invoices', icon: Receipt, render: Invoices },
   ];
 
@@ -131,7 +320,7 @@ export function FinanceApp() {
       {detail ? (
         <AppDetailOverlay
           appId="finance"
-          accent="#ca8a04"
+          accent={ACCENT}
           onBack={() => setDetail(null)}
           motion={{ kind: 'fade-up', durationMs: 240 }}
         >

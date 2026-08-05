@@ -19,10 +19,7 @@ import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, C
 import { useWindowPage } from '../contexts/WindowContext';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 import { useThemeStore, applyThemeTokens, useThemeIdFor } from '../lib/themes/store';
-import { useCanvasFxStore } from '../stores/canvasFx.store';
 import { THEME_META } from '../lib/themes/tokens';
-import { BackgroundFX, type CanvasEffectId } from './canvasui/v30';
-import fxObjectSrc from '../assets/hero.png';
 
 export interface AppSection {
   id: string;
@@ -56,12 +53,15 @@ interface AppFrameProps {
   tools?: ToolDef[];
   /** set false to suppress the per-app signature canvas-ui FX.
    * Used by apps that are picker / showcase / shell (settings, design). */
+  /** @deprecated inerte depuis le retrait du bandeau canvas-ui. */
   disableSignatureFx?: boolean;
   /** Which nuance index of the theme's canvas effect to render. Defaults to 0.
    *  Use 1 to differentiate apps that share the same theme. */
+  /** @deprecated inerte depuis le retrait du bandeau canvas-ui. */
   canvasNuance?: 0 | 1;
   /** Override the resolved effect id directly, bypassing theme resolution. */
-  canvasEffect?: CanvasEffectId;
+  /** @deprecated inerte depuis le retrait du bandeau canvas-ui. */
+  canvasEffect?: string;
 }
 
 const NARROW_BREAKPOINT = 640;
@@ -79,7 +79,10 @@ function ActiveSection({ section }: { section: AppSection }) {
   return <>{section.render()}</>;
 }
 
-export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools, disableSignatureFx, canvasNuance, canvasEffect }: AppFrameProps) {
+// `disableSignatureFx`, `canvasNuance` et `canvasEffect` restent acceptes dans
+// AppFrameProps pour ne pas casser leurs appelants, mais ne sont plus
+// destructures : ils ne pilotent plus rien depuis le retrait du bandeau.
+export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps) {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
@@ -116,7 +119,6 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   // retombe sur `getCanvasMapping(undefined).dominant`, c'est-a-dire le dominant
   // de warm-paper, ce qui imposerait GlyphRain a toutes les apps sans override.
   // Ici, absence d'override = undefined = resolution par theme inchangee.
-  const fxOverride = useCanvasFxStore((s) => s.appFxOverrides[appId]);
   const tokens = useThemeStore((s) => s.tokensFor(appId));
   useEffect(() => {
     if (rootRef.current) applyThemeTokens(rootRef.current, tokens);
@@ -324,42 +326,17 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
 
       {/* Content */}
       <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar relative">
-        {/* Per-app signature canvas-ui FX (v30, WebGL).
-            Renders the theme's nuance-1 effect as a transparent header strip.
-            disabled for picker/showcase apps (settings, design). */}
-        {!disableSignatureFx && active ? (
-          <div
-            className="pointer-events-none absolute top-0 left-0 right-0 h-24 z-0"
-            aria-hidden
-            style={{
-              mixBlendMode: 'screen',
-              // `mix-blend-mode` sur un canvas anime force le navigateur a
-              // recomposer TOUTE la fenetre a chaque frame du canvas, ce qui se
-              // voit comme un tremblement global. `isolation` borne la fusion a
-              // ce sous-arbre, `contain` borne la zone repeinte, et
-              // `will-change` promeut la couche pour qu'elle soit composee sur
-              // le GPU au lieu d'etre repeinte.
-              isolation: 'isolate',
-              contain: 'paint',
-              willChange: 'transform',
-            }}
-          >
-            <BackgroundFX
-              themeId={activeThemeId}
-              accent={accent}
-              nuanceSlot={canvasNuance ?? 0}
-              effectId={canvasEffect ?? fxOverride}
-              /* Requis par la famille Object (AsciiObject, DitheredObject,
-                 GlassObject, LiquidObject, ParticleObject) : sans objectSrc,
-                 BackgroundFX ne rend QUE le calque CSS et aucun WebGL. Les 28
-                 autres effets l'ignorent. Il n'etait passe nulle part dans le
-                 depot, donc ces 5 effets n'avaient jamais pu s'afficher. */
-              objectSrc={fxObjectSrc}
-              className="h-full w-full"
-            />
-          </div>
-        ) : null}
-        <div className={disableSignatureFx ? '' : 'relative z-10'}>
+        {/* Le bandeau de 96 px qui montait <BackgroundFX /> a ete retire.
+            Deux raisons, mesurees :
+            - 28 des 33 effets de canvas-ui dependent de l'API `html-in-canvas`,
+              absente de Chrome 148 (`drawElement`, `drawElementImage` et
+              `requestPaint` sont tous `undefined`). Ils allouaient un contexte
+              WebGL2 et une boucle rAF pour ne rien afficher.
+            - Le `mix-blend-mode: screen` du bandeau delavait le haut de chaque
+              fenetre, tres visible sur les themes sombres comme Cyberpunk.
+            Les 5 effets de la famille Object fonctionnaient, mais sur une image
+            generique. canvas-ui reste dans le depot, simplement non monte. */}
+        <div>
           {active ? <ActiveSection key={active.id} section={active} /> : null}
         </div>
       </div>
