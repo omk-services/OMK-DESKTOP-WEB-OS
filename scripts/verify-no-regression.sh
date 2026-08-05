@@ -38,11 +38,7 @@ if [ "$COUNT" -gt "$BASELINE" ]; then
 fi
 
 echo "== tests =="
-# `--passWithNoTests` : la story 1 du theme epic differe explicitement sa
-# couverture automatisee a la story 2 (« Garde-fou contre le retour des
-# variables orphelines »). vitest sort rc=1 quand `find src -name '*test*'`
-# est vide ; on accepte cet etat tant que la story 2 n'a pas atterri.
-if ! cmd.exe /c "npm test -- --passWithNoTests"; then
+if ! cmd.exe /c "npm test"; then
   echo "ECHEC : des tests sont rouges."
   exit 1
 fi
