@@ -53,3 +53,35 @@ source_spec: `1-le-registre-dentites-en-typescript-pur.md`
 severity: low
 reason: The follow-up-review damping cap (limits.max_followup_reviews = 1) was spent with the story finalized (status: done, verify green) while the review pass still recommended an independent follow-up. The work was committed by bmad-loop run 20260805-091730-9034; this entry preserves the lingering recommendation for a deliberate later review.
 status: open
+
+### DW-8: `npm run build` echoue avant cette story : `tsc -b` remonte 79 erreurs de type preexistantes dans les apps et les composants retires (heritees des passes anterieures).
+origin: spec-deferred 64f03b4bf5e0
+location: repo-wide (hors src/apps/ontology/)
+source_spec: `2-l-app-ontology-et-ses-quatre-sections.md`
+severity: medium
+reason: `npx tsc -b --noEmit` sur le HEAD de reference 0d0902c rapporte 79 erreurs, dont la majorite se trouve dans `src/apps/tasks/TasksDetailPage.tsx`, `src/apps/cognition/CognitionApp.tsx`, `src/components/canvasui/_v1_css_retired/BackgroundFX.tsx`, et `src/apps/marketplace/MarketplaceDetailPage.tsx`. La nouvelle app `src/apps/ontology/` ne porte aucune de ces erreurs, mais le pipeline reste casse au niveau du depot.
+status: open
+
+### DW-9: Placement de l'enregistrement `ontology` dans `app-discovery.ts` : la spec dit « apres WelcomeApp / avant DesignApp » (Intent Contract) et « apres DesignApp, fin de fichier » (Code Map). L'implementat
+origin: spec-deferred 9b535297b136
+location: src/lib/app-discovery.ts:55-58
+source_spec: `2-l-app-ontology-et-ses-quatre-sections.md`
+severity: low
+reason: Le code suit la formulation la plus precise (Code Map). Le conflit etait deja signale dans `Design Notes` de la spec ; pas de deviation silencieuse. La difference est purement documentaire.
+status: open
+
+### DW-10: Aucun test ne rend le JSX de `OntologyApp` (sections, StatCards, notice "Pas d'historique"). Les tests actuels couvrent le helper `validate` et l'API publique.
+origin: spec-deferred 7cdf366ca02e
+location: src/apps/ontology/ontology-app.test.ts
+source_spec: `2-l-app-ontology-et-ses-quatre-sections.md`
+severity: medium
+reason: Pour monter le composant il faudrait `@testing-library/react`, ce qui ajoute une dependance — interdit par la spec. Le patch review a deja ajoute 10 tests synthetiques sur `validate` pour couvrir les branches du helper. Le test de fermeture `architecture.test.ts` protege la frontiere du registre ; les surfaces UI restent verifiees a la main.
+status: open
+
+### DW-11: Accessibilite legere : pas d'`aria-label` sur les cartes entite/contrat, pas de `for/id` sur les `<select>` de la section Relations, pas d'`aria-live` sur le compteur filtre.
+origin: spec-deferred 74fcbf014d03
+location: src/apps/ontology/OntologyApp.tsx:159-189, 254-330, 575-602
+source_spec: `2-l-app-ontology-et-ses-quatre-sections.md`
+severity: low
+reason: Amelioree par une passe ulterieure (kit UI ou revue a11y). Aucune regression fonctionnelle ; les boutons utilisent `<button type="button">` deja.
+status: open

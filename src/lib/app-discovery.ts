@@ -1,6 +1,6 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, BrainCircuit, Shield, Wand2 } from 'lucide-react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, BrainCircuit, Shield, Wand2, Network } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 
@@ -23,6 +23,7 @@ import { OnboardingApp } from '../apps/onboarding/OnboardingApp';
 import { WelcomeApp } from '../apps/welcome/WelcomeApp';
 import { AuditApp } from '../apps/audit/AuditApp';
 import { DesignApp } from '../apps/design/DesignApp';
+import { OntologyApp } from '../apps/ontology/OntologyApp';
 
 registerApp({ id: 'dashboard',   name: 'Dashboard',            icon: LayoutDashboard, accent: '#059669', description: 'Ecosystem Vitals — the home view',              component: DashboardApp });
 registerApp({ id: 'people',      name: 'People / Agents',      icon: UserCog,         accent: '#0891b2', description: 'Your team and the agents on the People domain',  component: PeopleApp });
@@ -50,3 +51,8 @@ registerApp({ id: 'welcome',     name: 'Welcome',               icon: Compass,  
 // canvas that re-skins per sidebar style (Glassmorphism, Claymorphism, Brutalism,
 // Cyberpunk, Soft UI / Neumorphism, Editorial). No Supabase, no cognition hydration.
 registerApp({ id: 'design',      name: 'Design',                icon: Wand2,           accent: '#0f172a', description: 'Six front-end styles · one showcase canvas',   component: DesignApp   });
+// Ontology — story 2 de l'epic couche-ontologie : lecteur des 12 entites,
+// relations et contrats poses par story 1 via `src/lib/ontology/index.ts`.
+// Accent `#0f766e` (teal plus fonce que `#0d9488` pris par Onboarding) pour
+// eviter la collision visuelle. Icon `Network` non encore utilise ailleurs.
+registerApp({ id: 'ontology',    name: 'Ontology',              icon: Network,         accent: '#0f766e', description: 'Registre des 12 entites metier',              component: OntologyApp });
