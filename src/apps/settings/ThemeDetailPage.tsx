@@ -60,25 +60,25 @@ export function ThemeDetailPage({ themeId, onBack }: ThemeDetailPageProps) {
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Themes
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--theme-muted)]">
             Theme Preview
           </span>
         </div>
 
         {/* Title block */}
         <header className="space-y-1.5">
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-muted)]">
             {themeId}
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-stone-900">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--theme-text)]">
             {variantMeta.label}
           </h1>
-          <p className="max-w-2xl text-sm text-stone-500">{variantMeta.description}</p>
+          <p className="max-w-2xl text-sm text-[var(--theme-muted)]">{variantMeta.description}</p>
         </header>
 
         {/* Variant selector — 5 chips */}
@@ -92,8 +92,8 @@ export function ThemeDetailPage({ themeId, onBack }: ThemeDetailPageProps) {
                 onClick={() => setVariant(v.id)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all ${
                   selected
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    ? 'bg-[var(--theme-text)] text-[var(--theme-surface)] shadow-sm'
+                    : 'bg-[var(--theme-surface)] text-[var(--theme-muted)] hover:bg-[var(--theme-surface-hover)]'
                 }`}
               >
                 <Icon className="h-3 w-3" />
@@ -101,7 +101,7 @@ export function ThemeDetailPage({ themeId, onBack }: ThemeDetailPageProps) {
               </button>
             );
           })}
-          <div className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-stone-400">
+          <div className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-[var(--theme-muted)]">
             <span>{variant + 1}/{DESIGN_VARIANTS.length}</span>
             <ArrowRight className="h-3 w-3" />
           </div>

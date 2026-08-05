@@ -135,7 +135,7 @@ function CanvasFxPicker() {
             <button
               type="button"
               onClick={clearAll}
-              className="rounded-lg border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-stone-600 transition-colors hover:bg-stone-50"
+              className="rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-muted)] transition-colors hover:bg-[var(--theme-surface-hover)]"
             >
               Reset all
             </button>
@@ -154,8 +154,8 @@ function CanvasFxPicker() {
               <div key={app.id} className="px-5 py-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium text-stone-800">{app.name}</div>
-                    <p className="text-[11px] text-stone-400 mt-0.5">
+                    <div className="text-sm font-medium text-[var(--theme-text)]">{app.name}</div>
+                    <p className="text-[11px] text-[var(--theme-muted)] mt-0.5">
                       Theme · <span className="font-mono">{themeId}</span> · dominant ·{' '}
                       <span className="font-mono">{dominantLabel}</span>
                       {override && override !== 'auto' ? (
@@ -167,7 +167,7 @@ function CanvasFxPicker() {
                     <button
                       type="button"
                       onClick={() => clearAppFx(app.id)}
-                      className="rounded-md border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-stone-600 hover:bg-stone-50"
+                      className="rounded-md border border-[var(--panel-border)] bg-[var(--theme-surface)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-muted)] hover:bg-[var(--theme-surface-hover)]"
                     >
                       Reset
                     </button>
@@ -196,7 +196,7 @@ function CanvasFxPicker() {
         </div>
       </Card>
 
-      <p className="mt-4 text-[11px] text-stone-500 leading-relaxed">
+      <p className="mt-4 text-[11px] text-[var(--theme-muted)] leading-relaxed">
         The signature effect renders as a transparent header strip inside each app window.
         WebGL effects inherit the per-app theme tokens (accent, duration, dominant).
         On low-power hardware the wrapper falls back to a plain DOM subtree automatically.
@@ -232,8 +232,8 @@ export function SettingsApp() {
   const Row = ({ label, hint, k }: { label: string; hint: string; k: keyof typeof flags }) => (
     <div className="flex items-center justify-between px-5 py-4">
       <div>
-        <div className="text-sm font-medium text-stone-800">{label}</div>
-        <div className="text-xs text-stone-400">{hint}</div>
+        <div className="text-sm font-medium text-[var(--theme-text)]">{label}</div>
+        <div className="text-xs text-[var(--theme-muted)]">{hint}</div>
       </div>
       <Toggle on={flags[k]} onClick={() => set(k)} />
     </div>
@@ -283,10 +283,10 @@ export function SettingsApp() {
         <Card>
           <div className="px-5 py-4 flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium text-stone-800">
+              <div className="text-sm font-medium text-[var(--theme-text)]">
                 Observability (anonymous analytics + onboarding)
               </div>
-              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+              <p className="text-xs text-[var(--theme-muted)] mt-1 leading-relaxed">
                 Off by default. When on, PostHog Cloud (EU region) collects page navigation + feature usage;
                 UserTour can show in-app onboarding. RGPD-compliant: person profiles are only created if
                 you sign in. No PII collected unless you identify.
@@ -310,8 +310,8 @@ export function SettingsApp() {
         {[['Stripe', 'connected'], ['Calendly', 'connected'], ['LinkedIn', 'not connected']].map(([n, s]) => (
           <Card key={n} className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center"><Plug className="w-4.5 h-4.5 text-stone-500" /></span>
-              <span className="text-sm font-semibold text-stone-800">{n}</span>
+              <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
+              <span className="text-sm font-semibold text-[var(--theme-text)]">{n}</span>
             </div>
             <Badge tone={s === 'connected' ? 'ok' : 'neutral'}>{s}</Badge>
           </Card>
@@ -349,10 +349,10 @@ export function SettingsApp() {
         />
         <Card>
           <div className="px-5 py-4 border-b border-[var(--hairline)] flex items-center gap-3">
-            <HelpCircle className="w-4 h-4 text-stone-500" />
+            <HelpCircle className="w-4 h-4 text-[var(--theme-muted)]" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-stone-800">Replay onboarding tour</div>
-              <div className="text-xs text-stone-400 mt-0.5">
+              <div className="text-sm font-semibold text-[var(--theme-text)]">Replay onboarding tour</div>
+              <div className="text-xs text-[var(--theme-muted)] mt-0.5">
                 {consentOn
                   ? 'Each tour plays in the order you first saw it. Re-runs override the per-browser guard.'
                   : 'Turn on Observability in Privacy to enable UserTour onboarding.'}
@@ -363,8 +363,8 @@ export function SettingsApp() {
             {REPLAY_TOURS.map(t => (
               <div key={t.id} className="px-5 py-3 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-stone-800">{t.label}</div>
-                  <div className="text-xs text-stone-400">{t.hint}</div>
+                  <div className="text-sm font-semibold text-[var(--theme-text)]">{t.label}</div>
+                  <div className="text-xs text-[var(--theme-muted)]">{t.hint}</div>
                 </div>
                 <button
                   type="button"
@@ -469,7 +469,7 @@ export function SettingsApp() {
         action={
           <button
             onClick={() => { if (window.confirm('Reset all theme overrides to canonical defaults?')) resetAll(); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-[var(--theme-text)] bg-[var(--theme-surface-hover)] hover:bg-[var(--theme-surface-hover)] transition-colors"
           >
             <RotateCcw className="w-3 h-3" /> Reset all
           </button>
@@ -479,12 +479,12 @@ export function SettingsApp() {
       {/* Global default */}
       <Card>
         <div className="px-5 py-4 border-b border-[var(--hairline)] flex items-center gap-3">
-          <Palette className="w-4 h-4 text-stone-500" />
+          <Palette className="w-4 h-4 text-[var(--theme-muted)]" />
           <div className="flex-1">
-            <div className="text-sm font-semibold text-stone-800">Global default</div>
-            <div className="text-xs text-stone-400">Used when no per-app override is set.</div>
+            <div className="text-sm font-semibold text-[var(--theme-text)]">Global default</div>
+            <div className="text-xs text-[var(--theme-muted)]">Used when no per-app override is set.</div>
           </div>
-          <span className="text-xs font-mono text-stone-600">{THEME_META.find(t => t.id === globalTheme)?.name ?? '—'}</span>
+          <span className="text-xs font-mono text-[var(--theme-muted)]">{THEME_META.find(t => t.id === globalTheme)?.name ?? '—'}</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-5">
           {THEME_META.map(t => {
@@ -496,14 +496,14 @@ export function SettingsApp() {
                 onDoubleClick={() => setDetailTheme(t.id)}
                 title={`Click to set as global · Double-click to preview ${t.name}`}
                 className={`relative text-left rounded-lg overflow-hidden border-2 transition-all ${
-                  isActive ? 'border-stone-800 ring-2 ring-stone-800/30' : 'border-stone-200 hover:border-stone-400'
+                  isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--panel-border)]'
                 }`}
               >
                 <ThemePreview themeId={t.id} />
-                <div className="bg-white px-3 py-2 flex items-start justify-between gap-2">
+                <div className="bg-[var(--theme-surface)] px-3 py-2 flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-[12px] font-bold text-stone-900 truncate">{t.name}</div>
-                    <div className="text-[10px] text-stone-500 line-clamp-1">{t.mood}</div>
+                    <div className="text-[12px] font-bold text-[var(--theme-text)] truncate">{t.name}</div>
+                    <div className="text-[10px] text-[var(--theme-muted)] line-clamp-1">{t.mood}</div>
                   </div>
                   {isActive && (
                     <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
@@ -520,8 +520,8 @@ export function SettingsApp() {
       {/* Per-app overrides */}
       <Card>
         <div className="px-5 py-4 border-b border-[var(--hairline)]">
-          <div className="text-sm font-semibold text-stone-800">Per-app override</div>
-          <div className="text-xs text-stone-400">Pick a theme per business-domain app. Override beats global; canonical default applies otherwise.</div>
+          <div className="text-sm font-semibold text-[var(--theme-text)]">Per-app override</div>
+          <div className="text-xs text-[var(--theme-muted)]">Pick a theme per business-domain app. Override beats global; canonical default applies otherwise.</div>
         </div>
         <div className="divide-y divide-[var(--hairline)]">
           {APP_REGISTRY.map(app => {
@@ -532,9 +532,9 @@ export function SettingsApp() {
             return (
               <div key={app.id} className="px-5 py-3 flex items-center gap-4">
                 <div className="w-44 shrink-0">
-                  <div className="text-[12.5px] font-semibold text-stone-800">{app.name}</div>
+                  <div className="text-[12.5px] font-semibold text-[var(--theme-text)]">{app.name}</div>
                   {!isCustom && (
-                    <div className="text-[10px] text-stone-400 mt-0.5">default · {canonicalMeta?.name ?? '—'}</div>
+                    <div className="text-[10px] text-[var(--theme-muted)] mt-0.5">default · {canonicalMeta?.name ?? '—'}</div>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0 overflow-x-auto">
@@ -546,7 +546,7 @@ export function SettingsApp() {
                         onClick={() => setAppTheme(app.id, t.id)}
                         title={t.name}
                         className={`shrink-0 w-9 h-9 rounded-lg overflow-hidden border-2 transition-all ${
-                          isActive ? 'border-stone-800 ring-2 ring-stone-800/30' : 'border-transparent hover:border-stone-300'
+                          isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-transparent hover:border-[var(--panel-border)]'
                         }`}
                       >
                         <ThemePreview themeId={t.id} size="sm" />
@@ -557,7 +557,7 @@ export function SettingsApp() {
                 {isCustom && (
                   <button
                     onClick={() => resetAppTheme(app.id)}
-                    className="shrink-0 text-[10px] font-semibold text-stone-500 hover:text-stone-800 px-2 py-1 rounded hover:bg-stone-100"
+                    className="shrink-0 text-[10px] font-semibold text-[var(--theme-muted)] hover:text-[var(--theme-text)] px-2 py-1 rounded hover:bg-[var(--theme-surface-hover)]"
                   >
                     Reset
                   </button>
