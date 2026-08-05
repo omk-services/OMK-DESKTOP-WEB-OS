@@ -15,3 +15,17 @@ dist
 .claude/commands/bridge.md
 .windsurf/workflows/bridge.md
 .codex/prompts/bridge.md
+
+# sssf runtime
+adws/adw_data/sessions/
+adws/adw_data/sssf.db*
+__pycache__/
+*.pyc
+.bmad-loop/runs/
+.bmad-loop/cache/
+.bmad-loop/policy.toml
+_bmad/render/
+
+# journaux de delegation M3 — bruit local, jamais versionne
+m3_audit.log
+*.m3.log
