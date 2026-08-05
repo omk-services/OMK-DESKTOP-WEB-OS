@@ -92,7 +92,19 @@ export const useOntologyScopeStore = create<OntologyScopeState>()(
  * `scope` au consommateur.
  */
 export function useOntologyScope(): ScopeFilter {
-  return useOntologyScopeStore((s) => [s.scope, s.version] as const)[0];
+  // Selectionne un SCALAIRE, jamais un tuple. Un selecteur qui construit un
+  // nouvel objet ou tableau a chaque appel renvoie une reference differente a
+  // chaque rendu ; `useSyncExternalStore` compare par identite, conclut que
+  // l'etat a change, et reboucle. C'est exactement ce qui est arrive ici :
+  // `[s.scope, s.version]` faisait planter l'app entiere au montage avec
+  // « Maximum update depth exceeded », precede de « The result of getSnapshot
+  // should be cached to avoid an infinite loop ».
+  //
+  // Le tuple servait a forcer un re-rendu quand `setScope` est rappele avec la
+  // MEME valeur. Cette exigence etait une erreur de specification : re-rendre
+  // sur un changement d'etat nul n'a aucun interet pour un scalaire, et le
+  // mecanisme cense la satisfaire coute la stabilite de l'application.
+  return useOntologyScopeStore((s) => s.scope);
 }
 
 /** Re-export du nom de cle de persistance — verrouille par le test. */

@@ -33,3 +33,6 @@ m3_audit.log
 # worktrees d agents Claude Code — artefacts locaux, jamais versionnes
 # (committes par erreur en bc4a1d9 puis d40955d, sous forme de gitlink)
 .claude/worktrees/
+
+# restes de la story 4, interrompue en cours — a rejouer proprement
+.bmad-loop/story4-restes/
