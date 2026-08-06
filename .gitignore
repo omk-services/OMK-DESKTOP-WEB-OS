@@ -36,3 +36,4 @@ m3_audit.log
 
 # restes de la story 4, interrompue en cours — a rejouer proprement
 .bmad-loop/story4-restes/
+pnpm-lock.yaml
