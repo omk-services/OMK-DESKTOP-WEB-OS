@@ -181,3 +181,18 @@ export const useShellStore = create<ShellState>((set, get) => ({
     } catch { /* corrupted layout, ignore */ }
   },
 }));
+
+/* ═══ Ouverture pilotable pour les captures automatisees ═══
+ *
+ * En DEV uniquement, le magasin est publie sur `window`. C'est le seul moyen
+ * qu'un agent de capture (Playwright, critique du gauntlet loop) ouvre une app
+ * de facon deterministe : le bureau ouvre ses fenetres sur un double-clic React,
+ * et un double-clic synthetique ne reproduit pas la sequence d'evenements que
+ * React attend — plusieurs tentatives d'automatisation s'y sont cassees.
+ *
+ * Rien n'est expose en production : `import.meta.env.DEV` est evalue au build et
+ * Vite elimine le bloc entier du bundle.
+ */
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { __coachos?: unknown }).__coachos = { shell: useShellStore };
+}

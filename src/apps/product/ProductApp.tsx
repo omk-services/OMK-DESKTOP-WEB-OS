@@ -336,16 +336,6 @@ export function ProductApp() {
   };
 
   const Classement = () => {
-    if (rankingsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="product_rankings"
-          itemId={rankingsDrill.openId}
-          onBack={rankingsDrill.close}
-          onNavigate={rankingsDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -376,16 +366,6 @@ export function ProductApp() {
   };
 
   const Lancement = () => {
-    if (launchesDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="product_launches"
-          itemId={launchesDrill.openId}
-          onBack={launchesDrill.close}
-          onNavigate={launchesDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -415,16 +395,6 @@ export function ProductApp() {
   };
 
   const MVP = () => {
-    if (mvpsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="product_mvps"
-          itemId={mvpsDrill.openId}
-          onBack={mvpsDrill.close}
-          onNavigate={mvpsDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -455,16 +425,6 @@ export function ProductApp() {
   };
 
   const Ideation = () => {
-    if (ideasDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="product_ideas"
-          itemId={ideasDrill.openId}
-          onBack={ideasDrill.close}
-          onNavigate={ideasDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -492,6 +452,26 @@ export function ProductApp() {
         />
       </div>
     );
+  };
+
+  /* ── Drill registry — every CMS drill for this app, in one place. Used
+       both to render the dynamic detail at the top level (sibling of
+       AppFrame, so the theme follows the top bar, not the sidebar) and to
+       skip the section's inline view when another drill is open. */
+  const drillRegistry = [
+    { drill: rankingsDrill, collection: 'product_rankings' as const },
+    { drill: launchesDrill, collection: 'product_launches' as const },
+    { drill: mvpsDrill, collection: 'product_mvps' as const },
+    { drill: ideasDrill, collection: 'product_ideas' as const },
+  ];
+  const openDrillEntry = drillRegistry.find((d) => d.drill.openId !== null);
+  const openDrillCollection = openDrillEntry?.collection ?? null;
+  const openDrillId = openDrillEntry?.drill.openId ?? null;
+  const closeOpenDrill = (): void => {
+    for (const entry of drillRegistry) entry.drill.close();
+  };
+  const navigateOpenDrill = (id: string): void => {
+    openDrillEntry?.drill.open(id);
   };
 
   const sections: AppSection[] = [
@@ -529,6 +509,21 @@ export function ProductApp() {
           motion={{ kind: 'slide-right', durationMs: 220 }}
         >
           <ProductDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+      {openDrillCollection !== null && openDrillId !== null ? (
+        <AppDetailOverlay
+          appId="product"
+          accent="#ea580c"
+          onBack={closeOpenDrill}
+          motion={{ kind: 'slide-right', durationMs: 220 }}
+        >
+          <DynamicPageView
+            collectionId={openDrillCollection}
+            itemId={openDrillId}
+            onBack={closeOpenDrill}
+            onNavigate={navigateOpenDrill}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

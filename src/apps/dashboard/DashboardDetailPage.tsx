@@ -13,7 +13,7 @@
  *
  * Public contract unchanged: same export names, same props signature.
  */
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties, type JSX } from 'react';
 import {
   Activity,
   ArrowLeft,
@@ -272,11 +272,12 @@ export function DashboardDetailPage({
         <header className="mb-8">
           <div className="flex flex-wrap items-start gap-4">
             <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center text-white"
+              className="flex h-12 w-12 shrink-0 items-center justify-center"
               style={{
                 borderRadius: 'var(--theme-radius)',
                 background: `linear-gradient(140deg, ${ACCENT}, color-mix(in srgb, ${ACCENT} 55%, var(--theme-accent)))`,
                 boxShadow: `0 10px 30px -8px ${ACCENT}8c`,
+                color: 'var(--theme-text)',
               }}
               aria-hidden="true"
             >
@@ -788,11 +789,12 @@ export function DashboardDetailPage({
             type="button"
             onClick={onBack}
             aria-label={backLabel}
-            className="group inline-flex flex-1 items-center justify-center gap-2 px-5 py-3 text-[13px] font-bold text-white transition-all hover:brightness-110 active:scale-[0.995] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--theme-accent)] motion-reduce:transform-none motion-reduce:transition-none"
+            className="group inline-flex flex-1 items-center justify-center gap-2 px-5 py-3 text-[13px] font-bold transition-all hover:brightness-110 active:scale-[0.995] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--theme-accent)] motion-reduce:transform-none motion-reduce:transition-none"
             style={{
               borderRadius: 'var(--theme-radius)',
               background: `linear-gradient(120deg, ${ACCENT}, color-mix(in srgb, ${ACCENT} 62%, var(--theme-accent)))`,
               boxShadow: `0 14px 34px -14px ${ACCENT}`,
+              color: 'var(--theme-text)',
             }}
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none" />

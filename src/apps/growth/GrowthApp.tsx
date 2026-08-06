@@ -235,16 +235,6 @@ export function GrowthApp() {
   };
 
   const Acquisition = () => {
-    if (acquisitionDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="growth_acquisition"
-          itemId={acquisitionDrill.openId}
-          onBack={acquisitionDrill.close}
-          onNavigate={acquisitionDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -278,16 +268,6 @@ export function GrowthApp() {
   };
 
   const Strategie = () => {
-    if (strategieDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="growth_strategie"
-          itemId={strategieDrill.openId}
-          onBack={strategieDrill.close}
-          onNavigate={strategieDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -320,16 +300,6 @@ export function GrowthApp() {
   };
 
   const Partenariats = () => {
-    if (partenariatsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="growth_partenariats"
-          itemId={partenariatsDrill.openId}
-          onBack={partenariatsDrill.close}
-          onNavigate={partenariatsDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -362,16 +332,6 @@ export function GrowthApp() {
   };
 
   const AEO = () => {
-    if (aeoDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="growth_aeo"
-          itemId={aeoDrill.openId}
-          onBack={aeoDrill.close}
-          onNavigate={aeoDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -403,6 +363,26 @@ export function GrowthApp() {
     );
   };
 
+  /* ── Drill registry — every CMS drill for this app, in one place. Used
+       both to render the dynamic detail at the top level (sibling of
+       AppFrame, so the theme follows the top bar, not the sidebar) and to
+       skip the section's inline view when another drill is open. */
+  const drillRegistry = [
+    { drill: acquisitionDrill, collection: 'growth_acquisition' as const },
+    { drill: strategieDrill, collection: 'growth_strategie' as const },
+    { drill: partenariatsDrill, collection: 'growth_partenariats' as const },
+    { drill: aeoDrill, collection: 'growth_aeo' as const },
+  ];
+  const openDrillEntry = drillRegistry.find((d) => d.drill.openId !== null);
+  const openDrillCollection = openDrillEntry?.collection ?? null;
+  const openDrillId = openDrillEntry?.drill.openId ?? null;
+  const closeOpenDrill = (): void => {
+    for (const entry of drillRegistry) entry.drill.close();
+  };
+  const navigateOpenDrill = (id: string): void => {
+    openDrillEntry?.drill.open(id);
+  };
+
   const sections: AppSection[] = [
     { id: 'funnel', label: 'Funnel', icon: Filter, render: Funnel },
     { id: 'channels', label: 'Channels', icon: Radio, render: Channels },
@@ -424,6 +404,21 @@ export function GrowthApp() {
           motion={{ kind: 'fade-up', durationMs: 220 }}
         >
           <GrowthDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+      {openDrillCollection !== null && openDrillId !== null ? (
+        <AppDetailOverlay
+          appId="growth"
+          accent="#16a34a"
+          onBack={closeOpenDrill}
+          motion={{ kind: 'fade-up', durationMs: 220 }}
+        >
+          <DynamicPageView
+            collectionId={openDrillCollection}
+            itemId={openDrillId}
+            onBack={closeOpenDrill}
+            onNavigate={navigateOpenDrill}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

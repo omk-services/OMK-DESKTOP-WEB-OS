@@ -296,16 +296,6 @@ export function OperationsApp() {
   };
 
   const Processus = () => {
-    if (processesDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="processes"
-          itemId={processesDrill.openId}
-          onBack={processesDrill.close}
-          onNavigate={processesDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -333,16 +323,6 @@ export function OperationsApp() {
   };
 
   const Benchmarks = () => {
-    if (benchmarksDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="benchmarks"
-          itemId={benchmarksDrill.openId}
-          onBack={benchmarksDrill.close}
-          onNavigate={benchmarksDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -370,16 +350,6 @@ export function OperationsApp() {
   };
 
   const Changements = () => {
-    if (changesDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="changes"
-          itemId={changesDrill.openId}
-          onBack={changesDrill.close}
-          onNavigate={changesDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -407,16 +377,6 @@ export function OperationsApp() {
   };
 
   const Alertes = () => {
-    if (alertsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="alerts"
-          itemId={alertsDrill.openId}
-          onBack={alertsDrill.close}
-          onNavigate={alertsDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -445,6 +405,26 @@ export function OperationsApp() {
         />
       </div>
     );
+  };
+
+  /* ── Drill registry — every CMS drill for this app, in one place. Used
+       both to render the dynamic detail at the top level (sibling of
+       AppFrame, so the theme follows the top bar, not the sidebar) and to
+       skip the section's inline view when another drill is open. */
+  const drillRegistry = [
+    { drill: processesDrill, collection: 'processes' as const },
+    { drill: benchmarksDrill, collection: 'benchmarks' as const },
+    { drill: changesDrill, collection: 'changes' as const },
+    { drill: alertsDrill, collection: 'alerts' as const },
+  ];
+  const openDrillEntry = drillRegistry.find((d) => d.drill.openId !== null);
+  const openDrillCollection = openDrillEntry?.collection ?? null;
+  const openDrillId = openDrillEntry?.drill.openId ?? null;
+  const closeOpenDrill = (): void => {
+    for (const entry of drillRegistry) entry.drill.close();
+  };
+  const navigateOpenDrill = (id: string): void => {
+    openDrillEntry?.drill.open(id);
   };
 
   const sections: AppSection[] = [
@@ -482,6 +462,21 @@ export function OperationsApp() {
           motion={{ kind: 'fade-up', durationMs: 200 }}
         >
           <OperationsDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+      {openDrillCollection !== null && openDrillId !== null ? (
+        <AppDetailOverlay
+          appId="operations"
+          accent="#4f46e5"
+          onBack={closeOpenDrill}
+          motion={{ kind: 'fade-up', durationMs: 200 }}
+        >
+          <DynamicPageView
+            collectionId={openDrillCollection}
+            itemId={openDrillId}
+            onBack={closeOpenDrill}
+            onNavigate={navigateOpenDrill}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

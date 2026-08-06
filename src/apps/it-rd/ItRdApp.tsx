@@ -181,17 +181,6 @@ export function ItRdApp() {
     );
     const latest = sortedEntries[0];
 
-    if (journalDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="it_journal"
-          itemId={journalDrill.openId}
-          onBack={journalDrill.close}
-          onNavigate={journalDrill.open}
-        />
-      );
-    }
-
     return (
       <div className="p-7 h-full flex flex-col gap-5">
         <SectionHead
@@ -313,16 +302,6 @@ export function ItRdApp() {
   };
 
   const Boucles = () => {
-    if (loopsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="it_loops"
-          itemId={loopsDrill.openId}
-          onBack={loopsDrill.close}
-          onNavigate={loopsDrill.open}
-        />
-      );
-    }
     const stableCount = loops.filter(l => l.state === 'stable').length;
     const driftCount = loops.filter(l => l.state === 'drift').length;
     return (
@@ -403,16 +382,6 @@ export function ItRdApp() {
   };
 
   const Drift = () => {
-    if (driftDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="it_drift"
-          itemId={driftDrill.openId}
-          onBack={driftDrill.close}
-          onNavigate={driftDrill.open}
-        />
-      );
-    }
     const driftCount = drift.filter(d => d.severity === 'drift' || d.severity === 'alert').length;
     return (
       <div className="p-7">
@@ -483,16 +452,6 @@ export function ItRdApp() {
   };
 
   const Evals = () => {
-    if (evalsDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="it_evals"
-          itemId={evalsDrill.openId}
-          onBack={evalsDrill.close}
-          onNavigate={evalsDrill.open}
-        />
-      );
-    }
     const autoCount = evals.filter(e => e.evalType === 'auto').length;
     const reviewCount = evals.filter(e => e.evalType === 'review').length;
     return (
@@ -564,6 +523,26 @@ export function ItRdApp() {
     );
   };
 
+  /* ── Drill registry — every CMS drill for this app, in one place. Used
+       both to render the dynamic detail at the top level (sibling of
+       AppFrame, so the theme follows the top bar, not the sidebar) and to
+       skip the section's inline view when another drill is open. */
+  const drillRegistry = [
+    { drill: journalDrill, collection: 'it_journal' as const },
+    { drill: loopsDrill, collection: 'it_loops' as const },
+    { drill: driftDrill, collection: 'it_drift' as const },
+    { drill: evalsDrill, collection: 'it_evals' as const },
+  ];
+  const openDrillEntry = drillRegistry.find((d) => d.drill.openId !== null);
+  const openDrillCollection = openDrillEntry?.collection ?? null;
+  const openDrillId = openDrillEntry?.drill.openId ?? null;
+  const closeOpenDrill = (): void => {
+    for (const entry of drillRegistry) entry.drill.close();
+  };
+  const navigateOpenDrill = (id: string): void => {
+    openDrillEntry?.drill.open(id);
+  };
+
   const sections: AppSection[] = [
     { id: 'kernel', label: 'Kernel', icon: Server, render: Kernel },
     { id: 'experiments', label: 'Experiments', icon: FlaskConical, render: Experiments },
@@ -617,6 +596,21 @@ export function ItRdApp() {
           motion={{ kind: 'type-in', durationMs: 280 }}
         >
           <ItRdDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : null}
+      {openDrillCollection !== null && openDrillId !== null ? (
+        <AppDetailOverlay
+          appId="it-rd"
+          accent="#7c3aed"
+          onBack={closeOpenDrill}
+          motion={{ kind: 'type-in', durationMs: 280 }}
+        >
+          <DynamicPageView
+            collectionId={openDrillCollection}
+            itemId={openDrillId}
+            onBack={closeOpenDrill}
+            onNavigate={navigateOpenDrill}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

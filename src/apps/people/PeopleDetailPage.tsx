@@ -266,7 +266,7 @@ export function PeopleDetailPage({
                 style={SUNK}
               >
                 <div
-                  className="grid h-[104px] w-[104px] place-items-center rounded-full text-[30px] font-extrabold tracking-wide text-white"
+                  className="grid h-[104px] w-[104px] place-items-center rounded-full text-[30px] font-extrabold tracking-wide text-[color:#fff]"
                   style={{
                     background: `linear-gradient(145deg, ${accent}, ${accent}b8)`,
                     boxShadow: `7px 7px 16px var(--nm-shade), -6px -6px 14px var(--nm-glow), inset 0 2px 6px rgba(255,255,255,0.30), inset 0 -3px 8px ${accent}`,
@@ -368,7 +368,7 @@ export function PeopleDetailPage({
                       }
                 }
                 className={`inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-[12.5px] font-bold transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] ${
-                  pinged ? '' : 'text-white'
+                  pinged ? '' : 'text-[color:#fff]'
                 } ${FOCUS}`}
               >
                 <Send className="h-3.5 w-3.5" />

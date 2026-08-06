@@ -252,7 +252,9 @@ export const CANONICAL_APP_THEMES: Record<string, string> = {
   'dashboard':   'dark-oled',         // data-dense, terminal-grade metrics
   'product':     'brutalism',         // bold spec/roadmap cards
   'growth':      'vibrant-block',     // growth-hacker bold blocks
-  'sales':       'liquid-glass',      // CRM riche, multi-layer translucency
+  'sales':       'warm-paper',        // Sales OS Control Center : creme editorial, chiffres larges
+                                      // (etait 'liquid-glass' — refonte du 2026-08-06 d'apres la
+                                      //  reference Sales OS, dont le ton est clair, pas translucide)
   'operations':  'brutalism',         // load-bearing, hard borders
   'finance':     'trust',             // CFO sobre, noir
   'legal':       'trust',             // classical restraint

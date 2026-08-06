@@ -32,7 +32,7 @@ export function AppleStyle({ themeId }: VariantProps) {
     <div className="relative p-10" style={{ background: `linear-gradient(135deg, ${t.bg}, ${t.canvas})` }}>
       <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4), transparent 60%)' }} />
       <div className="relative mx-auto max-w-3xl space-y-6">
-        <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-500">Focus</div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: t.textMuted }}>Focus</div>
         <h2 className="text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--theme-font-display)', color: t.text }}>
           Build with quiet conviction.
         </h2>
@@ -41,8 +41,8 @@ export function AppleStyle({ themeId }: VariantProps) {
         </p>
         <div className="flex items-center gap-3 pt-4">
           <button
-            className="rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02]"
-            style={{ background: t.accent, boxShadow: `0 12px 32px ${t.accent}66` }}
+            className="rounded-full px-6 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02]"
+            style={{ background: t.accent, color: t.isDark ? '#000' : '#fff', boxShadow: `0 12px 32px ${t.accent}66` }}
           >
             Open the workspace
           </button>
@@ -69,7 +69,7 @@ export function AppleStyle({ themeId }: VariantProps) {
               }}
             >
               <Icon className="h-4 w-4 mb-2" style={{ color: t.accent }} />
-              <div className="text-[9px] font-bold uppercase tracking-wider text-stone-500">{k}</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: t.textMuted }}>{k}</div>
               <div className="mt-1 text-[12px] font-mono font-semibold" style={{ color: t.text }}>{v}</div>
             </div>
           ))}
@@ -100,7 +100,7 @@ export function BentoStyle({ themeId }: VariantProps) {
       {/* Stat tile */}
       <div className="col-span-2 rounded-3xl p-4 flex items-center justify-between" style={{ background: t.surface, border: `1px solid ${t.borderSubtle}` }}>
         <div>
-          <div className="text-[9px] font-bold uppercase tracking-wider text-stone-500">Stat</div>
+          <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: t.textMuted }}>Stat</div>
           <div className="text-3xl font-bold tabular-nums" style={{ color: t.text }}>12.4K</div>
         </div>
         <Activity className="h-8 w-8" style={{ color: t.accent }} />
@@ -108,13 +108,14 @@ export function BentoStyle({ themeId }: VariantProps) {
       {/* Action tile */}
       <div className="rounded-3xl p-4 flex items-center gap-3" style={{ background: t.surface, border: `1px solid ${t.borderSubtle}` }}>
         <div className="h-9 w-9 rounded-2xl flex items-center justify-center" style={{ background: t.accent }}>
-          <Check className="h-4 w-4 text-white" />
+          {/* Preview exception: contrast color on the theme's own accent button. */}
+          <Check className="h-4 w-4" style={{ color: t.isDark ? '#000' : '#fff' }} />
         </div>
         <div className="text-[11px] font-semibold" style={{ color: t.text }}>Done.</div>
       </div>
       {/* Wide tile */}
       <div className="col-span-2 rounded-3xl p-4 flex flex-col justify-between" style={{ background: t.surface, border: `1px solid ${t.borderSubtle}` }}>
-        <div className="text-[9px] font-bold uppercase tracking-wider text-stone-500">Range</div>
+        <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: t.textMuted }}>Range</div>
         <div className="flex items-end gap-1">
           {[40, 65, 50, 80, 70, 95, 60].map((h, i) => (
             <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: t.accent, opacity: 0.4 + i * 0.08 }} />
@@ -126,13 +127,13 @@ export function BentoStyle({ themeId }: VariantProps) {
         {['Inbox', 'Today', 'Queue'].map((label, i) => (
           <div key={label} className="flex items-center justify-between text-[11px]">
             <span style={{ color: t.text }}>{label}</span>
-            <span className="text-stone-500 tabular-nums">{[8, 3, 1][i]}</span>
+            <span className="tabular-nums" style={{ color: t.textMuted }}>{[8, 3, 1][i]}</span>
           </div>
         ))}
       </div>
       {/* Mini tile */}
       <div className="col-span-2 rounded-3xl p-4 flex items-center justify-between" style={{ background: t.surface, border: `1px solid ${t.borderSubtle}` }}>
-        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Heart</div>
+        <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: t.textMuted }}>Heart</div>
         <div className="h-2 w-2 rounded-full" style={{ background: t.accent }} />
       </div>
     </div>
@@ -147,7 +148,7 @@ export function EditorialStyle({ themeId }: VariantProps) {
   return (
     <div className="p-12" style={{ background: t.bg }}>
       <div className="mx-auto max-w-[640px]">
-        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.25em] text-stone-500">Essay · 7 min read</div>
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: t.textMuted }}>Essay · 7 min read</div>
         <h2
           className="text-4xl font-bold leading-[1.15] tracking-tight"
           style={{ fontFamily: 'var(--theme-font-display)', color: t.text }}

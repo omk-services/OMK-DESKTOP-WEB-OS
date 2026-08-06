@@ -61,13 +61,23 @@ export function LegalApp() {
           body: b,
         }))
       : [];
+    const party = String(item.client ?? item.subtitle ?? '');
+    const fields: { label: string; value: string }[] = [
+      { label: 'Document', value: String(item.document ?? '') },
+      { label: 'Counter-party', value: party },
+      { label: 'Signed', value: String(item.signed ?? '') },
+      { label: 'Status', value: String(item.status ?? 'active') },
+    ];
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
-      subtitle: String(item.party ?? item.subtitle ?? ''),
+      title: String(item.document ?? item.title ?? 'Untitled'),
+      subtitle: party,
+      party,
       status: String(item.status ?? 'active'),
+      signed: String(item.signed ?? ''),
+      collection: 'contracts',
       clauses,
-      fields: [],
+      fields,
     });
     contractsDrill.open(id);
   };
@@ -79,13 +89,22 @@ export function LegalApp() {
     const clauses = body
       ? [{ title: String(item.title ?? 'Policy'), body }]
       : [];
+    const updated = String(item.updated ?? '');
+    const fields: { label: string; value: string }[] = [
+      { label: 'Policy', value: String(item.name ?? item.title ?? '') },
+      { label: 'Last updated', value: updated },
+      { label: 'Summary', value: body },
+    ];
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
-      subtitle: String(item.subtitle ?? ''),
+      title: String(item.name ?? item.title ?? 'Untitled'),
+      subtitle: updated,
+      body,
+      updated,
       status: String(item.status ?? 'published'),
+      collection: 'policies',
       clauses,
-      fields: [],
+      fields,
     });
     policiesDrill.open(id);
   };
@@ -99,7 +118,12 @@ export function LegalApp() {
         <div className="divide-y divide-[var(--hairline)]">
           {checks.map(c => (
             <div key={c.id} className="flex items-center justify-between px-5 py-3.5">
-              <span className={`text-sm ${c.done ? 'text-stone-700' : 'text-stone-500'}`}>{c.label}</span>
+              <span
+                className="text-sm"
+                style={{ color: c.done ? 'var(--theme-text)' : 'var(--theme-muted)' }}
+              >
+                {c.label}
+              </span>
               <Toggle on={c.done} onClick={() => toggle(c.id)} />
             </div>
           ))}

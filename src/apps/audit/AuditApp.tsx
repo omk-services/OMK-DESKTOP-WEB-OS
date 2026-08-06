@@ -3,13 +3,28 @@
  * Source: 8-page PDF, 6 grilles diagnostiques (Maturité / Arbitrage / Contexte / Données / Automatabilité / ROI).
  * Sister to Drawbridge Task 4 (2026-07-28): icons d'autres systems d'audit pour intégrer le manuel.
  * D4 append-only — chaque grille est en lecture seule, ne mute pas d'état.
+ *
+ * 2026-08-06 — 5 grilles suivantes ajoutees : Arbitrage, Contexte, Données,
+ *               Automatabilité, Arbitrage & ROI. Chacune est une collection CMS
+ *               (audit_*), affichée via CMSCardList, drill via DynamicPageView,
+ *               detail rendu par AuditItemDetail. Statique Maturité conservée.
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
-  BrainCircuit, ChevronDown, FileText, Layers, Lock, Repeat, Shield,
+  BrainCircuit, FileText, Layers, Lock, Repeat, Shield,
   TrendingUp, Database, Cog, Languages, type LucideIcon,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
+import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { CMSCardList } from '../_ui/CMSCardList';
+import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { AuditItemDetail } from './AuditItemDetail';
+import { seedAuditCms, FREQ_BADGE_ACCENT } from './seed';
+
+seedAuditCms();
+registerItemDetail('audit', AuditItemDetail);
 
 const ACCENT = '#b91c1c'; // red — diagnostic / audit canon
 
@@ -58,26 +73,49 @@ interface GrilleDef {
   icon: LucideIcon;
   accent: string;
   tagline: string;
+  collectionId: string;
 }
 
 const GRILLES: GrilleDef[] = [
-  { id: 'maturite',        page: 2, title: 'Maturité',          icon: BrainCircuit, accent: '#6366f1', tagline: 'Trois niveaux, trois plafonds de verre.' },
-  { id: 'arbitrage',        page: 3, title: 'Arbitrage outil & modèle', icon: Layers,      accent: '#0891b2', tagline: 'Arbre de decision par nature de tache.' },
-  { id: 'contexte',         page: 4, title: 'Contexte',           icon: Languages,   accent: '#10b981', tagline: 'Hierarchie de valeur des actifs internes.' },
-  { id: 'donnees',          page: 5, title: 'Données',            icon: Database,     accent: '#ec4899', tagline: 'Sensibilite x type d\'hebergement.' },
-  { id: 'automatabilite',   page: 6, title: 'Automatabilite',    icon: Repeat,       accent: '#f59e0b', tagline: '5 tests qui separent une tache delegable.' },
-  { id: 'arbitrage-roi',    page: 7, title: 'Arbitrage & ROI',   icon: TrendingUp,   accent: '#7c3aed', tagline: 'Matrice impact/effort, calcul de gain.' },
+  { id: 'maturite',        page: 2, title: 'Maturité',          icon: BrainCircuit, accent: '#6366f1', tagline: 'Trois niveaux, trois plafonds de verre.',                                              collectionId: '' },
+  { id: 'arbitrage',       page: 3, title: 'Arbitrage',         icon: Layers,       accent: '#0891b2', tagline: 'Ce qui doit rester une decision humaine, et pourquoi.',                                collectionId: 'audit_arbitrage' },
+  { id: 'contexte',        page: 4, title: 'Contexte',          icon: Languages,    accent: '#10b981', tagline: 'Ce que l\'agent doit savoir du metier pour agir juste.',                                collectionId: 'audit_contexte' },
+  { id: 'donnees',         page: 5, title: 'Données',           icon: Database,     accent: '#ec4899', tagline: 'Qualite, fraicheur et provenance de ce qu\'il consomme.',                              collectionId: 'audit_donnees' },
+  { id: 'automatabilite',  page: 6, title: 'Automatabilité',    icon: Repeat,       accent: '#f59e0b', tagline: '5 tests qui separent une tache delegable.',                                            collectionId: 'audit_automatabilite' },
+  { id: 'roi',             page: 7, title: 'Arbitrage & ROI',   icon: TrendingUp,   accent: '#7c3aed', tagline: 'Ce que coute une decision humaine, ce qu\'elle evite.',                                collectionId: 'audit_arbitrage_roi' },
 ];
 
+interface CriterionItem extends Record<string, unknown> {
+  id: string;
+  criterion: string;
+  question: string;
+  axis: string;
+  frequency: string;
+  observe: string;
+  level0: string;
+  level1: string;
+  level2: string;
+}
+
+interface CollectionDrill {
+  openId: string | null;
+  open: (id: string) => void;
+  close: () => void;
+}
+
 export function AuditApp() {
-  const [activeGrille, setActiveGrille] = useState<string>('maturite');
+  const arbitrageDrill = useCollectionDrill('audit_arbitrage', 'Arbitrage');
+  const contexteDrill = useCollectionDrill('audit_contexte', 'Contexte');
+  const donneesDrill = useCollectionDrill('audit_donnees', 'Données');
+  const automatabiliteDrill = useCollectionDrill('audit_automatabilite', 'Automatabilité');
+  const roiDrill = useCollectionDrill('audit_arbitrage_roi', 'Arbitrage & ROI');
 
   const sections: AppSection[] = useMemo(() => [
     {
       id: 'overview',
       label: 'Overview',
       icon: FileText,
-      render: () => <OverviewContent onSelect={setActiveGrille} />,
+      render: () => <OverviewContent />,
     },
     {
       id: 'maturite',
@@ -89,47 +127,121 @@ export function AuditApp() {
       id: 'arbitrage',
       label: 'Arbitrage',
       icon: Layers,
-      render: () => <StubContent grille="arbitrage" />,
+      render: () => (
+        <CriterionGrid
+          title="Arbitrage"
+          subtitle={GRILLES[1].tagline}
+          accent={GRILLES[1].accent}
+          icon={GRILLES[1].icon}
+          collectionId="audit_arbitrage"
+          drill={arbitrageDrill}
+        />
+      ),
     },
     {
       id: 'contexte',
       label: 'Contexte',
       icon: Languages,
-      render: () => <StubContent grille="contexte" />,
+      render: () => (
+        <CriterionGrid
+          title="Contexte"
+          subtitle={GRILLES[2].tagline}
+          accent={GRILLES[2].accent}
+          icon={GRILLES[2].icon}
+          collectionId="audit_contexte"
+          drill={contexteDrill}
+        />
+      ),
     },
     {
       id: 'donnees',
       label: 'Données',
       icon: Database,
-      render: () => <StubContent grille="donnees" />,
+      render: () => (
+        <CriterionGrid
+          title="Données"
+          subtitle={GRILLES[3].tagline}
+          accent={GRILLES[3].accent}
+          icon={GRILLES[3].icon}
+          collectionId="audit_donnees"
+          drill={donneesDrill}
+        />
+      ),
     },
     {
       id: 'automatabilite',
       label: 'Automatabilité',
       icon: Repeat,
-      render: () => <StubContent grille="automatabilite" />,
+      render: () => (
+        <CriterionGrid
+          title="Automatabilité"
+          subtitle={GRILLES[4].tagline}
+          accent={GRILLES[4].accent}
+          icon={GRILLES[4].icon}
+          collectionId="audit_automatabilite"
+          drill={automatabiliteDrill}
+        />
+      ),
     },
     {
       id: 'roi',
       label: 'ROI',
       icon: TrendingUp,
-      render: () => <StubContent grille="roi" />,
+      render: () => (
+        <CriterionGrid
+          title="Arbitrage & ROI"
+          subtitle={GRILLES[5].tagline}
+          accent={GRILLES[5].accent}
+          icon={GRILLES[5].icon}
+          collectionId="audit_arbitrage_roi"
+          drill={roiDrill}
+        />
+      ),
     },
-  ], []);
+  ], [arbitrageDrill, contexteDrill, donneesDrill, automatabiliteDrill, roiDrill]);
+
+  const drillViews: ReadonlyArray<{
+    drill: CollectionDrill;
+    collectionId: string;
+  }> = [
+    { drill: arbitrageDrill, collectionId: 'audit_arbitrage' },
+    { drill: contexteDrill, collectionId: 'audit_contexte' },
+    { drill: donneesDrill, collectionId: 'audit_donnees' },
+    { drill: automatabiliteDrill, collectionId: 'audit_automatabilite' },
+    { drill: roiDrill, collectionId: 'audit_arbitrage_roi' },
+  ];
+  const activeDrill = drillViews.find((entry) => entry.drill.openId) ?? null;
 
   return (
-    <AppFrame
-      title="Manuel de Diagnostic IA"
-      subtitle="6 grilles canon · source audit.pdf"
-      accent={ACCENT}
-      icon={Shield}
-      sections={sections}
-      canvasNuance={1}
-    />
+    <>
+      <AppFrame
+        title="Manuel de Diagnostic IA"
+        subtitle="6 grilles canon · source audit.pdf"
+        accent={ACCENT}
+        icon={Shield}
+        sections={sections}
+        canvasNuance={1}
+      />
+      {activeDrill?.drill.openId ? (
+        <AppDetailOverlay
+          appId="audit"
+          accent={ACCENT}
+          onBack={() => activeDrill.drill.close()}
+          motion={{ kind: 'fade-up', durationMs: 220 }}
+        >
+          <DynamicPageView
+            collectionId={activeDrill.collectionId}
+            itemId={activeDrill.drill.openId}
+            onBack={() => activeDrill.drill.close()}
+            onNavigate={activeDrill.drill.open}
+          />
+        </AppDetailOverlay>
+      ) : null}
+    </>
   );
 }
 
-function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
+function OverviewContent() {
   return (
     <div className="space-y-6">
       <SectionHead
@@ -161,15 +273,16 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
           {GRILLES.map((g) => {
             const Icon = g.icon;
             return (
-              <button
+              <a
                 key={g.id}
-                onClick={() => onSelect(g.id)}
+                href={`#${g.id}`}
+                onClick={(e) => { e.preventDefault(); /* nav sidebar is the entry point */ }}
                 className="text-left rounded-xl border border-[var(--panel-border)] bg-[var(--theme-bg)] p-3 transition-all hover:border-[var(--theme-text-dim)] hover:shadow-md"
               >
                 <div className="mb-2 flex items-center gap-2">
                   <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-white"
-                    style={{ background: g.accent }}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center"
+                    style={{ background: g.accent, color: 'var(--theme-bg)' }}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
@@ -177,16 +290,19 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
                 </div>
                 <p className="text-[11px] leading-snug text-[var(--theme-muted)]">{g.tagline}</p>
                 <p className="mt-1 text-[10px] font-mono text-[var(--theme-text-dim)]">p. {g.page}</p>
-              </button>
+              </a>
             );
           })}
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[var(--panel-border)] bg-stone-900 p-5 text-stone-100">
+      <section
+        className="rounded-2xl p-5"
+        style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)' }}
+      >
         <p className="text-[13px] leading-relaxed">
           Une entreprise n'a pas un probleme d'IA. Elle a des taches qui coutent cher et dont personne ne parle.
-          L'IA n'est que la <em className="text-rose-300 not-italic">reponse eventuelle</em>.
+          L'IA n'est que la <em className="not-italic" style={{ color: 'var(--theme-bg)' }}>reponse eventuelle</em>.
         </p>
       </section>
     </div>
@@ -242,19 +358,32 @@ function MaturiteContent() {
         ))}
       </div>
 
-      <section className="rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-rose-700">
+      <section
+        className="rounded-2xl p-5"
+        style={{
+          background: 'var(--theme-surface)',
+          border: '1px solid var(--panel-border)',
+          borderLeft: '4px solid #f59e0b',
+        }}
+      >
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#b45309' }}>
           Faux niveaux à ne pas prendre pour de la maturité
         </p>
-        <p className="text-[12px] leading-snug text-rose-900">
+        <p className="text-[12px] leading-snug" style={{ color: 'var(--theme-text)' }}>
           Un POC presente en comite mais jamais utilise · un chatbot sur le site qui renvoie vers le
           formulaire de contact · une licence achetee dont personne ne connait le login · un
           « projet IA » dont le sponsor ne sait pas nommer la tache visee.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-stone-900 bg-stone-900 p-5 text-stone-100">
-        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-rose-300">
+      <section
+        className="rounded-2xl p-5"
+        style={{
+          background: 'var(--theme-text)',
+          color: 'var(--theme-bg)',
+        }}
+      >
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-bg)' }}>
           Repère
         </p>
         <p className="text-[13px] leading-snug">
@@ -266,43 +395,45 @@ function MaturiteContent() {
   );
 }
 
-function StubContent({ grille }: { grille: string }) {
-  const def = GRILLES.find((g) => g.id === grille);
-  if (!def) return null;
-  const Icon = def.icon;
+function CriterionGrid({
+  title,
+  subtitle,
+  accent,
+  icon: Icon,
+  collectionId,
+  drill,
+}: {
+  title: string;
+  subtitle: string;
+  accent: string;
+  icon: LucideIcon;
+  collectionId: string;
+  drill: CollectionDrill;
+}) {
   return (
-    <div className="space-y-5">
-      <SectionHead
-        title={def.title}
-        subtitle={def.tagline}
+    <div className="p-7">
+      <SectionHead title={title} subtitle={subtitle} />
+      <CMSCardList<CriterionItem>
+        collectionId={collectionId}
+        onOpen={(id) => drill.open(id)}
+        cols={2}
+        render={(c) => {
+          const freq = String(c.frequency ?? '').toLowerCase();
+          const freqAccent = FREQ_BADGE_ACCENT[freq] ?? accent;
+          return {
+            title: String(c.criterion ?? '—'),
+            subtitle: String(c.question ?? ''),
+            description: String(c.observe ?? '').slice(0, 160),
+            statusLabel: freq || '—',
+            statusTone: freq === 'quotidien' ? 'danger' : freq === 'hebdo' ? 'warn' : 'accent',
+            accent: freqAccent,
+            icon: <Icon className="w-5 h-5" />,
+            metricLabel: 'axe',
+            metricValue: String(c.axis ?? '—'),
+            meta: `3 niveaux · ${String(c.id ?? '')}`,
+          };
+        }}
       />
-      <div className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-        <div className="mb-3 flex items-center gap-2">
-          <Icon className="h-5 w-5" style={{ color: def.accent }} />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text)]">
-            Source
-          </h2>
-        </div>
-        <p className="text-[13px] leading-relaxed text-[var(--theme-muted)]">
-          Manuel de Diagnostic IA, page {def.page}. Source PDF canonique :
-          <code className="ml-1 rounded bg-[var(--theme-bg)] px-1.5 py-0.5 text-[11px] font-mono">
-            C:\Users\amado\Downloads\audit.pdf
-          </code>
-        </p>
-        <p className="mt-3 text-[12px] italic text-[var(--theme-muted)]">
-          Section canon: extraite textuellement du PDF. Pour le contenu exhaustif, ouvrir le PDF source.
-        </p>
-      </div>
-      <details className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-        <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[var(--theme-text)]">
-          <ChevronDown className="h-4 w-4" />
-          Pages canoniques (PDF)
-        </summary>
-        <p className="mt-3 text-[12px] text-[var(--theme-muted)]">
-          Consulter <code className="font-mono text-[11px]">audit.pdf</code> page {def.page} pour
-          le contenu integral (3 niveaux, tests, matrices).
-        </p>
-      </details>
     </div>
   );
 }

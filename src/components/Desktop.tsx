@@ -12,6 +12,7 @@ import { ViewportGuard } from './ViewportGuard';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useShellStore } from '../stores/shell.store';
 import { getApp } from '../lib/app-registry';
+import { getWallpaper } from '../lib/wallpaper';
 
 /** Onboarding-only routes: when the prospect hits /onboarding or /demo, the
  *  Macro Desktop opens with the Onboarding window auto-launched + maximized.
@@ -92,7 +93,30 @@ export function Desktop() {
 
   return (
     <ViewportGuard>
+      {/* The wallpaper component renders the canonical paper-garden scene.
+        If the user uploaded a custom wallpaper via Settings, we overlay an
+        extra <div> on top of it with the user's image + fit. Falls back to
+        the canonical scene when no image is set — keeps the rest of Desktop
+        untouched. */}
       <Wallpaper />
+      {(() => {
+        const wp = getWallpaper();
+        if (!wp.dataUrl) return null;
+        const size = wp.fit === 'repeat' ? 'auto' : wp.fit;
+        const repeat = wp.fit === 'repeat' ? 'repeat' : 'no-repeat';
+        return (
+          <div
+            aria-hidden
+            className="fixed inset-0 z-[-9] pointer-events-none"
+            style={{
+              backgroundImage: `url(${wp.dataUrl})`,
+              backgroundRepeat: repeat,
+              backgroundSize: size,
+              backgroundPosition: 'center center',
+            }}
+          />
+        );
+      })()}
 
       <div className="w-full h-screen overflow-hidden relative text-stone-800 bg-transparent">
         <TopBar />

@@ -78,6 +78,9 @@ export const COLLECTION_OWNERSHIP: Readonly<Record<string, string>> = Object.fre
   session_notes: 'clients',
   // Tasks
   tasks: 'tasks',
+  dods: 'tasks',
+  comparators: 'tasks',
+  exposed_actions: 'tasks',
   // Marketplace
   marketplace_listings: 'marketplace',
   // Product

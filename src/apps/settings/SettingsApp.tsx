@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play, Wand2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play, Wand2, Image as ImageIcon, Upload, RefreshCw, AlertTriangle } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
@@ -18,6 +18,14 @@ import {
   NEUTRAL_POOL,
   type CanvasEffectId,
 } from '../../components/canvasui/v30/theme-canvas-mapping';
+import {
+  getWallpaper,
+  setWallpaper,
+  setWallpaperFit,
+  clearWallpaper,
+  resizeImageToDataUrl,
+  type WallpaperFit,
+} from '../../lib/wallpaper';
 import posthog from 'posthog-js';
 
 const ACCENT = '#78716c';
@@ -111,7 +119,10 @@ function CanvasFxTile({
       }`}
       style={{ background: bg }}
     >
-      <span className="absolute inset-0 grid place-items-center text-[8px] font-bold uppercase text-white mix-blend-difference">
+      <span
+        className="absolute inset-0 grid place-items-center text-[8px] font-bold uppercase"
+        style={{ color: '#fff', mixBlendMode: 'difference' }}
+      >
         {effectId === 'auto' ? 'AUTO' : effectId.slice(0, 6)}
       </span>
     </button>
@@ -200,6 +211,225 @@ function CanvasFxPicker() {
         The signature effect renders as a transparent header strip inside each app window.
         WebGL effects inherit the per-app theme tokens (accent, duration, dominant).
         On low-power hardware the wrapper falls back to a plain DOM subtree automatically.
+      </p>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Wallpaper section — upload, preview, fit, reset.                          */
+/*  Image is downscaled to 2560px max long edge + JPEG re-encode in           */
+/*  src/lib/wallpaper.ts. Stored under its own localStorage keys so the       */
+/*  theme store never has to re-serialize multi-MB data on every theme change. */
+/* ────────────────────────────────────────────────────────────────────────── */
+function WallpaperPanel() {
+  // We read localStorage once on mount and listen to a custom event so the
+  // panel re-renders when the user uploads a new image. We deliberately do
+  // NOT subscribe to any store here — keeping the image out of Zustand is the
+  // whole point (see wallpaper.ts header).
+  const [{ dataUrl, fit }, setState] = useState(() => getWallpaper());
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Re-read storage when a sibling or the Desktop itself writes via the same keys.
+  // Cheap: ~1 string read. Avoids a Zustand subscription that would balloon the
+  // theme store's persisted blob.
+  useEffect(() => {
+    const refresh = () => setState(getWallpaper());
+    window.addEventListener('coach-os:wallpaper-changed', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('coach-os:wallpaper-changed', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    setBusy(true);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      const res = setWallpaper(dataUrl, fit);
+      if (!res.ok) {
+        // Don't lose the user's image silently — QuotaExceededError is the
+        // common case (private browsing, large photo, storage already half
+        // full from other apps' keys). The user should know the wallpaper
+        // didn't actually persist.
+        setError(
+          res.error.toLowerCase().includes('quota')
+            ? 'Browser storage is full. Clear some site data, then try a smaller image.'
+            : `Could not save the image: ${res.error}`
+        );
+        return;
+      }
+      setState(getWallpaper());
+      window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(
+        msg === 'unsupported'
+          ? 'That file is not an image.'
+          : msg === 'decode'
+          ? 'The image could not be decoded.'
+          : `Could not load the image: ${msg}`
+      );
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const onFitChange = (next: WallpaperFit) => {
+    setError(null);
+    const res = setWallpaperFit(next);
+    if (!res.ok) {
+      setError(`Could not save the fit: ${res.error}`);
+      return;
+    }
+    setState(getWallpaper());
+    window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
+  };
+
+  const onReset = () => {
+    setError(null);
+    clearWallpaper();
+    setState(getWallpaper());
+    window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
+  };
+
+  return (
+    <div className="p-7">
+      <SectionHead
+        title="Desktop wallpaper"
+        subtitle="Upload an image that fills the desktop behind your apps. Stored locally on this device."
+        action={
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={!dataUrl}
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <RotateCcw className="w-3 h-3" /> Restore default
+          </button>
+        }
+      />
+
+      <Card>
+        <div className="px-5 py-4 flex items-start gap-4 border-b border-[var(--hairline)]">
+          <div
+            className="relative h-28 w-48 shrink-0 rounded-lg overflow-hidden border border-[var(--panel-border)]"
+            style={{ background: dataUrl ? '#000' : 'var(--theme-canvas)' }}
+          >
+            {dataUrl ? (
+              <img
+                src={dataUrl}
+                alt="Current wallpaper preview"
+                className="absolute inset-0 h-full w-full"
+                style={{ objectFit: fit === 'repeat' ? 'unset' : fit, backgroundRepeat: fit === 'repeat' ? 'repeat' : 'no-repeat', backgroundSize: fit === 'repeat' ? 'auto' : undefined, backgroundImage: fit === 'repeat' ? `url(${dataUrl})` : undefined }}
+              />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center text-[var(--theme-muted)]">
+                <ImageIcon className="w-6 h-6" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-[var(--theme-text)]">
+              {dataUrl ? 'Custom wallpaper set' : 'No custom wallpaper'}
+            </div>
+            <p className="text-xs text-[var(--theme-muted)] mt-1 leading-relaxed">
+              {dataUrl
+                ? 'This image renders behind your apps. The original paper-garden scene returns the moment you restore the default.'
+                : 'Pick a photo or any image. The browser will resize it to fit a 2560-pixel desktop and re-encode it as JPEG to stay well under the local-storage budget.'}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                data-testid="wallpaper-input"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleFile(f);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 hover:scale-[1.01] active:scale-[0.99]"
+                style={{ background: 'var(--theme-accent)', color: 'var(--theme-accent)' }}
+              >
+                <Upload className="w-3 h-3" style={{ color: 'var(--theme-text)' }} />
+                <span style={{ color: 'var(--theme-text)' }}>{busy ? 'Processing…' : 'Upload image'}</span>
+              </button>
+
+              {dataUrl && (
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-1.5 text-[11px] font-semibold text-[var(--theme-muted)] hover:bg-[var(--theme-surface-hover)]"
+                >
+                  <RefreshCw className="w-3 h-3" /> Remove
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Fit selector — only meaningful when an image is set */}
+        <div className="px-5 py-4">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-muted)] mb-2">
+            Fit
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(['cover', 'contain', 'repeat'] as const).map((opt) => {
+              const active = fit === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => onFitChange(opt)}
+                  disabled={!dataUrl}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                    active
+                      ? 'text-[var(--theme-text)]'
+                      : 'text-[var(--theme-muted)] hover:text-[var(--theme-text)]'
+                  }`}
+                  style={{
+                    border: `1px solid ${active ? 'var(--theme-accent)' : 'var(--panel-border)'}`,
+                    background: active ? 'var(--theme-surface-hover)' : 'var(--theme-surface)',
+                  }}
+                >
+                  {active && <Check className="w-3 h-3" style={{ color: 'var(--theme-accent)' }} />}
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] text-[var(--theme-muted)] leading-relaxed">
+            Cover fills the desktop, cropping if needed. Contain shows the whole image, letterboxing if needed. Repeat tiles at native size — best for patterns.
+          </p>
+        </div>
+
+        {error && (
+          <div className="mx-5 mb-4 flex items-start gap-2 rounded-lg border p-3 text-[12px]"
+            style={{ borderColor: 'var(--theme-accent)', background: 'var(--theme-surface-hover)' }}
+          >
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: 'var(--theme-accent)' }} />
+            <span className="text-[var(--theme-text)]">{error}</span>
+          </div>
+        )}
+      </Card>
+
+      <p className="mt-4 text-[11px] text-[var(--theme-muted)] leading-relaxed">
+        Images live in your browser's local storage, never on a server. The resize
+        step keeps a typical photograph under 1 MB so it does not collide with
+        the theme store's other keys.
       </p>
     </div>
   );
@@ -372,9 +602,9 @@ export function SettingsApp() {
                   disabled={!consentOn}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
                   style={{
-                    color: consentOn ? '#0f766e' : '#78716c',
-                    background: consentOn ? '#ccfbf1' : '#f5f5f4',
-                    boxShadow: 'inset 0 0 0 1px rgba(15,118,110,0.25)',
+                    color: consentOn ? '#0f766e' : 'var(--theme-muted)',
+                    background: consentOn ? '#ccfbf1' : 'var(--theme-surface-hover)',
+                    boxShadow: consentOn ? 'inset 0 0 0 1px rgba(15,118,110,0.25)' : 'inset 0 0 0 1px var(--panel-border-subtle)',
                   }}
                 >
                   <Play className="w-3 h-3" /> Replay
@@ -390,6 +620,9 @@ export function SettingsApp() {
   /* ════════════════════════════════════════════════════════════════════════
    *  Themes section — 12-theme picker with per-app assignment.
    *  Pattern from KomputerMechanic Hermes + UI UX Pro Max skill catalogue.
+   *  Per-app override only governs the app's left sidebar + section
+   *  surfaces — the detail page overlay (AppDetailOverlay) reads the global
+   *  theme on :root and stays consistent with the top bar.
    * ════════════════════════════════════════════════════════════════════════ */
 
   const globalTheme = useThemeStore((s) => s.globalTheme);
@@ -412,7 +645,10 @@ export function SettingsApp() {
     return () => window.removeEventListener('coach-os:open-app-section', onOpen);
   }, []);
 
-  /** Per-app theme preview card — accent + bg + text + radius based on tokens. */
+  /** Per-app theme preview card — accent + bg + text + radius based on tokens.
+   *  These swatches INTENTIONALLY render the other theme's accent color, even
+   *  when the current theme is dark. The exception to the "no hard palette
+   *  classes" rule applies to preview swatches that show other themes. */
   const ThemePreview = ({ themeId, size = 'lg' }: { themeId: string; size?: 'lg' | 'sm' }) => {
     const t = THEME_META.find(th => th.id === themeId);
     if (!t) return null;
@@ -428,12 +664,19 @@ export function SettingsApp() {
         {/* fake mini-app preview */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full" style={{ background: t.accent }} />
-          <span className={`text-[9px] font-bold uppercase tracking-wider ${t.isDark ? 'text-white' : 'text-stone-900'}`}>{t.name}</span>
+          {/* Preview exception: name shows on the swatch background for that theme. */}
+          <span
+            className={`text-[9px] font-bold uppercase tracking-wider ${t.isDark ? '' : ''}`}
+            style={{ color: t.isDark ? '#ffffff' : '#1c1917' }}
+          >
+            {t.name}
+          </span>
         </div>
         <div className="absolute top-2 right-2 flex gap-1">
-          <div className={`w-1.5 h-1.5 rounded-full ${t.isDark ? 'bg-stone-600' : 'bg-stone-300'}`} />
-          <div className={`w-1.5 h-1.5 rounded-full ${t.isDark ? 'bg-stone-600' : 'bg-stone-300'}`} />
-          <div className={`w-1.5 h-1.5 rounded-full`} style={{ background: t.accent }} />
+          {/* Preview exception: dot palette swatches of the previewed theme. */}
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: t.isDark ? '#57534e' : '#d6d3d1' }} />
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: t.isDark ? '#57534e' : '#d6d3d1' }} />
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: t.accent }} />
         </div>
         {/* fake button + card */}
         <div className={`absolute ${isLg ? 'bottom-3 left-3 right-3' : 'bottom-2 left-2 right-2'} flex items-center gap-1.5`}>
@@ -441,12 +684,16 @@ export function SettingsApp() {
             className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider`}
             style={{
               background: t.accent,
-              color: t.isDark ? '#000' : '#fff',
+              // Preview exception: contrast on the swatch accent.
+              color: t.isDark ? '#000000' : '#ffffff',
             }}
           >
             {isLg ? 'Primary' : ''}
           </div>
-          <div className={`flex-1 h-1.5 rounded-full ${t.isDark ? 'bg-stone-800' : 'bg-stone-200'}`}>
+          <div
+            className={`flex-1 h-1.5 rounded-full`}
+            style={{ background: t.isDark ? '#27272a' : '#e7e5e4' }}
+          >
             <div className="h-full rounded-full" style={{ background: t.accent, width: '60%' }} />
           </div>
         </div>
@@ -465,7 +712,7 @@ export function SettingsApp() {
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
       <SectionHead
         title="Themes"
-        subtitle="12 styles from the UI UX Pro Max catalogue · per-app override"
+        subtitle="12 styles from the UI UX Pro Max catalogue · per-app override governs the sidebar"
         action={
           <button
             onClick={() => { if (window.confirm('Reset all theme overrides to canonical defaults?')) resetAll(); }}
@@ -482,7 +729,9 @@ export function SettingsApp() {
           <Palette className="w-4 h-4 text-[var(--theme-muted)]" />
           <div className="flex-1">
             <div className="text-sm font-semibold text-[var(--theme-text)]">Global default</div>
-            <div className="text-xs text-[var(--theme-muted)]">Used when no per-app override is set.</div>
+            <div className="text-xs text-[var(--theme-muted)]">
+              Drives the top bar and every detail page. Per-app overrides only repaint the sidebar.
+            </div>
           </div>
           <span className="text-xs font-mono text-[var(--theme-muted)]">{THEME_META.find(t => t.id === globalTheme)?.name ?? '—'}</span>
         </div>
@@ -506,7 +755,10 @@ export function SettingsApp() {
                     <div className="text-[10px] text-[var(--theme-muted)] line-clamp-1">{t.mood}</div>
                   </div>
                   {isActive && (
-                    <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                    <span
+                      className="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-accent)' }}
+                    >
                       <Check className="w-2.5 h-2.5" /> On
                     </span>
                   )}
@@ -517,51 +769,77 @@ export function SettingsApp() {
         </div>
       </Card>
 
-      {/* Per-app overrides */}
+      {/* Per-app overrides — legibility pass: large cards w/ name + reset, no swatch carousel */}
       <Card>
         <div className="px-5 py-4 border-b border-[var(--hairline)]">
-          <div className="text-sm font-semibold text-[var(--theme-text)]">Per-app override</div>
-          <div className="text-xs text-[var(--theme-muted)]">Pick a theme per business-domain app. Override beats global; canonical default applies otherwise.</div>
+          <div className="text-sm font-semibold text-[var(--theme-text)]">Per-app sidebar theme</div>
+          <div className="text-xs text-[var(--theme-muted)] leading-relaxed mt-0.5">
+            The override paints the left sidebar and section surfaces of that app. Detail pages
+            always follow the global theme on the top bar — that's by design.
+          </div>
         </div>
         <div className="divide-y divide-[var(--hairline)]">
           {APP_REGISTRY.map(app => {
-            const current = appThemes[app.id] ?? CANONICAL_APP_THEMES[app.id] ?? globalTheme;
+            const override = appThemes[app.id];
             const canonical = CANONICAL_APP_THEMES[app.id] ?? globalTheme;
+            const current = override ?? canonical;
+            const currentMeta = THEME_META.find(t => t.id === current);
             const canonicalMeta = THEME_META.find(t => t.id === canonical);
-            const isCustom = !!appThemes[app.id];
+            const isCustom = !!override;
             return (
-              <div key={app.id} className="px-5 py-3 flex items-center gap-4">
-                <div className="w-44 shrink-0">
-                  <div className="text-[12.5px] font-semibold text-[var(--theme-text)]">{app.name}</div>
-                  {!isCustom && (
-                    <div className="text-[10px] text-[var(--theme-muted)] mt-0.5">default · {canonicalMeta?.name ?? '—'}</div>
+              <div key={app.id} className="px-5 py-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-semibold text-[var(--theme-text)]">{app.name}</div>
+                    <div className="text-[11px] text-[var(--theme-muted)] mt-0.5">
+                      Sidebar now:{' '}
+                      <span className="font-mono font-semibold" style={{ color: 'var(--theme-accent)' }}>
+                        {currentMeta?.name ?? '—'}
+                      </span>
+                      {!isCustom && canonicalMeta && (
+                        <> · default · {canonicalMeta.name}</>
+                      )}
+                      {isCustom && canonicalMeta && (
+                        <> · default · {canonicalMeta.name}</>
+                      )}
+                    </div>
+                  </div>
+                  {isCustom ? (
+                    <button
+                      onClick={() => resetAppTheme(app.id)}
+                      className="shrink-0 inline-flex items-center gap-1 rounded-md border border-[var(--panel-border)] bg-[var(--theme-surface)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-muted)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Reset
+                    </button>
+                  ) : (
+                    <Badge tone="neutral">default</Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 flex-1 min-w-0 overflow-x-auto">
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                   {THEME_META.map(t => {
                     const isActive = t.id === current;
                     return (
                       <button
                         key={t.id}
                         onClick={() => setAppTheme(app.id, t.id)}
-                        title={t.name}
-                        className={`shrink-0 w-9 h-9 rounded-lg overflow-hidden border-2 transition-all ${
-                          isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-transparent hover:border-[var(--panel-border)]'
+                        title={isActive ? `${t.name} — active` : `Use ${t.name} on the sidebar`}
+                        className={`relative text-left rounded-lg overflow-hidden border-2 transition-all ${
+                          isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--panel-border)]'
                         }`}
                       >
                         <ThemePreview themeId={t.id} size="sm" />
+                        <div className="bg-[var(--theme-surface)] px-2 py-1.5 flex items-center justify-between gap-1">
+                          <span className="text-[10px] font-bold text-[var(--theme-text)] truncate">
+                            {t.name}
+                          </span>
+                          {isActive && (
+                            <Check className="w-3 h-3 shrink-0" style={{ color: 'var(--theme-accent)' }} />
+                          )}
+                        </div>
                       </button>
                     );
                   })}
                 </div>
-                {isCustom && (
-                  <button
-                    onClick={() => resetAppTheme(app.id)}
-                    className="shrink-0 text-[10px] font-semibold text-[var(--theme-muted)] hover:text-[var(--theme-text)] px-2 py-1 rounded hover:bg-[var(--theme-surface-hover)]"
-                  >
-                    Reset
-                  </button>
-                )}
               </div>
             );
           })}
@@ -572,10 +850,12 @@ export function SettingsApp() {
   };
 
   const CanvasFx = () => <CanvasFxPicker />;
+  const Wallpaper = () => <WallpaperPanel />;
 
   const sections: AppSection[] = [
     { id: 'general', label: 'General', icon: SlidersHorizontal, render: General },
     { id: 'themes', label: 'Themes', icon: Palette, render: Themes },
+    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, render: Wallpaper },
     { id: 'canvas-fx', label: 'Canvas FX', icon: Wand2, render: CanvasFx },
     { id: 'privacy', label: 'Privacy', icon: ShieldAlert, render: Privacy },
     { id: 'integrations', label: 'Integrations', icon: Plug, render: Integrations },

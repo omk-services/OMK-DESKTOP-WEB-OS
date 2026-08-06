@@ -188,6 +188,21 @@ const EXCLUSIONS: ReadonlyArray<{ name: string; consumer: string; reason: string
     reason: 'locale au theme neumorphism, posee a l\'execution par PeopleDetailPage',
   },
   {
+    name: 'sidebar-w',
+    // consomme : src/components/cms/AppDetailOverlay.tsx — `left: 'var(--sidebar-w, 0px)'`
+    consumer: 'src/components/cms/AppDetailOverlay.tsx',
+    reason: "posee a l'execution par AppFrame sur son element parent (useEffect, 240px ouverte / 68px repliee), "
+          + "pour que le calque de detail — monte en FRERE d'AppFrame — commence apres la barre laterale au lieu "
+          + "de la recouvrir. Ce n'est pas un jeton de theme : la valeur depend de l'etat de repli, pas de la palette.",
+  },
+  {
+    name: 'theme-font-mono',
+    // consomme : src/apps/tasks/TasksApp.tsx:144 — avec repli `ui-monospace, SFMono-Regular, monospace`
+    consumer: 'src/apps/tasks/TasksApp.tsx',
+    reason: "pile monospace, absente de ThemeTokens qui ne declare que fontDisplay et fontBody. "
+          + "La consommation porte deja son propre repli, donc l'absence de declaration est sans effet visible.",
+  },
+  {
     name: 'topbar-height',
     // consomme : src/index.css:88 — `.top-bar { height: var(--topbar-height); }` (declare :root ligne 65)
     consumer: 'src/index.css',
@@ -253,15 +268,24 @@ describe('orphan-css-vars', () => {
     expect(missing, `Alias story 1 manquants dans applyThemeTokens : ${missing.map((m) => '--' + m).join(', ')}`).toEqual([]);
   });
 
-  it('EXCLUSION_RENAMED : la liste d\'exclusions reste exactement aux 8 noms attendus', () => {
+  it('EXCLUSION_RENAMED : la liste d\'exclusions reste exactement aux 10 noms attendus', () => {
     // Si quelqu'un elargit la liste pour faire passer le test au vert, on
-    // veut le voir. Verrou : la liste doit faire 8 et contenir ces noms.
+    // veut le voir. Verrou : la liste doit faire 10 et contenir ces noms.
+    //
+    // Passee de 8 a 10 le 2026-08-06, et le detail compte :
+    //  - `sidebar-w`       posee a l'execution par AppFrame pour que le calque de
+    //                      detail commence apres la barre laterale. Depend de
+    //                      l'etat de repli, pas de la palette : elle n'a rien a
+    //                      faire dans applyThemeTokens.
+    //  - `theme-font-mono` pile monospace absente de ThemeTokens, consommee avec
+    //                      son propre repli — l'absence est sans effet visible.
     const EXPECTED = [
       'ok', 'warn', 'danger',
       'nm-shade', 'nm-glow', 'nm-accent',
       'topbar-height', 'canvasui-cursor',
+      'sidebar-w', 'theme-font-mono',
     ];
-    expect(EXCLUSIONS.length).toBe(8);
+    expect(EXCLUSIONS.length).toBe(10);
     const actual = EXCLUSIONS.map((e) => e.name).sort();
     expect(actual).toEqual([...EXPECTED].sort());
   });

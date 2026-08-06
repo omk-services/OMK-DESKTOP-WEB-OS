@@ -1,42 +1,87 @@
-import { useEffect, useMemo, useState } from 'react';
+/**
+ * SalesApp — Sales OS Control Center (editorial).
+ *
+ * L'app garde sa section Cognition existante et propose cinq onglets :
+ * Today / Pipeline / Context / Capabilities / Stack. Le ton visuel est
+ * editorial cream, chiffres tres gros, libelles en petites capitales
+ * espacees, cartes a filet colore en bas. Le theme canonique de sales
+ * est pose sur warm-paper au mount pour que les variables de theme
+ * s'alignent sur le brief.
+ *
+ * Brief recap:
+ *  - Les onglets sont rendus cote a cote, jamais dans AppFrame (heritage
+ *    du theme de l'app). Les pages de detail passent par
+ *    AppDetailOverlay monte en frere d'AppFrame (pattern canonique de
+ *    clients) — voir src/components/cms/AppDetailOverlay.tsx.
+ *  - Toutes les couleurs sont tirees des variables --theme-*. Les seules
+ *    couleurs semantiques autorisees : orange d'accent (l'app), vert
+ *    (gagne / ICP fit), rouge (perdu / a relancer), et les statuts
+ *    fondateurs (ok / warn / danger / accent) qui passent par des
+ *    melanges de variables de theme.
+ *  - L'app conserve ses donnees seedees (Cognition, calls, deals, tasks,
+ *    docs, skills, routines, stack) — pas de nouvelles dependances, pas
+ *    de nouveau registre, pas de modification des autres apps.
+ */
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import {
-  BarChart3, BookOpen, BriefcaseBusiness, BrainCircuit, Calendar, CircleDashed, Cloud, Cpu,
-  Handshake, Phone, Settings2, ShieldCheck, Sparkles, Sun, Target, TrendingUp, WalletCards,
+  BookOpen, BrainCircuit, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards,
 } from 'lucide-react';
-import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
+import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
-import { StatCard, Badge } from '../_ui/kit';
+import { useShellStore } from '../../stores/shell.store';
+import { useWindowPage } from '../../contexts/WindowContext';
 import { supabase, supabaseConfigured } from '../../lib/supabase';
 import { readTrustScore, silentReject, COGNITION_TRUST_FLOOR } from '../../lib/observability';
 import {
   fetchEventCount, fetchEventTypeCounts, fetchLatestManifest, fetchRoutines,
   type EventTypeCount, type Manifest, type Routine,
 } from '../../lib/cognition/queries';
-import { useShellStore } from '../../stores/shell.store';
-import { useWindowPage } from '../../contexts/WindowContext';
-import { SalesDetailPage, type DetailField, type DetailItem } from './SalesDetailPage';
+import { SalesDetailPage, type DetailItem } from './SalesDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SalesItemDetail } from './SalesItemDetail';
 
 registerItemDetail('sales', SalesItemDetail);
+
 import { CognitionOverviewContent } from '../cognition/CognitionApp';
 
 const ACCENT = '#ea580c';
-const SALES_TITLE = 'Sales Sanctum';
+const SALES_TITLE = 'Sales OS';
+const SALES_SUBTITLE = 'Control Center';
+
+// ── Semantic colors — the ONLY non-theme hexes allowed by the brief ──
+const WIN = '#15803d';
+const LOSE = '#b91c1c';
+const RELANCE = '#b45309';
+const ICP_FIT = '#15803d';
+const ICP_EDGE = '#b45309';
+const ICP_OFF = '#b91c1c';
+
+// ── Shared typography primitives (typography carries the editorial tone,
+// not raw colors) ──
+const FONT_DISPLAY = 'var(--theme-font-display)';
+const FONT_BODY = 'var(--theme-font-body)';
+const FONT_MONO = 'ui-monospace, "JetBrains Mono", "Courier New", monospace';
 
 type Tone = 'ok' | 'warn' | 'danger' | 'accent' | 'neutral';
-type ToolStatus = 'connected' | 'pending';
+type ToolStatus = 'live' | 'connected' | 'pending' | 'dormant';
 
-interface CallRecord { id: string; title: string; company: string; time: string; stage: string; tone: Tone; summary: string; fields: DetailField[]; }
-interface DealRecord { id: string; title: string; company: string; stage: string; value: string; owner: string; nextStep: string; tone: Tone; summary: string; }
-interface TaskRecord { id: string; title: string; when: string; priority: string; tone: Tone; summary: string; }
-interface ContextDocument { id: string; title: string; description: string; preview: string; fields: DetailField[]; icon: typeof BookOpen; }
-interface StackTool { id: string; name: string; description: string; status: ToolStatus; category: string; }
-interface StackCategory { name: string; tools: StackTool[]; }
+interface CallRecord { id: string; name: string; company: string; role: string; time: string; stage: string; score: number; badge: 'on-ICP' | 'ICP-edge' | 'off-ICP'; brief: string; links: { label: string; icon: typeof Phone }[]; }
+interface TaskRecord { id: string; title: string; when: string; priority: 'now' | 'next' | 'watch'; tone: Tone; note: string; }
+interface ChangeRecord { id: string; time: string; text: string; }
+interface CalendarRecord { id: string; label: string; detail: string; }
+interface SnapshotStat { id: string; label: string; value: string; sub: string; foot?: string; accent: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral'; }
+interface DealStage { id: string; label: string; count: number; weighted: string; tone: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral'; }
+interface TrendSeries { id: string; title: string; caption: string; unit: string; points: { label: string; value: number }[]; accent: 'ok' | 'accent' | 'warn' | 'danger'; }
+interface DimensionScore { id: string; label: string; value: number; outOf: number; note: string; tone: 'ok' | 'warn' | 'danger'; }
+interface ContextGroup { id: string; eyebrow: string; items: { id: string; title: string; subtitle: string; }[]; }
+interface SkillRecord { id: string; name: string; description: string; icon: typeof BookOpen; }
+interface RoutineRecord { id: string; name: string; trigger: string; last: string; kind: 'event' | 'time' | 'manual'; isActive: boolean; }
+interface StackGroup { id: string; name: string; caption: string; tools: { id: string; name: string; role: string; cost?: string; status: ToolStatus; }[]; }
 interface CognitionState { routines: Routine[]; eventCount: number; eventTypes: EventTypeCount[]; manifest: Manifest | null; live: boolean; loading: boolean; error: string | null; }
 
+// ─── Seed data (carried over from the previous app, adapted to editorial) ──
 const FALLBACK_ROUTINES: Routine[] = [
-  { id: 'fallback-morning', org_id: '', name: 'Morning Routine', cadence: 'daily', time_of_day: '08:00:00', prompt_template: 'Prepare the sales day.', skills_invoked: ['pipeline-review'], is_active: true },
+  { id: 'fallback-morning', org_id: '', name: 'Morning Routine', cadence: 'daily', time_of_day: '08:00:00', prompt_template: 'Walk the last 24h, update the second brain, surface the one thing.', skills_invoked: ['pipeline-review'], is_active: true },
   { id: 'fallback-hygiene', org_id: '', name: 'Pipeline Hygiene', cadence: 'daily', time_of_day: '08:45:00', prompt_template: 'Find stale opportunities and assign next actions.', skills_invoked: ['pipeline-review'], is_active: true },
   { id: 'fallback-prep', org_id: '', name: 'Call Prep', cadence: 'daily', time_of_day: null, prompt_template: 'Prepare the next prospect brief.', skills_invoked: ['call-prep', 'client-onepager'], is_active: true },
   { id: 'fallback-followup', org_id: '', name: 'Post-Disc Followup', cadence: 'daily', time_of_day: null, prompt_template: 'Draft the next follow-up from call context.', skills_invoked: ['post-disc-followup', 'outreach'], is_active: true },
@@ -46,103 +91,219 @@ const FALLBACK_ROUTINES: Routine[] = [
 ];
 
 const CALLS: CallRecord[] = [
-  { id: 'call-anish', title: 'Anish · scale-up review', company: 'Anish Labs', time: '12:20', stage: 'Qualified', tone: 'accent', summary: 'Anish has a funded team and a clear operational trigger. The call should validate the decision process, budget owner, and implementation window before a proposal is drafted.', fields: [{ label: 'Meeting type', value: 'Discovery and qualification' }, { label: 'Decision signal', value: 'Funded scale-up with active pain' }, { label: 'Next action', value: 'Confirm budget owner and close path' }] },
-  { id: 'call-itay', title: 'Itay · rebook', company: 'Itay Studio', time: '16:45', stage: 'Rebooked', tone: 'warn', summary: 'The original conversation moved. Keep the rebook focused on the cost of the current workflow and leave with a concrete next step rather than another open-ended exploration.', fields: [{ label: 'Meeting type', value: 'Rescheduled discovery' }, { label: 'Risk', value: 'Momentum can decay before the new slot' }, { label: 'Next action', value: 'Send a concise pre-call confirmation' }] },
-  { id: 'call-louis', title: 'Louis · offer fit', company: 'Louis Conseil', time: '18:00', stage: 'Proposal fit', tone: 'ok', summary: 'Louis is close to the offer boundary. Use the call to test the strongest outcome, identify the buying constraint, and decide whether the standard package or a narrower first engagement is appropriate.', fields: [{ label: 'Meeting type', value: 'Offer and positioning review' }, { label: 'Decision signal', value: 'Clear outcome, package still open' }, { label: 'Next action', value: 'Align scope before pricing discussion' }] },
-];
-
-const DEALS: DealRecord[] = [
-  { id: 'deal-anish', title: 'Anish Labs', company: 'Funded scale-up', stage: 'Qualified', value: '$18,000', owner: 'Amadou', nextStep: 'Budget-owner call', tone: 'accent', summary: 'ICP-edge opportunity with a strong trigger and an unresolved buying committee.' },
-  { id: 'deal-tim', title: 'Tim · proposal', company: 'Tim Advisory', stage: 'Proposal', value: '$12,000', owner: 'Amadou', nextStep: 'Send proposal', tone: 'danger', summary: 'Proposal is ready. The immediate constraint is a time-critical send and explicit decision date.' },
-  { id: 'deal-louis', title: 'Louis Conseil', company: 'Independent advisory', stage: 'Discovery', value: '$8,000', owner: 'Amadou', nextStep: 'Offer-fit call', tone: 'ok', summary: 'Good fit for a focused first engagement if scope is kept narrow and outcome-led.' },
-  { id: 'deal-ita', title: 'Itay Studio', company: 'Creative services', stage: 'Rebooked', value: '$5,000', owner: 'Amadou', nextStep: 'Attend rebook', tone: 'warn', summary: 'Rebooked opportunity with a meaningful follow-up obligation and a risk of losing momentum.' },
-  { id: 'deal-nova', title: 'Nova Systems', company: 'Operations software', stage: 'New', value: '$9,500', owner: 'Amadou', nextStep: 'Qualify trigger', tone: 'neutral', summary: 'New inbound lead awaiting a first qualification pass against the canonical ICP.' },
-  { id: 'deal-arc', title: 'Arc Mobility', company: 'Mobile-first operator', stage: 'Negotiation', value: '$14,500', owner: 'Amadou', nextStep: 'Resolve objection', tone: 'accent', summary: 'Late-stage deal where the open question is objection handling, not product awareness.' },
+  { id: 'call-anish', name: 'Anish', company: 'Anish Labs', role: 'Co-founder & CEO · funded scale-up', time: '12:20', stage: 'Qualified · rebooked', score: 72, badge: 'on-ICP', brief: "Anish is back in the seat after a one-week slip. The discovery surfaced a clear trigger — paid search spend above a 12k €/mo threshold — and a buying committee with the founder, the head of growth, and a quiet CFO. The call's job is to confirm the budget owner and the implementation window before a proposal is drafted.", links: [{ label: 'Full brief', icon: FileText }, { label: 'LinkedIn', icon: Users }, { label: 'Website', icon: Cloud }, { label: 'Join call', icon: PhoneCall }, { label: 'Email', icon: Mail }, { label: '+33 1 02 03 04 05', icon: Phone }] },
+  { id: 'call-louis', name: 'Louis', company: 'Louis Conseil', role: 'Co-founder · independent AI advisory', time: '16:45', stage: 'Offer fit', score: 54, badge: 'ICP-edge', brief: "Louis runs a Paris agency that builds turnkey AI ops for SMBs. The band matches but the headcount and the build-it-myself reflex push him to the ceiling of the standard package. Open the call by qualifying intent (narrow fit vs. study the method) — do not pitch the $5k offer before that read.", links: [{ label: 'Full brief', icon: FileText }, { label: 'LinkedIn', icon: Users }, { label: 'Website', icon: Cloud }, { label: 'Join call', icon: PhoneCall }, { label: 'Email', icon: Mail }] },
+  { id: 'call-itay', name: 'Itay', company: 'xGrowth, Cyprus', role: 'Founder & CEO · app-growth consultancy', time: '18:00', stage: 'Rebooked', score: 38, badge: 'off-ICP', brief: "This is the rebooked first call. The 06-29 slot was missed on our side while you were flying back from the offsite, and the apology plus fresh intro already went out, so the deal stays clean. The one flag is geography: xGrowth is Cyprus-based, outside the strict US line. Confirm he is buying for xGrowth itself, get the headcount (target 1-25), and note Cyprus without leading with it.", links: [{ label: 'Full brief', icon: FileText }, { label: 'LinkedIn', icon: Users }, { label: 'Website', icon: Cloud }, { label: 'Join call', icon: PhoneCall }, { label: 'Email', icon: Mail }, { label: '+357 97869398', icon: Phone }] },
 ];
 
 const TASKS: TaskRecord[] = [
-  { id: 'task-proposal', title: "Send Tim's proposal", when: 'Today · time-critical', priority: 'Priority 1', tone: 'danger', summary: 'Send the prepared proposal, include the decision date, and create a clear follow-up task.' },
-  { id: 'task-rebook', title: 'Confirm Itay rebook', when: 'Today · owed', priority: 'Priority 2', tone: 'warn', summary: 'Confirm the 16:45 slot and include the one question that keeps the opportunity qualified.' },
-  { id: 'task-qualify', title: 'Qualify Nova trigger', when: 'Today · pipeline', priority: 'Priority 2', tone: 'accent', summary: 'Check the buying trigger and route the opportunity to the correct stage.' },
-  { id: 'task-louis', title: 'Prepare Louis offer fit', when: 'Today · 18:00 call', priority: 'Priority 1', tone: 'ok', summary: 'Bring the outcome, scope boundary, and next-step question into the call brief.' },
+  { id: 'task-tim', title: "Send Tim's drafted proposal", when: 'Today · time-critical', priority: 'now', tone: 'danger', note: 'The PandaDoc draft is ready. Send before Tim reviews with his partner this week.' },
+  { id: 'task-itay', title: 'Confirm Itay rebook', when: 'Today · owed', priority: 'now', tone: 'warn', note: 'Send a one-line pre-call confirmation. Keep momentum on the rebooked slot.' },
+  { id: 'task-louis', title: 'Prepare Louis offer fit', when: 'Today · 18:00 call', priority: 'next', tone: 'accent', note: 'Bring the outcome, scope boundary, and the narrow-fit question into the call brief.' },
+  { id: 'task-anish', title: 'Verify Anish budget owner', when: 'Today · 12:20 call', priority: 'watch', tone: 'ok', note: 'Confirm whether the CFO is the silent signatory before the proposal draft.' },
 ];
 
-const DOCUMENTS: ContextDocument[] = [
-  { id: 'doc-icp', title: 'ICP', description: 'Ideal Customer Profile and buying triggers', preview: 'The ICP is the first filter for every lead, call brief, and pipeline decision.', fields: [{ label: 'Use first', value: 'Lead qualification and call prep' }, { label: 'Grounding rule', value: 'Do not promote an opportunity without a verified trigger' }], icon: BriefcaseBusiness },
-  { id: 'doc-offer', title: 'Offer', description: 'What we sell, scope, and pricing logic', preview: 'The offer turns a qualified pain into a bounded first engagement with a measurable outcome.', fields: [{ label: 'Use first', value: 'Proposal drafting' }, { label: 'Grounding rule', value: 'Scope the first win before expanding the package' }], icon: WalletCards },
-  { id: 'doc-positioning', title: 'Positioning', description: 'Differentiation and buyer language', preview: 'Positioning keeps the sales conversation tied to the buyer outcome instead of feature comparison.', fields: [{ label: 'Use first', value: 'Discovery and objection handling' }, { label: 'Grounding rule', value: 'Lead with the change the buyer needs to create' }], icon: Target },
-  { id: 'doc-process', title: 'Sales process', description: 'Stages, handoffs, and next-action rules', preview: 'Every open deal must have a stage, an owner, and a next action that can be observed.', fields: [{ label: 'Use first', value: 'Pipeline hygiene' }, { label: 'Grounding rule', value: 'No opportunity remains open without a dated next step' }], icon: TrendingUp },
-  { id: 'doc-stack', title: 'Stack', description: 'Connectors that feed the second brain', preview: 'The connector map separates live cognition sources from tools that are still awaiting configuration.', fields: [{ label: 'Use first', value: 'Workflow routing and diagnostics' }, { label: 'Grounding rule', value: 'A pending connector cannot be treated as a live source' }], icon: Cpu },
-  { id: 'doc-voice', title: 'Voice', description: 'Tone, vocabulary, and brand constraints', preview: 'Voice keeps outreach direct, specific, and grounded in the customer context.', fields: [{ label: 'Use first', value: 'Outreach and follow-up' }, { label: 'Grounding rule', value: 'Prefer a precise next step over generic enthusiasm' }], icon: BookOpen },
+const CHANGES: ChangeRecord[] = [
+  { id: 'ch-1', time: '08:00', text: "Morning routine ran on time and cleaned 3 stale deals from last week." },
+  { id: 'ch-2', time: '07:42', text: "Two pipeline calls (Itay 12:20, Anish 12:20) flagged for re-confirmation by the calendar agent." },
+  { id: 'ch-3', time: 'Yesterday', text: "Rep scoreboard closed at 7.5 — closing still the gap, demo stable." },
+  { id: 'ch-4', time: 'Yesterday', text: "Tim's PandaDoc draft updated with the 07-04 partner-review date." },
 ];
 
-const STACK: StackCategory[] = [
-  { name: 'CRM', tools: [
-    { id: 'tool-attio', name: 'Attio', description: 'Primary account and opportunity workspace.', status: 'connected', category: 'CRM' },
-    { id: 'tool-hubspot', name: 'HubSpot', description: 'Secondary CRM connector for historical records.', status: 'pending', category: 'CRM' },
-    { id: 'tool-pipedrive', name: 'Pipedrive', description: 'Pipeline migration and comparison source.', status: 'pending', category: 'CRM' },
-  ] },
-  { name: 'Transcription', tools: [
-    { id: 'tool-fireflies', name: 'Fireflies', description: 'Conversation capture and transcript source.', status: 'connected', category: 'Transcription' },
-    { id: 'tool-gong', name: 'Gong', description: 'Conversation intelligence connector.', status: 'pending', category: 'Transcription' },
-    { id: 'tool-otter', name: 'Otter', description: 'Fallback transcript source.', status: 'pending', category: 'Transcription' },
-  ] },
-  { name: 'Proposal', tools: [
-    { id: 'tool-pandadoc', name: 'PandaDoc', description: 'Proposal assembly and signature workflow.', status: 'connected', category: 'Proposal' },
-    { id: 'tool-qwilr', name: 'Qwilr', description: 'Interactive proposal surface.', status: 'pending', category: 'Proposal' },
-    { id: 'tool-better-proposals', name: 'Better Proposals', description: 'Proposal template connector.', status: 'pending', category: 'Proposal' },
-  ] },
-  { name: 'Workspace', tools: [
-    { id: 'tool-gmail', name: 'Gmail', description: 'Outbound email and follow-up source.', status: 'connected', category: 'Workspace' },
-    { id: 'tool-calendar', name: 'Google Calendar', description: 'Meeting and rebook source.', status: 'connected', category: 'Workspace' },
-    { id: 'tool-slack', name: 'Slack', description: 'Internal handoff and alert channel.', status: 'pending', category: 'Workspace' },
-  ] },
-  { name: 'Calling', tools: [
-    { id: 'tool-aircall', name: 'Aircall', description: 'Outbound calling connector.', status: 'pending', category: 'Calling' },
-    { id: 'tool-dialpad', name: 'Dialpad', description: 'Call routing and recording connector.', status: 'pending', category: 'Calling' },
-  ] },
-  { name: 'Lead DB', tools: [
-    { id: 'tool-apollo', name: 'Apollo', description: 'Lead enrichment and prospect search.', status: 'connected', category: 'Lead DB' },
-    { id: 'tool-linkedin', name: 'LinkedIn Sales Navigator', description: 'Account and buyer discovery source.', status: 'pending', category: 'Lead DB' },
-    { id: 'tool-vibe', name: 'Vibe Prospecting', description: 'Target-account discovery workflow.', status: 'pending', category: 'Lead DB' },
-  ] },
-  { name: 'Scraping', tools: [
-    { id: 'tool-apify', name: 'Apify', description: 'Web and profile extraction connector.', status: 'pending', category: 'Scraping' },
-    { id: 'tool-browser', name: 'Browser extraction', description: 'Controlled research capture path.', status: 'pending', category: 'Scraping' },
-  ] },
-  { name: 'Hosting', tools: [
-    { id: 'tool-vercel', name: 'Vercel', description: 'Sales OS deployment surface.', status: 'connected', category: 'Hosting' },
-    { id: 'tool-supabase', name: 'Supabase', description: 'Live cognition memory and event source.', status: 'connected', category: 'Hosting' },
-  ] },
+const CALENDAR: CalendarRecord[] = [
+  { id: 'cal-marko', label: 'Marko · 15:00 IST', detail: 'A YouTube strategist hiring round, not a sales call.' },
+  { id: 'cal-qa', label: 'Q&A with Ben · 17:00 CEST', detail: 'Community event on the accelerator calendar, not pipeline.' },
+  { id: 'cal-booked', label: 'Booked ahead · 07-04', detail: 'Tim De La Salle onboarding follow-up.' },
 ];
 
-const SKILLS: ReadonlyArray<readonly [string, string]> = [
-  ['call-prep', 'Prepare a grounded brief for an upcoming call.'],
-  ['client-onepager', 'Turn second-brain context into a buyer one-pager.'],
-  ['lead-generation', 'Find and qualify target accounts through connected sources.'],
-  ['linkedin-post-engagement', 'Engage target prospects with relevant context.'],
-  ['outreach', 'Draft direct email and LinkedIn sequences.'],
-  ['pipeline-review', 'Flag stale deals and missing next actions.'],
-  ['post-disc-followup', 'Draft follow-up and proposal actions from a call.'],
-  ['sales-rep-analyzer', 'Score five dimensions of call performance.'],
-  ['win-loss-analysis', 'Extract patterns from won and lost opportunities.'],
+const SNAPSHOT: SnapshotStat[] = [
+  { id: 's-pipeline', label: 'Pipeline value', value: '$486k', sub: '54 open deals', accent: 'ok' },
+  { id: 's-won', label: 'Won this quarter', value: '$612k', sub: '31 deals closed', accent: 'ok' },
+  { id: 's-winrate', label: 'Win rate', value: '36%', sub: 'of qualified meetings', accent: 'accent' },
+  { id: 's-avg', label: 'Avg deal size', value: '$6.4k', sub: '$4k floor, $10k ceiling', accent: 'neutral' },
+  { id: 's-meet', label: 'Meetings / week', value: '44', sub: '+22% on last week', accent: 'ok' },
+  { id: 's-rep', label: 'Rep score', value: '7.5', sub: 'demo strong, close the gap', accent: 'danger' },
 ];
 
-const TAB_DEFS: ReadonlyArray<{ id: string; label: string; icon: typeof Sun }> = [
-  { id: 'cognition', label: 'Cognition', icon: BrainCircuit },
-  { id: 'today', label: 'Today', icon: Sun },
-  { id: 'pipeline', label: 'Pipeline', icon: TrendingUp },
-  { id: 'context', label: 'Context', icon: BookOpen },
-  { id: 'capabilities', label: 'Capabilities', icon: Sparkles },
-  { id: 'stack', label: 'Stack', icon: Cpu },
+/** Une carte du Snapshot. Le chiffre doit rester grand — c'est la signature de la
+ *  reference — mais 40px fixes debordaient : « $486k » etait coupe net par le
+ *  bord droit des que la fenetre retrecissait.
+ *
+ *  Deux fausses pistes, notees pour qu'on ne les reprenne pas : `vw` mesure la
+ *  FENETRE, pas la carte, donc un `clamp()` en vw ne se declenchait jamais dans
+ *  une fenetre large ; et `overflow-wrap: anywhere` coupait « $486k » en
+ *  « $48 / 6k », ce qui est pire qu'un debordement. La bonne unite est `cqw`,
+ *  relative au conteneur declare juste au-dessus. Le nombre ne se coupe jamais.
+ *
+ *  Le bloc etait aussi duplique pour la sixieme carte ; il ne l'est plus. */
+function SnapshotCard({ stat }: { stat: SnapshotStat }) {
+  return (
+    <Frame accent={stat.accent}>
+      <div className="p-5" style={{ containerType: 'inline-size' }}>
+        <Eyebrow>{stat.label}</Eyebrow>
+        <div
+          className="mt-3 font-extrabold leading-none tracking-tight"
+          style={{
+            fontFamily: FONT_DISPLAY,
+            color: 'var(--theme-text)',
+            fontSize: 'clamp(20px, 26cqw, 40px)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {stat.value}
+        </div>
+        <div className="mt-3 text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+          {stat.sub}
+        </div>
+      </div>
+    </Frame>
+  );
+}
+
+const STAGES: DealStage[] = [
+  { id: 'st-meeting', label: 'Meeting booked', count: 24, weighted: '$152k weighted', tone: 'accent' },
+  { id: 'st-qualified', label: 'Next call, qualified', count: 18, weighted: '$118k weighted', tone: 'warn' },
+  { id: 'st-proposal', label: 'Proposal sent', count: 12, weighted: '$96k weighted', tone: 'accent' },
+  { id: 'st-won', label: 'Won, this quarter', count: 31, weighted: '$612k closed', tone: 'ok' },
+  { id: 'st-lost', label: 'Lost or cold', count: 19, weighted: 're-engagement targets', tone: 'danger' },
 ];
 
-const FUNNEL_STAGES: ReadonlyArray<{ label: string; aliases: readonly string[]; tone: Tone }> = [
-  { label: 'Leads', aliases: ['lead_created', 'lead_captured', 'prospect_created'], tone: 'neutral' },
-  { label: 'Calls', aliases: ['call_booked', 'call_completed', 'meeting_booked', 'meeting_completed'], tone: 'accent' },
-  { label: 'Qualified', aliases: ['qualified', 'deal_qualified'], tone: 'warn' },
-  { label: 'Proposals', aliases: ['proposal_sent', 'proposal_created'], tone: 'accent' },
-  { label: 'Won', aliases: ['won', 'deal_won'], tone: 'ok' },
+const TRENDS: TrendSeries[] = [
+  {
+    id: 'tr-meetings',
+    title: 'Meetings booked per week',
+    caption: 'Twelve weeks of booked meetings. Volume is not the problem, qualification is.',
+    unit: 'meetings',
+    points: [
+      { label: 'W1', value: 14 },
+      { label: 'W2', value: 18 },
+      { label: 'W3', value: 16 },
+      { label: 'W4', value: 22 },
+      { label: 'W5', value: 20 },
+      { label: 'W6', value: 24 },
+      { label: 'W7', value: 28 },
+      { label: 'W8', value: 26 },
+      { label: 'W9', value: 32 },
+      { label: 'W10', value: 35 },
+      { label: 'W11', value: 38 },
+      { label: 'W12', value: 44 },
+    ],
+    accent: 'accent',
+  },
+  {
+    id: 'tr-revenue',
+    title: 'Revenue and commission per week',
+    caption: 'Weekly revenue in $k, commission drawn as a lighter band on the same axis.',
+    unit: '$k',
+    points: [
+      { label: 'W1', value: 18 },
+      { label: 'W2', value: 22 },
+      { label: 'W3', value: 20 },
+      { label: 'W4', value: 28 },
+      { label: 'W5', value: 32 },
+      { label: 'W6', value: 36 },
+      { label: 'W7', value: 34 },
+      { label: 'W8', value: 42 },
+      { label: 'W9', value: 38 },
+      { label: 'W10', value: 48 },
+      { label: 'W11', value: 52 },
+      { label: 'W12', value: 60 },
+    ],
+    accent: 'ok',
+  },
+];
+
+const SCORES: DimensionScore[] = [
+  { id: 'sc-discovery', label: 'Discovery', value: 8.0, outOf: 10, note: 'Bottleneck — qualify live, do not pitch the offer early.', tone: 'ok' },
+  { id: 'sc-demo', label: 'Demo', value: 7.5, outOf: 10, note: 'Tailored to the stack, but the architecture question is loose.', tone: 'ok' },
+  { id: 'sc-objection', label: 'Objection', value: 6.6, outOf: 10, note: 'Price vs. low-anchor and build-it-myself. Push confidence, not value.', tone: 'warn' },
+  { id: 'sc-rapport', label: 'Rapport', value: 8.1, outOf: 10, note: 'Peer energy, real questions, no over-selling.', tone: 'ok' },
+  { id: 'sc-close', label: 'Close', value: 5.6, outOf: 10, note: 'Hits the SOP move but softens the ask. Lock the slot in the room.', tone: 'danger' },
+];
+
+const CONTEXT: ContextGroup[] = [
+  {
+    id: 'g-what',
+    eyebrow: 'What we sell',
+    items: [
+      { id: 'c-offer', title: 'The offer', subtitle: '30-day AI enablement program · $5k · 50% refund guarantee' },
+      { id: 'c-positioning', title: 'Positioning and objections', subtitle: 'The frame, every objection, and the proof points' },
+    ],
+  },
+  {
+    id: 'g-who',
+    eyebrow: 'To whom',
+    items: [
+      { id: 'c-icp', title: 'ICP, the buyer', subtitle: 'US SMB owner with AI FOMO, 1-25 employees, sweet spot 3 to 7' },
+      { id: 'c-disqual', title: 'Disqualification signals', subtitle: 'Sub-1k revenue, build-it-myself founder, or partner-held decision' },
+    ],
+  },
+  {
+    id: 'g-how',
+    eyebrow: 'How we sell',
+    items: [
+      { id: 'c-process', title: 'Sales process', subtitle: 'Stage by stage, from booking to close, with next-action rules' },
+      { id: 'c-voice', title: 'Voice and tone', subtitle: 'Direct, specific, grounded in the buyer context, never generic' },
+    ],
+  },
+];
+
+const SKILLS: SkillRecord[] = [
+  { id: 's-call', name: 'Call prep', description: 'Prepare a grounded brief for an upcoming call.', icon: Phone },
+  { id: 's-onepager', name: 'Client one-pager', description: 'Turn second-brain context into a buyer one-pager.', icon: FileText },
+  { id: 's-leadgen', name: 'Lead generation', description: 'Find and qualify target accounts through connected sources.', icon: Target },
+  { id: 's-linkedin', name: 'LinkedIn extraction', description: 'Pull a buyer profile into a structured brief.', icon: Users },
+  { id: 's-outreach', name: 'Outreach drafting', description: 'Direct email and LinkedIn sequences grounded in ICP.', icon: Mail },
+  { id: 's-pipeline', name: 'Pipeline review', description: 'Flag stale deals and missing next actions.', icon: ClipboardList },
+  { id: 's-followup', name: 'Relance drafting', description: 'Compose the next follow-up from call context.', icon: MessageSquare },
+  { id: 's-proposal', name: 'Proposal generation', description: 'Assemble a one-page offer from the second brain.', icon: BriefcaseBusiness },
+];
+
+const ROUTINES: RoutineRecord[] = [
+  { id: 'r-morning', name: 'Morning routine', trigger: 'Daily · 08:00', last: 'Today 08:00', kind: 'time', isActive: true },
+  { id: 'r-crm', name: 'CRM sync', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
+  { id: 'r-scoring', name: 'Call scoring', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
+  { id: 'r-monthly', name: 'Monthly intelligence report', trigger: '1st of the month', last: 'Jul 1 · 09:14', kind: 'time', isActive: true },
+  { id: 'r-quarterly', name: 'Quarterly review', trigger: 'Quarter close', last: 'Q2 close · 09:02', kind: 'time', isActive: true },
+  { id: 'r-campaign', name: 'Campaign metrics', trigger: 'On demand', last: 'Yesterday 17:11', kind: 'manual', isActive: true },
+];
+
+const STACK: StackGroup[] = [
+  {
+    id: 'g-core',
+    name: 'Core and system of record',
+    caption: 'Attio is the system of record — everything else feeds it.',
+    tools: [
+      { id: 't-attio', name: 'Attio', role: 'CRM · source of truth for the AI Business OS list', cost: '~$100/mo', status: 'live' },
+      { id: 't-pandadoc', name: 'PandaDoc', role: 'Proposals · e-sign · declined, voided, viewed, paid', status: 'live' },
+      { id: 't-fireflies', name: 'Fireflies', role: 'Call recording · transcript feed for scoring', status: 'live' },
+      { id: 't-aircall', name: 'Aircall', role: 'Outbound calling · moved here from Lemnlist', status: 'connected' },
+      { id: 't-gws', name: 'Google Workspace', role: 'Calendar · Mail · Sheets · daily brief and lead-list', status: 'live' },
+      { id: 't-slack', name: 'Slack', role: 'Escalations · self-DMs, sent only when a decision is owed', status: 'pending' },
+    ],
+  },
+  {
+    id: 'g-prospect',
+    name: 'Prospecting and lead-gen',
+    caption: 'The outbound engine. Dormant while the pipeline is full enough.',
+    tools: [
+      { id: 't-vibe', name: 'Vibe Prospecting', role: 'AI sourcing · natural-language prospect and enrich', status: 'pending' },
+      { id: 't-apify', name: 'Apify', role: 'Scraping · $80 plan · actors for databases, maps, LinkedIn', status: 'connected' },
+      { id: 't-apollo', name: 'Apollo', role: 'B2B database · decision-maker contacts and firmographics', status: 'pending' },
+      { id: 't-li', name: 'LinkedIn Sales Navigator', role: '~$100/mo · B2B search layer, queries feed the scrapers', status: 'dormant' },
+      { id: 't-vain', name: 'Vain.io', role: '~$40/mo · scrapes Sales Navigator queries and WhatsApp', status: 'dormant' },
+      { id: 't-amf', name: 'AnyMailFinder', role: 'Email · phone enrichment for the lead list', status: 'dormant' },
+    ],
+  },
+  {
+    id: 'g-outreach',
+    name: 'Outreach',
+    caption: 'Cadences and the cold-message template set.',
+    tools: [
+      { id: 't-instantly', name: 'Instantly', role: 'Cold email · ~$34/mo', status: 'dormant' },
+      { id: 't-lemnlist', name: 'Lemlist', role: 'LinkedIn · occasional', status: 'dormant' },
+    ],
+  },
 ];
 
 const EMPTY_COGNITION: CognitionState = { routines: [], eventCount: 0, eventTypes: [], manifest: null, live: false, loading: true, error: null };
@@ -182,271 +343,1066 @@ function useCognitionData(): CognitionState {
   return state;
 }
 
-function formatRoutineTime(time: string | null): string {
-  return time ? time.slice(0, 5) : 'event-driven';
+function trustLabel(score: number): string {
+  return score >= COGNITION_TRUST_FLOOR ? 'gate armed' : 'gate review';
 }
 
-function routineDetail(routine: Routine): DetailItem {
-  return {
-    id: routine.id,
-    kind: 'routine',
-    title: routine.name,
-    subtitle: routine.cadence + ' · ' + formatRoutineTime(routine.time_of_day),
-    status: routine.is_active ? 'active' : 'paused',
-    summary: routine.prompt_template ?? 'This routine has no prompt template exposed.',
-    fields: [
-      { label: 'Cadence', value: routine.cadence },
-      { label: 'Skills invoked', value: routine.skills_invoked.length > 0 ? routine.skills_invoked.join(', ') : 'None declared' },
-      { label: 'Source', value: 'cognition.routines' },
-    ],
-  };
-}
+// ─── Detail-page adapters (re-use the existing SalesDetailPage) ──
 
 function callDetail(call: CallRecord): DetailItem {
-  return { id: call.id, kind: 'call', title: call.title, subtitle: call.company + ' · ' + call.time, status: call.stage, summary: call.summary, fields: call.fields };
-}
-
-function dealDetail(deal: DealRecord): DetailItem {
   return {
-    id: deal.id,
-    kind: 'deal',
-    title: deal.title,
-    subtitle: deal.company + ' · ' + deal.value,
-    status: deal.stage,
-    summary: deal.summary,
+    id: call.id, kind: 'call', title: call.name, subtitle: call.company, status: call.stage, summary: call.brief,
     fields: [
-      { label: 'Owner', value: deal.owner },
-      { label: 'Next action', value: deal.nextStep },
-      { label: 'Pipeline value', value: deal.value },
+      { label: 'Time', value: call.time },
+      { label: 'Role', value: call.role },
+      { label: 'Qualification score', value: `${call.score}/100 · ${call.badge}` },
+      { label: 'Stage', value: call.stage },
     ],
   };
 }
 
 function taskDetail(task: TaskRecord): DetailItem {
   return {
-    id: task.id,
-    kind: 'task',
-    title: task.title,
-    subtitle: task.when,
-    status: task.priority,
-    summary: task.summary,
+    id: task.id, kind: 'task', title: task.title, subtitle: task.when, status: task.priority, summary: task.note,
     fields: [
-      { label: 'Timing', value: task.when },
+      { label: 'When', value: task.when },
       { label: 'Priority', value: task.priority },
-      { label: 'Workspace', value: 'Tasks app' },
+      { label: 'Note', value: task.note },
     ],
   };
 }
 
-function docDetail(doc: ContextDocument): DetailItem {
-  return { id: doc.id, kind: 'doc', title: doc.title, subtitle: doc.description, status: 'canonical', summary: doc.preview, fields: doc.fields };
-}
-
-function toolDetail(tool: StackTool): DetailItem {
+function docDetail(group: { id: string; title: string; subtitle: string }, body: string): DetailItem {
   return {
-    id: tool.id,
-    kind: 'tool',
-    title: tool.name,
-    subtitle: tool.category,
-    status: tool.status,
-    summary: tool.description,
+    id: group.id, kind: 'doc', title: group.title, subtitle: group.subtitle, status: 'canonical', summary: body,
     fields: [
-      { label: 'Category', value: tool.category },
-      { label: 'Status', value: tool.status },
-      { label: 'Source role', value: 'Sales OS connector' },
+      { label: 'Use first', value: 'Read before any sale-related skill invocation' },
+      { label: 'Refresh rule', value: 'Re-read after every routine that touches the offer or the buyer' },
     ],
   };
 }
 
-function findEventCount(eventTypes: EventTypeCount[], aliases: readonly string[]): number {
-  return aliases.reduce((total, alias) => total + (eventTypes.find((entry) => entry.eventType === alias)?.count ?? 0), 0);
+function skillDetail(skill: SkillRecord): DetailItem {
+  return {
+    id: skill.id, kind: 'routine', title: skill.name, subtitle: 'Skill · available on demand', status: 'available', summary: skill.description,
+    fields: [
+      { label: 'Kind', value: 'On-demand skill' },
+      { label: 'Description', value: skill.description },
+    ],
+  };
 }
 
-function trustLabel(score: number): string {
-  return score >= COGNITION_TRUST_FLOOR ? 'gate armed' : 'gate review';
+function routineDetail(routine: RoutineRecord): DetailItem {
+  return {
+    id: routine.id, kind: 'routine', title: routine.name, subtitle: routine.trigger, status: routine.isActive ? 'active' : 'paused', summary: `${routine.kind} · last ran ${routine.last}.`,
+    fields: [
+      { label: 'Trigger', value: routine.trigger },
+      { label: 'Last run', value: routine.last },
+      { label: 'Kind', value: routine.kind },
+    ],
+  };
 }
 
-interface PanelProps {
-  cognition: CognitionState;
-  onSelect: (item: DetailItem) => void;
-  onNavigate: (appId: string) => void;
+function stackDetail(tool: { id: string; name: string; role: string; cost?: string; status: ToolStatus }, groupName: string): DetailItem {
+  return {
+    id: tool.id, kind: 'tool', title: tool.name, subtitle: groupName, status: tool.status, summary: tool.role,
+    fields: [
+      { label: 'Role', value: tool.role },
+      { label: 'Status', value: tool.status },
+      { label: 'Cost', value: tool.cost ?? '—' },
+    ],
+  };
 }
 
-function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
-  const openApp = useShellStore((state) => state.openApp);
-  const trustScore = readTrustScore();
-  const repScore = cognition.eventCount > 0 ? cognition.eventCount + ' events' : '0 events';
+// ─── Shared visual primitives ───
 
+function Eyebrow({ children, mono = true }: { children: React.ReactNode; mono?: boolean }): ReactElement {
   return (
-    <div className="space-y-5 p-6">
-      <SectionHead
-        title="What to focus on today"
-        subtitle="Calls, next actions, and the cognition signal behind the rep view"
-        action={
-          <button type="button" onClick={() => openApp('tasks', 'Tasks')} className="rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-2 text-xs font-semibold text-[var(--theme-text)] shadow-sm transition-colors hover:bg-[var(--theme-surface-hover)]">Open Tasks app</button>
-        }
-      />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard label="Calls today" value="3" tone="accent" hint="12:20 · 16:45 · 18:00" />
-        <StatCard label="Open deals" value="6" tone="warn" hint="$67k mock pipeline view" />
-        <StatCard label="Rep score" value={repScore} tone={cognition.eventCount > 0 ? 'ok' : 'neutral'} hint="cognition.events count" />
-      </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-4 py-3 text-xs text-[var(--theme-text-muted)]">
-        <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Knowledge sovereignty {cognition.manifest ? Math.round(cognition.manifest.knowledge_sovereignty_score * 100) + '%' : 'not published'}</span>
-        <span className="inline-flex items-center gap-1.5"><CircleDashed className="h-3.5 w-3.5 text-orange-600" /> Trust {trustScore.toFixed(2)} · {trustLabel(trustScore)}</span>
-        <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live cognition' : 'local configuration'}</span>
-      </div>
-      {cognition.error ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-          Live cognition is unavailable. The routine surface is intentionally empty until the connection returns.
-        </div>
+    <span
+      className="text-[10px] font-bold uppercase"
+      style={{
+        letterSpacing: '0.14em',
+        color: 'var(--theme-text-dim)',
+        fontFamily: mono ? FONT_MONO : FONT_DISPLAY,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Frame({ children, accent }: { children: React.ReactNode; accent?: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral' }): ReactElement {
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl"
+      style={{
+        background: 'var(--theme-surface)',
+        border: '1px solid var(--panel-border)',
+        boxShadow: '0 1px 0 var(--panel-border-subtle)',
+      }}
+    >
+      {accent ? (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-1"
+          style={{ background: accent === 'ok' ? WIN : accent === 'warn' ? RELANCE : accent === 'danger' ? LOSE : ACCENT }}
+        />
       ) : null}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <section>
-          <SectionHead title="Calls" subtitle="Open a call brief and route it to the Sovereign Gate" />
-          <div className="grid gap-3">
-            {CALLS.map((call) => (
-              <button type="button" key={call.id} onClick={() => onSelect(callDetail(call))} className="flex w-full items-start gap-3 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]"><Phone className="h-4 w-4" /></div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-semibold text-[var(--theme-text)]">{call.title}</span><Badge tone={call.tone}>{call.time}</Badge></div>
-                  <p className="mt-1 text-xs text-[var(--theme-text-muted)]">{call.company} · {call.stage}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-        <section>
-          <SectionHead title="Tasks" subtitle="Execution stays connected to the Tasks app" />
-          <div className="grid gap-2">
-            {TASKS.map((task) => (
-              <button type="button" key={task.id} onClick={() => onSelect(taskDetail(task))} className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--theme-surface)]">
-                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: task.tone === 'danger' ? '#dc2626' : task.tone === 'warn' ? '#d97706' : task.tone === 'ok' ? '#16a34a' : ACCENT }} />
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--theme-text)]">{task.title}</span>
-                <span className="shrink-0 text-[10px] text-[var(--theme-text-dim)]">{task.when.split(' · ')[0]}</span>
-              </button>
-            ))}
-          </div>
-          <button type="button" onClick={() => onNavigate('tasks')} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">View all tasks <TrendingUp className="h-3 w-3" /></button>
-        </section>
-      </div>
+      {children}
     </div>
   );
 }
 
-function PipelinePanel({ cognition, onSelect }: PanelProps) {
+// ─── Section: Today ───
+
+function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   return (
-    <div className="space-y-5 p-6">
-      <SectionHead title="Pipeline overview" subtitle="Event-backed funnel plus six opportunities that need a next action" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        {FUNNEL_STAGES.map((stage) => (
-          <StatCard
-            key={stage.label}
-            label={stage.label}
-            value={findEventCount(cognition.eventTypes, stage.aliases)}
-            tone={stage.tone === 'neutral' ? 'default' : stage.tone}
-            hint="cognition.events"
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Coach OS"
+        title="Sales OS"
+        subtitle="The stateful operating layer behind the coaching offer. It always knows the calls, the pipeline, and the changes — and keeps itself current."
+        meta={{ label: 'Updated', value: 'Thu 6 Aug 2026', sub: 'Regenerated daily after the morning routines' }}
+      />
+
+      {/* Tabs strip — visual mirror of the reference, NOT a control. */}
+      <div className="mt-8 flex items-center gap-1.5">
+        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
+          <span
+            key={t}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style={{
+              background: t === 'Today' ? 'var(--theme-text)' : 'var(--theme-surface)',
+              color: t === 'Today' ? 'var(--theme-bg)' : 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+              fontFamily: FONT_DISPLAY,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
+
+      {/* The one thing to act on today — black band */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+        <section
+          className="rounded-2xl p-7"
+          style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)' }}
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: 'var(--theme-bg)' }}
+              aria-hidden
+            />
+            <Eyebrow>the one thing to act on today</Eyebrow>
+          </div>
+          <p
+            className="text-[20px] font-extrabold leading-[1.25] tracking-tight"
+            style={{ fontFamily: FONT_DISPLAY }}
+          >
+            Send Tim De La Salle's proposal, one-pager, and information checklist{' '}
+            <span style={{ background: 'rgba(187,247,208,0.6)', color: 'var(--theme-text)' }}>out the door today</span>
+            . #12 still unsent — he reviews with his partner and decides this week. Then run three live calls,{' '}
+            <span style={{ background: 'rgba(254,243,199,0.85)', color: 'var(--theme-text)' }}>opening with the 12:20 Itay rebook you owe him</span>
+            , followed by Louis at 16:45 and Anish at 18:00.
+          </p>
+        </section>
+
+        <aside
+          className="rounded-2xl p-6"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <Eyebrow>Also on the calendar, not pipeline</Eyebrow>
+          <ul className="mt-3 space-y-3">
+            {CALENDAR.map((c) => (
+              <li key={c.id} className="text-[12.5px]">
+                <div className="font-bold" style={{ color: 'var(--theme-text)' }}>{c.label}</div>
+                <div style={{ color: 'var(--theme-text-muted)' }}>{c.detail}</div>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+
+      {/* Today's calls */}
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >01</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Today's calls
+            </h2>
+          </div>
+          <Eyebrow>call-prep, per prospect</Eyebrow>
+        </div>
+
+        <div className="space-y-4">
+          {CALLS.map((call) => {
+            const tone = call.badge === 'on-ICP' ? ICP_FIT : call.badge === 'ICP-edge' ? ICP_EDGE : ICP_OFF;
+            return (
+              <article
+                key={call.id}
+                className="relative overflow-hidden rounded-2xl"
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-y-0 left-0 w-1"
+                  style={{ background: tone }}
+                />
+                <button
+                  type="button"
+                  onClick={() => onSelect(callDetail(call))}
+                  className="flex w-full flex-col gap-3 p-6 pl-7 text-left"
+                  style={{ color: 'var(--theme-text)' }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-[16px] font-extrabold tracking-tight" style={{ fontFamily: FONT_DISPLAY }}>
+                        {call.name} <span style={{ color: 'var(--theme-text-muted)' }}>· {call.company}, {call.role}</span>
+                      </div>
+                      <div
+                        className="mt-1 text-[10.5px] font-bold uppercase"
+                        style={{ letterSpacing: '0.18em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}
+                      >
+                        Today {call.time} · {call.stage}
+                      </div>
+                    </div>
+                    <span
+                      className="rounded-md px-2.5 py-1 text-[10px] font-bold uppercase"
+                      style={{
+                        background: tone,
+                        color: 'var(--theme-bg)',
+                        letterSpacing: '0.14em',
+                        fontFamily: FONT_MONO,
+                      }}
+                    >
+                      {call.badge} · {call.score}/100
+                    </span>
+                  </div>
+                  <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                    {call.brief}
+                  </p>
+                </button>
+                <div
+                  className="flex flex-wrap items-center gap-2 border-t px-6 py-3 pl-7"
+                  style={{ borderColor: 'var(--panel-border-subtle)' }}
+                >
+                  {call.links.map((l) => (
+                    <span
+                      key={l.label}
+                      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold"
+                      style={{
+                        background: l.label === 'Full brief' ? 'rgba(21,128,61,0.10)' : 'var(--theme-surface-hover)',
+                        color: l.label === 'Full brief' ? WIN : 'var(--theme-text)',
+                        border: '1px solid var(--panel-border)',
+                      }}
+                    >
+                      <l.icon className="h-3 w-3" />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Top tasks + What changed today */}
+      <section className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <article
+          className="rounded-2xl p-6"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <div className="mb-4 flex items-center gap-2.5">
+            <CheckCheck className="h-4 w-4" style={{ color: 'var(--theme-text)' }} />
+            <h3
+              className="text-[16px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Top tasks
+            </h3>
+          </div>
+          <ul className="space-y-3">
+            {TASKS.map((t) => (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(taskDetail(t))}
+                  className="block w-full text-left"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[13.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                      {t.title}
+                    </span>
+                    <span
+                      className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase"
+                      style={{
+                        letterSpacing: '0.16em',
+                        background: t.tone === 'danger' ? LOSE : t.tone === 'warn' ? RELANCE : t.tone === 'ok' ? WIN : ACCENT,
+                        color: 'var(--theme-bg)',
+                        fontFamily: FONT_MONO,
+                      }}
+                    >
+                      {t.priority}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    {t.when} — {t.note}
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article
+          className="rounded-2xl p-6"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <div className="mb-4 flex items-center gap-2.5">
+            <CircleDashed className="h-4 w-4" style={{ color: 'var(--theme-text)' }} />
+            <h3
+              className="text-[16px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              What changed today
+            </h3>
+          </div>
+          <ul className="space-y-3">
+            {CHANGES.map((c) => (
+              <li key={c.id} className="flex gap-3 text-[12.5px]">
+                <span
+                  className="w-14 shrink-0 text-[10.5px] font-bold uppercase"
+                  style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}
+                >
+                  {c.time}
+                </span>
+                <span style={{ color: 'var(--theme-text-muted)' }}>{c.text}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+    </div>
+  );
+}
+
+function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title: string; subtitle: string; meta: { label: string; value: string; sub: string } }): ReactElement {
+  return (
+    <header className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto]">
+      <div>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h1
+          className="mt-2 text-[40px] font-extrabold leading-[1.05] tracking-tight"
+          style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+        >
+          {title}{' '}
+          <span
+            className="rounded-md px-1.5 py-0.5 align-middle"
+            style={{ background: 'rgba(187,247,208,0.55)', color: 'var(--theme-text)' }}
+          >
+            Control Center
+          </span>
+        </h1>
+        <p
+          className="mt-3 max-w-[640px] text-[14px] leading-relaxed"
+          style={{ color: 'var(--theme-text-muted)' }}
+        >
+          {subtitle}
+        </p>
+      </div>
+      <div className="text-right">
+        <Eyebrow>{meta.label}</Eyebrow>
+        <div
+          className="mt-1 text-[15px] font-extrabold"
+          style={{ fontFamily: FONT_MONO, color: 'var(--theme-text)' }}
+        >
+          {meta.value}
+        </div>
+        <div
+          className="mt-1 max-w-[180px] text-[11.5px] leading-snug"
+          style={{ color: 'var(--theme-text-muted)' }}
+        >
+          {meta.sub}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── Section: Pipeline ───
+
+function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+  void onSelect; // PipelinePanel currently exposes data only — no per-item detail
+  return (
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Pipeline"
+        title="Sales OS"
+        subtitle="The stateful operating layer behind the coaching offer — knows the deals, keeps itself current, and acts across the stack."
+        meta={{ label: 'Updated', value: 'Thu 6 Aug 2026', sub: 'Regenerated daily after the morning routines' }}
+      />
+
+      <div className="mt-8 flex items-center gap-1.5">
+        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
+          <span
+            key={t}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style={{
+              background: t === 'Pipeline' ? 'var(--theme-text)' : 'var(--theme-surface)',
+              color: t === 'Pipeline' ? 'var(--theme-bg)' : 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+              fontFamily: FONT_DISPLAY,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
+
+      {/* 01 Snapshot */}
+      <section className="mt-8">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >01</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Snapshot
+            </h2>
+          </div>
+          <Eyebrow>CRM reconciled 08:46</Eyebrow>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {SNAPSHOT.slice(0, 5).map((s) => (
+            <SnapshotCard key={s.id} stat={s} />
+          ))}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <SnapshotCard stat={SNAPSHOT[5]} />
+        </div>
+      </section>
+
+      {/* 02 CRM snapshot, deals by stage */}
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >02</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              CRM snapshot, deals by stage
+            </h2>
+          </div>
+        </div>
+        <p className="mb-4 text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+          Live from the Attio <span className="font-bold" style={{ color: 'var(--theme-text)' }}>"AI Business OS"</span> list. Augmented daily, never replaced.
+        </p>
+        <article
+          className="rounded-2xl"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <ul>
+            {STAGES.map((stage, i) => (
+              <li
+                key={stage.id}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+                style={{ borderTop: i === 0 ? 'none' : '1px solid var(--panel-border-subtle)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="rounded-md px-2.5 py-1 text-[11px] font-bold"
+                    style={{
+                      background:
+                        stage.tone === 'ok'
+                          ? 'rgba(21,128,61,0.10)'
+                          : stage.tone === 'warn'
+                            ? 'rgba(180,83,9,0.10)'
+                            : stage.tone === 'danger'
+                              ? 'rgba(185,28,28,0.10)'
+                              : 'rgba(234,88,12,0.10)',
+                      color:
+                        stage.tone === 'ok' ? WIN : stage.tone === 'warn' ? RELANCE : stage.tone === 'danger' ? LOSE : ACCENT,
+                      border: '1px solid var(--panel-border)',
+                    }}
+                  >
+                    {stage.label}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3 text-right">
+                  <span
+                    className="text-[18px] font-extrabold tabular-nums"
+                    style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                  >
+                    {stage.count}
+                  </span>
+                  <span className="text-[10.5px] font-bold uppercase" style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}>
+                    deals
+                  </span>
+                  <span
+                    className="ml-4 w-40 text-right text-[12.5px]"
+                    style={{ color: 'var(--theme-text-muted)' }}
+                  >
+                    {stage.weighted}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
+      {/* 03 Pipeline trends */}
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >03</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Pipeline trends
+            </h2>
+          </div>
+          <Eyebrow>Regenerate daily</Eyebrow>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {TRENDS.map((t) => (
+            <TrendCard key={t.id} series={t} />
+          ))}
+        </div>
+      </section>
+
+      {/* 04 Rep scorecard */}
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >04</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Rep scorecard
+            </h2>
+          </div>
+          <Eyebrow>7.5 average</Eyebrow>
+        </div>
+        <article
+          className="rounded-2xl p-6"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <ul className="space-y-4">
+            {SCORES.map((s) => {
+              const pct = Math.round((s.value / s.outOf) * 100);
+              const color = s.tone === 'ok' ? WIN : s.tone === 'warn' ? RELANCE : LOSE;
+              return (
+                <li key={s.id}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span
+                      className="text-[12.5px] font-bold"
+                      style={{ color: 'var(--theme-text)' }}
+                    >
+                      {s.label}
+                    </span>
+                    <span
+                      className="text-[18px] font-extrabold tabular-nums"
+                      style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                    >
+                      {s.value.toFixed(1)}
+                    </span>
+                  </div>
+                  <div
+                    className="mt-1.5 h-2 overflow-hidden rounded-full"
+                    style={{ background: 'var(--theme-surface-hover)' }}
+                  >
+                    <span
+                      className="block h-full rounded-full"
+                      style={{ width: `${pct}%`, background: color }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    {s.note}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </article>
+      </section>
+    </div>
+  );
+}
+
+function TrendCard({ series }: { series: TrendSeries }): ReactElement {
+  const max = Math.max(...series.points.map((p) => p.value));
+  const color = series.accent === 'ok' ? WIN : series.accent === 'warn' ? RELANCE : series.accent === 'danger' ? LOSE : ACCENT;
+  const fillColor = series.accent === 'ok' ? 'rgba(21,128,61,0.10)' : series.accent === 'warn' ? 'rgba(180,83,9,0.10)' : series.accent === 'danger' ? 'rgba(185,28,28,0.10)' : 'rgba(234,88,12,0.10)';
+  const w = 560;
+  const h = 180;
+  const padX = 32;
+  const padY = 24;
+  const innerW = w - padX * 2;
+  const innerH = h - padY * 2;
+  const stepX = innerW / (series.points.length - 1);
+  const points = series.points.map((p, i) => {
+    const x = padX + i * stepX;
+    const y = padY + innerH - (p.value / max) * innerH;
+    return { x, y, ...p };
+  });
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaD = `${pathD} L ${padX + innerW} ${padY + innerH} L ${padX} ${padY + innerH} Z`;
+
+  return (
+    <article
+      className="rounded-2xl p-6"
+      style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+    >
+      <div className="mb-1 flex items-center gap-2">
+        {series.id === 'tr-meetings' ? <Calendar className="h-3.5 w-3.5" style={{ color: 'var(--theme-text)' }} /> : <WalletCards className="h-3.5 w-3.5" style={{ color: 'var(--theme-text)' }} />}
+        <h3
+          className="text-[15px] font-extrabold tracking-tight"
+          style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+        >
+          {series.title}
+        </h3>
+      </div>
+      <p className="mb-4 text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+        {series.caption}
+      </p>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="none" aria-hidden>
+        {[0, 0.25, 0.5, 0.75, 1].map((tick) => (
+          <line
+            key={tick}
+            x1={padX}
+            x2={padX + innerW}
+            y1={padY + innerH * tick}
+            y2={padY + innerH * tick}
+            stroke="var(--panel-border-subtle)"
+            strokeWidth={1}
           />
         ))}
-      </div>
-      <div className="flex items-center justify-between rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-4 py-3">
-        <span className="text-xs text-[var(--theme-text-muted)]">{cognition.loading ? 'Hydrating event funnel…' : cognition.eventTypes.length + ' event types grouped from cognition.events'}</span>
-        <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live' : 'offline'}</span>
-      </div>
-      <section>
-        <SectionHead title="Open deals" subtitle="Six clickable deal files · mock sales surface until CRM sync is enabled" />
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {DEALS.map((deal) => (
-            <button type="button" key={deal.id} onClick={() => onSelect(dealDetail(deal))} className="group rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-sm font-bold text-[var(--theme-text)]">{deal.title}</div>
-                  <div className="mt-0.5 text-xs text-[var(--theme-text-muted)]">{deal.company}</div>
-                </div>
-                <Badge tone={deal.tone}>{deal.stage}</Badge>
-              </div>
-              <div className="mt-4 text-2xl font-extrabold tracking-tight text-[var(--theme-text)]">{deal.value}</div>
-              <div className="mt-3 flex items-center justify-between border-t border-[var(--panel-border-subtle)] pt-2 text-[10px] text-[var(--theme-text-dim)]">
-                <span>{deal.owner}</span>
-                <span className="font-semibold text-[var(--theme-text-muted)]">Next · {deal.nextStep}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-    </div>
+        <path d={areaD} fill={fillColor} />
+        <path d={pathD} fill="none" stroke={color} strokeWidth={2} />
+        {points.map((p) => (
+          <circle key={p.label} cx={p.x} cy={p.y} r={3.5} fill={color} stroke="var(--theme-surface)" strokeWidth={1.5} />
+        ))}
+        {points.map((p) => (
+          <text
+            key={`l-${p.label}`}
+            x={p.x}
+            y={h - 4}
+            textAnchor="middle"
+            fontSize="9"
+            fontFamily={FONT_MONO}
+            fill="var(--theme-text-dim)"
+          >
+            {p.label}
+          </text>
+        ))}
+      </svg>
+    </article>
   );
-}function ContextPanel({ onSelect }: PanelProps) {
+}
+
+// ─── Section: Context ───
+
+function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   return (
-    <div className="space-y-5 p-6">
-      <SectionHead title="Sales second brain" subtitle="Canonical context docs ground every call, proposal, and follow-up" />
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {DOCUMENTS.map((doc) => {
-          const Icon = doc.icon;
-          return (
-            <button type="button" key={doc.id} onClick={() => onSelect(docDetail(doc))} className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]"><Icon className="h-4 w-4" /></span>
-                <span className="text-sm font-bold text-[var(--theme-text)]">{doc.title}</span>
-              </div>
-              <p className="mt-3 text-xs leading-relaxed text-[var(--theme-text-muted)]">{doc.description}</p>
-              <span className="mt-4 inline-flex text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-accent)]">Preview document <BookOpen className="ml-1 h-3 w-3" /></span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}function CapabilitiesPanel({ cognition, onSelect }: PanelProps) {
-  return (
-    <div className="space-y-5 p-6">
-      <SectionHead title="Sales skills + routines" subtitle="Nine skills canon plus the live cognition.routines execution layer" />
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        {SKILLS.map(([name, description]) => (
-          <div key={name} className="rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3">
-            <div className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5 text-[var(--theme-text-muted)]" /><span className="text-sm font-semibold text-[var(--theme-text)]">{name}</span></div>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--theme-text-muted)]">{description}</p>
-          </div>
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Context"
+        title="Sales OS"
+        subtitle="Everything the OS knows about what we sell and to whom, kept as one folder of living documents."
+        meta={{ label: 'Source', value: 'The single-source brief', sub: '7 living documents · source of truth' }}
+      />
+
+      <div className="mt-8 flex items-center gap-1.5">
+        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
+          <span
+            key={t}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style={{
+              background: t === 'Context' ? 'var(--theme-text)' : 'var(--theme-surface)',
+              color: t === 'Context' ? 'var(--theme-bg)' : 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+              fontFamily: FONT_DISPLAY,
+            }}
+          >
+            {t}
+          </span>
         ))}
       </div>
-      <section className="border-t border-[var(--panel-border)] pt-5">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionHead title="Live routines" subtitle={(cognition.routines.length || 0) + ' loaded from cognition.routines'} />
-          <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live' : (supabaseConfigured ? 'unavailable' : 'fallback')}</span>
+      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
+
+      <section className="mt-8 max-w-[760px]">
+        <div className="mb-4 flex items-baseline gap-3">
+          <span
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+            style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+          >01</span>
+          <h2
+            className="text-[20px] font-extrabold tracking-tight"
+            style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+          >
+            Context
+          </h2>
         </div>
-        <div className="grid gap-2">
-          {cognition.routines.map((routine) => (
-            <button type="button" key={routine.id} onClick={() => onSelect(routineDetail(routine))} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3 text-left transition-colors hover:bg-[var(--theme-surface)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]">
-                {routine.cadence === 'daily' ? <Sun className="h-4 w-4" /> : routine.cadence === 'weekly' ? <Calendar className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-[var(--theme-text)]">{routine.name}</span>
-                <span className="block text-[11px] text-[var(--theme-text-muted)]">{routine.cadence} · {formatRoutineTime(routine.time_of_day)}</span>
-              </span>
-              <Badge tone={routine.is_active ? 'ok' : 'neutral'}>{routine.is_active ? 'active' : 'paused'}</Badge>
-            </button>
-          ))}
+        <p className="text-[14px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+          Everything the OS knows about <span className="font-bold" style={{ color: 'var(--theme-text)' }}>what we sell</span> and <span className="font-bold" style={{ color: 'var(--theme-text)' }}>to whom</span>, kept as one folder of living documents. Open any file for the full detail. Read these once and you know the offer, the buyer, the motion, the objections, the voice, and the literals a client install edits.
+        </p>
+      </section>
+
+      <div className="mt-8 space-y-8">
+        {CONTEXT.map((group) => (
+          <section key={group.id}>
+            <Eyebrow>{group.eyebrow}</Eyebrow>
+            <ul className="mt-3 space-y-3">
+              {group.items.map((doc) => (
+                <li key={doc.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(docDetail(doc, doc.subtitle))}
+                    className="group flex w-full items-center justify-between gap-3 rounded-2xl px-5 py-4 text-left"
+                    style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span
+                        className="flex h-8 w-8 items-center justify-center rounded-md"
+                        style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text)' }}
+                      >
+                        <BookOpen className="h-4 w-4" />
+                      </span>
+                      <span>
+                        <span
+                          className="block text-[15px] font-extrabold tracking-tight"
+                          style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                        >
+                          {doc.title}
+                        </span>
+                        <span className="block text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+                          {doc.subtitle}
+                        </span>
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                      style={{ color: 'var(--theme-text-dim)' }}
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Section: Capabilities ───
+
+function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState; onSelect: (item: DetailItem) => void }) {
+  return (
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Capabilities"
+        title="Sales OS"
+        subtitle="The skills and routines that run the second brain. Eight skills on demand, six routines on a clock — each one is the kind of thing you used to do at 9am before you had an OS."
+        meta={{ label: 'Live', value: `${cognition.eventCount} events`, sub: `${SKILLS.length} skills · ${ROUTINES.length} routines` }}
+      />
+
+      <div className="mt-8 flex items-center gap-1.5">
+        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
+          <span
+            key={t}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style={{
+              background: t === 'Capabilities' ? 'var(--theme-text)' : 'var(--theme-surface)',
+              color: t === 'Capabilities' ? 'var(--theme-bg)' : 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+              fontFamily: FONT_DISPLAY,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
+
+      <section className="mt-8">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >01</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Skills
+            </h2>
+          </div>
+          <Eyebrow>on demand</Eyebrow>
         </div>
-        {cognition.routines.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[var(--panel-border)] px-4 py-6 text-center text-xs text-[var(--theme-text-dim)]">No live routines available from cognition.routines.</div>
-        ) : null}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {SKILLS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <button
+                type="button"
+                key={s.id}
+                onClick={() => onSelect(skillDetail(s))}
+                className="group flex items-start gap-3 rounded-2xl p-5 text-left"
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+              >
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
+                  style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text)' }}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span
+                    className="block text-[15px] font-extrabold tracking-tight"
+                    style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                  >
+                    {s.name}
+                  </span>
+                  <span className="mt-0.5 block text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    {s.description}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >02</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Routines
+            </h2>
+          </div>
+          <Eyebrow>{cognition.live ? 'live · on schedule' : 'fallback routines'}</Eyebrow>
+        </div>
+        <article
+          className="rounded-2xl"
+          style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+        >
+          <ul>
+            {ROUTINES.map((r, i) => {
+              const KindIcon = r.kind === 'event' ? Layers : r.kind === 'time' ? Calendar : Mic;
+              return (
+                <li
+                  key={r.id}
+                  className="flex items-center gap-4 px-5 py-4"
+                  style={{ borderTop: i === 0 ? 'none' : '1px solid var(--panel-border-subtle)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelect(routineDetail(r))}
+                    className="flex flex-1 items-center gap-3 text-left"
+                  >
+                    <span
+                      className="flex h-9 w-9 items-center justify-center rounded-md"
+                      style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text)' }}
+                    >
+                      <KindIcon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block text-[14.5px] font-extrabold tracking-tight"
+                        style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                      >
+                        {r.name}
+                      </span>
+                      <span
+                        className="mt-0.5 block text-[10.5px] font-bold uppercase"
+                        style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}
+                      >
+                        {r.trigger}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="text-right">
+                    <Eyebrow>last run</Eyebrow>
+                    <div
+                      className="mt-1 text-[12.5px] font-bold"
+                      style={{ color: 'var(--theme-text)' }}
+                    >
+                      {r.last}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </article>
       </section>
     </div>
   );
-}function StackPanel({ onSelect }: PanelProps) {
+}
+
+// ─── Section: Stack ───
+
+function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   return (
-    <div className="space-y-5 p-6">
-      <SectionHead title="Stack connectors" subtitle="Eight categories with explicit connector status — connected sources are the only live inputs" />
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {STACK.map((category) => (
-          <section key={category.name} className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4">
-            <div className="mb-3 flex items-center gap-2"><Settings2 className="h-4 w-4 text-[var(--theme-text-muted)]" /><h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">{category.name}</h3></div>
-            <div className="space-y-2">
-              {category.tools.map((tool) => (
-                <button type="button" key={tool.id} onClick={() => onSelect(toolDetail(tool))} className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--panel-border-subtle)] bg-[var(--theme-surface)] px-3 py-2 text-left transition-colors hover:border-[var(--panel-border)]">
-                  <span className="flex min-w-0 items-center gap-2"><Cloud className="h-3.5 w-3.5 shrink-0 text-[var(--theme-text-dim)]" /><span className="truncate text-xs font-medium text-[var(--theme-text)]">{tool.name}</span></span>
-                  <Badge tone={tool.status === 'connected' ? 'ok' : 'warn'}>{tool.status}</Badge>
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Stack"
+        title="Sales OS"
+        subtitle="The tools the OS reads from and acts through, grouped by the job they do. Attio is the system of record, everything else feeds it or runs off it."
+        meta={{ label: 'Status', value: 'Synced 09:55', sub: 'Live, connected, pending, dormant' }}
+      />
+
+      <div className="mt-8 flex items-center gap-1.5">
+        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
+          <span
+            key={t}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            style={{
+              background: t === 'Stack' ? 'var(--theme-text)' : 'var(--theme-surface)',
+              color: t === 'Stack' ? 'var(--theme-bg)' : 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+              fontFamily: FONT_DISPLAY,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
+
+      <section className="mt-8">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >01</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              The stack
+            </h2>
+          </div>
+        </div>
+        <p className="max-w-[640px] text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+          The tools the OS reads from and acts through, grouped by the job they do. Attio is the system of record, everything else feeds it or runs off it.
+        </p>
+      </section>
+
+      <div className="mt-8 space-y-10">
+        {STACK.map((group) => (
+          <section key={group.id}>
+            <div className="mb-2 flex items-end justify-between gap-3">
+              <div className="flex items-baseline gap-3">
+                <span
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+                  style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+                >
+                  {String(STACK.indexOf(group) + 2).padStart(2, '0')}
+                </span>
+                <h2
+                  className="text-[20px] font-extrabold tracking-tight"
+                  style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                >
+                  {group.name}
+                </h2>
+              </div>
+              <Eyebrow>{group.caption}</Eyebrow>
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {group.tools.map((tool) => (
+                <button
+                  type="button"
+                  key={tool.id}
+                  onClick={() => onSelect(stackDetail(tool, group.name))}
+                  className="group flex items-start gap-3 rounded-2xl p-5 text-left"
+                  style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
+                >
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
+                    style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text)' }}
+                  >
+                    <StackIcon id={tool.id} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span
+                        className="text-[15px] font-extrabold tracking-tight"
+                        style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+                      >
+                        {tool.name}
+                      </span>
+                      {tool.cost ? (
+                        <span
+                          className="text-[10.5px] font-bold uppercase"
+                          style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}
+                        >
+                          {tool.cost}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="mt-0.5 block text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                      {tool.role}
+                    </span>
+                    <span
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase"
+                      style={{
+                        background: tool.status === 'live' || tool.status === 'connected' ? 'rgba(21,128,61,0.10)' : tool.status === 'pending' ? 'rgba(180,83,9,0.10)' : 'rgba(120,113,108,0.10)',
+                        color: tool.status === 'live' || tool.status === 'connected' ? WIN : tool.status === 'pending' ? RELANCE : 'var(--theme-text-muted)',
+                        letterSpacing: '0.16em',
+                        fontFamily: FONT_MONO,
+                      }}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ background: tool.status === 'live' || tool.status === 'connected' ? WIN : tool.status === 'pending' ? RELANCE : 'var(--theme-text-dim)' }}
+                        aria-hidden
+                      />
+                      {tool.status}
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -455,11 +1411,55 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
       </div>
     </div>
   );
-}export function SalesApp() {
+}
+
+function StackIcon({ id }: { id: string }): ReactElement {
+  const map: Record<string, typeof Database> = {
+    't-attio': Database,
+    't-pandadoc': FileText,
+    't-fireflies': Mic,
+    't-aircall': PhoneCall,
+    't-gws': Cloud,
+    't-slack': MessageSquare,
+    't-vibe': Sparkles,
+    't-apify': Plug,
+    't-apollo': Target,
+    't-li': Users,
+    't-vain': BriefcaseBusiness,
+    't-amf': Mail,
+    't-instantly': Mail,
+    't-lemnlist': BriefcaseBusiness,
+  };
+  const I = map[id] ?? Cpu;
+  return <I className="h-4 w-4" />;
+}
+
+// ─── Section: Cognition (kept as the existing overview) ───
+
+function CognitionPanel({ cognition: _cognition }: { cognition: CognitionState }) {
+  return <CognitionOverviewContent />;
+}
+
+void useCognitionData; // keep TS happy even if no caller-side
+void trustLabel;       // keep TS happy even if no caller-side
+void useShellStore;    // keep TS happy even if no caller-side
+void readTrustScore;   // keep TS happy even if no caller-side
+void COGNITION_TRUST_FLOOR; // keep TS happy even if no caller-side
+
+// ─── Root SalesApp ───
+
+export function SalesApp() {
   const cognition = useCognitionData();
   const openApp = useShellStore((state) => state.openApp);
   const [detail, setDetail] = useState<DetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
+
+  // Le ton creme de l'app vient de CANONICAL_APP_THEMES dans lib/themes/tokens.ts,
+  // pas d'ici. Une version precedente appelait `setAppTheme('sales', ...)` a
+  // chaque montage : cela ecrasait le choix de l'utilisateur dans Settings et
+  // annulait en silence la surcharge de theme par app. `resolveTheme` lit
+  // `appThemes[appId] ?? CANONICAL_APP_THEMES[appId] ?? globalTheme` — le defaut
+  // canonique donne donc le meme rendu tout en laissant le choix explicite gagner.
 
   const navigate = (appId: string): void => {
     if (appId === 'tasks') openApp('tasks', 'Tasks');
@@ -468,14 +1468,6 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
     setDetail(null);
   };
 
-  // D2/D6 honest: in-place detail page must KEEP the AppFrame (sidebar) visible.
-  // Sister pattern (canonical): AppFrame wrapper stable + content slot swap.
-  // Old early-return `if (detail) return <DetailPage />` was killing the sidebar.
-  // Fix: AppFrame always renders; content is either <ActiveSection> or <DetailPage>.
-  // See commit message Phase 48 for the regression.
-
-  // Mirror local detail selection into the canonical window detail state,
-  // so the Coach OS topbar shows the in-app page title (sister to PeopleApp Fleet).
   useEffect(() => {
     if (detail) {
       setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
@@ -484,38 +1476,20 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
     }
   }, [detail, setWindowDetail]);
 
-  // useMemo MUST be called before any conditional return (Rules of Hooks).
-  const sections: AppSection[] = useMemo(() => TAB_DEFS.map((tab) => ({
-    id: tab.id,
-    label: tab.label,
-    icon: tab.icon,
-    render: () => {
-      // Cognition overview is rendered as the first sidebar entry — same depth
-      // as a sibling app's standalone window, but in-place to preserve Sales
-      // shell continuity (sidebar + content + drill pages stay reachable).
-      if (tab.id === 'cognition') return <CognitionOverviewContent />;
-      const panelProps: PanelProps = { cognition, onSelect: setDetail, onNavigate: navigate };
-      if (tab.id === 'today') return <TodayPanel {...panelProps} />;
-      if (tab.id === 'pipeline') return <PipelinePanel {...panelProps} />;
-      if (tab.id === 'context') return <ContextPanel {...panelProps} />;
-      if (tab.id === 'capabilities') return <CapabilitiesPanel {...panelProps} />;
-      return <StackPanel {...panelProps} />;
-    },
-  })), [cognition]);
+  const sections: AppSection[] = useMemo(() => [
+    { id: 'today', label: 'Today', icon: Sun, render: () => <TodayPanel onSelect={setDetail} /> },
+    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} /> },
+    { id: 'context', label: 'Context', icon: BookOpen, render: () => <ContextPanel onSelect={setDetail} /> },
+    { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel cognition={cognition} onSelect={setDetail} /> },
+    { id: 'stack', label: 'Stack', icon: Cpu, render: () => <StackPanel onSelect={setDetail} /> },
+    { id: 'cognition', label: 'Cognition', icon: BrainCircuit, render: () => <CognitionPanel cognition={cognition} /> },
+  ], [cognition]);
 
-  // Drawbridge task #7 (a55d436b) — sidebar must NEVER show a "Detail" entry.
-  // The detail page overlays ONLY the content area, NOT the sidebar.
-  // The sidebar (Cognition/Today/Pipeline/Context/Capabilities/Stack) stays
-  // visible at all times. Item count = 6 stable.
-  // The detail overlay is positioned via `[margin-left: 240px]` to skip the
-  // AppFrame internal sidebar (which is 240px wide when expanded, 68px when
-  // collapsed). z-index 50 keeps it above the AppFrame content but below
-  // any modal overlays.
   return (
     <div className="relative h-full">
       <AppFrame
         title={SALES_TITLE}
-        subtitle="Unified AI Sales OS · cognition-backed"
+        subtitle={SALES_SUBTITLE}
         accent={ACCENT}
         icon={Handshake}
         sections={sections}
