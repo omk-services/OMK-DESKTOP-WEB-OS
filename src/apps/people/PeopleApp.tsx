@@ -797,9 +797,6 @@ export function PeopleApp() {
   }, [detail, setWindowDetail]);
 
   const Team = () => {
-    if (teamDrill.openId) {
-      return <DynamicPageView collectionId="team" itemId={teamDrill.openId} onBack={teamDrill.close} onNavigate={teamDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Team" subtitle="Your human squad (X-Men doctrine)" action={<Badge tone="accent">{teamCount} members</Badge>} />
@@ -809,9 +806,6 @@ export function PeopleApp() {
   };
 
   const Agents = () => {
-    if (agentsDrill.openId) {
-      return <DynamicPageView collectionId="people_agents" itemId={agentsDrill.openId} onBack={agentsDrill.close} onNavigate={agentsDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead title="Agents" subtitle="AI workers on the People domain" action={<Badge tone="accent">{agentsCount} configured</Badge>} />
@@ -840,9 +834,6 @@ export function PeopleApp() {
   };
 
   const Personas = () => {
-    if (personasDrill.openId) {
-      return <DynamicPageView collectionId="personas" itemId={personasDrill.openId} onBack={personasDrill.close} onNavigate={personasDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -877,9 +868,6 @@ export function PeopleApp() {
   };
 
   const Memoire = () => {
-    if (memoryDrill.openId) {
-      return <DynamicPageView collectionId="memory" itemId={memoryDrill.openId} onBack={memoryDrill.close} onNavigate={memoryDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -918,9 +906,6 @@ export function PeopleApp() {
   };
 
   const Codex = () => {
-    if (codexDrill.openId) {
-      return <DynamicPageView collectionId="codex" itemId={codexDrill.openId} onBack={codexDrill.close} onNavigate={codexDrill.open} />;
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -980,6 +965,22 @@ export function PeopleApp() {
     codex:    'Profondeur',
   };
 
+  // Picked drill (if any) — one of the 5 CMS collections exposed via
+  // useCollectionDrill. The DynamicPageView is rendered in the overlay
+  // (sibling of AppFrame) so it inherits the global topbar theme instead
+  // of the per-app theme that AppFrame writes on its content.
+  const drillViews: ReadonlyArray<{
+    drill: { openId: string | null; open: (id: string) => void; close: () => void };
+    collectionId: string;
+  }> = [
+    { drill: teamDrill,     collectionId: 'team' },
+    { drill: agentsDrill,   collectionId: 'people_agents' },
+    { drill: personasDrill, collectionId: 'personas' },
+    { drill: memoryDrill,   collectionId: 'memory' },
+    { drill: codexDrill,    collectionId: 'codex' },
+  ];
+  const activeDrill = drillViews.find((d) => d.drill.openId) ?? null;
+
   return (
     <>
       <AppFrame title="RH & Méta-Gouvernance" subtitle="Agent Factory · B1 Gatekeeper" icon={Atom} accent={ACCENT} sections={sections} groups={groups} />
@@ -991,6 +992,20 @@ export function PeopleApp() {
           motion={{ kind: 'slide-left', durationMs: 220 }}
         >
           <PeopleDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : activeDrill && activeDrill.drill.openId ? (
+        <AppDetailOverlay
+          appId="people"
+          accent="#0891b2"
+          onBack={() => activeDrill.drill.close()}
+          motion={{ kind: 'slide-left', durationMs: 220 }}
+        >
+          <DynamicPageView
+            collectionId={activeDrill.collectionId}
+            itemId={activeDrill.drill.openId}
+            onBack={() => activeDrill.drill.close()}
+            onNavigate={activeDrill.drill.open}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

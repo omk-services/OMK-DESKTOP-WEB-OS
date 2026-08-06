@@ -115,16 +115,6 @@ export function FinanceApp() {
   };
 
   const Planchers = () => {
-    if (plancherDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="plancher_marges"
-          itemId={plancherDrill.openId}
-          onBack={plancherDrill.close}
-          onNavigate={plancherDrill.open}
-        />
-      );
-    }
     const belowFloor = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'danger').length;
     const tangential = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'warn').length;
     return (
@@ -181,16 +171,6 @@ export function FinanceApp() {
   };
 
   const Courbes = () => {
-    if (courbeDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="courbe_demande"
-          itemId={courbeDrill.openId}
-          onBack={courbeDrill.close}
-          onNavigate={courbeDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -227,16 +207,6 @@ export function FinanceApp() {
   };
 
   const Budgets = () => {
-    if (budgetDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="budget_tokens"
-          itemId={budgetDrill.openId}
-          onBack={budgetDrill.close}
-          onNavigate={budgetDrill.open}
-        />
-      );
-    }
     const totalModel = budgetItems.reduce((s, b) => s + Number(b.modelCost ?? 0), 0);
     const totalSaving = budgetItems.reduce((s, b) => s + Number(b.monthlySaving ?? 0), 0);
     return (
@@ -274,16 +244,6 @@ export function FinanceApp() {
   };
 
   const Formes = () => {
-    if (formesDrill.openId) {
-      return (
-        <DynamicPageView
-          collectionId="formes_prix"
-          itemId={formesDrill.openId}
-          onBack={formesDrill.close}
-          onNavigate={formesDrill.open}
-        />
-      );
-    }
     return (
       <div className="p-7">
         <SectionHead
@@ -355,6 +315,21 @@ export function FinanceApp() {
     { id: 'invoices', label: 'Invoices', icon: Receipt, render: Invoices },
   ];
 
+  // Picked drill (if any) — one of the 4 CMS collections exposed via
+  // useCollectionDrill. The DynamicPageView is rendered in the overlay
+  // (sibling of AppFrame) so it inherits the global topbar theme instead
+  // of the per-app theme that AppFrame writes on its content.
+  const drillViews: ReadonlyArray<{
+    drill: { openId: string | null; open: (id: string) => void; close: () => void };
+    collectionId: string;
+  }> = [
+    { drill: plancherDrill, collectionId: 'plancher_marges' },
+    { drill: courbeDrill,   collectionId: 'courbe_demande' },
+    { drill: budgetDrill,   collectionId: 'budget_tokens' },
+    { drill: formesDrill,   collectionId: 'formes_prix' },
+  ];
+  const activeDrill = drillViews.find((d) => d.drill.openId) ?? null;
+
   return (
     <>
       <AppFrame title="Finance" subtitle="Wonder Woman domain" icon={Wallet} accent={ACCENT} sections={sections} />
@@ -366,6 +341,20 @@ export function FinanceApp() {
           motion={{ kind: 'fade-up', durationMs: 240 }}
         >
           <FinanceDetailPage item={detail} onBack={() => setDetail(null)} />
+        </AppDetailOverlay>
+      ) : activeDrill && activeDrill.drill.openId ? (
+        <AppDetailOverlay
+          appId="finance"
+          accent={ACCENT}
+          onBack={() => activeDrill.drill.close()}
+          motion={{ kind: 'fade-up', durationMs: 240 }}
+        >
+          <DynamicPageView
+            collectionId={activeDrill.collectionId}
+            itemId={activeDrill.drill.openId}
+            onBack={() => activeDrill.drill.close()}
+            onNavigate={activeDrill.drill.open}
+          />
         </AppDetailOverlay>
       ) : null}
     </>
