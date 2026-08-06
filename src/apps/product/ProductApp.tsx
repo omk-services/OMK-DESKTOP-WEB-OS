@@ -308,22 +308,22 @@ export function ProductApp() {
             const meta = CHANNEL_STATUS_META[ch.status];
             const arrow = ch.direction === 'mgr→wkr' ? '→' : ch.direction === 'wkr→mgr' ? '←' : '⇢';
             return (
-              <div key={ch.id} className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm p-3.5 flex flex-col gap-1.5">
+              <div key={ch.id} className="bg-[var(--theme-surface)] rounded-xl border border-[var(--panel-border)] shadow-sm p-3.5 flex flex-col gap-1.5">
                 <div className="flex items-center gap-2 text-[12px]">
-                  <span className="font-bold text-stone-900">{ch.manager}</span>
-                  <span className="text-stone-400 font-mono">{arrow}</span>
-                  <span className="font-semibold text-stone-700">{ch.worker}</span>
+                  <span className="font-bold text-[var(--theme-text)]">{ch.manager}</span>
+                  <span className="text-[var(--theme-text-dim)] font-mono">{arrow}</span>
+                  <span className="font-semibold text-[var(--theme-text)]">{ch.worker}</span>
                   <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: meta.color, background: meta.bg }}>
                     {meta.label}
                   </span>
                 </div>
-                <div className="text-[12px] text-stone-700">{ch.task}</div>
+                <div className="text-[12px] text-[var(--theme-text)]">{ch.task}</div>
                 {ch.payload && (
-                  <div className="text-[10.5px] font-mono text-stone-500 bg-stone-50 rounded px-2 py-1 break-all">{ch.payload}</div>
+                  <div className="text-[10.5px] font-mono text-[var(--theme-text-muted)] bg-[var(--theme-surface)] rounded px-2 py-1 break-all">{ch.payload}</div>
                 )}
-                <div className="flex items-center gap-3 text-[10px] text-stone-400">
-                  <span>channel · <span className="text-stone-600">{ch.channel}</span></span>
-                  <span>model · <span className="font-mono text-stone-500">{ch.model}</span></span>
+                <div className="flex items-center gap-3 text-[10px] text-[var(--theme-text-dim)]">
+                  <span>channel · <span className="text-[var(--theme-text-muted)]">{ch.channel}</span></span>
+                  <span>model · <span className="font-mono text-[var(--theme-text-muted)]">{ch.model}</span></span>
                   {ch.latencyMs && <span>· {ch.latencyMs}ms</span>}
                   <span className="ml-auto font-mono">{new Date(ch.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>

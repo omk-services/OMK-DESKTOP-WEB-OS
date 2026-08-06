@@ -48,11 +48,11 @@ function Runway() {
           {runway.map((v, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div className="w-full rounded-t-md transition-all" style={{ height: `${(v / max) * 100}%`, background: `linear-gradient(180deg, ${ACCENT}, ${ACCENT}88)` }} />
-              <span className="text-[10px] text-stone-400">{months[i]}</span>
+              <span className="text-[10px] text-[var(--theme-text-dim)]">{months[i]}</span>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex items-center gap-2 text-xs text-stone-400">
+        <div className="mt-4 flex items-center gap-2 text-xs text-[var(--theme-text-dim)]">
           <span className="w-3 h-3 rounded-sm" style={{ background: ACCENT }} /> Cash on hand · burn holds runway above 24 months of safety
         </div>
       </Card>

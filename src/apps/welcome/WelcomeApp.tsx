@@ -123,10 +123,10 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
   };
 
   return (
-    <div className="flex flex-col h-full bg-stone-50">
+    <div className="flex flex-col h-full bg-[var(--theme-bg)]">
       {/* Page-tabs strip — flip between landing pages without leaving the canvas */}
-      <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar bg-white/60 backdrop-blur border-b border-stone-200/70 px-4 py-2">
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 mr-2 shrink-0">Pages</span>
+      <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar bg-[var(--theme-surface)] backdrop-blur border-b border-[var(--panel-border)] px-4 py-2">
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-text-dim)] mr-2 shrink-0">Pages</span>
         {LANDING_PAGES.map(p => {
           const Icon = PAGE_ICON[p.id] ?? Compass;
           const active = p.id === activePageId;
@@ -136,8 +136,8 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
               onClick={() => onSelectPage(p.id)}
               className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
                 active
-                  ? 'bg-stone-900 text-white shadow-md'
-                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                  ? 'bg-[var(--theme-accent)] text-white shadow-md'
+                  : 'text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]'
               }`}
             >
               <Icon className="w-3 h-3" />
@@ -148,15 +148,15 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
       </div>
 
       {/* Sticky Header Menu — Circle.so one-page nav */}
-      <header className="sticky top-0 z-20 backdrop-blur-md bg-white/80 border-b border-stone-200/70 shadow-sm">
+      <header className="sticky top-0 z-20 backdrop-blur-md bg-[var(--theme-surface)] border-b border-[var(--panel-border)] shadow-sm">
         <div className="flex items-center gap-3 px-6 py-3">
           <div className="flex items-center gap-2 shrink-0">
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-700 text-white text-[11px] font-extrabold shadow-md">
               {page.brand.split(' ').map(w => w[0]).join('').slice(0, 2)}
             </span>
             <div className="hidden sm:flex flex-col leading-tight">
-              <span className="text-[11px] font-extrabold tracking-tight text-stone-900">{page.brand}</span>
-              <span className="text-[10px] text-stone-500">{page.domain}</span>
+              <span className="text-[11px] font-extrabold tracking-tight text-[var(--theme-text)]">{page.brand}</span>
+              <span className="text-[10px] text-[var(--theme-text-muted)]">{page.domain}</span>
             </div>
           </div>
           <nav className="flex items-center gap-1 overflow-x-auto custom-scrollbar flex-1">
@@ -168,8 +168,8 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
                   onClick={() => scrollTo(s.id)}
                   className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
                     active
-                      ? 'bg-stone-900 text-white shadow-md'
-                      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                      ? 'bg-[var(--theme-accent)] text-white shadow-md'
+                      : 'text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]'
                   }`}
                 >
                   {s.label}
@@ -179,7 +179,7 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
           </nav>
           <button
             onClick={() => scrollTo('cta')}
-            className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-indigo-600 text-white px-4 py-1.5 text-xs font-bold shadow-md hover:bg-indigo-700 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[var(--theme-accent)] text-white px-4 py-1.5 text-xs font-bold shadow-md hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
           >
             Start free
             <ArrowRight className="w-3 h-3" />
@@ -222,10 +222,10 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
 
           <section data-anchor="testimonials" className="flex flex-col gap-5">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-3xl font-extrabold tracking-tight text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+              <h2 className="text-3xl font-extrabold tracking-tight text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>
                 What coaches say
               </h2>
-              <span className="text-xs text-stone-500">{page.testimonials.length} highlighted</span>
+              <span className="text-xs text-[var(--theme-text-muted)]">{page.testimonials.length} highlighted</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {page.testimonials.map((t, i) => (
@@ -236,19 +236,19 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
 
           <section data-anchor="pricing" className="flex flex-col gap-5">
             <div className="text-center max-w-xl mx-auto">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-700">Pricing</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 mt-2" style={{ fontFamily: 'var(--theme-font-display)' }}>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--theme-accent)]">Pricing</span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--theme-text)] mt-2" style={{ fontFamily: 'var(--theme-font-display)' }}>
                 Simple, sovereign, USD-only.
               </h2>
-              <p className="text-sm text-stone-500 mt-2">US-hosted. CCPA + Colorado AI Act compliant. No hidden seat fees.</p>
+              <p className="text-sm text-[var(--theme-text-muted)] mt-2">US-hosted. CCPA + Colorado AI Act compliant. No hidden seat fees.</p>
             </div>
             <PricingGrid tiers={page.pricing} />
           </section>
 
           <section data-anchor="faq" className="flex flex-col gap-5">
             <div className="text-center max-w-xl mx-auto">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-700">FAQ</span>
-              <h2 className="text-3xl font-extrabold tracking-tight text-stone-900 mt-2" style={{ fontFamily: 'var(--theme-font-display)' }}>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--theme-accent)]">FAQ</span>
+              <h2 className="text-3xl font-extrabold tracking-tight text-[var(--theme-text)] mt-2" style={{ fontFamily: 'var(--theme-font-display)' }}>
                 Common questions
               </h2>
             </div>
@@ -259,11 +259,11 @@ function LandingCanvas({ page, onSelectPage, activePageId }: { page: LandingPage
             <ClosingCta headline={page.closing.headline} sub={page.closing.sub} ctaLabel={page.closing.cta.label} />
           </div>
 
-          <footer className="text-center text-xs text-stone-400 pt-4 pb-8 flex flex-col gap-1">
+          <footer className="text-center text-xs text-[var(--theme-text-dim)] pt-4 pb-8 flex flex-col gap-1">
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => scrollTo('top')}
-                className="inline-flex items-center gap-1 rounded-full bg-white border border-stone-200 px-3 py-1 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors"
+                className="inline-flex items-center gap-1 rounded-full bg-[var(--theme-surface)] border border-[var(--panel-border)] px-3 py-1 text-xs font-semibold text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface-hover)] transition-colors"
               >
                 <ArrowUp className="w-3 h-3" />
                 Back to top
@@ -288,18 +288,18 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
   );
 
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar bg-stone-50">
+    <div className="h-full overflow-y-auto custom-scrollbar bg-[var(--theme-bg)]">
       <div className="max-w-5xl mx-auto px-6 sm:px-10 py-10 flex flex-col gap-10">
         {/* Hero — paradigm + 3-stage trajectory + fit check CTA */}
-        <section className="rounded-3xl bg-gradient-to-br from-indigo-50 via-white to-rose-50 border border-stone-200/70 px-8 py-12 shadow-sm">
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-700">
+        <section className="rounded-3xl bg-gradient-to-br from-indigo-50 via-[var(--theme-surface)] to-rose-50 border border-[var(--panel-border)] px-8 py-12 shadow-sm">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--theme-accent)]">
             <Sparkles className="w-4 h-4" />
             Self-Operating Business OS
           </div>
-          <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+          <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>
             8 Domaines. 1 Coach Practice.
           </h1>
-          <p className="mt-3 text-stone-600 max-w-2xl">
+          <p className="mt-3 text-[var(--theme-text-muted)] max-w-2xl">
             PoC → SaaS → White Label. Built for premium US coaches ($500–$2,000/hr). US-hosted. CCPA + Colorado AI Act compliant.
           </p>
 
@@ -307,10 +307,10 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
             {TRAJECTORY.map(t => (
               <span
                 key={t.label}
-                className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-700"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-surface)] backdrop-blur border border-[var(--panel-border)] px-3 py-1.5 text-xs font-semibold text-[var(--theme-text)]"
               >
-                <span className="font-extrabold text-indigo-700">{t.label}</span>
-                <span className="text-stone-500">{t.caption}</span>
+                <span className="font-extrabold text-[var(--theme-accent)]">{t.label}</span>
+                <span className="text-[var(--theme-text-muted)]">{t.caption}</span>
               </span>
             ))}
           </div>
@@ -319,7 +319,7 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
             {demoPage && (
               <button
                 onClick={() => onSelect(demoPage.id)}
-                className="inline-flex items-center gap-2 rounded-full bg-stone-900 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:bg-stone-800 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 Take the 4-question fit check
                 <ArrowRight className="w-4 h-4" />
@@ -327,11 +327,11 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
             )}
             <a
               href="#domaines"
-              className="inline-flex items-center gap-2 rounded-full bg-white border border-stone-200 text-stone-800 px-5 py-2.5 text-sm font-semibold hover:bg-stone-50 transition-all"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-surface)] border border-[var(--panel-border)] text-[var(--theme-text)] px-5 py-2.5 text-sm font-semibold hover:bg-[var(--theme-surface-hover)] transition-all"
             >
               Browse the 8 Domaines
             </a>
-            <span className="inline-flex items-center gap-2 text-xs text-stone-500">
+            <span className="inline-flex items-center gap-2 text-xs text-[var(--theme-text-muted)]">
               <Compass className="w-3.5 h-3.5" />
               9 pages · 8 Domaines + Demo
             </span>
@@ -341,8 +341,8 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
         {/* The 8 Domaines grid */}
         <section id="domaines" className="flex flex-col gap-4 scroll-mt-6">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">The 8 Domaines</h2>
-            <span className="text-xs text-stone-400">SOB Convergence · B2 leader per card</span>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">The 8 Domaines</h2>
+            <span className="text-xs text-[var(--theme-text-dim)]">SOB Convergence · B2 leader per card</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {domainPages.map(p => {
@@ -353,21 +353,21 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
                 <button
                   key={p.id}
                   onClick={() => onSelect(p.id)}
-                  className="text-left rounded-2xl bg-white border border-stone-200 shadow-sm p-5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col gap-3 group"
+                  className="text-left rounded-2xl bg-[var(--theme-surface)] border border-[var(--panel-border)] shadow-sm p-5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col gap-3 group"
                 >
                   <div className="flex items-center gap-3">
                     <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shrink-0" style={{ background: ACCENT }}>
                       <Icon className="w-5 h-5" />
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-indigo-700">Domaine {num}</div>
-                      <div className="text-sm font-bold text-stone-900 truncate">{p.brand}</div>
+                      <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[var(--theme-accent)]">Domaine {num}</div>
+                      <div className="text-sm font-bold text-[var(--theme-text)] truncate">{p.brand}</div>
                     </div>
                   </div>
-                  <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">{p.tagline}</p>
+                  <p className="text-xs text-[var(--theme-text-muted)] leading-relaxed line-clamp-2">{p.tagline}</p>
                   <div className="mt-auto flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{leader}</span>
-                    <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-indigo-600 transition-colors" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-dim)]">{leader}</span>
+                    <ArrowRight className="w-4 h-4 text-[var(--theme-text-dim)] group-hover:text-[var(--theme-accent)] transition-colors" />
                   </div>
                 </button>
               );
@@ -379,8 +379,8 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
         {demoPage && (
           <section className="flex flex-col gap-4">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500">Not sure yet?</h2>
-              <span className="text-xs text-stone-400">Free · 4 minutes</span>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">Not sure yet?</h2>
+              <span className="text-xs text-[var(--theme-text-dim)]">Free · 4 minutes</span>
             </div>
             <button
               onClick={() => onSelect(demoPage.id)}
@@ -392,7 +392,7 @@ function OverviewPanel({ onSelect }: { onSelect: (id: string) => void }) {
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-300">Demo · Free</div>
                 <div className="text-base font-bold mt-0.5">See the Coach OS in 4 questions.</div>
-                <div className="text-xs text-stone-400 mt-1">Zero-PII. Citadel preview. Audit log live.</div>
+                <div className="text-xs text-white/60 mt-1">Zero-PII. Citadel preview. Audit log live.</div>
               </div>
               <ArrowRight className="w-5 h-5 text-white/70 shrink-0" />
             </button>

@@ -30,7 +30,7 @@ function PanelHeader({ label, title, accent }: PanelHeaderProps) {
   return (
     <div className="px-6 pt-6 pb-3">
       <div className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>{label}</div>
-      <h3 className="text-lg font-bold tracking-tight text-stone-900 font-outfit mt-0.5">{title}</h3>
+      <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text)] font-outfit mt-0.5">{title}</h3>
     </div>
   );
 }
@@ -45,7 +45,7 @@ const CATEGORY_LABEL: Record<string, { color: string }> = {
 function CategoryPill({ value }: { value: string }) {
   const meta = CATEGORY_LABEL[value];
   if (!meta) {
-    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">{value}</span>;
+    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]">{value}</span>;
   }
   return (
     <span
@@ -60,29 +60,29 @@ function CategoryPill({ value }: { value: string }) {
 function VaulPanel() {
   const items = useCmsStore(s => (s.items[COLLECTIONS.vault] ?? []));
   return (
-    <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
+    <div className="bg-[var(--theme-surface)] rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
       <PanelHeader label="IP Vault" title="3 captured notes from the demo instance" accent={PALETTE.sanctuary} />
       <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar space-y-2">
         {items.length === 0 && <EmptyHint label="Loading vault…" />}
         {items.map((n: CmsItem) => (
-          <div key={String(n.id)} className="flex items-start gap-3 p-2 rounded-lg hover:bg-stone-50 transition-colors">
+          <div key={String(n.id)} className="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--theme-surface-hover)] transition-colors">
             <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
                   style={{ background: `${PALETTE.sanctuary}1a`, color: PALETTE.sanctuary }}>
               {String(n.sentiment ?? '·').charAt(0)}
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-stone-800 truncate">{String(n.topic)}</div>
-              <div className="text-[11px] text-stone-500 truncate flex items-center gap-1">
+              <div className="text-[13px] font-semibold text-[var(--theme-text)] truncate">{String(n.topic)}</div>
+              <div className="text-[11px] text-[var(--theme-text-muted)] truncate flex items-center gap-1">
                 <span>{String(n.clientName)}</span>
-                <span className="text-stone-300">·</span>
+                <span className="text-[var(--theme-text-dim)]">·</span>
                 <span>{String(n.date)}</span>
-                <span className="text-stone-300">·</span>
+                <span className="text-[var(--theme-text-dim)]">·</span>
                 <span>{String(n.duration)}</span>
               </div>
             </div>
           </div>
         ))}
-        <div className="flex items-center gap-2 text-[11px] text-stone-400 px-2 pt-2">
+        <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-dim)] px-2 pt-2">
           <ShieldCheck className="w-3 h-3" />
           <span>All byte-level encrypted · egress filtered · panic-lock ready</span>
         </div>
@@ -94,17 +94,17 @@ function VaulPanel() {
 function AppsPanel() {
   const items = useCmsStore(s => (s.items[COLLECTIONS.apps] ?? []));
   return (
-    <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
+    <div className="bg-[var(--theme-surface)] rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
       <PanelHeader label="Mini-apps library" title="4 showcase apps in your demo instance" accent={PALETTE.compounding} />
       <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar space-y-3">
         {items.map((a: CmsItem) => (
-          <div key={String(a.id)} className="rounded-xl border border-stone-200 p-3 hover:border-stone-300 transition-colors">
+          <div key={String(a.id)} className="rounded-xl border border-[var(--theme-border)] p-3 hover:border-[var(--theme-text-dim)] transition-colors">
             <div className="flex items-start justify-between gap-2">
-              <div className="text-[13px] font-bold text-stone-900 truncate">{String(a.name)}</div>
+              <div className="text-[13px] font-bold text-[var(--theme-text)] truncate">{String(a.name)}</div>
               {a.category ? <CategoryPill value={String(a.category)} /> : null}
             </div>
-            <p className="text-[11.5px] text-stone-500 mt-1 leading-snug">{String(a.tagline)}</p>
-            <div className="text-[10.5px] font-semibold text-stone-400 uppercase tracking-wider mt-2">
+            <p className="text-[11.5px] text-[var(--theme-text-muted)] mt-1 leading-snug">{String(a.tagline)}</p>
+            <div className="text-[10.5px] font-semibold text-[var(--theme-text-dim)] uppercase tracking-wider mt-2">
               {String(a.metric)}
             </div>
           </div>
@@ -117,23 +117,23 @@ function AppsPanel() {
 function QuizResultPanel() {
   const items = useCmsStore(s => (s.items[COLLECTIONS.metrics] ?? []));
   return (
-    <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
+    <div className="bg-[var(--theme-surface)] rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
       <PanelHeader label="QuizResult · Personalised audit" title="Your first-month Nexus preview" accent={PALETTE.diagnostic} />
       <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar space-y-2">
         {items.map((m: CmsItem) => {
           const value = String(m.value);
           const unit = String(m.unit ?? '');
           return (
-            <div key={String(m.id)} className="rounded-xl border border-stone-200 p-3">
+            <div key={String(m.id)} className="rounded-xl border border-[var(--theme-border)] p-3">
               <div className="flex items-baseline justify-between gap-3">
-                <div className="text-[12px] font-semibold uppercase tracking-wider text-stone-500">{String(m.label)}</div>
+                <div className="text-[12px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)]">{String(m.label)}</div>
                 <div className="flex items-baseline gap-1">
                   <div className="text-2xl font-extrabold tracking-tight leading-none"
                        style={{ color: PALETTE.diagnostic }}>{value}</div>
-                  <div className="text-[11px] font-medium text-stone-500">{unit}</div>
+                  <div className="text-[11px] font-medium text-[var(--theme-text-muted)]">{unit}</div>
                 </div>
               </div>
-              <p className="text-[11.5px] text-stone-500 mt-1.5 leading-snug">{String(m.story)}</p>
+              <p className="text-[11.5px] text-[var(--theme-text-muted)] mt-1.5 leading-snug">{String(m.story)}</p>
             </div>
           );
         })}
@@ -144,7 +144,7 @@ function QuizResultPanel() {
 
 function CompliancePanel() {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
+    <div className="bg-[var(--theme-surface)] rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
       <PanelHeader label="Compliance dashboard" title="Audit-ready by design (CCPA + Colorado AI Act 2026)" accent={PALETTE.compliance} />
       <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar space-y-3">
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3">
@@ -167,16 +167,16 @@ function CompliancePanel() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-stone-200 p-3">
-          <div className="flex items-center gap-2 text-[12px] font-semibold text-stone-700">
+        <div className="rounded-xl border border-[var(--theme-border)] p-3">
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-[var(--theme-text)]">
             <ClipboardCheck className="w-3.5 h-3.5" />
             Audit-pack export
           </div>
-          <p className="text-[11.5px] text-stone-500 mt-1">
+          <p className="text-[11.5px] text-[var(--theme-text-muted)] mt-1">
             Two clicks: select date range + regulator format (CCPA / Colorado AI Act / Executive Order 14110). Signed JSON, hash-chained.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-stone-400">
+        <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-dim)]">
           <Sparkles className="w-3 h-3" />
           US-only hosting · Supabase US-East or coach-owned VPS
         </div>
@@ -187,7 +187,7 @@ function CompliancePanel() {
 
 function EmptyHint({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 text-[11px] text-stone-400 px-2 py-1">
+    <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-dim)] px-2 py-1">
       <FileSearch className="w-3 h-3" />
       <span>{label}</span>
     </div>
@@ -241,7 +241,7 @@ function AuditSimulationPanel() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
+    <div className="bg-[var(--theme-surface)] rounded-2xl border border-[var(--panel-border)] shadow-sm overflow-hidden h-full flex flex-col">
       <PanelHeader label="Audit simulation · CCPA + Colorado AI Act 2026" title="4 findings · 1 critical · est. $9k-$22k exposure" accent={PALETTE.audit} />
       <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar space-y-2.5">
         <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 flex items-center gap-3">
@@ -255,17 +255,17 @@ function AuditSimulationPanel() {
         {FINDINGS.map((f, idx) => {
           const meta = severityMeta[f.severity];
           return (
-            <div key={idx} className="rounded-xl border border-stone-200 overflow-hidden">
+            <div key={idx} className="rounded-xl border border-[var(--theme-border)] overflow-hidden">
               <div className="flex items-center justify-between gap-2 px-3 py-2" style={{ background: meta.bg }}>
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.18em]" style={{ color: meta.color }}>{meta.label}</span>
-                <span className="text-[10px] font-mono text-stone-500">#{idx + 1}</span>
+                <span className="text-[10px] font-mono text-[var(--theme-text-muted)]">#{idx + 1}</span>
               </div>
               <div className="p-3 space-y-1.5">
-                <div className="text-[13px] font-bold text-stone-900 leading-snug">{f.title}</div>
-                <p className="text-[11.5px] text-stone-600 leading-snug">{f.detail}</p>
-                <div className="flex items-start gap-2 mt-2 pt-2 border-t border-stone-100">
+                <div className="text-[13px] font-bold text-[var(--theme-text)] leading-snug">{f.title}</div>
+                <p className="text-[11.5px] text-[var(--theme-text-muted)] leading-snug">{f.detail}</p>
+                <div className="flex items-start gap-2 mt-2 pt-2 border-t border-[var(--theme-border-subtle)]">
                   <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: PALETTE.audit }} />
-                  <div className="text-[11px] text-stone-700 leading-snug">
+                  <div className="text-[11px] text-[var(--theme-text)] leading-snug">
                     <span className="font-semibold" style={{ color: PALETTE.audit }}>Nexus fix · </span>{f.remediation}
                   </div>
                 </div>

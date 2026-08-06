@@ -139,12 +139,12 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
 
       <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
         <div className="mb-2 flex items-center gap-2">
-          <Lock className="h-4 w-4 text-stone-500" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700">
+          <Lock className="h-4 w-4 text-[var(--theme-muted)]" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text)]">
             Ce que ce document n'est pas
           </h2>
         </div>
-        <p className="text-[13px] leading-relaxed text-stone-600">
+        <p className="text-[13px] leading-relaxed text-[var(--theme-muted)]">
           Une bible de diagnostic : indicateurs observables, seuils, arbres de decision, ordres de grandeur.
           Ni un catalogue d'outils, ni un formulaire a remplir.
         </p>
@@ -152,8 +152,8 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
 
       <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
         <div className="mb-3 flex items-center gap-2">
-          <Cog className="h-4 w-4 text-stone-500" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700">
+          <Cog className="h-4 w-4 text-[var(--theme-muted)]" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text)]">
             Les six grilles
           </h2>
         </div>
@@ -164,7 +164,7 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
               <button
                 key={g.id}
                 onClick={() => onSelect(g.id)}
-                className="text-left rounded-xl border border-[var(--panel-border)] bg-[var(--theme-bg)] p-3 transition-all hover:border-stone-400 hover:shadow-md"
+                className="text-left rounded-xl border border-[var(--panel-border)] bg-[var(--theme-bg)] p-3 transition-all hover:border-[var(--theme-text-dim)] hover:shadow-md"
               >
                 <div className="mb-2 flex items-center gap-2">
                   <div
@@ -173,10 +173,10 @@ function OverviewContent({ onSelect }: { onSelect: (id: string) => void }) {
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[13px] font-bold text-stone-900">{g.title}</span>
+                  <span className="text-[13px] font-bold text-[var(--theme-text)]">{g.title}</span>
                 </div>
-                <p className="text-[11px] leading-snug text-stone-500">{g.tagline}</p>
-                <p className="mt-1 text-[10px] font-mono text-stone-400">p. {g.page}</p>
+                <p className="text-[11px] leading-snug text-[var(--theme-muted)]">{g.tagline}</p>
+                <p className="mt-1 text-[10px] font-mono text-[var(--theme-text-dim)]">p. {g.page}</p>
               </button>
             );
           })}
@@ -212,30 +212,30 @@ function MaturiteContent() {
             }`}
           >
             <div className="mb-2 flex items-center gap-3">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                 0{idx + 1}
               </span>
-              <h3 className="text-lg font-bold text-stone-900">{row.title}</h3>
+              <h3 className="text-lg font-bold text-[var(--theme-text)]">{row.title}</h3>
             </div>
-            <p className="mb-3 text-[12px] italic text-stone-600">{row.tagline}</p>
+            <p className="mb-3 text-[12px] italic text-[var(--theme-muted)]">{row.tagline}</p>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-stone-400">
+                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Signes observables
                 </p>
-                <p className="text-[12px] leading-snug text-stone-700">{row.signs}</p>
+                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.signs}</p>
               </div>
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-stone-400">
+                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Plafond
                 </p>
-                <p className="text-[12px] leading-snug text-stone-700">{row.plafond}</p>
+                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.plafond}</p>
               </div>
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-stone-400">
+                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Le pas suivant
                 </p>
-                <p className="text-[12px] leading-snug text-stone-700">{row.nextStep}</p>
+                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.nextStep}</p>
               </div>
             </div>
           </div>
@@ -279,26 +279,26 @@ function StubContent({ grille }: { grille: string }) {
       <div className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
         <div className="mb-3 flex items-center gap-2">
           <Icon className="h-5 w-5" style={{ color: def.accent }} />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--theme-text)]">
             Source
           </h2>
         </div>
-        <p className="text-[13px] leading-relaxed text-stone-600">
+        <p className="text-[13px] leading-relaxed text-[var(--theme-muted)]">
           Manuel de Diagnostic IA, page {def.page}. Source PDF canonique :
-          <code className="ml-1 rounded bg-stone-100 px-1.5 py-0.5 text-[11px] font-mono">
+          <code className="ml-1 rounded bg-[var(--theme-bg)] px-1.5 py-0.5 text-[11px] font-mono">
             C:\Users\amado\Downloads\audit.pdf
           </code>
         </p>
-        <p className="mt-3 text-[12px] italic text-stone-500">
+        <p className="mt-3 text-[12px] italic text-[var(--theme-muted)]">
           Section canon: extraite textuellement du PDF. Pour le contenu exhaustif, ouvrir le PDF source.
         </p>
       </div>
       <details className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-        <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-stone-800">
+        <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[var(--theme-text)]">
           <ChevronDown className="h-4 w-4" />
           Pages canoniques (PDF)
         </summary>
-        <p className="mt-3 text-[12px] text-stone-600">
+        <p className="mt-3 text-[12px] text-[var(--theme-muted)]">
           Consulter <code className="font-mono text-[11px]">audit.pdf</code> page {def.page} pour
           le contenu integral (3 niveaux, tests, matrices).
         </p>

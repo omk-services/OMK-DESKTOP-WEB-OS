@@ -46,12 +46,12 @@ export function ItRdDetailPage({
             type="button"
             onClick={onBack}
             aria-label={backLabel}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-stone-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {backLabel}
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--theme-text-dim)]">
             it-rd
           </span>
         </div>
@@ -64,15 +64,15 @@ export function ItRdDetailPage({
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <section
-            className="rounded-2xl border border-[var(--panel-border)] bg-stone-950 p-5"
+            className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-bg)] p-5"
           >
-            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
               logs.stream
             </h2>
-            <pre className="overflow-x-auto text-[12px] leading-relaxed text-stone-200">
+            <pre className="overflow-x-auto text-[12px] leading-relaxed text-[var(--theme-text)]">
               {item.logs.map((l, i) => (
                 <div key={i} className={LEVEL_COLOR[l.level]}>
-                  <span className="text-stone-500">{l.ts}</span> {l.line}
+                  <span className="text-[var(--theme-text-muted)]">{l.ts}</span> {l.line}
                 </div>
               ))}
             </pre>

@@ -40,12 +40,12 @@ export function GrowthDetailPage({
             type="button"
             onClick={onBack}
             aria-label={backLabel}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-stone-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {backLabel}
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--theme-text-dim)]">
             Growth
           </span>
         </div>
@@ -57,8 +57,8 @@ export function GrowthDetailPage({
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <section
-            className="rounded-2xl border-2 border-stone-900 p-5"
-            style={{ background: 'var(--theme-surface)' }}
+            className="rounded-2xl border-2 p-5"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-text)' }}
           >
             <h2 className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
               <TrendingUp className="h-3.5 w-3.5" /> Funnel
@@ -72,7 +72,7 @@ export function GrowthDetailPage({
                       {f.absolute} · {f.pct}%
                     </span>
                   </div>
-                  <div className="mt-1 h-3 rounded-full bg-stone-200">
+                  <div className="mt-1 h-3 rounded-full bg-[var(--canvas)]">
                     <div
                       className="h-full rounded-full"
                       style={{
@@ -87,8 +87,8 @@ export function GrowthDetailPage({
           </section>
 
           <section
-            className="rounded-2xl border-2 border-stone-900 p-5"
-            style={{ background: 'var(--theme-surface)' }}
+            className="rounded-2xl border-2 p-5"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-text)' }}
           >
             <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
               Experiments

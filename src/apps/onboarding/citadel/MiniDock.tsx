@@ -79,9 +79,9 @@ export function MiniDock() {
       onMouseLeave={() => setHoveredId(null)}
     >
       <div
-        className="flex items-end gap-1.5 px-2.5 py-2 rounded-2xl border border-white/40 shadow-[0_8px_32px_-8px_rgba(13,148,136,0.45)]"
+        className="flex items-end gap-1.5 px-2.5 py-2 rounded-2xl border border-[var(--theme-border-subtle)] shadow-[var(--shadow-panel)]"
         style={{
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(240,253,250,0.85) 100%)',
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--theme-surface) 92%, transparent) 0%, color-mix(in srgb, var(--theme-surface-hover) 85%, transparent) 100%)',
           backdropFilter: 'blur(20px) saturate(1.4)',
           WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
         }}
@@ -109,22 +109,22 @@ export function MiniDock() {
               className="group relative flex flex-col items-center"
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(41,37,36,0.5)] border border-white/60 transition-all"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-[var(--theme-shadow)] border border-[var(--theme-border-subtle)] transition-all"
                 style={{
                   background: isOpen
-                    ? `linear-gradient(160deg, #ffffff, ${entry.accent}40)`
-                    : 'linear-gradient(160deg, #ffffff, #f5f5f4)',
+                    ? `linear-gradient(160deg, var(--theme-surface), ${entry.accent}40)`
+                    : 'linear-gradient(160deg, var(--theme-surface), var(--theme-surface-hover))',
                   transform: isHovered ? 'translateY(-6px) scale(1.12)' : 'translateY(0) scale(1)',
                   transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                   boxShadow: isHovered ? `0 8px 20px -6px ${entry.accent}88` : undefined,
                 }}
               >
                 {Icon ? (
-                  <Icon className="w-5 h-5" style={{ color: isOpen ? entry.accent : '#78716c' }} />
+                  <Icon className="w-5 h-5" style={{ color: isOpen ? entry.accent : 'var(--theme-text-dim)' }} />
                 ) : (
                   <span
                     className="text-lg font-extrabold tracking-tight"
-                    style={{ color: isOpen ? entry.accent : '#78716c' }}
+                    style={{ color: isOpen ? entry.accent : 'var(--theme-text-dim)' }}
                   >
                     {entry.iconChar}
                   </span>
@@ -141,12 +141,12 @@ export function MiniDock() {
               {/* Tooltip on hover */}
               {isHovered && (
                 <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 whitespace-nowrap z-[300] pointer-events-none">
-                  <div className="px-3 py-1.5 rounded-lg bg-stone-900/95 backdrop-blur text-white text-[11px] font-semibold shadow-xl">
-                    <div className="text-[10px] uppercase tracking-wider text-white/60">Step</div>
+                  <div className="px-3 py-1.5 rounded-lg bg-[var(--theme-text)]/95 backdrop-blur text-[var(--theme-bg)] text-[11px] font-semibold shadow-xl">
+                    <div className="text-[10px] uppercase tracking-wider opacity-60">Step</div>
                     <div>{entry.label}</div>
-                    <div className="text-[10px] font-normal text-white/70 mt-0.5 max-w-[260px] whitespace-normal">{entry.short}</div>
+                    <div className="text-[10px] font-normal opacity-70 mt-0.5 max-w-[260px] whitespace-normal">{entry.short}</div>
                   </div>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-stone-900/95" />
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-[var(--theme-text)]/95" />
                 </div>
               )}
             </button>

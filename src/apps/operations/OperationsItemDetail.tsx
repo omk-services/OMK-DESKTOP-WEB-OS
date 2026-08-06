@@ -382,7 +382,7 @@ function ProcessBody({ item, accent }: { item: Record<string, unknown>; accent: 
         style={{
           background: '#fef3c7',
           borderLeft: '6px solid #f59e0b',
-          color: '#1f2937',
+          color: 'var(--theme-text)',
           borderRadius: 0,
         }}
       >
@@ -397,7 +397,7 @@ function ProcessBody({ item, accent }: { item: Record<string, unknown>; accent: 
             </p>
           ))
         ) : (
-          <p className="text-[13px]" style={{ color: '#1f2937' }}>No edge cases recorded yet.</p>
+          <p className="text-[13px]" style={{ color: 'var(--theme-text)' }}>No edge cases recorded yet.</p>
         )}
       </section>
     </div>
@@ -483,7 +483,7 @@ function BenchmarkBody({ item }: { item: Record<string, unknown> }): JSX.Element
         <div
           className="mt-3 h-2"
           style={{
-            background: 'rgba(0,0,0,0.08)',
+            background: 'color-mix(in srgb, var(--theme-text) 8%, transparent)',
             borderRadius: 0,
           }}
         >
@@ -637,9 +637,9 @@ function AlertBody({ item, accent }: { item: Record<string, unknown>; accent: st
       <section
         className="p-4"
         style={{
-          background: enrichment === 'raw' ? '#fef3c7' : '#f5f3ff',
+          background: enrichment === 'raw' ? '#fef3c7' : 'var(--theme-surface)',
           borderLeft: `6px solid ${enrichment === 'raw' ? '#f59e0b' : accent}`,
-          color: '#1f2937',
+          color: 'var(--theme-text)',
           borderRadius: 0,
         }}
       >
@@ -667,8 +667,8 @@ function AlertBody({ item, accent }: { item: Record<string, unknown>; accent: st
           <pre
             className="text-[12px] leading-relaxed whitespace-pre-wrap font-mono p-3"
             style={{
-              background: '#0a0a14',
-              color: '#e5e7eb',
+              background: 'var(--canvas)',
+              color: 'var(--theme-text)',
               border: '1.5px solid var(--theme-text)',
               borderRadius: 0,
               overflowX: 'auto',

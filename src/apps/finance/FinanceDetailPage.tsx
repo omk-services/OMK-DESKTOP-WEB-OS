@@ -36,20 +36,20 @@ export function FinanceDetailPage({
             type="button"
             onClick={onBack}
             aria-label={backLabel}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-stone-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {backLabel}
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--theme-text-dim)]">
             Finance
           </span>
         </div>
 
-        <h1 tabIndex={-1} className="text-3xl font-bold text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+        <h1 tabIndex={-1} className="text-3xl font-bold text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>
           {item.title}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">{item.subtitle}</p>
+        <p className="mt-1 text-sm text-[var(--theme-text-muted)]">{item.subtitle}</p>
 
         <section
           className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[var(--panel-border)] sm:grid-cols-3"
@@ -60,11 +60,11 @@ export function FinanceDetailPage({
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                 <Banknote className="h-3 w-3" /> {k.label}
               </div>
-              <div className="mt-2 text-3xl font-bold text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+              <div className="mt-2 text-3xl font-bold text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>
                 {k.value}
               </div>
               {k.delta ? (
-                <div className="mt-1 text-xs text-stone-500">{k.delta}</div>
+                <div className="mt-1 text-xs text-[var(--theme-text-muted)]">{k.delta}</div>
               ) : null}
             </div>
           ))}
@@ -77,7 +77,7 @@ export function FinanceDetailPage({
           >
             <table className="w-full text-[12px]">
               <thead>
-                <tr className="bg-stone-100 text-left text-[10px] uppercase tracking-wider text-stone-500">
+                <tr className="bg-[var(--theme-surface-hover)] text-left text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)]">
                   {columns.map((c) => (
                     <th key={c} className="px-3 py-2 font-bold">{c}</th>
                   ))}
@@ -85,9 +85,9 @@ export function FinanceDetailPage({
               </thead>
               <tbody>
                 {item.rows.map((row, i) => (
-                  <tr key={i} className="border-t border-stone-100">
+                  <tr key={i} className="border-t border-[var(--panel-border-subtle)]">
                     {columns.map((c) => (
-                      <td key={c} className="px-3 py-2 text-stone-800">{row[c]}</td>
+                      <td key={c} className="px-3 py-2 text-[var(--theme-text)]">{row[c]}</td>
                     ))}
                   </tr>
                 ))}

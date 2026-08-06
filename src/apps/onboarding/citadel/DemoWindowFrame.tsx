@@ -114,26 +114,26 @@ export function DemoWindowFrame({ id, title, accent, icon, children }: DemoWindo
         <div
           onMouseDown={handleTitleBarMouseDown}
           onDoubleClick={() => maximizeApp(id)}
-          className="h-9 flex items-center justify-between px-3 bg-white/85 backdrop-blur border-b border-[var(--panel-border-subtle)] cursor-grab active:cursor-grabbing select-none shrink-0"
+          className="h-9 flex items-center justify-between px-3 bg-[var(--theme-surface)] backdrop-blur border-b border-[var(--panel-border-subtle)] cursor-grab active:cursor-grabbing select-none shrink-0"
         >
           <div className="flex items-center gap-2 w-1/4">
             <button
               onClick={(e) => { e.stopPropagation(); closeApp(id); }}
               onMouseDown={(e) => e.stopPropagation()}
               aria-label="Close window"
-              className="w-3 h-3 rounded-full bg-[#ff5f56] ring-1 ring-black/10 hover:opacity-80"
+              className="w-3 h-3 rounded-full bg-[#ff5f56] ring-1 ring-[var(--theme-text)]/10 hover:opacity-80"
             />
             <button
               onClick={(e) => { e.stopPropagation(); minimizeApp(id); }}
               onMouseDown={(e) => e.stopPropagation()}
               aria-label="Minimize window"
-              className="w-3 h-3 rounded-full bg-[#ffbd2e] ring-1 ring-black/10 hover:opacity-80"
+              className="w-3 h-3 rounded-full bg-[#ffbd2e] ring-1 ring-[var(--theme-text)]/10 hover:opacity-80"
             />
             <button
               onClick={(e) => { e.stopPropagation(); maximizeApp(id); }}
               onMouseDown={(e) => e.stopPropagation()}
               aria-label="Maximize window"
-              className="w-3 h-3 rounded-full bg-[#27c93f] ring-1 ring-black/10 hover:opacity-80"
+              className="w-3 h-3 rounded-full bg-[#27c93f] ring-1 ring-[var(--theme-text)]/10 hover:opacity-80"
             />
           </div>
 

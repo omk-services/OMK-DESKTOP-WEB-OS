@@ -228,7 +228,7 @@ export function OperationsDetailPage({
             type="button"
             onClick={onBack}
             aria-label={backLabel}
-            className="inline-flex items-center gap-2 border-[3px] border-[color:var(--theme-text)] bg-[var(--theme-surface)] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#4f46e5] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+            className="inline-flex items-center gap-2 border-[3px] border-[color:var(--theme-text)] bg-[var(--theme-surface)] px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--theme-accent)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
           >
             <ArrowLeft className="h-3.5 w-3.5" strokeWidth={3.5} />
             {backLabel}
@@ -363,7 +363,7 @@ export function OperationsDetailPage({
                   type="button"
                   aria-pressed={done}
                   onClick={() => toggle(seg.index)}
-                  className="flex w-full items-stretch border-[3px] border-[color:var(--theme-text)] text-left transition-transform duration-150 hover:-translate-y-[2px] hover:shadow-[6px_6px_0_var(--theme-text)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#4f46e5] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  className="flex w-full items-stretch border-[3px] border-[color:var(--theme-text)] text-left transition-transform duration-150 hover:-translate-y-[2px] hover:shadow-[6px_6px_0_var(--theme-text)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--theme-accent)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                   style={{ background: done ? `${ACCENT}1a` : 'var(--theme-surface)' }}
                 >
                   <span
@@ -550,7 +550,7 @@ export function OperationsDetailPage({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-2 border-[3px] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#4f46e5] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+              className="inline-flex items-center gap-2 border-[3px] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--theme-accent)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
               style={{ borderColor: ACCENT, background: `${ACCENT}26` }}
             >
               <ArrowLeft className="h-3.5 w-3.5" strokeWidth={3.5} />
@@ -561,7 +561,7 @@ export function OperationsDetailPage({
               <button
                 type="button"
                 onClick={toggleAll}
-                className="inline-flex items-center gap-2 border-[3px] border-[color:var(--theme-text)] bg-[var(--theme-surface)] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#4f46e5] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
+                className="inline-flex items-center gap-2 border-[3px] border-[color:var(--theme-text)] bg-[var(--theme-surface)] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-[var(--theme-text)] shadow-[5px_5px_0_var(--theme-text)] transition-transform duration-150 hover:-translate-x-[2px] hover:-translate-y-[2px] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--theme-accent)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
               >
                 {allDone ? <RotateCcw className="h-3.5 w-3.5" strokeWidth={3.5} /> : <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={3.5} />}
                 {allDone ? 'Reset checks' : 'Verify all steps'}

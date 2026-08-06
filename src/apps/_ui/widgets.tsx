@@ -22,7 +22,7 @@ export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${on ? 'bg-[var(--theme-accent)]' : 'bg-stone-300'}`}
+      className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${on ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-surface-hover)]'}`}
       aria-pressed={on}
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
@@ -37,8 +37,8 @@ export function ProgressRow({ label, value, hint, accent = 'var(--theme-accent)'
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm font-medium text-stone-700">{label}</span>
-        <span className="text-xs font-semibold text-stone-500 tabular-nums">{hint ?? `${v}%`}</span>
+        <span className="text-sm font-medium text-[var(--theme-text)]">{label}</span>
+        <span className="text-xs font-semibold text-[var(--theme-muted)] tabular-nums">{hint ?? `${v}%`}</span>
       </div>
       <div className="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${v}%`, background: accent }} />
@@ -54,8 +54,8 @@ export function KanbanBoard({ columns }: { columns: { title: string; accent?: st
         <div key={i} className="flex flex-col min-h-0 bg-[var(--canvas)] rounded-xl border border-[var(--panel-border-subtle)]">
           <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[var(--panel-border-subtle)]">
             <span className="w-2 h-2 rounded-full" style={{ background: col.accent ?? 'var(--theme-accent)' }} />
-            <span className="text-[12px] font-bold uppercase tracking-wide text-stone-500">{col.title}</span>
-            <span className="ml-auto text-[11px] font-semibold text-stone-400">{col.items.length}</span>
+            <span className="text-[12px] font-bold uppercase tracking-wide text-[var(--theme-muted)]">{col.title}</span>
+            <span className="ml-auto text-[11px] font-semibold text-[var(--theme-text-dim)]">{col.items.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2.5 flex flex-col gap-2.5">
             {col.items}
@@ -75,7 +75,7 @@ export function KanbanCard({ title, meta, accent, onClick }: { title: string; me
     >
       {accent && <span className="block w-8 h-1 rounded-full mb-2" style={{ background: accent }} />}
       <div className="text-sm font-semibold text-stone-800 leading-snug">{title}</div>
-      {meta && <div className="text-xs text-stone-400 mt-1">{meta}</div>}
+      {meta && <div className="text-xs text-[var(--theme-text-dim)] mt-1">{meta}</div>}
     </Comp>
   );
 }
@@ -86,7 +86,7 @@ export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.
     <div className="overflow-x-auto custom-scrollbar">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-[11px] uppercase tracking-wide text-stone-400">
+          <tr className="text-left text-[11px] uppercase tracking-wide text-[var(--theme-text-dim)]">
             {head.map((h, i) => <th key={i} className="font-semibold px-4 py-2.5">{h}</th>)}
           </tr>
         </thead>
@@ -97,7 +97,7 @@ export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.
               onClick={onRowClick ? () => onRowClick(i) : undefined}
               className={`border-t border-[var(--hairline)] hover:bg-stone-50 ${onRowClick ? 'cursor-pointer' : ''}`}
             >
-              {r.map((cell, j) => <td key={j} className="px-4 py-3 text-stone-700">{cell}</td>)}
+              {r.map((cell, j) => <td key={j} className="px-4 py-3 text-[var(--theme-text)]">{cell}</td>)}
             </tr>
           ))}
         </tbody>
@@ -119,7 +119,7 @@ export function FunnelStep({ label, value, pct, accent = 'var(--theme-accent)' }
           {value}
         </div>
       </div>
-      <div className="w-12 text-right text-xs font-semibold text-stone-400 tabular-nums">{pct}%</div>
+      <div className="w-12 text-right text-xs font-semibold text-[var(--theme-text-dim)] tabular-nums">{pct}%</div>
     </div>
   );
 }

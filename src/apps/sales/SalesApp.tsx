@@ -283,7 +283,7 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
         title="What to focus on today"
         subtitle="Calls, next actions, and the cognition signal behind the rep view"
         action={
-          <button type="button" onClick={() => openApp('tasks', 'Tasks')} className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-700 shadow-sm transition-colors hover:bg-stone-50">Open Tasks app</button>
+          <button type="button" onClick={() => openApp('tasks', 'Tasks')} className="rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-2 text-xs font-semibold text-[var(--theme-text)] shadow-sm transition-colors hover:bg-[var(--theme-surface-hover)]">Open Tasks app</button>
         }
       />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -291,10 +291,10 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
         <StatCard label="Open deals" value="6" tone="warn" hint="$67k mock pipeline view" />
         <StatCard label="Rep score" value={repScore} tone={cognition.eventCount > 0 ? 'ok' : 'neutral'} hint="cognition.events count" />
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-stone-200 bg-white px-4 py-3 text-xs text-stone-600">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-4 py-3 text-xs text-[var(--theme-text-muted)]">
         <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Knowledge sovereignty {cognition.manifest ? Math.round(cognition.manifest.knowledge_sovereignty_score * 100) + '%' : 'not published'}</span>
         <span className="inline-flex items-center gap-1.5"><CircleDashed className="h-3.5 w-3.5 text-orange-600" /> Trust {trustScore.toFixed(2)} · {trustLabel(trustScore)}</span>
-        <span className="font-mono text-[10px] text-stone-400">{cognition.live ? 'live cognition' : 'local configuration'}</span>
+        <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live cognition' : 'local configuration'}</span>
       </div>
       {cognition.error ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -306,11 +306,11 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
           <SectionHead title="Calls" subtitle="Open a call brief and route it to the Sovereign Gate" />
           <div className="grid gap-3">
             {CALLS.map((call) => (
-              <button type="button" key={call.id} onClick={() => onSelect(callDetail(call))} className="flex w-full items-start gap-3 rounded-xl border border-[var(--panel-border)] bg-white p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><Phone className="h-4 w-4" /></div>
+              <button type="button" key={call.id} onClick={() => onSelect(callDetail(call))} className="flex w-full items-start gap-3 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]"><Phone className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-semibold text-stone-800">{call.title}</span><Badge tone={call.tone}>{call.time}</Badge></div>
-                  <p className="mt-1 text-xs text-stone-500">{call.company} · {call.stage}</p>
+                  <div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-semibold text-[var(--theme-text)]">{call.title}</span><Badge tone={call.tone}>{call.time}</Badge></div>
+                  <p className="mt-1 text-xs text-[var(--theme-text-muted)]">{call.company} · {call.stage}</p>
                 </div>
               </button>
             ))}
@@ -320,14 +320,14 @@ function TodayPanel({ cognition, onSelect, onNavigate }: PanelProps) {
           <SectionHead title="Tasks" subtitle="Execution stays connected to the Tasks app" />
           <div className="grid gap-2">
             {TASKS.map((task) => (
-              <button type="button" key={task.id} onClick={() => onSelect(taskDetail(task))} className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--panel-border)] bg-white px-3 py-2.5 text-left transition-colors hover:bg-white">
+              <button type="button" key={task.id} onClick={() => onSelect(taskDetail(task))} className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--theme-surface)]">
                 <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: task.tone === 'danger' ? '#dc2626' : task.tone === 'warn' ? '#d97706' : task.tone === 'ok' ? '#16a34a' : ACCENT }} />
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-stone-700">{task.title}</span>
-                <span className="shrink-0 text-[10px] text-stone-400">{task.when.split(' · ')[0]}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--theme-text)]">{task.title}</span>
+                <span className="shrink-0 text-[10px] text-[var(--theme-text-dim)]">{task.when.split(' · ')[0]}</span>
               </button>
             ))}
           </div>
-          <button type="button" onClick={() => onNavigate('tasks')} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-900">View all tasks <TrendingUp className="h-3 w-3" /></button>
+          <button type="button" onClick={() => onNavigate('tasks')} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">View all tasks <TrendingUp className="h-3 w-3" /></button>
         </section>
       </div>
     </div>
@@ -349,26 +349,26 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
           />
         ))}
       </div>
-      <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
-        <span className="text-xs text-stone-600">{cognition.loading ? 'Hydrating event funnel…' : cognition.eventTypes.length + ' event types grouped from cognition.events'}</span>
-        <span className="font-mono text-[10px] text-stone-400">{cognition.live ? 'live' : 'offline'}</span>
+      <div className="flex items-center justify-between rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-4 py-3">
+        <span className="text-xs text-[var(--theme-text-muted)]">{cognition.loading ? 'Hydrating event funnel…' : cognition.eventTypes.length + ' event types grouped from cognition.events'}</span>
+        <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live' : 'offline'}</span>
       </div>
       <section>
         <SectionHead title="Open deals" subtitle="Six clickable deal files · mock sales surface until CRM sync is enabled" />
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {DEALS.map((deal) => (
-            <button type="button" key={deal.id} onClick={() => onSelect(dealDetail(deal))} className="group rounded-2xl border border-[var(--panel-border)] bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <button type="button" key={deal.id} onClick={() => onSelect(dealDetail(deal))} className="group rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-sm font-bold text-stone-900">{deal.title}</div>
-                  <div className="mt-0.5 text-xs text-stone-500">{deal.company}</div>
+                  <div className="text-sm font-bold text-[var(--theme-text)]">{deal.title}</div>
+                  <div className="mt-0.5 text-xs text-[var(--theme-text-muted)]">{deal.company}</div>
                 </div>
                 <Badge tone={deal.tone}>{deal.stage}</Badge>
               </div>
-              <div className="mt-4 text-2xl font-extrabold tracking-tight text-stone-900">{deal.value}</div>
-              <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-2 text-[10px] text-stone-400">
+              <div className="mt-4 text-2xl font-extrabold tracking-tight text-[var(--theme-text)]">{deal.value}</div>
+              <div className="mt-3 flex items-center justify-between border-t border-[var(--panel-border-subtle)] pt-2 text-[10px] text-[var(--theme-text-dim)]">
                 <span>{deal.owner}</span>
-                <span className="font-semibold text-stone-600">Next · {deal.nextStep}</span>
+                <span className="font-semibold text-[var(--theme-text-muted)]">Next · {deal.nextStep}</span>
               </div>
             </button>
           ))}
@@ -384,13 +384,13 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
         {DOCUMENTS.map((doc) => {
           const Icon = doc.icon;
           return (
-            <button type="button" key={doc.id} onClick={() => onSelect(docDetail(doc))} className="rounded-2xl border border-[var(--panel-border)] bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <button type="button" key={doc.id} onClick={() => onSelect(docDetail(doc))} className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-700"><Icon className="h-4 w-4" /></span>
-                <span className="text-sm font-bold text-stone-800">{doc.title}</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]"><Icon className="h-4 w-4" /></span>
+                <span className="text-sm font-bold text-[var(--theme-text)]">{doc.title}</span>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-stone-500">{doc.description}</p>
-              <span className="mt-4 inline-flex text-[10px] font-semibold uppercase tracking-wider text-violet-700">Preview document <BookOpen className="ml-1 h-3 w-3" /></span>
+              <p className="mt-3 text-xs leading-relaxed text-[var(--theme-text-muted)]">{doc.description}</p>
+              <span className="mt-4 inline-flex text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-accent)]">Preview document <BookOpen className="ml-1 h-3 w-3" /></span>
             </button>
           );
         })}
@@ -403,33 +403,33 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
       <SectionHead title="Sales skills + routines" subtitle="Nine skills canon plus the live cognition.routines execution layer" />
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {SKILLS.map(([name, description]) => (
-          <div key={name} className="rounded-xl border border-[var(--panel-border)] bg-white p-3">
-            <div className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5 text-orange-600" /><span className="text-sm font-semibold text-stone-800">{name}</span></div>
-            <p className="mt-1 text-xs leading-relaxed text-stone-500">{description}</p>
+          <div key={name} className="rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3">
+            <div className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5 text-[var(--theme-text-muted)]" /><span className="text-sm font-semibold text-[var(--theme-text)]">{name}</span></div>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--theme-text-muted)]">{description}</p>
           </div>
         ))}
       </div>
       <section className="border-t border-[var(--panel-border)] pt-5">
         <div className="mb-3 flex items-center justify-between">
           <SectionHead title="Live routines" subtitle={(cognition.routines.length || 0) + ' loaded from cognition.routines'} />
-          <span className="font-mono text-[10px] text-stone-400">{cognition.live ? 'live' : (supabaseConfigured ? 'unavailable' : 'fallback')}</span>
+          <span className="font-mono text-[10px] text-[var(--theme-text-dim)]">{cognition.live ? 'live' : (supabaseConfigured ? 'unavailable' : 'fallback')}</span>
         </div>
         <div className="grid gap-2">
           {cognition.routines.map((routine) => (
-            <button type="button" key={routine.id} onClick={() => onSelect(routineDetail(routine))} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border)] bg-white p-3 text-left transition-colors hover:bg-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+            <button type="button" key={routine.id} onClick={() => onSelect(routineDetail(routine))} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-3 text-left transition-colors hover:bg-[var(--theme-surface)]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]">
                 {routine.cadence === 'daily' ? <Sun className="h-4 w-4" /> : routine.cadence === 'weekly' ? <Calendar className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-stone-800">{routine.name}</span>
-                <span className="block text-[11px] text-stone-500">{routine.cadence} · {formatRoutineTime(routine.time_of_day)}</span>
+                <span className="block text-sm font-semibold text-[var(--theme-text)]">{routine.name}</span>
+                <span className="block text-[11px] text-[var(--theme-text-muted)]">{routine.cadence} · {formatRoutineTime(routine.time_of_day)}</span>
               </span>
               <Badge tone={routine.is_active ? 'ok' : 'neutral'}>{routine.is_active ? 'active' : 'paused'}</Badge>
             </button>
           ))}
         </div>
         {cognition.routines.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-stone-300 px-4 py-6 text-center text-xs text-stone-400">No live routines available from cognition.routines.</div>
+          <div className="rounded-xl border border-dashed border-[var(--panel-border)] px-4 py-6 text-center text-xs text-[var(--theme-text-dim)]">No live routines available from cognition.routines.</div>
         ) : null}
       </section>
     </div>
@@ -440,12 +440,12 @@ function PipelinePanel({ cognition, onSelect }: PanelProps) {
       <SectionHead title="Stack connectors" subtitle="Eight categories with explicit connector status — connected sources are the only live inputs" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {STACK.map((category) => (
-          <section key={category.name} className="rounded-2xl border border-[var(--panel-border)] bg-white p-4">
-            <div className="mb-3 flex items-center gap-2"><Settings2 className="h-4 w-4 text-stone-500" /><h3 className="text-xs font-bold uppercase tracking-wider text-stone-600">{category.name}</h3></div>
+          <section key={category.name} className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-4">
+            <div className="mb-3 flex items-center gap-2"><Settings2 className="h-4 w-4 text-[var(--theme-text-muted)]" /><h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">{category.name}</h3></div>
             <div className="space-y-2">
               {category.tools.map((tool) => (
-                <button type="button" key={tool.id} onClick={() => onSelect(toolDetail(tool))} className="flex w-full items-center justify-between gap-2 rounded-lg border border-stone-100 bg-white px-3 py-2 text-left transition-colors hover:border-stone-200">
-                  <span className="flex min-w-0 items-center gap-2"><Cloud className="h-3.5 w-3.5 shrink-0 text-stone-400" /><span className="truncate text-xs font-medium text-stone-700">{tool.name}</span></span>
+                <button type="button" key={tool.id} onClick={() => onSelect(toolDetail(tool))} className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--panel-border-subtle)] bg-[var(--theme-surface)] px-3 py-2 text-left transition-colors hover:border-[var(--panel-border)]">
+                  <span className="flex min-w-0 items-center gap-2"><Cloud className="h-3.5 w-3.5 shrink-0 text-[var(--theme-text-dim)]" /><span className="truncate text-xs font-medium text-[var(--theme-text)]">{tool.name}</span></span>
                   <Badge tone={tool.status === 'connected' ? 'ok' : 'warn'}>{tool.status}</Badge>
                 </button>
               ))}

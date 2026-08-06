@@ -377,7 +377,7 @@ function PlancherDetail(props: ItemDetailProps): JSX.Element {
               {status === 'danger' ? 'Sous le plancher — décision humaine requise' : status === 'warn' ? 'Tangente — surveille la prochaine vente' : 'Ce qu\'il faut savoir avant de toucher au prix'}
             </span>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: '#1f2937' }}>{note}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text)' }}>{note}</p>
         </div>
       )}
 
@@ -538,7 +538,7 @@ function CourbeDetail(props: ItemDetailProps): JSX.Element {
                   />
                   <div
                     className="absolute top-0 h-full"
-                    style={{ left: `${pricePct}%`, width: '2px', background: isSweet ? '#ffffff' : '#1f2937' }}
+                    style={{ left: `${pricePct}%`, width: '2px', background: isSweet ? '#ffffff' : 'var(--theme-text)' }}
                   />
                   <div
                     className="absolute inset-0 flex items-center justify-end pr-2 text-[10.5px] font-extrabold tabular-nums"
@@ -570,7 +570,7 @@ function CourbeDetail(props: ItemDetailProps): JSX.Element {
               Ce que la pente raconte
             </span>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: '#1f2937' }}>{notes}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text)' }}>{notes}</p>
         </div>
       )}
 
@@ -739,7 +739,7 @@ function BudgetTokensDetail(props: ItemDetailProps): JSX.Element {
               Pourquoi ce ratio tient (ou pas)
             </span>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: '#1f2937' }}>{notes}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text)' }}>{notes}</p>
         </div>
       )}
 
@@ -858,7 +858,7 @@ function FormesPrixDetail(props: ItemDetailProps): JSX.Element {
               Pour qui cette forme marche
             </span>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: '#1f2937' }}>{bestFor}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text)' }}>{bestFor}</p>
         </div>
       )}
 

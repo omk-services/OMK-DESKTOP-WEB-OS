@@ -181,8 +181,8 @@ function CitadelPanel() {
       accent="#0d9488"
       icon={<Sparkles className="w-3.5 h-3.5" />}
     >
-      <div className="absolute inset-0 overflow-hidden" style={{ background: 'radial-gradient(circle at top right, #0d948815 0%, transparent 60%), linear-gradient(135deg, #f0fdfa 0%, #fafaf9 100%)' }}>
-        <div className="h-6 px-3 flex items-center justify-between text-[10px] font-medium text-stone-500 border-b border-emerald-100 bg-emerald-50/40">
+      <div className="absolute inset-0 overflow-hidden" style={{ background: 'radial-gradient(circle at top right, rgba(var(--theme-accent-rgb), 0.08) 0%, transparent 60%), linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-surface) 100%)' }}>
+        <div className="h-6 px-3 flex items-center justify-between text-[10px] font-medium text-[var(--theme-text-muted)] border-b border-emerald-100 bg-emerald-50/40">
           <div className="flex items-center gap-1.5">
             <Lock className="w-2.5 h-2.5 text-emerald-600" />
             <span>Zero-PII sandbox · runs entirely in your browser</span>
@@ -202,10 +202,10 @@ function CitadelPanel() {
               transition={{ duration: 0.18 }}
               className="absolute inset-x-0 top-7 bottom-0 flex"
             >
-              <div className="w-[42%] p-5 flex flex-col justify-center border-r border-emerald-100 bg-white/60 overflow-auto custom-scrollbar">
+              <div className="w-[42%] p-5 flex flex-col justify-center border-r border-emerald-100 bg-[var(--theme-surface)] overflow-auto custom-scrollbar">
                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">{q.id === 'capture' ? 'Step 1 of 4 · Capture' : q.id === 'volume' ? 'Step 2 of 4 · Volume' : q.id === 'leverage' ? 'Step 3 of 4 · Leverage' : 'Step 4 of 4 · Compliance'}</div>
-                <h2 className="text-[18px] font-bold tracking-tight text-stone-900 font-outfit mt-1.5 leading-tight">{q.prompt}</h2>
-                {q.helper && <p className="text-[12px] text-stone-500 mt-1.5 leading-snug">{q.helper}</p>}
+                <h2 className="text-[18px] font-bold tracking-tight text-[var(--theme-text)] font-outfit mt-1.5 leading-tight">{q.prompt}</h2>
+                {q.helper && <p className="text-[12px] text-[var(--theme-text-muted)] mt-1.5 leading-snug">{q.helper}</p>}
 
                 <div className="mt-4 flex flex-col gap-2">
                   {q.options.map((opt) => {
@@ -217,16 +217,16 @@ function CitadelPanel() {
                         className={`text-left rounded-xl border px-3 py-2.5 transition-all ${
                           isSelected
                             ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200'
-                            : 'border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm'
+                            : 'border-[var(--theme-border)] bg-[var(--theme-surface)] hover:border-[var(--theme-text-dim)] hover:shadow-sm'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            isSelected ? 'border-emerald-500' : 'border-stone-300'
+                            isSelected ? 'border-emerald-500' : 'border-[var(--theme-text-dim)]'
                           }`}>
                             {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
                           </span>
-                          <span className={`text-[12.5px] font-medium ${isSelected ? 'text-stone-900' : 'text-stone-700'}`}>{opt.label}</span>
+                          <span className={`text-[12.5px] font-medium ${isSelected ? 'text-[var(--theme-text)]' : 'text-[var(--theme-text-muted)]'}`}>{opt.label}</span>
                         </div>
                       </button>
                     );
@@ -237,7 +237,7 @@ function CitadelPanel() {
                   <button
                     onClick={() => setStepIdx(Math.max(0, stepIdx - 1))}
                     disabled={stepIdx === 0}
-                    className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 hover:text-stone-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     ← Back
                   </button>
@@ -248,7 +248,7 @@ function CitadelPanel() {
                       else setStepIdx(stepIdx + 1);
                     }}
                     disabled={answers[q.id] === undefined}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-semibold text-white shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-semibold text-[var(--theme-bg)] shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{ background: '#0d9488' }}
                   >
                     {isLast ? 'See your demo' : 'Next'} <ArrowRight className="w-3 h-3" />
@@ -259,32 +259,32 @@ function CitadelPanel() {
                   {QUIZ.map((_, i) => (
                     <span
                       key={i}
-                      className={`h-1 flex-1 rounded-full transition-colors ${i <= stepIdx ? 'bg-emerald-500' : 'bg-stone-200'}`}
+                      className={`h-1 flex-1 rounded-full transition-colors ${i <= stepIdx ? 'bg-emerald-500' : 'bg-[var(--theme-border)]'}`}
                     />
                   ))}
                 </div>
               </div>
 
-              <div className="flex-1 relative p-4 overflow-hidden bg-stone-50">
-                <div className="absolute top-2 left-3 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">Your future demo instance</div>
+              <div className="flex-1 relative p-4 overflow-hidden bg-[var(--theme-surface-hover)]">
+                <div className="absolute top-2 left-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-text-dim)]">Your future demo instance</div>
                 <div className="mt-5 grid grid-cols-2 grid-rows-2 gap-2 h-[calc(100%-2rem)]">
                   {DEMO_PANELS.slice(0, 4).map((p, i) => {
                     const IconChar = MINI_APP_ICONS[i];
                     return (
-                      <div key={p.id} className="relative bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-                        <div className="h-5 px-2 flex items-center gap-1 bg-stone-50 border-b border-stone-100">
-                          <span className="w-1 h-1 rounded-full bg-stone-300" />
-                          <span className="w-1 h-1 rounded-full bg-stone-300" />
-                          <span className="w-1 h-1 rounded-full bg-stone-300" />
+                      <div key={p.id} className="relative bg-[var(--theme-surface)] rounded-xl border border-[var(--theme-border)] shadow-sm overflow-hidden">
+                        <div className="h-5 px-2 flex items-center gap-1 bg-[var(--theme-surface-hover)] border-b border-[var(--theme-border-subtle)]">
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
                           <span className="ml-1.5 text-[8.5px] font-semibold uppercase tracking-wider truncate" style={{ color: p.accent }}>{p.title}</span>
                         </div>
-                        <div className="aspect-[3/2] flex flex-col items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100">
+                        <div className="aspect-[3/2] flex flex-col items-center justify-center bg-gradient-to-br from-[var(--theme-surface-hover)] to-[var(--theme-border-subtle)]">
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-extrabold shadow-sm"
                                style={{ background: `${p.accent}1f`, color: p.accent }}>
                             {IconChar}
                           </div>
-                          <div className="text-[9.5px] font-bold text-stone-600 mt-1.5 uppercase tracking-wider">{p.title}</div>
-                          <div className="text-[8.5px] text-stone-400 mt-0.5 px-2 text-center">{p.id === 'ip-vault' ? 'Sanctuary' : p.id === 'apps' ? 'Compounding' : p.id === 'quiz-result' ? 'Diagnostic' : 'Compliance'}</div>
+                          <div className="text-[9.5px] font-bold text-[var(--theme-text-muted)] mt-1.5 uppercase tracking-wider">{p.title}</div>
+                          <div className="text-[8.5px] text-[var(--theme-text-dim)] mt-0.5 px-2 text-center">{p.id === 'ip-vault' ? 'Sanctuary' : p.id === 'apps' ? 'Compounding' : p.id === 'quiz-result' ? 'Diagnostic' : 'Compliance'}</div>
                         </div>
                       </div>
                     );
@@ -292,7 +292,7 @@ function CitadelPanel() {
                 </div>
                 {!allAnswered && (
                   <div className="absolute bottom-2 left-3 right-3 flex items-center justify-center">
-                    <div className="bg-white/90 backdrop-blur rounded-full px-3 py-1 text-[9.5px] font-semibold text-stone-500 border border-stone-200">
+                    <div className="bg-[var(--theme-surface)]/90 backdrop-blur rounded-full px-3 py-1 text-[9.5px] font-semibold text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
                       Answer all four to populate each panel
                     </div>
                   </div>
@@ -317,11 +317,11 @@ function CitadelPanel() {
                     <span className="text-[9.5px] font-bold uppercase tracking-[0.18em]" style={{ color: band.color }}>Fit band</span>
                     <span className="text-[14px] font-bold" style={{ color: band.color }}>{band.tone} · {score}/12</span>
                   </div>
-                  <p className="text-[10.5px] text-stone-700 mt-0.5 leading-snug truncate">{band.sub}</p>
+                  <p className="text-[10.5px] text-[var(--theme-text)] mt-0.5 leading-snug truncate">{band.sub}</p>
                 </div>
                 <button
                   onClick={() => { setPhase('quiz'); setStepIdx(0); setAnswers({}); }}
-                  className="flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-800 shrink-0 px-2 py-1 rounded-md hover:bg-white/50"
+                  className="flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] shrink-0 px-2 py-1 rounded-md hover:bg-[var(--theme-surface)]/50"
                 >
                   <RotateCcw className="w-2.5 h-2.5" /> Restart
                 </button>
@@ -347,30 +347,30 @@ function MiniTopBar() {
   const maximizeApp = useDemoShellStore(s => s.maximizeApp);
 
   return (
-    <div className="absolute top-0 inset-x-0 z-[100] h-8 px-3 flex items-center justify-between text-[10.5px] font-medium text-stone-600 border-b border-emerald-100/80 backdrop-blur-md"
-         style={{ background: 'linear-gradient(180deg, rgba(236,253,245,0.92) 0%, rgba(240,253,250,0.78) 100%)' }}>
+    <div className="absolute top-0 inset-x-0 z-[100] h-8 px-3 flex items-center justify-between text-[10.5px] font-medium text-[var(--theme-text-muted)] border-b border-[var(--theme-border-subtle)] backdrop-blur-md"
+         style={{ background: 'linear-gradient(180deg, color-mix(in srgb, var(--theme-surface) 92%, transparent) 0%, color-mix(in srgb, var(--theme-surface-hover) 78%, transparent) 100%)' }}>
       <div className="flex items-center gap-2">
         <span className="w-3.5 h-3.5 rounded-[5px] bg-emerald-600 flex items-center justify-center text-white">
           <Leaf className="w-2 h-2" />
         </span>
-        <span className="font-bold tracking-tight text-stone-800 font-outfit">demo-coach</span>
-        <span className="text-stone-300">·</span>
-        <span className="text-stone-500">your Nexus preview</span>
+        <span className="font-bold tracking-tight text-[var(--theme-text)] font-outfit">demo-coach</span>
+        <span className="text-[var(--theme-text-dim)]">·</span>
+        <span className="text-[var(--theme-text-muted)]">your Nexus preview</span>
       </div>
       <div className="flex items-center gap-2.5">
         <span className="flex items-center gap-1 text-emerald-700 font-semibold">
           <Lock className="w-2.5 h-2.5" /> Zero-PII sandbox
         </span>
-        <span className="text-stone-300">·</span>
+        <span className="text-[var(--theme-text-dim)]">·</span>
         <button
           onClick={() => maximizeApp('__citadel__')}
-          className="flex items-center gap-1 text-stone-500 hover:text-stone-800 transition-colors"
+          className="flex items-center gap-1 text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] transition-colors"
           title="Expand the Nexus Quiz window"
         >
           <Maximize2 className="w-2.5 h-2.5" /> Expand
         </button>
-        <span className="text-stone-300">·</span>
-        <span className="font-mono text-stone-500 tabular-nums">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        <span className="text-[var(--theme-text-dim)]">·</span>
+        <span className="font-mono text-[var(--theme-text-muted)] tabular-nums">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
     </div>
   );

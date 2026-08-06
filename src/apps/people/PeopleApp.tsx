@@ -64,9 +64,9 @@ function Culture() {
       <SectionHead title="Culture" subtitle="The operating values every agent inherits" />
       <div className="grid grid-cols-2 gap-3">
         {values.map((v, i) => (
-          <div key={i} className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm p-5 flex items-start gap-3">
-            <Heart className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
-            <span className="text-sm font-medium text-stone-700">{v}</span>
+          <div key={i} className="bg-[var(--panel-solid)] rounded-xl border border-[var(--panel-border)] shadow-sm p-5 flex items-start gap-3">
+            <Heart className="w-5 h-5 text-[var(--theme-text-muted)] shrink-0 mt-0.5" />
+            <span className="text-sm font-medium text-[var(--theme-text)]">{v}</span>
           </div>
         ))}
       </div>
@@ -101,20 +101,20 @@ function Overview() {
         <span className="text-[10.5px] font-extrabold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
           Domaine 01 · RH & Méta-Gouvernance
         </span>
-        <h1 className="text-[28px] font-bold tracking-tight text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>
+        <h1 className="text-[28px] font-bold tracking-tight text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>
           Your Agent Factory. Your daily standup.
         </h1>
-        <p className="text-[13.5px] text-stone-600 max-w-2xl leading-relaxed">
+        <p className="text-[13.5px] text-[var(--theme-text-muted)] max-w-2xl leading-relaxed">
           You govern {FLEET_AGENTS.length} specialist agents here. Run a 10-minute standup every morning, approve what they ship, and bring new capabilities online through 2-week sprints. Your agents do the work. You stay the Gatekeeper.
         </p>
       </div>
 
       {/* How it works — 3 steps, capped, concrete */}
       <div className="flex flex-col gap-2.5">
-        <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— HOW IT WORKS</div>
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— HOW IT WORKS</div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {steps.map((s) => (
-            <div key={s.n} className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex items-start gap-3">
+            <div key={s.n} className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex items-start gap-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[13px] font-extrabold shrink-0"
                 style={{ background: ACCENT }}
@@ -122,8 +122,8 @@ function Overview() {
                 {s.n}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-bold text-stone-900">{s.title}</div>
-                <div className="text-[11.5px] text-stone-600 mt-0.5 leading-snug">{s.body}</div>
+                <div className="text-[13px] font-bold text-[var(--theme-text)]">{s.title}</div>
+                <div className="text-[11.5px] text-[var(--theme-text-muted)] mt-0.5 leading-snug">{s.body}</div>
               </div>
             </div>
           ))}
@@ -133,8 +133,8 @@ function Overview() {
       {/* Today's Standup — Border Beam on the hero card */}
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— TODAY'S STANDUP</span>
-          <span className="text-[10px] font-mono text-stone-400">· {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— TODAY'S STANDUP</span>
+          <span className="text-[10px] font-mono text-[var(--theme-text-dim)]">· {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
         </div>
         <div className="relative rounded-2xl p-[2px] overflow-hidden" style={{ background: 'linear-gradient(120deg, transparent 0%, rgba(16,185,129,0.0) 30%, #10b981 50%, rgba(16,185,129,0.0) 70%, transparent 100%)', backgroundSize: '200% 200%', animation: 'border-beam 4s linear infinite' }}>
           <style>{`
@@ -143,7 +143,7 @@ function Overview() {
               100% { background-position: 200% 50%; }
             }
           `}</style>
-          <div className="bg-white rounded-2xl p-6">
+          <div className="bg-[var(--panel-solid)] rounded-2xl p-6">
             <div className="flex items-start gap-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0"
@@ -153,10 +153,10 @@ function Overview() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-bold text-stone-900">B1 Gatekeeper standing by</span>
+                  <span className="text-[15px] font-bold text-[var(--theme-text)]">B1 Gatekeeper standing by</span>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">You</span>
                 </div>
-                <p className="text-[12.5px] text-stone-600 mt-1 leading-snug">
+                <p className="text-[12.5px] text-[var(--theme-text-muted)] mt-1 leading-snug">
                   {active.length} of {FLEET_AGENTS.length} agents ran overnight. {blocked.length > 0 ? `${blocked.length} need your call.` : 'No blockers.'}
                 </p>
               </div>
@@ -181,13 +181,13 @@ function Overview() {
                   {active.map(a => a.name).join(', ') || 'none'}
                 </div>
               </div>
-              <div className="rounded-xl bg-stone-50 border border-stone-100 p-3.5">
+              <div className="rounded-xl bg-[var(--theme-surface-hover)] border border-[var(--panel-border-subtle)] p-3.5">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-stone-500" />
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-stone-500">Idle</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[var(--theme-text-muted)]" />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-muted)]">Idle</span>
                 </div>
-                <div className="text-[24px] font-bold text-stone-900 mt-1 tabular-nums">{idle.length}</div>
-                <div className="text-[10.5px] text-stone-500 mt-0.5 truncate">
+                <div className="text-[24px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{idle.length}</div>
+                <div className="text-[10.5px] text-[var(--theme-text-muted)] mt-0.5 truncate">
                   {idle.map(a => a.name).join(', ') || 'none'}
                 </div>
               </div>
@@ -204,17 +204,17 @@ function Overview() {
             </div>
 
             {/* Next concrete action */}
-            <div className="mt-5 pt-4 border-t border-stone-100 flex items-center gap-2 text-[11.5px] text-stone-600">
-              <span className="text-[9.5px] font-mono uppercase tracking-wider text-stone-400">Next</span>
-              <span>Open <span className="font-semibold text-stone-800">Squads</span> to clear the {blocked.length > 0 ? 'blocked' : 'queue'}</span>
-              <span className="ml-auto text-[9.5px] font-mono text-stone-400">~10 min</span>
+            <div className="mt-5 pt-4 border-t border-[var(--panel-border-subtle)] flex items-center gap-2 text-[11.5px] text-[var(--theme-text-muted)]">
+              <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Next</span>
+              <span>Open <span className="font-semibold text-[var(--theme-text)]">Squads</span> to clear the {blocked.length > 0 ? 'blocked' : 'queue'}</span>
+              <span className="ml-auto text-[9.5px] font-mono text-[var(--theme-text-dim)]">~10 min</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer micro-CTA (i-have-adhd: action-first, one primary) */}
-      <div className="flex items-center justify-between text-[11px] text-stone-500">
+      <div className="flex items-center justify-between text-[11px] text-[var(--theme-text-muted)]">
         <span>Coach OS ships what you approve. Nothing more.</span>
         <span className="font-mono uppercase tracking-wider text-[9.5px]">v2.0 · SOB Convergence</span>
       </div>
@@ -230,7 +230,7 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex flex-col gap-3 text-left transition-all hover:scale-[1.015] hover:shadow-md active:scale-[0.99] cursor-pointer"
+      className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex flex-col gap-3 text-left transition-all hover:scale-[1.015] hover:shadow-md active:scale-[0.99] cursor-pointer"
     >
       <div className="flex items-center gap-2.5">
         <div className="relative shrink-0">
@@ -252,17 +252,17 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
               </span>
             ) : (
               <span className="relative inline-flex w-2.5 h-2.5">
-                <span className="absolute inset-0 rounded-full bg-stone-300" />
+                <span className="absolute inset-0 rounded-full bg-[var(--theme-text-dim)]" />
               </span>
             )}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[14px] font-bold text-stone-900 truncate">{agent.name}</span>
-            <span className="font-mono text-[9px] font-bold text-stone-400 px-1.5 py-0.5 rounded bg-stone-100">{agent.code}</span>
+            <span className="text-[14px] font-bold text-[var(--theme-text)] truncate">{agent.name}</span>
+            <span className="font-mono text-[9px] font-bold text-[var(--theme-text-dim)] px-1.5 py-0.5 rounded bg-[var(--panel-border-subtle)]">{agent.code}</span>
           </div>
-          <div className="text-[11px] text-stone-500 truncate">{agent.role} · <span className="font-mono text-stone-400">{agent.channel}</span></div>
+          <div className="text-[11px] text-[var(--theme-text-muted)] truncate">{agent.role} · <span className="font-mono text-[var(--theme-text-dim)]">{agent.channel}</span></div>
         </div>
         <span
           className={`inline-flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${state.pulse ? 'animate-pulse' : ''}`}
@@ -273,15 +273,15 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
         </span>
       </div>
 
-      <p className="text-[12px] text-stone-700 leading-snug line-clamp-2">{agent.task}</p>
+      <p className="text-[12px] text-[var(--theme-text)] leading-snug line-clamp-2">{agent.task}</p>
 
       {/* Load bar */}
       <div>
-        <div className="flex items-center justify-between text-[9.5px] font-mono uppercase tracking-wider text-stone-400 mb-1">
+        <div className="flex items-center justify-between text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)] mb-1">
           <span>Load</span>
-          <span className="text-stone-700 font-bold">{agent.load}%</span>
+          <span className="text-[var(--theme-text)] font-bold">{agent.load}%</span>
         </div>
-        <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-[var(--panel-border-subtle)] overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{
@@ -295,27 +295,27 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
       {/* Metrics row */}
       <div className="grid grid-cols-4 gap-1.5 text-center">
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Tasks</div>
-          <div className="text-[13px] font-bold text-stone-800 tabular-nums">{agent.tasksToday}</div>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tasks</div>
+          <div className="text-[13px] font-bold text-[var(--theme-text)] tabular-nums">{agent.tasksToday}</div>
         </div>
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Tokens</div>
-          <div className="text-[13px] font-bold text-stone-800 tabular-nums">{agent.tokens}</div>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tokens</div>
+          <div className="text-[13px] font-bold text-[var(--theme-text)] tabular-nums">{agent.tokens}</div>
         </div>
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Latency</div>
-          <div className="text-[13px] font-bold text-stone-800 tabular-nums">{agent.latency}</div>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Latency</div>
+          <div className="text-[13px] font-bold text-[var(--theme-text)] tabular-nums">{agent.latency}</div>
         </div>
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Succ.</div>
-          <div className="text-[13px] font-bold text-stone-800 tabular-nums">{agent.success}%</div>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Succ.</div>
+          <div className="text-[13px] font-bold text-[var(--theme-text)] tabular-nums">{agent.success}%</div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[9.5px] font-mono text-stone-400 pt-1.5 border-t border-stone-100">
-        <span>model · <span className="text-stone-600">{agent.defaultModel}</span></span>
-        <span>share · <span className="text-stone-600 font-bold">{agent.share}%</span></span>
-        <span className="ml-auto text-stone-500">Open ›</span>
+      <div className="flex items-center justify-between text-[9.5px] font-mono text-[var(--theme-text-dim)] pt-1.5 border-t border-[var(--panel-border-subtle)]">
+        <span>model · <span className="text-[var(--theme-text-muted)]">{agent.defaultModel}</span></span>
+        <span>share · <span className="text-[var(--theme-text-muted)] font-bold">{agent.share}%</span></span>
+        <span className="ml-auto text-[var(--theme-text-muted)]">Open ›</span>
       </div>
     </button>
   );
@@ -351,8 +351,8 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-[28px] font-bold text-stone-900" style={{ fontFamily: 'var(--theme-font-display)' }}>{agent.name}</h2>
-              <span className="font-mono text-[11px] font-bold text-stone-500 px-2 py-0.5 rounded bg-stone-100">{agent.code}</span>
+              <h2 className="text-[28px] font-bold text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>{agent.name}</h2>
+              <span className="font-mono text-[11px] font-bold text-[var(--theme-text-muted)] px-2 py-0.5 rounded bg-[var(--panel-border-subtle)]">{agent.code}</span>
               <span
                 className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${state.pulse ? 'animate-pulse' : ''}`}
                 style={{ color: state.color, background: state.bg }}
@@ -361,10 +361,10 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
                 {state.label}
               </span>
             </div>
-            <div className="text-[13px] text-stone-600 mt-1">
-              {agent.role} · <span className="font-mono text-stone-500">{agent.channel}</span>
+            <div className="text-[13px] text-[var(--theme-text-muted)] mt-1">
+              {agent.role} · <span className="font-mono text-[var(--theme-text-muted)]">{agent.channel}</span>
             </div>
-            <p className="text-[13px] text-stone-700 mt-3 leading-relaxed max-w-2xl">{agent.bio}</p>
+            <p className="text-[13px] text-[var(--theme-text)] mt-3 leading-relaxed max-w-2xl">{agent.bio}</p>
           </div>
         </div>
 
@@ -384,31 +384,31 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
 
       {/* Metrics grid — Tasks / Tokens / Latency / Success */}
       <div className="grid grid-cols-4 gap-3">
-        <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Tasks today</div>
-          <div className="text-[32px] font-bold text-stone-900 mt-1 tabular-nums">{agent.tasksToday}</div>
+        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tasks today</div>
+          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.tasksToday}</div>
         </div>
-        <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Tokens used</div>
-          <div className="text-[32px] font-bold text-stone-900 mt-1 tabular-nums">{agent.tokens}</div>
+        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tokens used</div>
+          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.tokens}</div>
         </div>
-        <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Avg latency</div>
-          <div className="text-[32px] font-bold text-stone-900 mt-1 tabular-nums">{agent.latency}</div>
+        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Avg latency</div>
+          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.latency}</div>
         </div>
-        <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">Success rate</div>
+        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Success rate</div>
           <div className="text-[32px] font-bold tabular-nums mt-1" style={{ color: agent.success >= 99 ? '#15803d' : agent.success >= 95 ? '#0891b2' : '#b45309' }}>{agent.success}%</div>
         </div>
       </div>
 
       {/* Load bar (full width) */}
-      <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
-        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-2">
+      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
+        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)] mb-2">
           <span>Current load</span>
-          <span className="text-stone-700 font-bold text-[14px]">{agent.load}% · {agent.task}</span>
+          <span className="text-[var(--theme-text)] font-bold text-[14px]">{agent.load}% · {agent.task}</span>
         </div>
-        <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
+        <div className="h-2 rounded-full bg-[var(--panel-border-subtle)] overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{
@@ -420,20 +420,20 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
       </div>
 
       {/* Recent runs */}
-      <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm">
+      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm">
         <div className="px-5 py-3 border-b border-[var(--panel-border-subtle)] flex items-center gap-2">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400">RECENT RUNS · last 30 min</span>
-          <span className="ml-auto text-[10px] font-mono text-stone-400">share · <span className="text-stone-700 font-bold">{agent.share}%</span></span>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">RECENT RUNS · last 30 min</span>
+          <span className="ml-auto text-[10px] font-mono text-[var(--theme-text-dim)]">share · <span className="text-[var(--theme-text)] font-bold">{agent.share}%</span></span>
         </div>
         <ul className="divide-y divide-[var(--panel-border-subtle)]">
           {agent.recentRuns.map((r, i) => (
             <li key={i} className="flex items-center gap-3 px-5 py-2.5 text-[12px]">
-              <span className="font-mono text-[10.5px] text-stone-400 w-12 shrink-0">{r.ts}</span>
+              <span className="font-mono text-[10.5px] text-[var(--theme-text-dim)] w-12 shrink-0">{r.ts}</span>
               <span
                 className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ background: r.status === 'ok' ? '#16a34a' : r.status === 'warn' ? '#f59e0b' : '#dc2626' }}
               />
-              <span className="text-stone-700 flex-1 truncate">{r.task}</span>
+              <span className="text-[var(--theme-text)] flex-1 truncate">{r.task}</span>
               <span
                 className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
                 style={{
@@ -449,13 +449,13 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
       </div>
 
       {/* Peers (Manager→Worker) */}
-      <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
-        <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 mb-2">PEERS · MANAGER→WORKER HANDOFFS</div>
+      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)] mb-2">PEERS · MANAGER→WORKER HANDOFFS</div>
         <div className="flex items-center gap-2 flex-wrap">
           {agent.peers.map(p => (
             <span
               key={p}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-stone-50 text-stone-700 border border-stone-200"
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-surface-hover)] text-[var(--theme-text)] border border-[var(--panel-border)]"
             >
               {p}
             </span>
@@ -464,8 +464,8 @@ function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void 
       </div>
 
       {/* Model + share footer */}
-      <div className="text-[10px] font-mono text-stone-400 text-center pt-2">
-        default model · <span className="text-stone-700 font-bold">{agent.defaultModel}</span> · 4 log entries shown
+      <div className="text-[10px] font-mono text-[var(--theme-text-dim)] text-center pt-2">
+        default model · <span className="text-[var(--theme-text)] font-bold">{agent.defaultModel}</span> · 4 log entries shown
       </div>
     </div>
   );
@@ -525,10 +525,10 @@ function Fleet() {
               <div className="flex items-center gap-2.5">
                 <span className="w-1.5 h-5 rounded-full" style={{ background: meta.accent }} />
                 <div className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-stone-700">{meta.label}</span>
-                  <span className="text-[10.5px] text-stone-500 truncate">{meta.tagline}</span>
+                  <span className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-[var(--theme-text)]">{meta.label}</span>
+                  <span className="text-[10.5px] text-[var(--theme-text-muted)] truncate">{meta.tagline}</span>
                 </div>
-                <span className="ml-auto text-[9.5px] font-mono uppercase tracking-wider text-stone-400">
+                <span className="ml-auto text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
                   {agents.length} on bench
                 </span>
               </div>
@@ -582,7 +582,7 @@ function Content() {
                 key={f.id}
                 onClick={() => setFilter(f.id)}
                 className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold transition-all ${
-                  filter === f.id ? 'text-white' : 'text-stone-600 hover:bg-stone-100'
+                  filter === f.id ? 'text-white' : 'text-[var(--theme-text-muted)] hover:bg-[var(--panel-border-subtle)]'
                 }`}
                 style={filter === f.id ? { background: ACCENT } : undefined}
               >
@@ -596,30 +596,30 @@ function Content() {
         {docs.map(d => {
           const agent = FLEET_AGENTS.find(a => a.code.toLowerCase() === 'a-' + (d.agentKey === 'orchestrator' ? '00' : d.agentKey === 'scribe' ? '02' : d.agentKey === 'reach' ? '03' : d.agentKey === 'dev' ? '04' : '01') || a.role.toLowerCase().includes(d.agentKey));
           return (
-            <div key={d.id} className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm p-4 hover:border-cyan-400 transition-colors">
+            <div key={d.id} className="bg-[var(--panel-solid)] rounded-xl border border-[var(--panel-border)] shadow-sm p-4 hover:border-[var(--theme-accent)] transition-colors">
               <div className="flex items-start gap-3">
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-[10px] tracking-wider text-white shrink-0"
-                  style={{ background: agent?.accent ?? '#64748b' }}
+                  style={{ background: agent?.accent ?? 'var(--theme-text-dim)' }}
                 >
                   {agent?.initials ?? '?'}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[13.5px] font-bold text-stone-900 truncate">{d.title}</span>
+                    <span className="text-[13.5px] font-bold text-[var(--theme-text)] truncate">{d.title}</span>
                     <div className="flex items-center gap-1 ml-auto">
                       {d.tags.map(t => (
-                        <span key={t} className="text-[9.5px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-stone-100 text-stone-600">{t}</span>
+                        <span key={t} className="text-[9.5px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--panel-border-subtle)] text-[var(--theme-text-muted)]">{t}</span>
                       ))}
                     </div>
                   </div>
-                  <div className="text-[10.5px] font-mono text-stone-400 mt-0.5">{d.filename}</div>
-                  <p className="text-[12px] text-stone-600 leading-snug mt-2 line-clamp-2">{d.excerpt}</p>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-stone-400 mt-2">
+                  <div className="text-[10.5px] font-mono text-[var(--theme-text-dim)] mt-0.5">{d.filename}</div>
+                  <p className="text-[12px] text-[var(--theme-text-muted)] leading-snug mt-2 line-clamp-2">{d.excerpt}</p>
+                  <div className="flex items-center gap-3 text-[10px] font-mono text-[var(--theme-text-dim)] mt-2">
                     <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {new Date(d.modifiedAt).toLocaleDateString()}</span>
                     <span>·</span>
                     <span>{d.size} bytes</span>
-                    <span className="ml-auto">by <span className="text-stone-600 font-semibold">{agent?.name ?? d.agentKey}</span></span>
+                    <span className="ml-auto">by <span className="text-[var(--theme-text-muted)] font-semibold">{agent?.name ?? d.agentKey}</span></span>
                   </div>
                 </div>
               </div>
@@ -635,7 +635,7 @@ function heatColor(value: number): string {
   // 0 = transparent, 100 = ember (orange) full opacity
   if (value === 0) return 'rgba(0,0,0,0)';
   const opacity = Math.min(0.95, Math.max(0.06, value / 100));
-  return `rgba(15, 118, 110, ${opacity.toFixed(2)})`;
+  return `rgba(var(--theme-accent-rgb), ${opacity.toFixed(2)})`;
 }
 
 const TASK_KIND_COLOR: Record<ScheduleTask['kind'], string> = {
@@ -678,17 +678,17 @@ function Schedule() {
       />
 
       {/* Heatmap */}
-      <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
+      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— ACTIVITY HEATMAP · 7d × 24h</div>
-            <div className="text-[12px] text-stone-600 mt-0.5">When the squads are busiest, UTC</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— ACTIVITY HEATMAP · 7d × 24h</div>
+            <div className="text-[12px] text-[var(--theme-text-muted)] mt-0.5">When the squads are busiest, UTC</div>
           </div>
-          <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-stone-400">
+          <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
             <span>quiet</span>
             <div className="flex gap-0.5">
               {[0.06, 0.25, 0.5, 0.75, 0.95].map(o => (
-                <div key={o} className="w-3 h-3 rounded-sm" style={{ background: `rgba(15, 118, 110, ${o})` }} />
+                <div key={o} className="w-3 h-3 rounded-sm" style={{ background: `rgba(var(--theme-accent-rgb), ${o})` }} />
               ))}
             </div>
             <span>busy</span>
@@ -701,7 +701,7 @@ function Schedule() {
             <div className="grid" style={{ gridTemplateColumns: '40px repeat(24, 1fr)', gap: '2px' }}>
               <div />
               {HOURS.map(h => (
-                <div key={h} className="text-[9px] font-mono text-stone-400 text-center">
+                <div key={h} className="text-[9px] font-mono text-[var(--theme-text-dim)] text-center">
                   {h % 6 === 0 ? h : ''}
                 </div>
               ))}
@@ -709,11 +709,11 @@ function Schedule() {
             {/* Day rows */}
             {DAYS.map((day, dayIdx) => (
               <div key={day} className="grid mt-1" style={{ gridTemplateColumns: '40px repeat(24, 1fr)', gap: '2px' }}>
-                <div className="text-[10px] font-mono uppercase text-stone-500 font-semibold pr-2 text-right self-center">{day}</div>
+                <div className="text-[10px] font-mono uppercase text-[var(--theme-text-muted)] font-semibold pr-2 text-right self-center">{day}</div>
                 {HOURS.map(h => (
                   <div
                     key={h}
-                    className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-emerald-400 cursor-pointer"
+                    className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-[var(--theme-accent)] cursor-pointer"
                     style={{ background: heatColor(SCHEDULE_GRID[dayIdx][h]) }}
                     title={`${day} ${h}:00 — activity ${SCHEDULE_GRID[dayIdx][h]}`}
                   />
@@ -724,36 +724,36 @@ function Schedule() {
         </div>
 
         {/* Stats row */}
-        <div className="mt-4 pt-3 border-t border-stone-100 grid grid-cols-3 gap-4">
+        <div className="mt-4 pt-3 border-t border-[var(--panel-border-subtle)] grid grid-cols-3 gap-4">
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-wider text-stone-400">Peak hour</div>
-            <div className="text-[20px] font-bold text-stone-900 mt-0.5">{String(peakHour).padStart(2, '0')}:00 UTC</div>
+            <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Peak hour</div>
+            <div className="text-[20px] font-bold text-[var(--theme-text)] mt-0.5">{String(peakHour).padStart(2, '0')}:00 UTC</div>
           </div>
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-wider text-stone-400">Quietest</div>
-            <div className="text-[20px] font-bold text-stone-900 mt-0.5">{String(quietestHour).padStart(2, '0')}:00 UTC</div>
+            <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Quietest</div>
+            <div className="text-[20px] font-bold text-[var(--theme-text)] mt-0.5">{String(quietestHour).padStart(2, '0')}:00 UTC</div>
           </div>
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-wider text-stone-400">Weekday avg</div>
+            <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Weekday avg</div>
             <div className="text-[20px] font-bold text-emerald-700 mt-0.5">{weekdayAvg}%</div>
           </div>
         </div>
       </div>
 
       {/* Planned tasks — reframed as Daily Standup / Sprint Review / Retrospective */}
-      <div className="bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
+      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
           <Zap className="w-4 h-4 text-emerald-700" />
-          <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400">— SPRINT CADENCE · THIS WEEK</div>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— SPRINT CADENCE · THIS WEEK</div>
         </div>
         <div className="flex flex-col gap-2">
           {SCHEDULE_TASKS.map(t => {
             const kindColor = TASK_KIND_COLOR[t.kind];
             const cadenceLabel = TASK_KIND_LABEL[t.kind];
             return (
-              <div key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-stone-500 w-10 shrink-0">{t.day}</span>
-                <span className="font-mono text-[11px] text-stone-700 tabular-nums w-24 shrink-0">
+              <div key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--theme-surface-hover)] transition-colors">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
+                <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
                   {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
                 </span>
                 <span
@@ -763,8 +763,8 @@ function Schedule() {
                 >
                   {cadenceLabel}
                 </span>
-                <span className="text-[12.5px] text-stone-700 truncate flex-1">{t.label}</span>
-                <span className="text-[10px] font-mono text-stone-400 shrink-0">@ {t.agent}</span>
+                <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
+                <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
               </div>
             );
           })}
