@@ -107,7 +107,15 @@ export function AppDetailOverlay({
         data-testid="app-detail-overlay"
         data-app={appId}
         className="absolute top-0 right-0 bottom-0 z-50 overflow-y-auto custom-scrollbar"
-        style={{ left: 0, background: 'var(--theme-bg)', color: 'var(--theme-text)' }}
+        style={{
+          // Commence APRES la sidebar au lieu de la recouvrir. `--sidebar-w`
+          // est publie par AppFrame sur le parent commun ; le repli de 240px
+          // a 68px dure 200ms cote sidebar, on suit la meme duree.
+          left: 'var(--sidebar-w, 0px)',
+          transition: 'left 200ms',
+          background: 'var(--theme-bg)',
+          color: 'var(--theme-text)',
+        }}
         variants={variants}
         initial="hidden"
         animate="visible"

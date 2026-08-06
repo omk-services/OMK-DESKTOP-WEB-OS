@@ -176,6 +176,17 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   }, []);
 
   const collapsed = manualCollapsed ?? isNarrow;
+
+  // `--sidebar-w` est pose plus bas sur le div d'AppFrame, mais AppDetailOverlay
+  // est monte en FRERE par chaque app (voir ClientsApp). Une variable CSS
+  // descend, elle ne traverse pas lateralement : le calque ne la verrait donc
+  // jamais et retomberait sur `left: 0`, recouvrant la sidebar — c'est ce qui
+  // rendait la navigation entre sections impossible des qu'une fiche etait
+  // ouverte. On la republie sur le parent commun.
+  useEffect(() => {
+    const parent = rootRef.current?.parentElement;
+    if (parent) parent.style.setProperty('--sidebar-w', collapsed ? '68px' : '240px');
+  }, [collapsed]);
   const toggleCollapsed = () => setManualCollapsed(!collapsed);
   const hasTools = tools && tools.length > 0;
 
