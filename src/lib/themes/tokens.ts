@@ -230,9 +230,9 @@ const THEME_META_RAW: ThemeMetaInput[] = [
   { id: 'neumorphism', name: 'Neumorphism', sourceStyleId: 'neumorphism', description: 'Soft UI raised/inset shadows, pastel cyan', bestFor: ['operations'], mood: 'tactile and calm', lightMode: true, darkMode: true },
   { id: 'brutalism', name: 'Brutalism', sourceStyleId: 'brutalism', description: 'Hard borders, mono display, yellow accent', bestFor: ['product'], mood: 'no bullshit', lightMode: true, darkMode: true },
   { id: 'dark-oled', name: 'Dark OLED', sourceStyleId: 'dark-mode', description: 'Pure black, cyan glow, financial-grade contrast', bestFor: ['finance', 'dashboard'], mood: 'terminal-grade', lightMode: false, darkMode: true },
-  { id: 'aurora', name: 'Aurora UI', sourceStyleId: 'aurora-ui', description: 'Gradient purple/pink conique, floating orbs, blur layers', bestFor: ['people'], mood: 'warm north star', lightMode: false, darkMode: true },
+  { id: 'aurora', name: 'Aurora UI', sourceStyleId: 'aurora-ui', description: 'Gradient purple/pink conique, floating orbs, blur layers', bestFor: [], mood: 'warm north star', lightMode: false, darkMode: true },
   { id: 'cyberpunk', name: 'Cyberpunk', sourceStyleId: 'cyberpunk-ui', description: 'Neon green/magenta on black, monospace, scanline glow', bestFor: ['it-rd'], mood: 'neon and code', lightMode: false, darkMode: true },
-  { id: 'editorial', name: 'Editorial', sourceStyleId: 'editorial-magazine', description: 'Serif Playfair display, narrow gutters, rule lines', bestFor: ['tasks'], mood: 'long-form calm', lightMode: true, darkMode: false },
+  { id: 'editorial', name: 'Editorial', sourceStyleId: 'editorial-magazine', description: 'Serif Playfair display, narrow gutters, rule lines', bestFor: ['tasks', 'people'], mood: 'long-form calm', lightMode: true, darkMode: false },
   { id: 'liquid-glass', name: 'Liquid Glass', sourceStyleId: 'liquid-glass', description: 'Heavy blur, multi-layer translucency, sky-blue gradient', bestFor: [], mood: 'apple-vision-pro', lightMode: true, darkMode: true },
   { id: 'claymorphism', name: 'Claymorphism', sourceStyleId: 'claymorphism', description: 'Pastel 3D, soft inner shadows, peach gradient', bestFor: ['clients'], mood: 'squishy warmth', lightMode: true, darkMode: false },
   { id: 'trust', name: 'Trust and Authority', sourceStyleId: 'trust-authority', description: 'Noir sobre, Cormorant serif headings, classical restraint', bestFor: ['sales', 'legal'], mood: 'old money sober', lightMode: true, darkMode: false },
@@ -256,7 +256,7 @@ export const CANONICAL_APP_THEMES: Record<string, string> = {
   'operations':  'brutalism',         // load-bearing, hard borders
   'finance':     'trust',             // CFO sobre, noir
   'legal':       'trust',             // classical restraint
-  'people':      'aurora',            // warm north star, gradient
+  'people':      'editorial',         // long-form calm — serif, filets, gouttieres etroites
   'it-rd':       'cyberpunk',         // neon, code, dev
   'clients':     'claymorphism',      // squishy warmth, human-facing
   'tasks':       'editorial',         // long-form, calm, magazine
