@@ -6,6 +6,7 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDetailPage';
 import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
@@ -142,10 +143,10 @@ export function OperationsApp() {
   const runbooksDrill = useCollectionDrill('runbooks', 'Runbooks');
   const knowledgeDrill = useCollectionDrill('articles', 'Knowledge Base');
   const incidentsDrill = useCollectionDrill('incidents', 'Incidents');
-  useCollectionDrill('processes', 'Processus');
-  useCollectionDrill('benchmarks', 'Benchmarks');
-  useCollectionDrill('changes', 'Changements');
-  useCollectionDrill('alerts', 'Alertes');
+  const processesDrill = useCollectionDrill('processes', 'Processus');
+  const benchmarksDrill = useCollectionDrill('benchmarks', 'Benchmarks');
+  const changesDrill = useCollectionDrill('changes', 'Changements');
+  const alertsDrill = useCollectionDrill('alerts', 'Alertes');
   const runbooks = useCmsStore(s => s.items['runbooks']) ?? [];
   const articles = useCmsStore(s => s.items['articles']) ?? [];
   const incidents = useCmsStore(s => s.items['incidents']) ?? [];
@@ -295,6 +296,16 @@ export function OperationsApp() {
   };
 
   const Processus = () => {
+    if (processesDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="processes"
+          itemId={processesDrill.openId}
+          onBack={processesDrill.close}
+          onNavigate={processesDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead
@@ -322,6 +333,16 @@ export function OperationsApp() {
   };
 
   const Benchmarks = () => {
+    if (benchmarksDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="benchmarks"
+          itemId={benchmarksDrill.openId}
+          onBack={benchmarksDrill.close}
+          onNavigate={benchmarksDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead
@@ -349,6 +370,16 @@ export function OperationsApp() {
   };
 
   const Changements = () => {
+    if (changesDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="changes"
+          itemId={changesDrill.openId}
+          onBack={changesDrill.close}
+          onNavigate={changesDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead
@@ -376,6 +407,16 @@ export function OperationsApp() {
   };
 
   const Alertes = () => {
+    if (alertsDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="alerts"
+          itemId={alertsDrill.openId}
+          onBack={alertsDrill.close}
+          onNavigate={alertsDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead

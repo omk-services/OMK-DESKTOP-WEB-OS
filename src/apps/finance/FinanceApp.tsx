@@ -6,6 +6,7 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { FinanceItemDetail } from './FinanceItemDetail';
@@ -114,6 +115,16 @@ export function FinanceApp() {
   };
 
   const Planchers = () => {
+    if (plancherDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="plancher_marges"
+          itemId={plancherDrill.openId}
+          onBack={plancherDrill.close}
+          onNavigate={plancherDrill.open}
+        />
+      );
+    }
     const belowFloor = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'danger').length;
     const tangential = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'warn').length;
     return (
@@ -170,6 +181,16 @@ export function FinanceApp() {
   };
 
   const Courbes = () => {
+    if (courbeDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="courbe_demande"
+          itemId={courbeDrill.openId}
+          onBack={courbeDrill.close}
+          onNavigate={courbeDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead
@@ -206,6 +227,16 @@ export function FinanceApp() {
   };
 
   const Budgets = () => {
+    if (budgetDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="budget_tokens"
+          itemId={budgetDrill.openId}
+          onBack={budgetDrill.close}
+          onNavigate={budgetDrill.open}
+        />
+      );
+    }
     const totalModel = budgetItems.reduce((s, b) => s + Number(b.modelCost ?? 0), 0);
     const totalSaving = budgetItems.reduce((s, b) => s + Number(b.monthlySaving ?? 0), 0);
     return (
@@ -243,6 +274,16 @@ export function FinanceApp() {
   };
 
   const Formes = () => {
+    if (formesDrill.openId) {
+      return (
+        <DynamicPageView
+          collectionId="formes_prix"
+          itemId={formesDrill.openId}
+          onBack={formesDrill.close}
+          onNavigate={formesDrill.open}
+        />
+      );
+    }
     return (
       <div className="p-7">
         <SectionHead
