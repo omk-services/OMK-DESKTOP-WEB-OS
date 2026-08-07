@@ -1,23 +1,65 @@
-/** DesktopIcons — real openable icons sitting on the wallpaper (replaces the Dock).
+/** DesktopIcons — real openable icons sitting on the wallpaper.
  *  Single click = select, double click = open the app window. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useShellStore } from '../stores/shell.store';
 import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
+import { HAUTEUR_DOCK } from './Dock';
+
+/** Hauteur d'une case, calee sur la PLUS HAUTE : pastille 48 + libelle sur deux
+ *  lignes + gouttieres. « People / Agents » et « Sales Sanctum » passent a la
+ *  ligne ; caler sur une case a une ligne sous-estimerait la rangee et ferait
+ *  se chevaucher les libelles. */
+const HAUTEUR_CASE = 104;
+/** Barre du haut. */
+const HAUTEUR_BARRE = 44;
+/** Dock + respiration au-dessus. */
+const MARGE_BASSE = HAUTEUR_DOCK + 12;
+
+/** Nombre de rangees qui tiennent reellement dans la fenetre.
+ *
+ *  C'etait `repeat(7, max-content)` — sept rangees en dur. Sur un ecran haut ca
+ *  passait ; dans un navigateur integre, ou la zone utile descend sous 600 px, la
+ *  septieme rangee tombait hors cadre. Marketplace et Onboarding devenaient
+ *  inatteignables, et dezoomer n'y changeait rien : le nombre de rangees ne
+ *  dependait pas de la place disponible.
+ *
+ *  Les icones debordent maintenant en COLONNES, comme sur un bureau classique.
+ */
+function calculeRangees(): number {
+  if (typeof window === 'undefined') return 7;
+  const utile = window.innerHeight - HAUTEUR_BARRE - MARGE_BASSE;
+  return Math.max(1, Math.floor(utile / HAUTEUR_CASE));
+}
+
+function useRangees(): number {
+  const [rangees, setRangees] = useState(calculeRangees);
+  useEffect(() => {
+    const surRedimensionnement = () => setRangees(calculeRangees());
+    window.addEventListener('resize', surRedimensionnement);
+    return () => window.removeEventListener('resize', surRedimensionnement);
+  }, []);
+  return rangees;
+}
 
 export function DesktopIcons() {
   const openApp = useShellStore(s => s.openApp);
   const [selected, setSelected] = useState<string | null>(null);
   const userHidden = useAppVisibility((s) => s.hidden);
+  const rangees = useRangees();
   // Hide apps flagged with hidden: true (sister Drawbridge Task 1 2026-07-28) OR toggled off by the user.
   const apps = getAllApps().filter(a => !a.hidden && userHidden[a.id] !== true);
 
   return (
     <div
-      className="absolute left-0 top-11 bottom-4 z-0 p-4 pointer-events-none"
+      className="absolute left-0 top-11 z-0 p-4 pointer-events-none"
+      style={{ bottom: MARGE_BASSE }}
       onClick={() => setSelected(null)}
     >
-      <div className="grid grid-flow-col gap-x-2 gap-y-1 h-full content-start" style={{ gridTemplateRows: 'repeat(7, max-content)' }}>
+      <div
+        className="grid grid-flow-col gap-x-2 gap-y-2 content-start"
+        style={{ gridTemplateRows: `repeat(${rangees}, max-content)` }}
+      >
         {apps.map(app => {
           const Icon = app.icon;
           const accent = app.accent ?? 'var(--theme-accent)';

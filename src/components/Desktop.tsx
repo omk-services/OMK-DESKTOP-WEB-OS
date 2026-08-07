@@ -4,6 +4,7 @@ import { AnimatePresence } from 'motion/react';
 import { useDemoShellStore, markCitadelSeen } from '../lib/demoShell';
 import { TopBar } from './TopBar';
 import { Wallpaper } from './Wallpaper';
+import { Dock } from './Dock';
 import { DesktopIcons } from './DesktopIcons';
 import { WindowFrame } from './WindowFrame';
 import { ToastContainer } from './Toast';
@@ -125,6 +126,7 @@ export function Desktop() {
           </AnimatePresence>
         </div>
 
+        <Dock />
         <ToastContainer />
         <AppDrawer />
       </div>
