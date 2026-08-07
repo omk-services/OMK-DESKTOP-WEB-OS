@@ -222,11 +222,16 @@ export function demarrerSessionBuzz(opts: BuzzPromptOptions): BuzzHandle {
   (async () => {
     try {
       const init = await envoyer({ method: 'initialize', params: { protocolVersion: 20241105, capabilities: {}, clientInfo: { name: 'coach-os', version: '0.1' } } });
+      // `envoyer` rend `undefined` quand l'ecriture sur stdin echoue — il a
+      // alors deja appele `termineAvec`. Sans ce garde, lire `.error` dessus
+      // leve une TypeError et remplace la terminaison propre par un plantage.
+      if (!init) return;
       if (init.error) {
         termineAvec({ stopReason: 'error', error: `initialize: ${init.error.message}` });
         return;
       }
       const news = await envoyer({ method: 'session/new', params: { cwd: opts.cwd ?? process.cwd(), mcpServers: [] } });
+      if (!news) return;
       if (news.error) {
         termineAvec({ stopReason: 'error', error: `session/new: ${news.error.message}` });
         return;
@@ -241,6 +246,7 @@ export function demarrerSessionBuzz(opts: BuzzPromptOptions): BuzzHandle {
         method: 'session/prompt',
         params: { sessionId, prompt: [{ type: 'text', text: opts.prompt }] },
       });
+      if (!prompt) return;
       if (prompt.error) {
         termineAvec({ stopReason: 'error', error: `session/prompt: ${prompt.error.message}` });
         return;

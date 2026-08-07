@@ -1,0 +1,26 @@
+{
+  // Les fonctions `api/` tournent sous Node, pas dans le navigateur — elles
+  // lisent `process.env`, lancent des sous-processus, manipulent des `Buffer`.
+  // Sans ce fichier, `api/` n'etait couvert par AUCUN tsconfig : le `tsc -b`
+  // local rendait « propre » sans rien verifier, et c'est le build Vercel qui a
+  // decouvert vingt erreurs `Cannot find name 'process'` — apres deux
+  // deploiements en echec.
+  //
+  // Un instrument qui ne mesure pas la zone qu'on croit mesurer est pire qu'un
+  // instrument absent : il rend une assurance imméritée.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true
+  },
+  "include": ["**/*.ts"]
+}

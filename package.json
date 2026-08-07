@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "typecheck:api": "tsc -p api/tsconfig.json --noEmit"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.34",
