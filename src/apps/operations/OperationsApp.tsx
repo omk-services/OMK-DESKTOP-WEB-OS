@@ -56,8 +56,9 @@ interface RunbookItem extends Record<string, unknown> {
 interface ArticleItem extends Record<string, unknown> {
   id: string;
   title: string;
-  topic: string;
-  citations: number;
+  topic?: string;
+  category?: string;
+  reads: number;
   updated: string;
   body: string;
 }
@@ -187,12 +188,12 @@ export function OperationsApp() {
     setDetail({
       id: String(item.id),
       title: String(item.title ?? 'Untitled'),
-      subtitle: String(item.topic ?? ''),
-      status: String(item.topic ?? 'active'),
+      subtitle: String(item.category ?? item.topic ?? ''),
+      status: String(item.category ?? item.topic ?? 'active'),
       body: String(item.body ?? ''),
       sidebar: [
-        { label: 'Topic', value: String(item.topic ?? '—') },
-        { label: 'Citations', value: `${Number(item.citations ?? 0)} this month` },
+        { label: 'Category', value: String(item.category ?? item.topic ?? '—') },
+        { label: 'Citations', value: `${Number(item.reads ?? 0)} this month` },
         { label: 'Updated', value: String(item.updated ?? '—') },
       ],
       incidents: [],
@@ -257,14 +258,14 @@ export function OperationsApp() {
           cols={2}
           render={(a) => ({
             title: a.title,
-            subtitle: a.topic,
+            subtitle: a.category ?? a.topic ?? '',
             description: a.body.split('\n').find(l => l.trim() && !l.startsWith('#'))?.slice(0, 160),
-            statusLabel: a.topic,
+            statusLabel: a.category ?? a.topic ?? '',
             statusTone: 'accent',
             accent: ACCENT,
             icon: <BookOpen className="w-5 h-5" />,
             metricLabel: 'citations',
-            metricValue: `${a.citations} this month`,
+            metricValue: `${a.reads} this month`,
             meta: `updated ${a.updated}`,
           })}
         />

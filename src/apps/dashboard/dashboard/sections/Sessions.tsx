@@ -71,15 +71,22 @@ export function Sessions(): JSX.Element {
       </Panel>
 
       {/* Table */}
-      <Panel pad="p-0">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-[12px]">
+      <Panel pad="p-0" className="relative">
+        <div
+          className="overflow-x-auto custom-scrollbar"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, transparent calc(100% - 40px), var(--theme-surface) 100%)',
+            backgroundAttachment: 'local, local, scroll, scroll',
+          }}
+        >
+          <table className="w-full text-left text-[12px]" style={{ minWidth: '760px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--panel-border)' }}>
                 {['Heure', 'Agent', 'Canal', 'Durée', 'Tokens', 'Coût', 'Issue'].map((h, i) => (
                   <th
                     key={h}
-                    className={`px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] ${i === 0 ? 'pl-6' : ''}`}
+                    className={`px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] whitespace-nowrap ${i === 0 ? 'pl-6' : ''}`}
                     style={{ color: 'var(--theme-text-dim)' }}
                   >
                     {h}
@@ -100,6 +107,11 @@ export function Sessions(): JSX.Element {
             </tbody>
           </table>
         </div>
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-8"
+          style={{ background: 'linear-gradient(to right, transparent, var(--theme-surface))' }}
+          aria-hidden="true"
+        />
       </Panel>
     </div>
   );
@@ -114,32 +126,32 @@ function SessionRow({ session }: { session: DashboardSession }): JSX.Element {
     : 'ok';
   return (
     <tr style={{ borderBottom: '1px solid var(--panel-border-subtle)' }}>
-      <td className="pl-6 pr-5 py-3 font-mono text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+      <td className="pl-6 pr-4 py-3 font-mono text-[11px] whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
         {session.startedAt}
       </td>
-      <td className="px-5 py-3">
+      <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <IconChip tone={agent?.state === 'healthy' ? 'ok' : agent?.state === 'degraded' ? 'warn' : 'danger'} size={24}>
             <History className="h-3 w-3" />
           </IconChip>
-          <span className="text-[12px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+          <span className="text-[12px] font-semibold whitespace-nowrap" style={{ color: 'var(--theme-text)' }}>
             {agent?.name ?? session.agentId}
           </span>
         </div>
       </td>
-      <td className="px-5 py-3 text-[11px] uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>
+      <td className="px-4 py-3 text-[11px] uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--theme-text-dim)' }}>
         {session.channel}
       </td>
-      <td className="px-5 py-3 tabular-nums" style={{ color: 'var(--theme-text)' }}>
+      <td className="px-4 py-3 tabular-nums whitespace-nowrap" style={{ color: 'var(--theme-text)' }}>
         {session.durationMin} min
       </td>
-      <td className="px-5 py-3 tabular-nums" style={{ color: 'var(--theme-text)' }}>
+      <td className="px-4 py-3 tabular-nums whitespace-nowrap" style={{ color: 'var(--theme-text)' }}>
         {session.tokens.toLocaleString()}
       </td>
-      <td className="px-5 py-3 tabular-nums" style={{ color: ACCENT }}>
+      <td className="px-4 py-3 tabular-nums whitespace-nowrap" style={{ color: ACCENT }}>
         ${session.cost.toFixed(3)}
       </td>
-      <td className="px-5 py-3 pr-6">
+      <td className="px-4 py-3 pr-6 whitespace-nowrap">
         <Pill tone={tone}>{session.outcome}</Pill>
       </td>
     </tr>

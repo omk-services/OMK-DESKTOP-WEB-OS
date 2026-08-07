@@ -182,9 +182,9 @@ function CitadelPanel() {
       icon={<Sparkles className="w-3.5 h-3.5" />}
     >
       <div className="absolute inset-0 overflow-hidden" style={{ background: 'radial-gradient(circle at top right, rgba(var(--theme-accent-rgb), 0.08) 0%, transparent 60%), linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-surface) 100%)' }}>
-        <div className="h-6 px-3 flex items-center justify-between text-[10px] font-medium text-[var(--theme-text-muted)] border-b border-emerald-100 bg-emerald-50/40">
+        <div className="h-6 px-3 flex items-center justify-between text-[10px] font-medium text-[var(--theme-text-muted)] border-b border-[var(--theme-border)] bg-[var(--theme-surface-hover)]">
           <div className="flex items-center gap-1.5">
-            <Lock className="w-2.5 h-2.5 text-emerald-600" />
+            <Lock className="w-2.5 h-2.5" style={{ color: 'var(--theme-accent)' }} />
             <span>Zero-PII sandbox · runs entirely in your browser</span>
           </div>
           <div className="flex items-center gap-3">
@@ -202,10 +202,10 @@ function CitadelPanel() {
               transition={{ duration: 0.18 }}
               className="absolute inset-x-0 top-7 bottom-0 flex"
             >
-              <div className="w-[42%] p-5 flex flex-col justify-center border-r border-emerald-100 bg-[var(--theme-surface)] overflow-auto custom-scrollbar">
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">{q.id === 'capture' ? 'Step 1 of 4 · Capture' : q.id === 'volume' ? 'Step 2 of 4 · Volume' : q.id === 'leverage' ? 'Step 3 of 4 · Leverage' : 'Step 4 of 4 · Compliance'}</div>
+              <div className="w-[42%] p-5 flex flex-col justify-center border-r border-[var(--theme-border)] bg-[var(--theme-surface)] overflow-auto custom-scrollbar">
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--theme-accent)' }}>{q.id === 'capture' ? 'Step 1 of 4 · Capture' : q.id === 'volume' ? 'Step 2 of 4 · Volume' : q.id === 'leverage' ? 'Step 3 of 4 · Leverage' : 'Step 4 of 4 · Compliance'}</div>
                 <h2 className="text-[18px] font-bold tracking-tight text-[var(--theme-text)] font-outfit mt-1.5 leading-tight">{q.prompt}</h2>
-                {q.helper && <p className="text-[12px] text-[var(--theme-text-muted)] mt-1.5 leading-snug">{q.helper}</p>}
+                {q.helper && <p className="text-[12px] text-[var(--theme-text)] mt-1.5 leading-snug">{q.helper}</p>}
 
                 <div className="mt-4 flex flex-col gap-2">
                   {q.options.map((opt) => {
@@ -216,15 +216,23 @@ function CitadelPanel() {
                         onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt.value }))}
                         className={`text-left rounded-xl border px-3 py-2.5 transition-all ${
                           isSelected
-                            ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200'
-                            : 'border-[var(--theme-border)] bg-[var(--theme-surface)] hover:border-[var(--theme-text-dim)] hover:shadow-sm'
+                            ? 'ring-2'
+                            : 'border-[var(--theme-border)] bg-[var(--theme-surface)] hover:border-[var(--theme-text-muted)] hover:shadow-sm'
                         }`}
+                        style={isSelected ? {
+                          borderColor: 'var(--theme-accent)',
+                          background: 'color-mix(in srgb, var(--theme-accent) 14%, var(--theme-surface))',
+                          // @ts-expect-error CSS custom prop via Tailwind ring
+                          '--tw-ring-color': 'color-mix(in srgb, var(--theme-accent) 30%, transparent)',
+                        } : undefined}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            isSelected ? 'border-emerald-500' : 'border-[var(--theme-text-dim)]'
-                          }`}>
-                            {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
+                            isSelected ? '' : 'border-[var(--theme-text-muted)]'
+                          }`}
+                            style={isSelected ? { borderColor: 'var(--theme-accent)' } : undefined}
+                          >
+                            {isSelected && <span className="w-2 h-2 rounded-full" style={{ background: 'var(--theme-accent)' }} />}
                           </span>
                           <span className={`text-[12.5px] font-medium ${isSelected ? 'text-[var(--theme-text)]' : 'text-[var(--theme-text-muted)]'}`}>{opt.label}</span>
                         </div>
@@ -237,7 +245,7 @@ function CitadelPanel() {
                   <button
                     onClick={() => setStepIdx(Math.max(0, stepIdx - 1))}
                     disabled={stepIdx === 0}
-                    className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     ← Back
                   </button>
@@ -259,23 +267,24 @@ function CitadelPanel() {
                   {QUIZ.map((_, i) => (
                     <span
                       key={i}
-                      className={`h-1 flex-1 rounded-full transition-colors ${i <= stepIdx ? 'bg-emerald-500' : 'bg-[var(--theme-border)]'}`}
+                      className={`h-1 flex-1 rounded-full transition-colors`}
+                      style={{ background: i <= stepIdx ? 'var(--theme-accent)' : 'var(--theme-text-dim)' }}
                     />
                   ))}
                 </div>
               </div>
 
               <div className="flex-1 relative p-4 overflow-hidden bg-[var(--theme-surface-hover)]">
-                <div className="absolute top-2 left-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-text-dim)]">Your future demo instance</div>
+                <div className="absolute top-2 left-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-text-muted)]">Your future demo instance</div>
                 <div className="mt-5 grid grid-cols-2 grid-rows-2 gap-2 h-[calc(100%-2rem)]">
                   {DEMO_PANELS.slice(0, 4).map((p, i) => {
                     const IconChar = MINI_APP_ICONS[i];
                     return (
                       <div key={p.id} className="relative bg-[var(--theme-surface)] rounded-xl border border-[var(--theme-border)] shadow-sm overflow-hidden">
                         <div className="h-5 px-2 flex items-center gap-1 bg-[var(--theme-surface-hover)] border-b border-[var(--theme-border-subtle)]">
-                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
-                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
-                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-dim)]" />
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-muted)]" />
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-muted)]" />
+                          <span className="w-1 h-1 rounded-full bg-[var(--theme-text-muted)]" />
                           <span className="ml-1.5 text-[8.5px] font-semibold uppercase tracking-wider truncate" style={{ color: p.accent }}>{p.title}</span>
                         </div>
                         <div className="aspect-[3/2] flex flex-col items-center justify-center bg-gradient-to-br from-[var(--theme-surface-hover)] to-[var(--theme-border-subtle)]">
@@ -284,7 +293,7 @@ function CitadelPanel() {
                             {IconChar}
                           </div>
                           <div className="text-[9.5px] font-bold text-[var(--theme-text-muted)] mt-1.5 uppercase tracking-wider">{p.title}</div>
-                          <div className="text-[8.5px] text-[var(--theme-text-dim)] mt-0.5 px-2 text-center">{p.id === 'ip-vault' ? 'Sanctuary' : p.id === 'apps' ? 'Compounding' : p.id === 'quiz-result' ? 'Diagnostic' : 'Compliance'}</div>
+                          <div className="text-[8.5px] text-[var(--theme-text-muted)] mt-0.5 px-2 text-center">{p.id === 'ip-vault' ? 'Sanctuary' : p.id === 'apps' ? 'Compounding' : p.id === 'quiz-result' ? 'Diagnostic' : 'Compliance'}</div>
                         </div>
                       </div>
                     );
@@ -292,7 +301,7 @@ function CitadelPanel() {
                 </div>
                 {!allAnswered && (
                   <div className="absolute bottom-2 left-3 right-3 flex items-center justify-center">
-                    <div className="bg-[var(--theme-surface)]/90 backdrop-blur rounded-full px-3 py-1 text-[9.5px] font-semibold text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
+                    <div className="bg-[var(--theme-surface)]/90 backdrop-blur rounded-full px-3 py-1 text-[9.5px] font-semibold text-[var(--theme-text)] border border-[var(--theme-border)]">
                       Answer all four to populate each panel
                     </div>
                   </div>
@@ -358,7 +367,7 @@ function MiniTopBar() {
         <span className="text-[var(--theme-text-muted)]">your Nexus preview</span>
       </div>
       <div className="flex items-center gap-2.5">
-        <span className="flex items-center gap-1 text-emerald-700 font-semibold">
+        <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--theme-accent)' }}>
           <Lock className="w-2.5 h-2.5" /> Zero-PII sandbox
         </span>
         <span className="text-[var(--theme-text-dim)]">·</span>

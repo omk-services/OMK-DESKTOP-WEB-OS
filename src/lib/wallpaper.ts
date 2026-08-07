@@ -16,6 +16,8 @@
  *  Fit follows the CSS background-size vocabulary: 'cover' | 'contain' | 'repeat'.
  */
 
+import { useSyncExternalStore } from 'react';
+
 const KEY_DATA = 'coach-os-wallpaper-data-v1';
 const KEY_FIT = 'coach-os-wallpaper-fit-v1';
 
@@ -40,6 +42,68 @@ export function getWallpaper(): { dataUrl: string | null; fit: WallpaperFit } {
   return { dataUrl, fit };
 }
 
+/* ------------------------------ abonnement ------------------------------
+ *
+ *  `localStorage` n'est pas reactif. Le bureau lisait `getWallpaper()` dans son
+ *  corps de rendu : ecrire une nouvelle image depuis Settings ne declenchait
+ *  aucun rendu, et le fond n'apparaissait qu'au prochain rendu provoque par
+ *  autre chose — un clic dans le vide, l'ouverture d'une fenetre. Quelqu'un qui
+ *  ignore ce comportement conclut que son image n'a pas ete prise.
+ *
+ *  On notifie donc explicitement a chaque ecriture.
+ */
+
+type Ecouteur = () => void;
+const ecouteurs = new Set<Ecouteur>();
+
+function notifier(): void {
+  instantane = null;              // invalide le cache avant de reveiller React
+  for (const e of ecouteurs) e();
+}
+
+function souscrire(e: Ecouteur): () => void {
+  ecouteurs.add(e);
+  // Autre onglet : l'evenement `storage` ne se declenche que pour les AUTRES
+  // documents, jamais pour celui qui ecrit — d'ou le `notifier()` ci-dessus.
+  const surStockage = (ev: StorageEvent) => {
+    if (ev.key === KEY_DATA || ev.key === KEY_FIT || ev.key === null) notifier();
+  };
+  window.addEventListener('storage', surStockage);
+  return () => {
+    ecouteurs.delete(e);
+    window.removeEventListener('storage', surStockage);
+  };
+}
+
+/** Instantane memorise.
+ *
+ *  `useSyncExternalStore` compare les instantanes par IDENTITE. Renvoyer
+ *  l'objet frais de `getWallpaper()` a chaque appel donne un nouvel objet a
+ *  chaque fois : React conclut que l'etat a change, redemande un rendu, qui
+ *  reconstruit un objet, et ainsi de suite — « getSnapshot should be cached »
+ *  puis « Maximum update depth exceeded ». C'est la quatrieme fois que ce piege
+ *  se presente dans cet ecosysteme. Le cache n'est pas une optimisation, c'est
+ *  la condition pour que la page s'affiche.
+ */
+let instantane: { dataUrl: string | null; fit: WallpaperFit } | null = null;
+
+function lireInstantane(): { dataUrl: string | null; fit: WallpaperFit } {
+  if (instantane === null) instantane = getWallpaper();
+  return instantane;
+}
+
+/** Instantane serveur — pas de `localStorage` au rendu SSR. Constante figee,
+ *  pour la meme raison d'identite que ci-dessus. */
+const INSTANTANE_SERVEUR: { dataUrl: string | null; fit: WallpaperFit } = {
+  dataUrl: null,
+  fit: DEFAULT_FIT,
+};
+
+/** Fond d'ecran courant, reactif. Se met a jour des l'ecriture, sans clic. */
+export function useWallpaper(): { dataUrl: string | null; fit: WallpaperFit } {
+  return useSyncExternalStore(souscrire, lireInstantane, () => INSTANTANE_SERVEUR);
+}
+
 /** Persist a wallpaper data URL + fit. Returns false if the browser refuses
  *  the write (QuotaExceededError, SecurityError, …) — callers must surface
  *  the failure to the user rather than silently keeping an image that is not
@@ -48,6 +112,7 @@ export function setWallpaper(dataUrl: string, fit: WallpaperFit): { ok: true } |
   try {
     localStorage.setItem(KEY_DATA, dataUrl);
     localStorage.setItem(KEY_FIT, fit);
+    notifier();
     return { ok: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -59,6 +124,7 @@ export function setWallpaper(dataUrl: string, fit: WallpaperFit): { ok: true } |
 export function setWallpaperFit(fit: WallpaperFit): { ok: true } | { ok: false; error: string } {
   try {
     localStorage.setItem(KEY_FIT, fit);
+    notifier();
     return { ok: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -74,6 +140,9 @@ export function clearWallpaper(): void {
   } catch {
     // best-effort
   }
+  // Hors du `try` : meme si l'effacement a echoue, l'interface doit se resynchroniser
+  // sur l'etat reel plutot que de rester sur un affichage perime.
+  notifier();
 }
 
 /** Maximum long-edge dimension in pixels. 2560 is plenty for any desktop

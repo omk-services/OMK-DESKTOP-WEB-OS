@@ -36,7 +36,8 @@ import {
   User,
   Filter,
 } from 'lucide-react';
-import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
+import { AppFrame, type AppSection } from '../../components/AppFrame';
+import { ThemedSectionHead } from '../_ui/ontology/ThemedSectionHead';
 import { StatCard, Card, Badge } from '../_ui/kit';
 import {
   getEntity,
@@ -243,7 +244,7 @@ function EntityCard({ entity, scope, accent, onOpen }: {
         >
           <Database className="w-4 h-4" />
         </div>
-        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-muted)]">
           {visibleAttrs.length} attr.
         </span>
       </div>
@@ -260,7 +261,7 @@ function EntityCard({ entity, scope, accent, onOpen }: {
           </Badge>
         ) : null}
       </div>
-      <div className="text-[12px] text-[var(--theme-text-dim)] line-clamp-3">
+      <div className="text-[12px] text-[var(--theme-text-muted)] line-clamp-3">
         {entity.description}
       </div>
     </button>
@@ -283,7 +284,7 @@ function ScopeToggle(): React.ReactElement {
       'inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors',
       actif
         ? 'bg-[var(--panel)] text-[var(--theme-text)] border border-[var(--panel-border)] shadow-sm'
-        : 'text-[var(--theme-text-dim)] hover:text-[var(--theme-text)]',
+        : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text)]',
     ].join(' ');
 
   return (
@@ -433,7 +434,7 @@ function RelationsList({ allRelations, entityIds }: {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-[var(--theme-text-dim)] font-semibold">
+        <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-[var(--theme-text-muted)] font-semibold">
           Source
           <select
             value={source}
@@ -449,7 +450,7 @@ function RelationsList({ allRelations, entityIds }: {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-[var(--theme-text-dim)] font-semibold">
+        <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-[var(--theme-text-muted)] font-semibold">
           Cible
           <select
             value={target}
@@ -661,7 +662,7 @@ function VersionsPanel() {
             <div className="font-bold text-[var(--theme-text)]">
               Pas d'historique de versions
             </div>
-            <div className="text-[var(--theme-text-dim)]">
+            <div className="text-[var(--theme-text-muted)]">
               Le registre vit en memoire TypeScript, sans persistance. Aucune
               comparaison de versions n'est possible : le snapshot est
               l'etat compile. Toute mutation passe par une PR qui change
@@ -729,7 +730,7 @@ export function OntologyApp() {
       ) : (
         <>
           <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
-            <SectionHead
+            <ThemedSectionHead
               title="Entites metier"
               subtitle="Les 12 types du registre — cliquables pour voir leurs attributs types."
             />
@@ -755,7 +756,7 @@ export function OntologyApp() {
 
   const Relations = () => (
     <div className="p-7">
-      <SectionHead
+      <ThemedSectionHead
         title="Relations"
         subtitle="Verbes typés entre entites, filtrables par source ou cible."
       />
@@ -772,7 +773,7 @@ export function OntologyApp() {
         />
       ) : (
         <>
-          <SectionHead
+          <ThemedSectionHead
             title="Contrats semantiques"
             subtitle="Declencheurs et actions permises par entite."
           />
@@ -795,7 +796,7 @@ export function OntologyApp() {
                   <div className="font-bold text-[14px] text-[var(--theme-text)] truncate">
                     {e.label}
                   </div>
-                  <div className="text-[11px] text-[var(--theme-text-dim)] truncate">
+                  <div className="text-[11px] text-[var(--theme-text-muted)] truncate">
                     {e.description}
                   </div>
                 </div>
@@ -809,7 +810,7 @@ export function OntologyApp() {
 
   const Versions = () => (
     <div className="p-7">
-      <SectionHead
+      <ThemedSectionHead
         title="Etat du registre"
         subtitle="Compteurs + verification runtime des invariants de la story 1."
       />

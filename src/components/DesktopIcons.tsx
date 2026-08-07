@@ -38,7 +38,14 @@ export function DesktopIcons() {
               >
                 <Icon className="w-6 h-6" style={{ color: accent }} />
               </span>
-              <span className="text-[11px] font-semibold text-stone-700 text-center leading-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+              {/* Pastille sous le libelle.
+               *
+               *  Le libelle etait en `text-stone-700` avec une ombre blanche :
+               *  lisible sur l'ancienne scene pastel, illisible des que le fond
+               *  est devenu une photo. Un texte clair sur un voile sombre tient
+               *  sur n'importe quelle image — y compris celle que l'utilisateur
+               *  televerse, qu'on ne peut pas connaitre a l'avance. */}
+              <span className="max-w-[76px] rounded-md bg-black/45 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white backdrop-blur-[2px]">
                 {app.name}
               </span>
             </button>

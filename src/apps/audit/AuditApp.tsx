@@ -311,47 +311,51 @@ function OverviewContent() {
 
 function MaturiteContent() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <SectionHead
         title="Maturité"
         subtitle="Trois niveaux, trois plafonds de verre. Le niveau réel n'est pas celui qu'on declare."
       />
 
-      <div className="space-y-3">
+      {/* Les trois cartes forment un tout indissociable — l'utilisateur doit
+          pouvoir lire Discuter / Connecter / Déléguer d'un coup d'œil, sans
+          devoir scroller. Avant le compact, p-5 + grid 3-col faisait déborder
+          la troisième carte sous la ligne de flottaison en 1440x900. (FIX-4.5.) */}
+      <div className="space-y-2.5">
         {MATURITE_GRID.map((row, idx) => (
           <div
             key={row.level}
-            className={`rounded-2xl border-2 p-5 ${
+            className={`rounded-xl border-2 p-4 ${
               idx === 0 ? 'border-indigo-300 bg-indigo-50/40'
               : idx === 1 ? 'border-amber-300 bg-amber-50/40'
               : 'border-emerald-300 bg-emerald-50/40'
             }`}
           >
-            <div className="mb-2 flex items-center gap-3">
+            <div className="mb-1.5 flex items-center gap-3">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                 0{idx + 1}
               </span>
-              <h3 className="text-lg font-bold text-[var(--theme-text)]">{row.title}</h3>
+              <h3 className="text-base font-bold text-[var(--theme-text)]">{row.title}</h3>
             </div>
-            <p className="mb-3 text-[12px] italic text-[var(--theme-muted)]">{row.tagline}</p>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <p className="mb-2 text-[11.5px] italic text-[var(--theme-muted)]">{row.tagline}</p>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
+                <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Signes observables
                 </p>
-                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.signs}</p>
+                <p className="text-[11.5px] leading-snug text-[var(--theme-text)]">{row.signs}</p>
               </div>
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
+                <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Plafond
                 </p>
-                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.plafond}</p>
+                <p className="text-[11.5px] leading-snug text-[var(--theme-text)]">{row.plafond}</p>
               </div>
               <div>
-                <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
+                <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                   Le pas suivant
                 </p>
-                <p className="text-[12px] leading-snug text-[var(--theme-text)]">{row.nextStep}</p>
+                <p className="text-[11.5px] leading-snug text-[var(--theme-text)]">{row.nextStep}</p>
               </div>
             </div>
           </div>
@@ -359,17 +363,17 @@ function MaturiteContent() {
       </div>
 
       <section
-        className="rounded-2xl p-5"
+        className="rounded-xl p-4"
         style={{
           background: 'var(--theme-surface)',
           border: '1px solid var(--panel-border)',
           borderLeft: '4px solid #f59e0b',
         }}
       >
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#b45309' }}>
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#b45309' }}>
           Faux niveaux à ne pas prendre pour de la maturité
         </p>
-        <p className="text-[12px] leading-snug" style={{ color: 'var(--theme-text)' }}>
+        <p className="text-[11.5px] leading-snug" style={{ color: 'var(--theme-text)' }}>
           Un POC presente en comite mais jamais utilise · un chatbot sur le site qui renvoie vers le
           formulaire de contact · une licence achetee dont personne ne connait le login · un
           « projet IA » dont le sponsor ne sait pas nommer la tache visee.
@@ -377,7 +381,7 @@ function MaturiteContent() {
       </section>
 
       <section
-        className="rounded-2xl p-5"
+        className="rounded-xl p-4"
         style={{
           background: 'var(--theme-text)',
           color: 'var(--theme-bg)',
@@ -386,7 +390,7 @@ function MaturiteContent() {
         <p className="mb-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-bg)' }}>
           Repère
         </p>
-        <p className="text-[13px] leading-snug">
+        <p className="text-[12px] leading-snug">
           La valeur durable demarre au niveau 2. Le niveau 1 se paie en abonnements.
           Le niveau 2 se paie en <em className="not-italic">processus</em>.
         </p>

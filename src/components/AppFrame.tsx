@@ -216,13 +216,13 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <div
-                  className="text-[14px] font-bold text-[var(--theme-text)] tracking-tight truncate"
+                  className="text-[14px] font-bold text-[var(--theme-text)] tracking-tight leading-tight whitespace-normal break-words"
                   style={{ fontFamily: 'var(--theme-font-display)' }}
                 >
                   {title}
                 </div>
                 {subtitle && (
-                  <div className="text-[10px] text-[var(--theme-text-dim)] uppercase tracking-wider truncate mt-0.5">{subtitle}</div>
+                  <div className="text-[10px] text-[var(--theme-text-dim)] uppercase tracking-wider leading-tight whitespace-normal break-words mt-0.5">{subtitle}</div>
                 )}
               </div>
             )}
@@ -270,10 +270,10 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
                 {themeMeta.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <div className="text-[11.5px] font-semibold text-[var(--theme-text)] truncate" style={{ fontFamily: 'var(--theme-font-display)' }}>
+                <div className="text-[11.5px] font-semibold text-[var(--theme-text)] leading-tight whitespace-normal break-words" style={{ fontFamily: 'var(--theme-font-display)' }}>
                   {themeMeta.name}
                 </div>
-                <div className="text-[9.5px] text-[var(--theme-text-dim)] uppercase tracking-wider truncate">
+                <div className="text-[9.5px] text-[var(--theme-text-dim)] uppercase tracking-wider leading-tight whitespace-normal break-words">
                   {tokens.isDark ? 'Dark' : 'Light'} · {appThemeOverride ? 'custom' : 'default'}
                 </div>
               </div>
@@ -298,6 +298,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
                   </div>
                 )}
                 <button
+                  data-section={s.label}
                   onClick={() => navigateToSection(s.id)}
                   title={collapsed ? s.label : undefined}
                   className={`relative flex items-center gap-2.5 rounded-xl text-[12.5px] font-medium transition-all ${

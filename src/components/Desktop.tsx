@@ -12,7 +12,7 @@ import { ViewportGuard } from './ViewportGuard';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useShellStore } from '../stores/shell.store';
 import { getApp } from '../lib/app-registry';
-import { getWallpaper } from '../lib/wallpaper';
+import { useWallpaper } from '../lib/wallpaper';
 
 /** Onboarding-only routes: when the prospect hits /onboarding or /demo, the
  *  Macro Desktop opens with the Onboarding window auto-launched + maximized.
@@ -99,24 +99,7 @@ export function Desktop() {
         the canonical scene when no image is set — keeps the rest of Desktop
         untouched. */}
       <Wallpaper />
-      {(() => {
-        const wp = getWallpaper();
-        if (!wp.dataUrl) return null;
-        const size = wp.fit === 'repeat' ? 'auto' : wp.fit;
-        const repeat = wp.fit === 'repeat' ? 'repeat' : 'no-repeat';
-        return (
-          <div
-            aria-hidden
-            className="fixed inset-0 z-[-9] pointer-events-none"
-            style={{
-              backgroundImage: `url(${wp.dataUrl})`,
-              backgroundRepeat: repeat,
-              backgroundSize: size,
-              backgroundPosition: 'center center',
-            }}
-          />
-        );
-      })()}
+      <CustomWallpaperLayer />
 
       <div className="w-full h-screen overflow-hidden relative text-stone-800 bg-transparent">
         <TopBar />
@@ -149,12 +132,37 @@ export function Desktop() {
   );
 }
 
+/** Couche du fond d'ecran choisi par l'utilisateur, posee au-dessus de la scene
+ *  par defaut (`<Wallpaper />`, z-[-10]) et sous tout le reste.
+ *
+ *  Composant a part entiere, et non une fonction appelee dans le rendu du
+ *  bureau : c'est ce qui lui permet de s'abonner par `useWallpaper()`. La
+ *  version precedente lisait `localStorage` directement dans le corps de
+ *  `Desktop`, sans abonnement — televerser une image ne repeignait rien tant
+ *  qu'un autre evenement ne provoquait pas de rendu. */
+function CustomWallpaperLayer() {
+  const { dataUrl, fit } = useWallpaper();
+  if (!dataUrl) return null;
+  return (
+    <div
+      aria-hidden
+      className="fixed inset-0 z-[-9] pointer-events-none"
+      style={{
+        backgroundImage: `url(${dataUrl})`,
+        backgroundRepeat: fit === 'repeat' ? 'repeat' : 'no-repeat',
+        backgroundSize: fit === 'repeat' ? 'auto' : fit,
+        backgroundPosition: 'center center',
+      }}
+    />
+  );
+}
+
 function MissingApp({ title }: { title: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-3 text-center p-12">
       <div className="w-16 h-16 rounded-2xl bg-[var(--canvas)] border border-[var(--panel-border)] flex items-center justify-center text-2xl">🚧</div>
-      <h3 className="text-base font-bold text-stone-700">{title}</h3>
-      <p className="text-sm text-stone-400 max-w-xs">This app is not registered.</p>
+      <h3 className="text-base font-bold text-[var(--theme-text)]">{title}</h3>
+      <p className="text-sm text-[var(--theme-text-dim)] max-w-xs">This app is not registered.</p>
     </div>
   );
 }

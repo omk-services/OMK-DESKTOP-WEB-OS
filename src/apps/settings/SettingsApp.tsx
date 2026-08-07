@@ -19,7 +19,7 @@ import {
   type CanvasEffectId,
 } from '../../components/canvasui/v30/theme-canvas-mapping';
 import {
-  getWallpaper,
+  useWallpaper,
   setWallpaper,
   setWallpaperFit,
   clearWallpaper,
@@ -112,7 +112,7 @@ function CanvasFxTile({
       type="button"
       onClick={onClick}
       title={effectId}
-      className={`relative h-9 w-full rounded-md transition-all hover:scale-[1.04] active:scale-[0.96] ${
+      className={`relative h-11 w-full rounded-md transition-all hover:scale-[1.04] active:scale-[0.96] ${
         selected
           ? 'outline outline-2 outline-offset-2 outline-[var(--theme-accent)] scale-105'
           : 'opacity-90 hover:opacity-100'
@@ -120,10 +120,10 @@ function CanvasFxTile({
       style={{ background: bg }}
     >
       <span
-        className="absolute inset-0 grid place-items-center text-[8px] font-bold uppercase"
-        style={{ color: '#fff', mixBlendMode: 'difference' }}
+        className="absolute inset-0 flex items-center justify-center px-1 text-center text-[8px] font-bold uppercase leading-tight"
+        style={{ color: '#fff', mixBlendMode: 'difference', wordBreak: 'break-word' }}
       >
-        {effectId === 'auto' ? 'AUTO' : effectId.slice(0, 6)}
+        {effectId === 'auto' ? 'AUTO' : effectId}
       </span>
     </button>
   );
@@ -186,7 +186,7 @@ function CanvasFxPicker() {
                     <Badge tone="neutral">auto</Badge>
                   )}
                 </div>
-                <div className="mt-3 grid grid-cols-12 gap-1.5">
+                <div className="mt-3 grid grid-cols-6 gap-2">
                   <CanvasFxTile
                     effectId="auto"
                     selected={!override || override === 'auto'}
@@ -223,27 +223,18 @@ function CanvasFxPicker() {
 /*  theme store never has to re-serialize multi-MB data on every theme change. */
 /* ────────────────────────────────────────────────────────────────────────── */
 function WallpaperPanel() {
-  // We read localStorage once on mount and listen to a custom event so the
-  // panel re-renders when the user uploads a new image. We deliberately do
-  // NOT subscribe to any store here — keeping the image out of Zustand is the
-  // whole point (see wallpaper.ts header).
-  const [{ dataUrl, fit }, setState] = useState(() => getWallpaper());
+  // Abonnement partage avec le bureau (cf. `useWallpaper` dans lib/wallpaper.ts).
+  // L'image reste hors de Zustand — c'est tout l'objet de ce module — mais les
+  // deux surfaces qui l'affichent lisent desormais la meme source reactive.
+  //
+  // La version precedente tenait un etat local et ecoutait un evenement
+  // `coach-os:wallpaper-changed` que personne n'emettait jamais. Le panneau se
+  // rafraichissait quand meme, par ses propres `setState` apres chaque
+  // ecriture ; le bureau, lui, n'entendait rien et gardait l'ancien fond.
+  const { dataUrl, fit } = useWallpaper();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  // Re-read storage when a sibling or the Desktop itself writes via the same keys.
-  // Cheap: ~1 string read. Avoids a Zustand subscription that would balloon the
-  // theme store's persisted blob.
-  useEffect(() => {
-    const refresh = () => setState(getWallpaper());
-    window.addEventListener('coach-os:wallpaper-changed', refresh);
-    window.addEventListener('storage', refresh);
-    return () => {
-      window.removeEventListener('coach-os:wallpaper-changed', refresh);
-      window.removeEventListener('storage', refresh);
-    };
-  }, []);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -263,8 +254,6 @@ function WallpaperPanel() {
         );
         return;
       }
-      setState(getWallpaper());
-      window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(
@@ -287,15 +276,11 @@ function WallpaperPanel() {
       setError(`Could not save the fit: ${res.error}`);
       return;
     }
-    setState(getWallpaper());
-    window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
   };
 
   const onReset = () => {
     setError(null);
     clearWallpaper();
-    setState(getWallpaper());
-    window.dispatchEvent(new CustomEvent('coach-os:wallpaper-changed'));
   };
 
   return (
@@ -341,7 +326,7 @@ function WallpaperPanel() {
             </div>
             <p className="text-xs text-[var(--theme-muted)] mt-1 leading-relaxed">
               {dataUrl
-                ? 'This image renders behind your apps. The original paper-garden scene returns the moment you restore the default.'
+                ? 'This image renders behind your apps, over the Solarpunk default. On contain or repeat, that default is what you see around the edges. Restore it at any time.'
                 : 'Pick a photo or any image. The browser will resize it to fit a 2560-pixel desktop and re-encode it as JPEG to stay well under the local-storage budget.'}
             </p>
 

@@ -6,6 +6,12 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 
+const CARD_BG = 'var(--theme-surface)';
+const CARD_TEXT = 'var(--theme-text)';
+const CARD_TEXT_MUTED = 'var(--theme-text-muted)';
+const CARD_TEXT_DIM = 'var(--theme-text-dim)';
+const CARD_BORDER = 'var(--panel-border)';
+
 export type FleetStatusTone = 'ok' | 'warn' | 'danger' | 'accent' | 'neutral' | 'primary';
 
 export interface FleetItemCardProps {
@@ -57,9 +63,10 @@ export function FleetItemCard(props: FleetItemCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-${compact ? 3 : 4} flex items-start gap-${compact ? 3 : 4} text-left transition-all w-full ${
+      className={`rounded-2xl border shadow-sm p-${compact ? 3 : 4} flex items-start gap-${compact ? 3 : 4} text-left transition-all w-full ${
         isClickable ? 'cursor-pointer hover:scale-[1.012] hover:shadow-md active:scale-[0.99]' : ''
       }`}
+      style={{ background: CARD_BG, borderColor: CARD_BORDER }}
     >
       {/* Avatar / icon */}
       {icon !== undefined ? (
@@ -73,15 +80,33 @@ export function FleetItemCard(props: FleetItemCardProps) {
 
       {/* Main content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
+        {/* En-tete : titre + pastille de statut.
+         *
+         *  `flex-wrap` et le `min-w` du bloc titre vont ensemble. Sans eux, la
+         *  pastille est en `shrink-0` et le titre en `min-w-0` : c'est donc
+         *  TOUJOURS le titre qui cede. En grille de 3 colonnes il ne lui restait
+         *  qu'une centaine de pixels, et « Supabase » devenait « Sup ». Passer
+         *  le titre en `line-clamp-2` n'y suffisait pas — deux lignes de rien
+         *  restent rien.
+         *
+         *  Avec un plancher de 9rem, la pastille passe a la ligne des que le
+         *  titre ne tient plus a cote d'elle. Sur les cartes larges, rien ne
+         *  bouge : elle reste en haut a droite. */}
+        <div className="flex flex-wrap items-start gap-2">
+          <div className="min-w-[9rem] flex-1">
             <div className="flex items-center gap-1.5">
-              <span className={`${compact ? 'text-[13px]' : 'text-[14px]'} font-bold text-stone-900 truncate`}>
+              <span
+                className={`${compact ? 'text-[13px]' : 'text-[14px]'} font-bold`}
+                style={{ color: CARD_TEXT, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+              >
                 {title}
               </span>
             </div>
             {subtitle && (
-              <div className={`${compact ? 'text-[10.5px]' : 'text-[11.5px]'} text-stone-500 truncate mt-0.5`}>
+              <div
+                className={`${compact ? 'text-[10.5px]' : 'text-[11.5px]'} truncate mt-0.5`}
+                style={{ color: CARD_TEXT_MUTED }}
+              >
                 {subtitle}
               </div>
             )}
@@ -100,17 +125,23 @@ export function FleetItemCard(props: FleetItemCardProps) {
 
         {/* Description (2 lines max) */}
         {description && (
-          <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} text-stone-700 leading-snug line-clamp-2 mt-1.5`}>
+          <p
+            className={`${compact ? 'text-[11px]' : 'text-[12px]'} leading-snug line-clamp-2 mt-1.5`}
+            style={{ color: CARD_TEXT_MUTED }}
+          >
             {description}
           </p>
         )}
 
         {/* Meta footer */}
         {(meta || metricValue !== undefined) && (
-          <div className={`flex items-center gap-3 ${compact ? 'text-[9.5px]' : 'text-[10.5px]'} font-mono text-stone-400 mt-2.5 pt-2 border-t border-stone-100`}>
+          <div
+            className={`flex items-center gap-3 ${compact ? 'text-[9.5px]' : 'text-[10.5px]'} font-mono mt-2.5 pt-2 border-t`}
+            style={{ color: CARD_TEXT_DIM, borderColor: 'var(--panel-border-subtle)' }}
+          >
             {metricValue !== undefined && (
-              <span className="text-stone-700 font-semibold tabular-nums">
-                {metricLabel && <span className="text-stone-400 mr-1">{metricLabel}</span>}
+              <span className="font-semibold tabular-nums" style={{ color: CARD_TEXT }}>
+                {metricLabel && <span className="mr-1" style={{ color: CARD_TEXT_DIM }}>{metricLabel}</span>}
                 {metricValue}
               </span>
             )}
@@ -120,11 +151,12 @@ export function FleetItemCard(props: FleetItemCardProps) {
       </div>
 
       {/* Trailing (default: chevron) */}
-      {trailing !== undefined ? trailing : isClickable ? <ChevronRight className="w-4 h-4 text-stone-300 shrink-0 self-center" /> : null}
+      {trailing !== undefined ? trailing : isClickable ? <ChevronRight className="w-4 h-4 shrink-0 self-center" style={{ color: CARD_TEXT_DIM }} /> : null}
     </button>
   ) : (
     <div
-      className={`bg-white rounded-2xl border border-[var(--panel-border)] shadow-sm p-${compact ? 3 : 4} flex items-start gap-${compact ? 3 : 4} text-left transition-all`}
+      className={`rounded-2xl border shadow-sm p-${compact ? 3 : 4} flex items-start gap-${compact ? 3 : 4} text-left transition-all`}
+      style={{ background: CARD_BG, borderColor: CARD_BORDER }}
     >
       {/* Avatar / icon */}
       {icon !== undefined ? (
@@ -138,15 +170,33 @@ export function FleetItemCard(props: FleetItemCardProps) {
 
       {/* Main content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
+        {/* En-tete : titre + pastille de statut.
+         *
+         *  `flex-wrap` et le `min-w` du bloc titre vont ensemble. Sans eux, la
+         *  pastille est en `shrink-0` et le titre en `min-w-0` : c'est donc
+         *  TOUJOURS le titre qui cede. En grille de 3 colonnes il ne lui restait
+         *  qu'une centaine de pixels, et « Supabase » devenait « Sup ». Passer
+         *  le titre en `line-clamp-2` n'y suffisait pas — deux lignes de rien
+         *  restent rien.
+         *
+         *  Avec un plancher de 9rem, la pastille passe a la ligne des que le
+         *  titre ne tient plus a cote d'elle. Sur les cartes larges, rien ne
+         *  bouge : elle reste en haut a droite. */}
+        <div className="flex flex-wrap items-start gap-2">
+          <div className="min-w-[9rem] flex-1">
             <div className="flex items-center gap-1.5">
-              <span className={`${compact ? 'text-[13px]' : 'text-[14px]'} font-bold text-stone-900 truncate`}>
+              <span
+                className={`${compact ? 'text-[13px]' : 'text-[14px]'} font-bold`}
+                style={{ color: CARD_TEXT, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+              >
                 {title}
               </span>
             </div>
             {subtitle && (
-              <div className={`${compact ? 'text-[10.5px]' : 'text-[11.5px]'} text-stone-500 truncate mt-0.5`}>
+              <div
+                className={`${compact ? 'text-[10.5px]' : 'text-[11.5px]'} truncate mt-0.5`}
+                style={{ color: CARD_TEXT_MUTED }}
+              >
                 {subtitle}
               </div>
             )}
@@ -165,17 +215,23 @@ export function FleetItemCard(props: FleetItemCardProps) {
 
         {/* Description (2 lines max) */}
         {description && (
-          <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} text-stone-700 leading-snug line-clamp-2 mt-1.5`}>
+          <p
+            className={`${compact ? 'text-[11px]' : 'text-[12px]'} leading-snug line-clamp-2 mt-1.5`}
+            style={{ color: CARD_TEXT_MUTED }}
+          >
             {description}
           </p>
         )}
 
         {/* Meta footer */}
         {(meta || metricValue !== undefined) && (
-          <div className={`flex items-center gap-3 ${compact ? 'text-[9.5px]' : 'text-[10.5px]'} font-mono text-stone-400 mt-2.5 pt-2 border-t border-stone-100`}>
+          <div
+            className={`flex items-center gap-3 ${compact ? 'text-[9.5px]' : 'text-[10.5px]'} font-mono mt-2.5 pt-2 border-t`}
+            style={{ color: CARD_TEXT_DIM, borderColor: 'var(--panel-border-subtle)' }}
+          >
             {metricValue !== undefined && (
-              <span className="text-stone-700 font-semibold tabular-nums">
-                {metricLabel && <span className="text-stone-400 mr-1">{metricLabel}</span>}
+              <span className="font-semibold tabular-nums" style={{ color: CARD_TEXT }}>
+                {metricLabel && <span className="mr-1" style={{ color: CARD_TEXT_DIM }}>{metricLabel}</span>}
                 {metricValue}
               </span>
             )}

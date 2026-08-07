@@ -62,16 +62,16 @@ export function ClientsApp() {
   const openNote = (id: string): void => {
     const item = sessionNotes.find(c => c.id === id);
     if (!item) { vaultDrill.open(id); return; }
-    const initials = String(item.client ?? '?').split(' ').map(p => p[0] ?? '').slice(0, 2).join('').toUpperCase() || '?';
+    const initials = String(item.clientName ?? '?').split(' ').map(p => p[0] ?? '').slice(0, 2).join('').toUpperCase() || '?';
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
-      subtitle: `${String(item.client ?? '—')} · ${String(item.date ?? '')}`,
-      status: String(item.tag ?? 'note'),
+      title: String(item.title ?? item.topic ?? 'Untitled'),
+      subtitle: `${String(item.clientName ?? '—')} · ${String(item.date ?? '')}`,
+      status: String(item.sentiment ?? 'note'),
       portrait: { initials, gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' },
       pills: [
         { label: 'Duration', value: String(item.duration ?? '—'), tone: 'neutral' },
-        { label: 'Tag', value: String(item.tag ?? 'session note'), tone: 'good' },
+        { label: 'Sentiment', value: String(item.sentiment ?? 'session note'), tone: 'good' },
         { label: 'Date', value: String(item.date ?? ''), tone: 'neutral' },
       ],
       fields: [],
@@ -195,16 +195,16 @@ export function ClientsApp() {
           onOpen={openNote}
           cols={2}
           render={(n: Record<string, unknown>) => ({
-            title: String(n.title),
-            subtitle: `${String(n.client ?? '—')} · ${String(n.date ?? '')}`,
-            description: String(n.summary ?? n.body ?? '').slice(0, 160),
-            statusLabel: String(n.tag ?? 'note'),
+            title: String(n.title ?? n.topic ?? 'Untitled'),
+            subtitle: `${String(n.clientName ?? '—')} · ${String(n.date ?? '')}`,
+            description: String(n.body ?? '').slice(0, 160),
+            statusLabel: String(n.sentiment ?? 'note'),
             statusTone: 'accent',
             accent: '#8b5cf6',
             icon: <BookText className="w-5 h-5" />,
             metricLabel: 'duration',
             metricValue: String(n.duration ?? '—'),
-            meta: String(n.tag ?? 'session note'),
+            meta: String(n.sentiment ?? 'session note'),
           })}
         />
       </div>

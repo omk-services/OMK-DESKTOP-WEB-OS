@@ -30,7 +30,12 @@ function SwitchCard({ sw, onToggle }: { sw: KillSwitch; onToggle: () => void }) 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[13.5px] font-bold text-[var(--theme-text)] truncate">{sw.label}</span>
+            <span
+              className="text-[13.5px] font-bold"
+              style={{ color: 'var(--theme-text)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+            >
+              {sw.label}
+            </span>
           </div>
           <p className="text-[11.5px] text-[var(--theme-text-muted)] leading-snug mt-1">{sw.cuts}</p>
         </div>

@@ -12,7 +12,12 @@
  *
  * Options :
  *   --app <id>        identifiant d'app (cf. src/lib/app-discovery.ts)
- *   --section <id>    onglet de la barre laterale a activer avant la capture
+ *   --section <label> libellé EXACT de la section a activer. Sélecteur strict
+ *                      [data-section="<label>"] : seuls les boutons de la barre
+ *                      latérale portent cet attribut (cf. AppFrame.tsx). Aucun
+ *                      repli textuel — un match dans le fil d'Ariane ou le
+ *                      rail du bureau serait sélectionné à tort. Si la section
+ *                      est introuvable, le script échoue avec exit code 4.
  *   --theme <id>      theme global a poser avant la capture (barre du haut)
  *   --url <url>       capture une page externe — sert a photographier la BARRE
  *   --out <chemin>    fichier PNG de sortie (defaut : /tmp/shot.png)
@@ -98,9 +103,27 @@ if (!url && appId) {
   }
   await page.waitForTimeout(600);
   if (section) {
-    const cible = page.locator(`[data-section="${section}"], button:has-text("${section}")`).first();
-    if (await cible.count()) { await cible.click(); await page.waitForTimeout(400); }
-    else console.error(`section "${section}" introuvable — capture sans changement d'onglet`);
+    // Sélecteur strict : seuls les boutons de section de la barre latérale
+    // portent `data-section`. Aucun repli textuel — un bouton homonyme dans
+    // le fil d'Ariane ou le rail du bureau serait sélectionné à tort, et
+    // une capture qui montre autre chose que ce qu'elle prétend montrer
+    // invalide silencieusement la campagne QA. Si rien ne matche, on
+    // échoue bruyamment avec un code non-zero pour arrêter le pipeline.
+    const cible = page.locator(`[data-section="${section}"]`);
+    const count = await cible.count();
+    if (count === 0) {
+      console.error(`section "${section}" introuvable : aucun bouton avec [data-section="${section}"] dans la barre latérale.`);
+      console.error('Le sélecteur ne se replie PAS sur le texte — un match dans le fil d\'Ariane ou le rail du bureau serait invalide.');
+      await navigateur.close();
+      process.exit(4);
+    }
+    if (count > 1) {
+      console.error(`section "${section}" : ${count} boutons portent [data-section="${section}"] — ambigu, abandon.`);
+      await navigateur.close();
+      process.exit(5);
+    }
+    await cible.click();
+    await page.waitForTimeout(400);
   }
 }
 

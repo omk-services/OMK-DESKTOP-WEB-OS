@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
-import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
+import { AppFrame, type AppSection } from '../../components/AppFrame';
+import { ThemedSectionHead } from './ThemedSectionHead';
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -137,7 +138,7 @@ export function ItRdApp() {
   const Kernel = () => {
     return (
       <div className="p-7">
-        <SectionHead title="IT Software Kernel" subtitle="Live service health" action={<Badge tone="ok">{okCount} / {totalServices} nominal</Badge>} />
+        <ThemedSectionHead title="IT Software Kernel" subtitle="Live service health" action={<Badge tone="ok">{okCount} / {totalServices} nominal</Badge>} />
         <CollectionRepeater collectionId="services" onOpen={openService} />
       </div>
     );
@@ -147,7 +148,7 @@ export function ItRdApp() {
     const byStage = (stage: string) => experiments.filter(e => e.stage === stage);
     return (
       <div className="p-7 h-full flex flex-col">
-        <SectionHead title="Experiments" subtitle="R&D board" />
+        <ThemedSectionHead title="Experiments" subtitle="R&D board" />
         <div className="flex-1 min-h-0">
           <KanbanBoard columns={[
             { title: 'Idea', accent: '#a78bfa', items: byStage('idea').map(e => (
@@ -168,7 +169,7 @@ export function ItRdApp() {
   const Deploys = () => {
     return (
       <div className="p-7">
-        <SectionHead title="Deploys" subtitle="Recent shipments" />
+        <ThemedSectionHead title="Deploys" subtitle="Recent shipments" />
         <CollectionRepeater collectionId="deploys" onOpen={openDeploy} />
       </div>
     );
@@ -183,7 +184,7 @@ export function ItRdApp() {
 
     return (
       <div className="p-7 h-full flex flex-col gap-5">
-        <SectionHead
+        <ThemedSectionHead
           title="Journal"
           subtitle="Append-only log of every act by humans and agents. The latest snapshot is the projected state."
           action={<Badge tone="accent">{journal.length} entries</Badge>}
@@ -306,7 +307,7 @@ export function ItRdApp() {
     const driftCount = loops.filter(l => l.state === 'drift').length;
     return (
       <div className="p-7">
-        <SectionHead
+        <ThemedSectionHead
           title="Boucles"
           subtitle="Feedback loops with their 4 organs. No loop, no metric to act on."
           action={
@@ -385,7 +386,7 @@ export function ItRdApp() {
     const driftCount = drift.filter(d => d.severity === 'drift' || d.severity === 'alert').length;
     return (
       <div className="p-7">
-        <SectionHead
+        <ThemedSectionHead
           title="Drift"
           subtitle="Gap between the model spec and the actual behavior. Cross the threshold, get alerted."
           action={<Badge tone={driftCount > 0 ? 'warn' : 'ok'}>{driftCount} above threshold</Badge>}
@@ -456,7 +457,7 @@ export function ItRdApp() {
     const reviewCount = evals.filter(e => e.evalType === 'review').length;
     return (
       <div className="p-7">
-        <SectionHead
+        <ThemedSectionHead
           title="Evals"
           subtitle="System evaluations. Auto = measured by the runner. Review = waiting for a human."
           action={

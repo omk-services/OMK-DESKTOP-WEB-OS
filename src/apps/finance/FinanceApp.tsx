@@ -20,6 +20,11 @@ const ACCENT = '#0d9488';
 
 // projected cash (k$) over 12 months — declining runway
 const runway = [42, 40, 39, 37, 36, 34, 33, 31, 30, 28, 27, 25];
+// Pixel height (instead of %) — in a flex-col child the parent has no fixed
+// height, so percentage heights of the bars resolve to 0 against the parent's
+// auto height and the chart came out empty. A constant BAR_HEIGHT leaves room
+// for the month label (~14px) + the gap-2 (8px) below it.
+const RUNWAY_BAR_PX = 160;
 
 function Overview() {
   return (
@@ -47,7 +52,7 @@ function Runway() {
         <div className="flex items-end gap-2 h-52">
           {runway.map((v, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
-              <div className="w-full rounded-t-md transition-all" style={{ height: `${(v / max) * 100}%`, background: `linear-gradient(180deg, ${ACCENT}, ${ACCENT}88)` }} />
+              <div className="w-full rounded-t-md transition-all" style={{ height: `${(v / max) * RUNWAY_BAR_PX}px`, background: `linear-gradient(180deg, ${ACCENT}, ${ACCENT}88)` }} />
               <span className="text-[10px] text-[var(--theme-text-dim)]">{months[i]}</span>
             </div>
           ))}

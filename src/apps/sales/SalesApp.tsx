@@ -700,16 +700,16 @@ function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
 
 function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title: string; subtitle: string; meta: { label: string; value: string; sub: string } }): ReactElement {
   return (
-    <header className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto]">
-      <div>
+    <header className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0">
         <Eyebrow>{eyebrow}</Eyebrow>
         <h1
-          className="mt-2 text-[40px] font-extrabold leading-[1.05] tracking-tight"
+          className="mt-2 text-[40px] font-extrabold leading-[1.05] tracking-tight whitespace-nowrap"
           style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
         >
           {title}{' '}
           <span
-            className="rounded-md px-1.5 py-0.5 align-middle"
+            className="rounded-md px-1.5 py-0.5 align-middle whitespace-nowrap"
             style={{ background: 'rgba(187,247,208,0.55)', color: 'var(--theme-text)' }}
           >
             Control Center
@@ -722,16 +722,16 @@ function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title
           {subtitle}
         </p>
       </div>
-      <div className="text-right">
+      <div className="text-right max-w-[180px] shrink-0">
         <Eyebrow>{meta.label}</Eyebrow>
         <div
-          className="mt-1 text-[15px] font-extrabold"
+          className="mt-1 text-[15px] font-extrabold break-words"
           style={{ fontFamily: FONT_MONO, color: 'var(--theme-text)' }}
         >
           {meta.value}
         </div>
         <div
-          className="mt-1 max-w-[180px] text-[11.5px] leading-snug"
+          className="mt-1 text-[11.5px] leading-snug"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           {meta.sub}

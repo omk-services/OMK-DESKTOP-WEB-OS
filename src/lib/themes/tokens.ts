@@ -267,7 +267,6 @@ export const CANONICAL_APP_THEMES: Record<string, string> = {
   'onboarding':  'liquid-glass',      // hero demo, vision-pro
   'welcome':     'neumorphism',       // soft UI, tactile, hero accueil
   'audit':       'glassmorphism',     // diagnostic précis, frosted data
-  'cognition':   'editorial',         // sovereign gate, sobre serif
 };
 
 export const THEME_LIST = THEME_META.map(m => m.id);

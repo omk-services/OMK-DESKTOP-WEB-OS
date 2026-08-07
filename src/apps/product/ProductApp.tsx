@@ -21,6 +21,7 @@ import { ProductDetailPage, type ProductDetailItem } from './ProductDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { ProductItemDetail } from './ProductItemDetail';
 import { CMSCardList } from '../_ui/CMSCardList';
+import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
 import { seedProductCms } from './seed';
 
@@ -87,11 +88,14 @@ interface ProductItem extends Record<string, unknown> {
 interface ReleaseItem extends Record<string, unknown> {
   id: string;
   title: string;
+  name?: string;
   version?: string;
   shippedAt?: string;
   shippedRelative?: string;
+  when?: string;
   status?: 'shipped' | 'draft' | 'archived';
   changelog?: string;
+  notes?: string;
 }
 
 interface RankingItem extends Record<string, unknown> {
@@ -221,26 +225,35 @@ export function ProductApp() {
   };
 
   const Backlog = () => {
+    const backlogItems = byStage('backlog');
     return (
       <div className="p-7">
-        <SectionHead title="Backlog" subtitle="Groomed, not yet scheduled" action={<Badge tone="neutral">{byStage('backlog').length}</Badge>} />
-        <CMSCardList<ProductItem>
-          collectionId="product_items"
-          onOpen={openItem}
-          cols={2}
-          render={(it) => ({
-            title: it.title,
-            subtitle: it.meta,
-            description: it.specStatus ? `Spec status: ${it.specStatus}${it.owner ? ` · Owner: ${it.owner}` : ''}` : `Owner: ${it.owner ?? '—'}`,
-            statusLabel: it.stage,
-            statusTone: STAGE_TONE[it.stage] ?? 'neutral',
-            accent: STAGE_ACCENT[it.stage] ?? ACCENT,
-            icon: STAGE_ICON[it.stage] ?? <FileCode className="w-5 h-5" />,
-            meta: 'backlog · drag to Roadmap to schedule',
-          })}
-          // Filter to backlog items only
-          emptyMessage="No backlog items yet."
-        />
+        <SectionHead title="Backlog" subtitle="Groomed, not yet scheduled" action={<Badge tone="neutral">{backlogItems.length}</Badge>} />
+        {backlogItems.length === 0 ? (
+          <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>
+            No backlog items yet.
+          </div>
+        ) : (
+          <FleetItemGrid cols={2}>
+            {backlogItems.map((raw) => {
+              const it = raw as unknown as ProductItem;
+              return (
+                <FleetItemCard
+                  key={String(it.id)}
+                  title={String(it.title)}
+                  subtitle={String(it.meta ?? '')}
+                  description={it.specStatus ? `Spec status: ${it.specStatus}${it.owner ? ` · Owner: ${it.owner}` : ''}` : `Owner: ${it.owner ?? '—'}`}
+                  statusLabel={String(it.stage)}
+                  statusTone={STAGE_TONE[it.stage] ?? 'neutral'}
+                  accent={STAGE_ACCENT[it.stage] ?? ACCENT}
+                  icon={STAGE_ICON[it.stage] ?? <FileCode className="w-5 h-5" />}
+                  meta="backlog · drag to Roadmap to schedule"
+                  onClick={() => openItem(String(it.id))}
+                />
+              );
+            })}
+          </FleetItemGrid>
+        )}
       </div>
     );
   };
@@ -254,16 +267,16 @@ export function ProductApp() {
           onOpen={openRelease}
           cols={2}
           render={(r) => ({
-            title: r.title,
-            subtitle: r.shippedRelative ? `Shipped ${r.shippedRelative}` : (r.shippedAt ?? '—'),
-            description: r.changelog,
+            title: String(r.title ?? r.name ?? 'Untitled release'),
+            subtitle: r.shippedRelative ? `Shipped ${r.shippedRelative}` : (r.shippedAt ?? r.when ?? '—'),
+            description: r.changelog ?? r.notes ?? '',
             statusLabel: r.status ?? 'shipped',
             statusTone: r.status === 'archived' ? 'neutral' : r.status === 'draft' ? 'warn' : 'ok',
             accent: r.status === 'archived' ? '#737373' : '#16a34a',
             icon: <Package className="w-5 h-5" />,
             metricLabel: 'version',
             metricValue: r.version ?? '—',
-            meta: r.shippedRelative ?? r.shippedAt,
+            meta: r.shippedRelative ?? r.shippedAt ?? r.when,
           })}
         />
       </div>

@@ -31,7 +31,14 @@ export function CMSCardList<T extends { id: unknown }>({
 }: CMSCardListProps<T>) {
   const items = (useCmsStore(s => s.items[collectionId] ?? []) as unknown as T[]);
   if (items.length === 0) {
-    return <div className="text-center text-[12px] text-stone-400 py-8">{emptyMessage}</div>;
+    return (
+      <div
+        className="text-center text-[12px] py-8"
+        style={{ color: 'var(--theme-text-dim)' }}
+      >
+        {emptyMessage}
+      </div>
+    );
   }
   return (
     <FleetItemGrid cols={cols}>

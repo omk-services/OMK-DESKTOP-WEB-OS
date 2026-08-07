@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Scale, FileSignature, ShieldCheck, BookMarked } from 'lucide-react';
+import { Scale, FileSignature, ShieldCheck, BookMarked, AlertTriangle } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
@@ -111,9 +111,41 @@ export function LegalApp() {
 
   const cleared = checks.filter(c => c.done).length;
 
+  // Une échéance AI-Act figée à 2026-08-02 est passée depuis plusieurs jours
+  // et l'ancien rendu (« Deadline 2026-08-02 » en gris neutre) ne le disait
+  // pas. On calcule le retard à chaque rendu (sans useState — la date du jour
+  // change entre deux ouvertures du shell, pas pendant) et on l'affiche en
+  // couleur d'alerte avec une icône. (cf. FIX-4.4.)
+  const DEADLINE = new Date('2026-08-02T00:00:00');
+  const today = new Date();
+  const daysLate = Math.max(
+    0,
+    Math.floor((today.getTime() - DEADLINE.getTime()) / 86_400_000),
+  );
+  const overdue = daysLate > 0;
+  const overdueLabel = overdue
+    ? `Deadline 2026-08-02 · en retard de ${daysLate} jour${daysLate > 1 ? 's' : ''}`
+    : `Deadline 2026-08-02 · dans ${-daysLate} jour${-daysLate > 1 ? 's' : ''}`;
+
   const Compliance = () => (
     <div className="p-7">
-      <SectionHead title="AI-Act compliance" subtitle="Deadline 2026-08-02" action={<Badge tone={cleared === checks.length ? 'ok' : 'warn'}>{cleared} / {checks.length}</Badge>} />
+      <div className="flex items-start justify-between gap-4 mb-5">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-stone-900 font-outfit">AI-Act compliance</h2>
+          <p
+            className={`text-sm mt-0.5 inline-flex items-center gap-1.5 ${
+              overdue ? 'text-red-600 font-semibold' : 'text-stone-500'
+            }`}
+          >
+            {overdue && <AlertTriangle className="w-3.5 h-3.5" />}
+            <span>{overdueLabel}</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {overdue && <Badge tone="danger">Overdue</Badge>}
+          <Badge tone={cleared === checks.length ? 'ok' : 'warn'}>{cleared} / {checks.length}</Badge>
+        </div>
+      </div>
       <Card>
         <div className="divide-y divide-[var(--hairline)]">
           {checks.map(c => (

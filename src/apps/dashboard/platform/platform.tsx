@@ -72,7 +72,37 @@ function Knowledge() {
 
 function DocumentQuestion({ document }: { document: KnowledgeDocument }) {
   const state = docState[document.state];
-  return <Panel className="p-5"><div className="mb-4 flex items-center justify-between"><div><div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ACCENT }}>Question au document</div><h3 className="mt-1 text-base font-bold">{document.title}</h3></div><SemanticPill color={state.color} background={`${state.color}18`}><CircleCheck className="h-3 w-3" />{state.label}</SemanticPill></div><div className="rounded-xl border border-[var(--panel-border)] p-3 text-xs" style={{ color: 'var(--theme-muted)' }}>Quel est le point essentiel à retenir pour la prochaine séance ?</div><div className="mt-4 rounded-xl p-4" style={{ background: `${ACCENT}0d` }}><div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: ACCENT }}><Sparkles className="h-3 w-3" />Réponse</div><p className="text-sm leading-relaxed">{document.answer}</p></div><div className="mt-4 flex items-start gap-2 border-t border-[var(--panel-border)] pt-3 text-[11px]" style={{ color: 'var(--theme-muted)' }}><Link2 className="h-3.5 w-3.5 shrink-0" style={{ color: '#15803d' }} /><span>Source : <strong style={{ color: 'var(--theme-text)' }}>{document.source}</strong></span></div></Panel>;
+  return (
+    <Panel className="p-5">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ACCENT }}>Question au document</div>
+          <h3
+            className="mt-1 text-base font-bold"
+            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          >
+            {document.title}
+          </h3>
+        </div>
+        <SemanticPill color={state.color} background={`${state.color}18`}>
+          <CircleCheck className="h-3 w-3" />{state.label}
+        </SemanticPill>
+      </div>
+      <div className="rounded-xl border border-[var(--panel-border)] p-3 text-xs" style={{ color: 'var(--theme-muted)' }}>
+        Quel est le point essentiel à retenir pour la prochaine séance ?
+      </div>
+      <div className="mt-4 rounded-xl p-4" style={{ background: `${ACCENT}0d` }}>
+        <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: ACCENT }}>
+          <Sparkles className="h-3 w-3" />Réponse
+        </div>
+        <p className="text-sm leading-relaxed">{document.answer}</p>
+      </div>
+      <div className="mt-4 flex items-start gap-2 border-t border-[var(--panel-border)] pt-3 text-[11px]" style={{ color: 'var(--theme-muted)' }}>
+        <Link2 className="h-3.5 w-3.5 shrink-0" style={{ color: '#15803d' }} />
+        <span>Source : <strong style={{ color: 'var(--theme-text)' }}>{document.source}</strong></span>
+      </div>
+    </Panel>
+  );
 }
 
 function Memories() {

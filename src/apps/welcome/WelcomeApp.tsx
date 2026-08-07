@@ -330,6 +330,42 @@ export function WelcomeApp() {
   const initialId = LANDING_PAGES[0]?.id ?? '';
   const [activePageId, setActivePageId] = useState<string>(initialId);
 
+  // Le bandeau PAGES du canvas et la barre latérale d'AppFrame lisent chacun
+  // leur propre source de vérité : la sidebar suit `activeId` interne à
+  // AppFrame, le bandeau suit `activePageId` interne à WelcomeApp. Sans pont,
+  // cliquer la sidebar « OMK Coach Demo » laisse le bandeau surligner « OMK RH »,
+  // et cliquer un onglet du bandeau ne déplace pas la sidebar. (cf. FIX-4.2.)
+  //
+  // Le pont le plus local possible :
+  //   - à chaque clic sur un bouton sidebar (data-section={label}), on
+  //     retrouve la page dont la marque porte ce label, et on synchronise
+  //     activePageId. Le canvas réaffiche le bandeau avec le bon surlignage.
+  //   - quand un onglet du bandeau est cliqué, on déclenche aussi un clic
+  //     sur le bouton sidebar correspondant, ce qui pousse AppFrame à
+  //     naviguer. Les deux états convergent en un seul cycle.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const btn = target.closest('[data-section]');
+      if (!(btn instanceof HTMLElement)) return;
+      const label = btn.getAttribute('data-section');
+      if (!label) return;
+      const page = LANDING_PAGES.find(p => p.brand === label);
+      if (page && page.id !== activePageId) setActivePageId(page.id);
+    };
+    document.addEventListener('click', handler, true);
+    return () => document.removeEventListener('click', handler, true);
+  }, [activePageId]);
+
+  const navigateToPage = (id: string) => {
+    setActivePageId(id);
+    const page = LANDING_PAGES.find(p => p.id === id);
+    if (!page) return;
+    const btn = document.querySelector(`[data-section="${page.brand}"]`);
+    if (btn instanceof HTMLButtonElement) btn.click();
+  };
+
   const sections: AppSection[] = useMemo(() => {
     return [
       {
@@ -338,7 +374,7 @@ export function WelcomeApp() {
         icon: Compass,
         render: () => (
           <GlobalThemedCanvas>
-            <OverviewPanel onSelect={(id) => setActivePageId(id)} />
+            <OverviewPanel onSelect={navigateToPage} />
           </GlobalThemedCanvas>
         ),
       },
@@ -350,7 +386,7 @@ export function WelcomeApp() {
           icon: Icon,
           render: () => (
             <GlobalThemedCanvas>
-              <PageCanvas page={p} activePageId={activePageId} onSelectPage={(id) => setActivePageId(id)} />
+              <PageCanvas page={p} activePageId={activePageId} onSelectPage={navigateToPage} />
             </GlobalThemedCanvas>
           ),
         } satisfies AppSection;
