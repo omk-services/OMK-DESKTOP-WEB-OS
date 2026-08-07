@@ -14,6 +14,7 @@ import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
 import { TopBarMenu } from './TopBarMenu';
 import { ChangelogTabs } from './ChangelogTabs';
+import { CharacterMenu } from '../agent/CharacterMenu';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -316,6 +317,8 @@ export function TopBar() {
               {voice.listening ? 'Écoute' : 'Voix'}
             </button>
           )}
+
+          <CharacterMenu />
 
           <button
             onClick={clearNotifications}

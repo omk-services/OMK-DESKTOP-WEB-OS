@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play, Wand2, Image as ImageIcon, Upload, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateCcw, HelpCircle, Play, Wand2, Image as ImageIcon, Upload, RefreshCw, AlertTriangle, Bot } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
@@ -10,6 +10,7 @@ import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
 import { ThemeDetailPage } from './ThemeDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SettingsItemDetail } from './SettingsItemDetail';
+import { AssistantSettings } from './AssistantSettings';
 
 registerItemDetail('settings', SettingsItemDetail);
 import { useCanvasFxStore } from '../../stores/canvasFx.store';
@@ -842,6 +843,7 @@ export function SettingsApp() {
     { id: 'themes', label: 'Themes', icon: Palette, render: Themes },
     { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, render: Wallpaper },
     { id: 'canvas-fx', label: 'Canvas FX', icon: Wand2, render: CanvasFx },
+    { id: 'assistant', label: 'Assistant', icon: Bot, render: AssistantSettings },
     { id: 'privacy', label: 'Privacy', icon: ShieldAlert, render: Privacy },
     { id: 'integrations', label: 'Integrations', icon: Plug, render: Integrations },
     { id: 'help', label: 'Help', icon: HelpCircle, render: Help },

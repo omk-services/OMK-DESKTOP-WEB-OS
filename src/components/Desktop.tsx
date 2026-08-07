@@ -14,6 +14,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { useShellStore } from '../stores/shell.store';
 import { getApp } from '../lib/app-registry';
 import { useWallpaper } from '../lib/wallpaper';
+import { AssistantOverlay } from '../agent/AssistantOverlay';
 
 /** Onboarding-only routes: when the prospect hits /onboarding or /demo, the
  *  Macro Desktop opens with the Onboarding window auto-launched + maximized.
@@ -129,6 +130,7 @@ export function Desktop() {
         <Dock />
         <ToastContainer />
         <AppDrawer />
+        <AssistantOverlay />
       </div>
     </ViewportGuard>
   );

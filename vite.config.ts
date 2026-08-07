@@ -2,10 +2,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { devApiPlugin } from './tools/dev-api-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), devApiPlugin()],
   // Ce depot n'avait aucun runner de test. L'absence a bloque la premiere
   // story de l'epic themes-par-app : le skill dev de BMAD exige des tests
   // couvrant la matrice d'acceptation, et n'avait rien pour les executer.
