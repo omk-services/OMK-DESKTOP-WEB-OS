@@ -207,6 +207,46 @@ export function AssistantOverlay() {
     void sendMessage({ text });
   }, [input, sendMessage]);
 
+  // ──── Position : elle doit suivre la fenetre ────
+  //
+  //  La position par defaut etait `{ x: 1180, y: 700 }`, en dur. Dans un
+  //  navigateur integre, ou la hauteur utile descend sous 800 px, le personnage
+  //  etait rendu a 700 + 128 = 828 — sous le bord bas. Present dans le DOM,
+  //  anime, et parfaitement invisible : le pire des etats, puisque rien ne
+  //  signale l'anomalie.
+  //
+  //  Meme cause que les icones du bureau, corrigees plus tot : une constante qui
+  //  supposait un grand ecran. On borne donc contre la fenetre reelle, au
+  //  montage et a chaque redimensionnement, et on remonte la position bornee
+  //  dans le magasin pour qu'elle soit persistee reparee.
+  const HAUT_BARRE = 44;
+  const BAS_DOCK = 92;
+
+  const bornerDansCadre = useCallback(
+    (p: { x: number; y: number }) => {
+      const largeur = character.width;
+      const hauteur = character.height;
+      const maxX = Math.max(0, window.innerWidth - largeur - 8);
+      const maxY = Math.max(HAUT_BARRE, window.innerHeight - hauteur - BAS_DOCK);
+      return {
+        x: Math.min(Math.max(8, p.x), maxX),
+        y: Math.min(Math.max(HAUT_BARRE, p.y), maxY),
+      };
+    },
+    [character.width, character.height],
+  );
+
+  useEffect(() => {
+    const recadrer = () => {
+      const p = useAssistantStore.getState().position;
+      const borne = bornerDansCadre(p);
+      if (borne.x !== p.x || borne.y !== p.y) setPosition(borne.x, borne.y);
+    };
+    recadrer();
+    window.addEventListener('resize', recadrer);
+    return () => window.removeEventListener('resize', recadrer);
+  }, [bornerDansCadre, setPosition]);
+
   // ──── Drag ────
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (e.button !== 0) return;
@@ -227,7 +267,10 @@ export function AssistantOverlay() {
     if (!drag) return;
     const dx = e.clientX - drag.startX;
     const dy = e.clientY - drag.startY;
-    setPosition(drag.originX + dx, drag.originY + dy);
+    // Borne aussi pendant le glissement : sans ca on peut deposer le
+    // personnage hors de l'ecran et n'avoir plus aucun moyen de le rattraper.
+    const p = bornerDansCadre({ x: drag.originX + dx, y: drag.originY + dy });
+    setPosition(p.x, p.y);
   }, [setPosition]);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
