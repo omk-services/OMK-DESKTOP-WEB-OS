@@ -14,6 +14,9 @@ export default defineConfig({
   // qu'ecrire des proprietes CSS sur un HTMLElement.
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    //  etait hors du glob : les tests du portier existaient sans jamais
+    // tourner. Un test qui ne s'execute pas donne une fausse assurance, ce qui
+    // est pire que pas de test du tout.
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'api/**/*.{test,spec}.ts'],
   },
 })

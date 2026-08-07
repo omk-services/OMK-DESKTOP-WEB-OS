@@ -20,6 +20,7 @@ import {
 } from './_agent/providers.js'
 import { tools } from './_agent/tools.js'
 import { composeSystem } from './_agent/prompt.js'
+import { verifierAcces, verifierTaille, MAX_MESSAGES } from './_agent/garde.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -47,6 +48,9 @@ function isUIMessageArray(value: unknown): value is UIMessage[] {
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  const refus = verifierAcces(request) ?? verifierTaille(request)
+  if (refus) return jsonError(refus.status, refus.message)
+
   if (request.method !== 'POST') {
     return jsonError(405, 'Methode non autorisee. Utiliser POST.')
   }
@@ -73,6 +77,11 @@ export default async function handler(request: Request): Promise<Response> {
       400,
       'Le champ "messages" doit etre un tableau de messages UI du SDK.',
     )
+  }
+  // Chaque message est reinjecte en entree a chaque tour : sans plafond,
+  // mille messages triviaux passent et se paient.
+  if (messages.length > MAX_MESSAGES) {
+    return jsonError(413, `Trop de messages (${messages.length}). Maximum : ${MAX_MESSAGES}.`)
   }
 
   let resolvedId: ProviderId

@@ -15,6 +15,7 @@ import { isBackendAvailable } from '../_agent/backends.js'
 import { demarrerSessionBuzz, type BuzzHandle } from '../_agent/backends/buzz.js'
 import { demarrerSessionMultica, type MulticaHandle } from '../_agent/backends/multica.js'
 import { demarrerSessionModel, type ModelHandle } from '../_agent/backends/model.js'
+import { verifierAcces, verifierTaille, MAX_MESSAGES } from '../_agent/garde.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -56,6 +57,9 @@ function dernierTexteUtilisateur(messages: UIMessage[]): string {
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  const refus = verifierAcces(request) ?? verifierTaille(request)
+  if (refus) return jsonError(refus.status, refus.message)
+
   if (request.method !== 'POST') {
     return jsonError(405, 'Methode non autorisee. Utiliser POST.')
   }
