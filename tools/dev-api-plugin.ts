@@ -20,6 +20,8 @@ interface Route {
 const ROUTES: Route[] = [
   { test: (p) => p === '/api/chat', module: '/api/chat.ts' },
   { test: (p) => p === '/api/agent/providers', module: '/api/agent/providers.ts' },
+  { test: (p) => p === '/api/agent/roster', module: '/api/agent/roster.ts' },
+  { test: (p) => p === '/api/agent/invoke', module: '/api/agent/invoke.ts' },
 ]
 
 async function readNodeBody(req: IncomingMessage): Promise<Uint8Array | undefined> {
