@@ -96,6 +96,27 @@ export async function upsertItem(collectionId: string, item: CmsItem): Promise<v
   }
 }
 
+/** Removes one item. Fire-and-forget from the caller's perspective — the
+ *  Zustand store already updated optimistically before this resolves.
+ *  Brief-F (2026-08-07) — la couche d'écriture appelle ce chemin en miroir
+ *  de `upsertItem`. Sans lui, `removeItem` du store laissait la ligne dans
+ *  Supabase après un rechargement. */
+export async function removeItem(collectionId: string, id: string): Promise<void> {
+  const orgId = await getCurrentOrgId();
+  if (!orgId) return;
+
+  try {
+    await supabase
+      .from('cms_items')
+      .delete()
+      .eq('id', id)
+      .eq('collection_id', collectionId)
+      .eq('org_id', orgId);
+  } catch {
+    // best-effort — local state is the source of truth until Supabase confirms
+  }
+}
+
 /** Append-only event sink used by domain surfaces to record state-changing
  *  decisions without mutating existing rows. D4 append-only compliance, no
  *  UPSERT semantics, no PATCH semantics. */

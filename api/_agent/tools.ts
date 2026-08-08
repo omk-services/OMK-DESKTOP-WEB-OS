@@ -75,10 +75,62 @@ export const changerTheme = tool({
   }),
 })
 
+/** Brief-F (2026-08-07) — couche d'écriture.
+ *
+ *  creerItem dépose une proposition de création dans une collection du CMS.
+ *  L'item n'est créé qu'à la fusion, après approbation humaine.
+ *  Ne pas utiliser pour supprimer : il n'y a pas d'outil supprimer dans cette
+ *  vague. Dire ce qu'on ne peut pas faire fait partie du contrat (cf. prompt).
+ */
+export const creerItem = tool({
+  description:
+    "PROPOSE la création d'un item dans une collection du CMS. Ne touche " +
+    "PAS aux donnees reelles : depose une proposition dans le scenario " +
+    "courant. L'approbateur verra la proposition dans la file " +
+    "d'approbation (People > Approvals) et tranchera. Le collectionId doit " +
+    "exister (listerApps ou lireCollection pour decouvrir). Les `fields` " +
+    "doivent inclure au moins le champ titre declare par la collection ; " +
+    "les cles inconnues sont ignorees.",
+  inputSchema: z.object({
+    collectionId: z
+      .string()
+      .describe('Identifiant canonique de la collection dans le CMS.'),
+    fields: z
+      .record(z.string(), z.unknown())
+      .describe(
+        "Champs de l'item. Inclure au moins la cle designee par " +
+          'titleField dans la declaration de la collection.',
+      ),
+  }),
+})
+
+/** Brief-F (2026-08-07) — modifierItem : patch partiel sur un item existant,
+ *  lui aussi via proposition. La fusion capture un snapshot et revert au
+ *  moindre echec. */
+export const modifierItem = tool({
+  description:
+    "PROPOSE la modification d'un item existant dans une collection du CMS. " +
+    "Ne touche PAS aux donnees reelles : depose une proposition dans le " +
+    "scenario courant. Le `patch` est un objet cle->valeur ; les cles " +
+    "inconnues de la collection sont ignorees. L'id doit exister dans la " +
+    "collection.",
+  inputSchema: z.object({
+    collectionId: z
+      .string()
+      .describe('Identifiant canonique de la collection dans le CMS.'),
+    id: z.string().describe('Identifiant canonique de l\'item a modifier.'),
+    patch: z
+      .record(z.string(), z.unknown())
+      .describe('Patch a appliquer. Cles inconnues ignorees.'),
+  }),
+})
+
 export const tools = {
   listerApps,
   ouvrirApp,
   allerASection,
   lireCollection,
   changerTheme,
+  creerItem,
+  modifierItem,
 }

@@ -31,6 +31,7 @@ import { getAllApps } from '../lib/app-registry';
 import { CHARACTERS } from './characters';
 import { useScenariosStore } from '../stores/scenarios.store';
 import type { Applicator } from './scenarios';
+import type { CmsCollectionDef } from '../lib/cms/types';
 
 interface ToolSuccess<T> { ok: true; data: T }
 interface ToolFailure { ok: false; error: string }
@@ -273,11 +274,168 @@ export const applyThemeChange: Applicator = (args) => {
   }
 };
 
-/** Table des applicateurs par outil. C'est ce que la fusion itère.
- *  Tout outil d'écriture doit y figurer — sinon la fusion s'arrête à
- *  la première proposition qu'elle ne sait pas appliquer. */
-export const applicateurs: Record<string, Applicator> = {
-  changerTheme: applyThemeChange,
+/** Table des applicateurs par outil — déclarée en bas du fichier.
+ *  Voir l'implémentation à la fin du module : les références y sont toutes
+ *  déjà résolues, et c'est cette table que la fusion atomique importe. */
+
+// ────────────────────────────────────────────────────────────────────────────
+// creerItem — ÉCRITURE. Dépose une proposition de création dans une
+// collection du CMS. Ne touche jamais aux données réelles.
+//
+// Brief-F (2026-08-07) — la couche d'écriture. Avant : l'agent prétendait
+// avoir ajouté une tâche alors qu'aucun outil ne le permettait. Maintenant :
+// il dépose une proposition, l'utilisateur la voit arriver dans la file
+// d'approbation, et tranche.
+//
+// Le label est généré côté client à partir de `collectionId`, du titre
+// déclaré par la collection (def.singular) et des champs fournis. Pas
+// d'invention : chaque champ doit être une clé valide du formulaire ou
+// correspondre à `def.titleField` / `def.subtitleField` / `def.badgeField`.
+// ────────────────────────────────────────────────────────────────────────────
+
+interface CreerItemArgs {
+  collectionId: string;
+  /** Données de l'item. Doivent inclure au moins `def.titleField`. */
+  fields: Record<string, unknown>;
+}
+
+interface ModifierItemArgs {
+  collectionId: string;
+  id: string;
+  /** Patch à appliquer. */
+  patch: Record<string, unknown>;
+}
+
+function pickKnownFields(def: CmsCollectionDef, fields: Record<string, unknown>): Record<string, unknown> {
+  const allowed = new Set(def.fields.map((f) => f.key));
+  // Le `titleField`, `subtitleField` et `badgeField` ne sont pas toujours
+  // déclarés dans `def.fields` (le seed existant le confirme : tasksDef a
+  // `titleField: 'label'` mais `label` n'est pas dans `def.fields`). On les
+  // accepte pour ne pas bloquer un humain ou un agent qui suit le contrat.
+  if (def.titleField) allowed.add(def.titleField);
+  if (def.subtitleField) allowed.add(def.subtitleField);
+  if (def.badgeField) allowed.add(def.badgeField);
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (allowed.has(k)) out[k] = v;
+  }
+  return out;
+}
+
+export function creerItem(args: CreerItemArgs): ToolResult<{
+  scenarioId: string;
+  proposalId: string;
+  collectionId: string;
+  fields: Record<string, unknown>;
+}> {
+  if (!args || typeof args.collectionId !== 'string') {
+    return fail('collectionId must be a non-empty string');
+  }
+  if (!args.fields || typeof args.fields !== 'object') {
+    return fail('fields must be an object');
+  }
+  const def = useCmsStore.getState().collections[args.collectionId];
+  if (!def) return fail(`Unknown collection: "${args.collectionId}". Use lireCollection to discover what exists.`);
+  const cleaned = pickKnownFields(def, args.fields);
+  const titleFieldValue = cleaned[def.titleField];
+  if (titleFieldValue === undefined || titleFieldValue === null || titleFieldValue === '') {
+    return fail(`fields.${def.titleField} est obligatoire (champ titre déclaré par la collection).`);
+  }
+  const displayName = `Créer un ${def.singular} : ${String(titleFieldValue)}`;
+  const { scenarioId, proposalId } = useScenariosStore.getState().addProposal({
+    toolName: 'creerItem',
+    args: { collectionId: args.collectionId, fields: cleaned },
+    displayName,
+  });
+  return ok({ scenarioId, proposalId, collectionId: args.collectionId, fields: cleaned });
+}
+
+/** L'applicateur de creerItem — utilisé par la fusion atomique.
+ *
+ *  Capture le résultat de `addItem`, et fournit un `revert` qui appelle
+ *  `removeItem` sur l'id retourné. C'est la symétrie exacte qui rend la
+ *  sémantique tout-ou-rien correcte pour une création : si une proposition
+ *  suivante échoue, la ligne créée est retirée avant que la fonction rende. */
+export const applyCreerItem: Applicator = (args) => {
+  const collectionId = String(args.collectionId ?? '');
+  const fields = (args.fields && typeof args.fields === 'object' ? args.fields : {}) as Record<string, unknown>;
+  if (!collectionId) return { ok: false, error: 'collectionId manquant' };
+  const def = useCmsStore.getState().collections[collectionId];
+  if (!def) return { ok: false, error: `Collection inconnue : "${collectionId}"` };
+  const result = useCmsStore.getState().addItem(collectionId, fields);
+  if (!result.ok || !result.item) {
+    return { ok: false, error: result.error ?? 'Création impossible' };
+  }
+  const createdId = result.item.id;
+  return {
+    ok: true,
+    revert: () => {
+      useCmsStore.getState().removeItem(collectionId, createdId);
+    },
+  };
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// modifierItem — ÉCRITURE. Dépose une proposition de modification.
+// Symétrique de creerItem : la fusion revert avec updateItem sur l'ancien
+// snapshot.
+// ────────────────────────────────────────────────────────────────────────────
+export function modifierItem(args: ModifierItemArgs): ToolResult<{
+  scenarioId: string;
+  proposalId: string;
+  collectionId: string;
+  id: string;
+  patch: Record<string, unknown>;
+}> {
+  if (!args || typeof args.collectionId !== 'string') {
+    return fail('collectionId must be a non-empty string');
+  }
+  if (!args.id || typeof args.id !== 'string') {
+    return fail('id must be a non-empty string');
+  }
+  if (!args.patch || typeof args.patch !== 'object') {
+    return fail('patch must be an object');
+  }
+  const def = useCmsStore.getState().collections[args.collectionId];
+  if (!def) return fail(`Unknown collection: "${args.collectionId}".`);
+  const cleaned = pickKnownFields(def, args.patch);
+  const items = useCmsStore.getState().items[args.collectionId] ?? [];
+  const target = items.find((it) => it.id === args.id);
+  if (!target) {
+    return fail(`Item introuvable : "${args.id}" dans "${args.collectionId}".`);
+  }
+  const titleFieldValue = target[def.titleField];
+  const displayName = `Modifier ${def.singular} : ${String(titleFieldValue ?? args.id)}`;
+  const { scenarioId, proposalId } = useScenariosStore.getState().addProposal({
+    toolName: 'modifierItem',
+    args: { collectionId: args.collectionId, id: args.id, patch: cleaned },
+    displayName,
+  });
+  return ok({ scenarioId, proposalId, collectionId: args.collectionId, id: args.id, patch: cleaned });
+}
+
+export const applyModifierItem: Applicator = (args) => {
+  const collectionId = String(args.collectionId ?? '');
+  const id = String(args.id ?? '');
+  const patch = (args.patch && typeof args.patch === 'object' ? args.patch : {}) as Record<string, unknown>;
+  if (!collectionId) return { ok: false, error: 'collectionId manquant' };
+  if (!id) return { ok: false, error: 'id manquant' };
+  const items = useCmsStore.getState().items[collectionId] ?? [];
+  const before = items.find((it) => it.id === id);
+  if (!before) return { ok: false, error: `Item introuvable : "${id}" dans "${collectionId}".` };
+  // Snapshot exact de l'état précédent — c'est ce qui rend le revert correct.
+  const snapshot: Record<string, unknown> = { ...before };
+  try {
+    useCmsStore.getState().updateItem(collectionId, id, patch);
+    return {
+      ok: true,
+      revert: () => {
+        useCmsStore.getState().updateItem(collectionId, id, snapshot);
+      },
+    };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -287,10 +445,24 @@ export function listAssistantCharacters() {
   return CHARACTERS.map((c) => ({ id: c.id, name: c.name, width: c.width, height: c.height }));
 }
 
+/** Table des applicateurs par outil — déclarée en fin de fichier.
+ *  C'est ce que la fusion itère. Tout outil d'écriture doit y figurer —
+ *  sinon la fusion s'arrête à la première proposition qu'elle ne sait
+ *  pas appliquer.
+ *  Brief-F (2026-08-07) — creerItem et modifierItem rejoignent
+ *  changerTheme. La déclaration est posée ici plutôt qu'au milieu pour
+ *  éviter le TDZ sur les `const` des applicateurs ajoutés après le
+ *  sélecteur original (Brief D posait déjà ce risque ; on le retire). */
+export const applicateurs: Record<string, Applicator> = {
+  changerTheme: applyThemeChange,
+  creerItem: applyCreerItem,
+  modifierItem: applyModifierItem,
+};
+
 // DEV-only handle for Playwright capture scripts.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   const w = window as unknown as { __coachos?: Record<string, unknown> };
   // On s'assure que le theme store est chargé pour le publier aussi.
   void useThemeStore.getState();
-  w.__coachos = { ...w.__coachos, tools: { applicateurs, applyThemeChange } };
+  w.__coachos = { ...w.__coachos, tools: { applicateurs, applyThemeChange, applyCreerItem, applyModifierItem, creerItem, modifierItem } };
 }

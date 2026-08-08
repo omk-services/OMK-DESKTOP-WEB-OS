@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckSquare, Sun, CalendarClock, CheckCheck, Check, ShieldCheck, GitCompareArrows, Megaphone } from 'lucide-react';
+import { CheckSquare, Sun, CalendarClock, CheckCheck, Check, ShieldCheck, GitCompareArrows, Megaphone, Plus, Trash2 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -189,7 +189,54 @@ export function TasksApp() {
     }
   }, [detail, setWindowDetail]);
   const updateItem = useCmsStore(s => s.updateItem);
+  const addItem = useCmsStore(s => s.addItem);
+  const removeItem = useCmsStore(s => s.removeItem);
   const addToast = useShellStore(s => s.addToast);
+
+  /* Brief-F — la couche d'écriture : un humain doit pouvoir créer une tâche.
+   * L'état est local à l'app : pas besoin de persister un brouillon. La
+   * soumission passe par `addItem` du magasin CMS — pas un raccourci à côté. */
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerLabel, setComposerLabel] = useState('');
+  const [composerWhen, setComposerWhen] = useState('');
+
+  const submitNewTask = (): void => {
+    const label = composerLabel.trim();
+    if (label.length === 0) {
+      addToast({ source: 'Tasks', type: 'warning', message: 'Le titre est obligatoire.' });
+      return;
+    }
+    const result = addItem('tasks', {
+      label,
+      when: composerWhen.trim() || 'today',
+      group: 'today',
+      done: false,
+    });
+    if (result.ok) {
+      addToast({ source: 'Tasks', type: 'success', message: `Ajouté : ${label}` });
+      setComposerLabel('');
+      setComposerWhen('');
+      setComposerOpen(false);
+    } else {
+      addToast({ source: 'Tasks', type: 'warning', message: result.error ?? 'Création impossible.' });
+    }
+  };
+
+  const cancelComposer = (): void => {
+    setComposerLabel('');
+    setComposerWhen('');
+    setComposerOpen(false);
+  };
+
+  const removeTask = (id: string): void => {
+    const current = tasks.find((t) => t.id === id);
+    const result = removeItem('tasks', id);
+    if (result.ok) {
+      addToast({ source: 'Tasks', type: 'success', message: `Supprimé : ${String(current?.label ?? id)}` });
+    } else {
+      addToast({ source: 'Tasks', type: 'warning', message: result.error ?? 'Suppression impossible.' });
+    }
+  };
 
   const toggle = (id: string) => {
     const current = tasks.find(t => t.id === id);
@@ -214,11 +261,111 @@ export function TasksApp() {
     drill.open(id);
   };
 
-  const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string) => {
+  const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string, withComposer = false) => {
     const items = tasks.filter(filter);
     return (
       <div className="p-7">
-        <SectionHead title={title} subtitle={`${items.length} item${items.length === 1 ? '' : 's'}`} />
+        <SectionHead
+          title={title}
+          subtitle={`${items.length} item${items.length === 1 ? '' : 's'}`}
+          action={
+            withComposer && !composerOpen ? (
+              <button
+                onClick={() => setComposerOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'var(--theme-surface)',
+                  border: '1px solid var(--panel-border)',
+                  color: 'var(--theme-text)',
+                }}
+                aria-label="Ajouter une tâche"
+              >
+                <Plus className="w-4 h-4" />
+                Ajouter
+              </button>
+            ) : null
+          }
+        />
+        {withComposer && composerOpen ? (
+          <div
+            className="mb-4 rounded-xl border p-4"
+            style={{
+              background: 'var(--theme-surface)',
+              borderColor: 'var(--panel-border)',
+            }}
+          >
+            <label
+              className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="tasks-composer-label"
+            >
+              Titre
+            </label>
+            <input
+              id="tasks-composer-label"
+              autoFocus
+              value={composerLabel}
+              onChange={(e) => setComposerLabel(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewTask();
+                if (e.key === 'Escape') cancelComposer();
+              }}
+              placeholder="Décrire la tâche…"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+              style={{
+                background: 'var(--theme-bg)',
+                border: '1px solid var(--panel-border)',
+                color: 'var(--theme-text)',
+              }}
+            />
+            <label
+              className="mt-3 block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="tasks-composer-when"
+            >
+              Échéance (libre)
+            </label>
+            <input
+              id="tasks-composer-when"
+              value={composerWhen}
+              onChange={(e) => setComposerWhen(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewTask();
+                if (e.key === 'Escape') cancelComposer();
+              }}
+              placeholder="ex. Thu 14:00 · tomorrow · next week"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+              style={{
+                background: 'var(--theme-bg)',
+                border: '1px solid var(--panel-border)',
+                color: 'var(--theme-text)',
+              }}
+            />
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                onClick={cancelComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--theme-text-dim)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={submitNewTask}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: ACCENT,
+                  color: '#ffffff',
+                }}
+              >
+                Ajouter la tâche
+              </button>
+            </div>
+          </div>
+        ) : null}
         {items.length === 0 ? (
           <div
             className="text-sm py-10 text-center"
@@ -264,6 +411,14 @@ export function TasksApp() {
                 >
                   {String(t.when)}
                 </span>
+                <button
+                  onClick={() => removeTask(String(t.id))}
+                  className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:opacity-80"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  aria-label={`Supprimer ${String(t.label)}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             ))}
           </div>
@@ -275,7 +430,7 @@ export function TasksApp() {
   const isToday = (t: typeof tasks[number]) => t.group === 'today' && !t.done;
   const isUpcoming = (t: typeof tasks[number]) => t.group === 'upcoming' && !t.done;
 
-  const Today = () => list(isToday, 'Today', 'Nothing left today — nicely done.');
+  const Today = () => list(isToday, 'Today', 'Nothing left today — nicely done.', true);
   const Upcoming = () => list(isUpcoming, 'Upcoming', 'Nothing on the horizon.');
   const Done = () => list(t => !!t.done, 'Done', 'No completed tasks yet.');
 
