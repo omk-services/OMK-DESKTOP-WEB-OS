@@ -22,9 +22,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { lastAssistantMessageIsCompleteWithToolCalls, type ChatStatus } from 'ai';
-import { Send, X, MessageSquare, Sparkles, AlertTriangle } from 'lucide-react';
+import { Send, X, MessageSquare, Sparkles, AlertTriangle, Mic, Square } from 'lucide-react';
 import { SpriteAgent } from './SpriteAgent';
+import { VoiceWave } from './VoiceWave';
 import { getCharacter, type Intent } from './characters';
+import {
+  hasRecognition,
+  hasSynthesis,
+  useVoiceRecognition,
+  useVoiceSynthesis,
+  type SpeechState,
+} from './voice';
 import {
   listerApps,
   ouvrirApp,
@@ -32,7 +40,7 @@ import {
   lireCollection,
   changerTheme,
 } from './tools';
-import type { AgentSlot } from '../stores/assistant.store';
+import { useAssistantStore, type AgentSlot } from '../stores/assistant.store';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Status → intent. Stable, memoise hors du composant.
@@ -202,6 +210,17 @@ export function AgentTile(props: AgentTileProps) {
   const { agent, onToggleBubble, onSetBubbleOpen, onSetPosition, onAppendTurn, onClearHistory, barHaut = 44, dockBas = 92 } = props;
   const character = useMemo(() => getCharacter(agent.personnageId) ?? getCharacter('clippy')!, [agent.personnageId]);
 
+  // Reglages vocaux lus a chaque rendu. Scalaires : pas de risque de boucle.
+  const voiceEnabled = useAssistantStore((s) => s.voiceEnabled);
+  const voiceName = useAssistantStore((s) => s.voiceName);
+  const voiceRate = useAssistantStore((s) => s.voiceRate);
+  const voicePrivacy = useAssistantStore((s) => s.voicePrivacy);
+
+  // Detection de la disponibilite des APIs navigateur — recalculee au mount
+  // uniquement (les flags ne changent pas pendant la session).
+  const canListen = useMemo(() => hasRecognition(), []);
+  const canSpeak = useMemo(() => hasSynthesis(), []);
+
   // Entry animation : joue une fois par changement de personnage.
   const [entryDone, setEntryDone] = useState(false);
   const [entryKey, setEntryKey] = useState(agent.personnageId);
@@ -244,6 +263,22 @@ export function AgentTile(props: AgentTileProps) {
 
   // ─── Flux texte (pour dos != modele) ───
   const [fluxState, envoyerFlux, stopFlux] = useTexteFlux(agent.id, agent, agent.backend !== 'modele');
+
+  // ─── Voix : reconnaissance et synthese ───
+  // La reconnaissance recoit la transcription finale via onFinal, qu'on
+  // envoie comme un message utilisateur a l'agent (meme canal que send()).
+  const recFinalRef = useRef<((text: string) => void) | null>(null);
+  const recognition = useVoiceRecognition({
+    enabled: voiceEnabled && canListen,
+    onFinal: (text) => recFinalRef.current?.(text),
+  });
+  const synthesis = useVoiceSynthesis({
+    enabled: voiceEnabled && canSpeak,
+    voiceName,
+    rate: voiceRate,
+    privacy: voicePrivacy,
+    agentId: agent.id,
+  });
 
   // ─── Position : bornee contre la fenetre ───
   const bornerDansCadre = useCallback(
@@ -319,9 +354,56 @@ export function AgentTile(props: AgentTileProps) {
   }, [fluxState.status]);
 
   // ─── Status → intent ───
+  // Pendant la synthese vocale, l'intent reste 'speaking' meme si le
+  // streaming texte est termine : c'est le personnage qui parle, pas
+  // seulement la machine qui repond.
   const chatStatusForIntent: ChatStatus = isModele ? chat.status : (isStreaming ? 'streaming' : 'ready');
   const statusIntent = intentForStatus(chatStatusForIntent, hasError, isStreaming);
-  const intent = entryDone ? statusIntent : 'entree';
+  const synthActive = synthesis.state === 'speaking';
+  const intent: Intent = entryDone
+    ? (synthActive ? 'speaking' : statusIntent)
+    : 'entree';
+
+  // ─── Branchement de la reconnaissance : envoyer la transcription finale
+  // comme un message utilisateur. On utilise un ref pour eviter de
+  // re-rendre quand send() change. ───
+  recFinalRef.current = (text: string) => {
+    if (!text) return;
+    setInput('');
+    onAppendTurn(agent.id, { id: crypto.randomUUID(), role: 'user', ts: Date.now(), text });
+    if (isModele) {
+      void chat.sendMessage({ text });
+    } else {
+      envoyerFlux(text);
+    }
+  };
+
+  // ─── Transcription intermediaire : on l'injecte dans le champ de saisie
+  // au fur et a mesure, par-dessus ce que l'utilisateur aurait tape. Si
+  // l'utilisateur tape pendant qu'on ecoute, sa frappe prend la main. ───
+  useEffect(() => {
+    if (recognition.state !== 'listening') return;
+    if (!recognition.interim) return;
+    setInput(recognition.interim);
+    // On ne depend que de l'etat et du transcript — pas de l'input sinon
+    // on boucle : setInput -> re-render -> useEffect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recognition.state, recognition.interim]);
+
+  // ─── Synthese vocale : chaque nouvelle reponse assistant terminee est
+  // dite a voix haute si la voix est activee. ───
+  const lastSpokenRef = useRef<string>('');
+  useEffect(() => {
+    if (!voiceEnabled || !canSpeak) return;
+    if (!lastAssistantText) return;
+    // On attend que le streaming texte soit termine pour parler : sinon
+    // on coupe la parole a chaque token, ce qui est inutile et laid.
+    if (isStreaming) return;
+    if (lastAssistantText === lastSpokenRef.current) return;
+    lastSpokenRef.current = lastAssistantText;
+    synthesis.speak(lastAssistantText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastAssistantText, isStreaming, voiceEnabled, canSpeak]);
 
   // ─── Input local ───
   const [input, setInput] = useState('');
@@ -378,6 +460,10 @@ export function AgentTile(props: AgentTileProps) {
 
   // Texte de la bulle, dependant du statut
   const bubbleText = (() => {
+    // Refus de permission micro : un message clair, sans re-essai en boucle.
+    if (recognition.state === 'denied') {
+      return 'Le micro est refuse. Autorise-le dans les reglages du navigateur pour dicter ta question.';
+    }
     if (hasError) {
       if (isModele && chat.error) {
         return chat.error.message?.includes('fetch')
@@ -425,6 +511,13 @@ export function AgentTile(props: AgentTileProps) {
             onClose={() => onSetBubbleOpen(agent.id, false)}
             onClear={() => onClearHistory(agent.id)}
             width={bubbleWidth}
+            voiceEnabled={voiceEnabled}
+            canListen={canListen}
+            recognitionState={recognition.state}
+            synthesisState={synthesis.state}
+            onStartListening={() => recognition.start()}
+            onStopListening={() => recognition.stop()}
+            onStopSpeaking={() => synthesis.stop()}
           />
         )}
         <div
@@ -478,9 +571,20 @@ interface AgentBubbleProps {
   onClose: () => void;
   onClear: () => void;
   width: number;
+  voiceEnabled: boolean;
+  canListen: boolean;
+  recognitionState: SpeechState;
+  synthesisState: SpeechState;
+  onStartListening: () => void;
+  onStopListening: () => void;
+  onStopSpeaking: () => void;
 }
 
-function AgentBubble({ agent, character, text, isStreaming, hasError, input, setInput, onSend, onStop, onClose, onClear, width }: AgentBubbleProps) {
+function AgentBubble({
+  agent, character, text, isStreaming, hasError, input, setInput, onSend, onStop, onClose, onClear, width,
+  voiceEnabled, canListen, recognitionState, synthesisState,
+  onStartListening, onStopListening, onStopSpeaking,
+}: AgentBubbleProps) {
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -489,6 +593,18 @@ function AgentBubble({ agent, character, text, isStreaming, hasError, input, set
       onClose();
     }
   };
+  // Le bouton Stop arrete : le stream texte s'il tourne, OU la synthese
+  // vocale seule si elle seule tourne. Les deux ensemble : stream d'abord,
+  // puis synthese.
+  const handleStop = () => {
+    if (isStreaming) onStop();
+    if (synthesisState === 'speaking') onStopSpeaking();
+  };
+  const showStop = isStreaming || synthesisState === 'speaking';
+  // Le bouton micro n'est visible que si : voiceEnabled, canListen,
+  // et on n'ecoute pas deja.
+  const showMic = voiceEnabled && canListen;
+  const showMicStop = voiceEnabled && canListen && recognitionState === 'listening';
   return (
     <div
       data-bubble-handle="true"
@@ -510,6 +626,19 @@ function AgentBubble({ agent, character, text, isStreaming, hasError, input, set
           {!agent.backendAvailable && (
             <span title="Dos indisponible">
               <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: '#dc2626' }} />
+            </span>
+          )}
+          {/* Indicateur d'etat vocal : visible des que le micro est ouvert
+              ou que l'agent parle. Un micro ouvert sans signal est
+              inacceptable — on le dit. */}
+          {recognitionState === 'listening' && (
+            <span data-voice-indicator="listening" aria-label="Micro ouvert" className="flex items-center">
+              <VoiceWave state="listening" color={character.bubble.border} size="sm" />
+            </span>
+          )}
+          {synthesisState === 'speaking' && (
+            <span data-voice-indicator="speaking" aria-label="L'agent parle" className="flex items-center">
+              <VoiceWave state="speaking" color={character.bubble.border} size="sm" />
             </span>
           )}
         </div>
@@ -544,12 +673,54 @@ function AgentBubble({ agent, character, text, isStreaming, hasError, input, set
         onSubmit={(e) => { e.preventDefault(); onSend(); }}
         className="mt-2 flex items-center gap-1"
       >
+        {/* Bouton micro : visible SEULEMENT si la reconnaissance est
+            disponible ET que la voix est activee. Sinon, pas de bouton
+            qui ne fait rien — c'est la regle du brief. */}
+        {showMic && !showMicStop && (
+          <button
+            type="button"
+            onClick={onStartListening}
+            disabled={hasError || !agent.backendAvailable || recognitionState === 'denied'}
+            className="shrink-0 rounded-lg px-1.5 py-1 text-[10px] font-bold flex items-center justify-center disabled:opacity-40"
+            style={{
+              background: recognitionState === 'denied' ? 'rgba(220,38,38,0.1)' : 'rgba(255,255,255,0.7)',
+              border: `1px solid ${character.bubble.border}40`,
+              color: character.bubble.ink,
+            }}
+            title="Dicter"
+            data-voice-mic
+          >
+            <Mic className="w-3 h-3" />
+          </button>
+        )}
+        {showMicStop && (
+          <button
+            type="button"
+            onClick={onStopListening}
+            className="shrink-0 rounded-lg px-1.5 py-1 text-[10px] font-bold flex items-center justify-center"
+            style={{
+              background: character.bubble.border,
+              color: '#fff',
+            }}
+            title="Arreter le micro"
+            data-voice-mic-stop
+            data-voice-mic-active="true"
+          >
+            <Square className="w-3 h-3" />
+          </button>
+        )}
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder={hasError ? 'Try again…' : `Demande a ${agent.name}…`}
+          placeholder={
+            recognitionState === 'denied'
+              ? 'Micro refuse — utilise le clavier'
+              : hasError
+                ? 'Try again…'
+                : `Demande a ${agent.name}…`
+          }
           disabled={hasError || !agent.backendAvailable}
           className="flex-1 min-w-0 rounded-lg px-2 py-1 text-[12px] outline-none"
           style={{
@@ -559,13 +730,14 @@ function AgentBubble({ agent, character, text, isStreaming, hasError, input, set
           }}
           data-assistant-input
         />
-        {isStreaming ? (
+        {showStop ? (
           <button
             type="button"
-            onClick={onStop}
+            onClick={handleStop}
             className="rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider"
             style={{ background: character.bubble.border, color: '#fff' }}
             aria-label="Stop"
+            data-voice-stop
           >
             Stop
           </button>

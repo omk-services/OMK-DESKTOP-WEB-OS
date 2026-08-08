@@ -6,6 +6,22 @@
  * Each tool returns a JSON-serialisable object. Errors are returned as
  * `{ error: string }` — never thrown — so the model can read them and
  * recover, instead of the tour of loop breaking.
+ *
+ * ARCHITECTURE — la séparation lecture / écriture :
+ *  - lecture (listerApps, lireCollection) : geste immédiat, retourne la valeur
+ *    réelle, jamais de proposition. L'agent doit pouvoir lire l'état courant
+ *    pour informer ses décisions.
+ *  - navigation (ouvrirApp, allerASection) : geste immédiat d'affichage, pas
+ *    une écriture de données. Un outil qui déplace une fenêtre sur l'écran
+ *    n'a pas besoin d'approbation — l'utilisateur le voit bouger et corrige
+ *    en un geste.
+ *  - écriture (changerTheme, et tous les outils à venir) : dépose une
+ *    proposition dans le scénario courant. Ne touche plus aux données
+ *    réelles directement. La fusion est l'acte qui engage.
+ *
+ * Cette séparation est tracée ici, en un seul endroit, plutôt que dans
+ * chaque outil. Un outil qui change de nature (lecture → écriture) doit
+ * être déplacé dans la bonne moitié du fichier.
  */
 import { useShellStore } from '../stores/shell.store';
 import { useCmsStore, getCollectionItems } from '../lib/cms/cms.store';
@@ -13,6 +29,8 @@ import { useThemeStore } from '../lib/themes/store';
 import { THEME_META } from '../lib/themes/tokens';
 import { getAllApps } from '../lib/app-registry';
 import { CHARACTERS } from './characters';
+import { useScenariosStore } from '../stores/scenarios.store';
+import type { Applicator } from './scenarios';
 
 interface ToolSuccess<T> { ok: true; data: T }
 interface ToolFailure { ok: false; error: string }
@@ -22,7 +40,7 @@ const ok = <T>(data: T): ToolSuccess<T> => ({ ok: true, data });
 const fail = (error: string): ToolFailure => ({ ok: false, error });
 
 // ────────────────────────────────────────────────────────────────────────────
-// listerApps — returns the registered apps + their sections (best effort).
+// listerApps — LECTURE. Retourne la liste des apps et leurs sections.
 // ────────────────────────────────────────────────────────────────────────────
 export function listerApps(): ToolResult<{ apps: Array<{ id: string; name: string; description: string; sections: string[] }>; note: string }> {
   try {
@@ -49,7 +67,7 @@ export function listerApps(): ToolResult<{ apps: Array<{ id: string; name: strin
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// ouvrirApp — opens the window of an app.
+// ouvrirApp — NAVIGATION. Geste immédiat d'affichage.
 // ────────────────────────────────────────────────────────────────────────────
 export function ouvrirApp(appId: string): ToolResult<{ appId: string; title: string }> {
   if (!appId || typeof appId !== 'string') {
@@ -90,7 +108,7 @@ async function attendreSections(limiteMs = 2000): Promise<string[]> {
   }
 }
 
-/** Va sur une section.
+/** Va sur une section — NAVIGATION. Geste immédiat d'affichage.
  *
  *  La version precedente emettait un evenement `coach-os:open-app-section` que
  *  PERSONNE n'ecoutait, et rendait `ok` — le modele croyait avoir navigue alors
@@ -99,16 +117,28 @@ async function attendreSections(limiteMs = 2000): Promise<string[]> {
  *
  *  On clique donc le vrai bouton, et on echoue franchement si la section
  *  n'existe pas, en listant celles qui existent pour que le modele se corrige.
- */
+ *
+ *  Atomicité : si l'app est déjà fermée et que le clic échoue, on referme
+ *  l'app qu'on vient d'ouvrir. L'utilisateur ne reste pas avec une fenêtre
+ *  qu'il n'a pas demandée. C'est la même sémantique « tout ou rien » que la
+ *  fusion des scénarios : ou bien la navigation aboutit, ou bien l'état ne
+ *  bouge pas. */
 export async function allerASection(
   appId: string,
   sectionId: string,
 ): Promise<ToolResult<{ appId: string; sectionId: string }>> {
-  const open = ouvrirApp(appId);
+  // On regarde si l'app est déjà ouverte. Si oui, on NE LA ROUVRE PAS —
+  // une seconde openApp déplace la fenêtre sur l'écran, ce qui n'est pas
+  // l'intention de l'utilisateur.
+  const shell = useShellStore.getState();
+  const dejaOuverte = shell.windows.some((w) => w.id === appId && w.isOpen);
+  const open = dejaOuverte ? ok({ appId, title: appId }) : ouvrirApp(appId);
   if (!open.ok) return open;
+
   try {
     const disponibles = await attendreSections();
     if (disponibles.length === 0) {
+      if (!dejaOuverte) useShellStore.getState().closeApp(appId);
       return fail(`L'app "${appId}" est ouverte mais n'expose aucune section.`);
     }
     // Tolerant a la casse et aux espaces : le modele ecrit « Client Pipeline »
@@ -116,6 +146,7 @@ export async function allerASection(
     const norme = (s: string) => s.trim().toLowerCase();
     const cible = disponibles.find((s) => norme(s) === norme(sectionId));
     if (!cible) {
+      if (!dejaOuverte) useShellStore.getState().closeApp(appId);
       return fail(
         `Section "${sectionId}" introuvable dans "${appId}". Sections disponibles : ${disponibles.join(', ')}.`,
       );
@@ -123,18 +154,22 @@ export async function allerASection(
     const bouton = document.querySelector<HTMLElement>(
       `[data-section="${CSS.escape(cible)}"]`,
     );
-    if (!bouton) return fail(`Bouton de la section "${cible}" introuvable.`);
+    if (!bouton) {
+      if (!dejaOuverte) useShellStore.getState().closeApp(appId);
+      return fail(`Bouton de la section "${cible}" introuvable.`);
+    }
     bouton.click();
     return ok({ appId, sectionId: cible });
   } catch (err) {
+    if (!dejaOuverte) {
+      try { useShellStore.getState().closeApp(appId); } catch { /* noop */ }
+    }
     return fail(err instanceof Error ? err.message : String(err));
   }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// lireCollection — returns the items of a CMS collection. Useful for the
-// assistant to summarise "your clients" or "your tasks" without having to
-// open the app first.
+// lireCollection — LECTURE. Items du CMS.
 // ────────────────────────────────────────────────────────────────────────────
 interface CollectionItem {
   id: string;
@@ -162,31 +197,100 @@ export function lireCollection(collectionId: string): ToolResult<{ collectionId:
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// changerTheme — sets the global theme (or a per-app override).
+// changerTheme — ÉCRITURE. Dépose une proposition, ne touche plus le store.
+//
+// Contrat changé :
+//  - Avant : modifier le theme immédiatement. Un agent qui se trompe avait
+//    déjà modifié le bureau.
+//  - Maintenant : la proposition atterrit dans le scénario courant. Le
+//    bureau reste sur l'ancien thème. L'utilisateur voit la proposition
+//    arriver dans la file d'approbation et tranche.
+//
+// L'applicateur `applyThemeChange` est exporté à part : c'est lui qui est
+// appelé à la fusion, avec son `revert`. La séparation est ce qui rend
+// l'atomique testable — l'outil, lui, ne fait plus que proposer.
 // ────────────────────────────────────────────────────────────────────────────
-export function changerTheme(themeId: string, appId?: string): ToolResult<{ themeId: string; appId?: string; known: string[] }> {
+export function changerTheme(themeId: string, appId?: string): ToolResult<{
+  scenarioId: string;
+  proposalId: string;
+  themeId: string;
+  appId?: string;
+  known: string[];
+}> {
   if (!themeId || typeof themeId !== 'string') return fail('themeId must be a non-empty string');
   const known = THEME_META.map((t) => t.id);
   if (!known.includes(themeId)) {
     return fail(`Unknown themeId: "${themeId}". Known themes: ${known.join(', ')}.`);
   }
-  try {
-    const store = useThemeStore.getState();
-    if (appId) {
-      // Use the public setAppTheme — it bumps a sentinel so the UI re-renders.
-      store.setAppTheme(appId, themeId);
-    } else {
-      store.setGlobalTheme(themeId);
-    }
-    return ok({ themeId, appId, known });
-  } catch (err) {
-    return fail(err instanceof Error ? err.message : String(err));
-  }
+  const displayName = appId
+    ? `Thème « ${themeId} » sur l'app ${appId}`
+    : `Thème global « ${themeId} »`;
+  const { scenarioId, proposalId } = useScenariosStore.getState().addProposal({
+    toolName: 'changerTheme',
+    args: { themeId, appId },
+    displayName,
+  });
+  return ok({ scenarioId, proposalId, themeId, appId, known });
 }
+
+/** L'applicateur du changement de thème, utilisé par la fusion atomique.
+ *
+ *  Il capture l'état précédent AVANT d'écrire, et fournit un `revert`
+ *  qui rétablit l'état exact. C'est ce qui permet à la sémantique
+ *  « tout ou rien » de fonctionner pour un thème qui aurait été changé
+ *  puis reverté suite à l'échec d'une autre proposition. */
+export const applyThemeChange: Applicator = (args) => {
+  const themeId = String(args.themeId ?? '');
+  const appId = typeof args.appId === 'string' ? args.appId : undefined;
+  if (!themeId) return { ok: false, error: 'themeId manquant' };
+  const known = THEME_META.map((t) => t.id);
+  if (!known.includes(themeId)) {
+    return { ok: false, error: `Thème inconnu : "${themeId}"` };
+  }
+  const store = useThemeStore.getState();
+  // Capture de l'état précédent — l'exact revert est ce qui rend l'atomique
+  // correct sur un changement de thème.
+  const previousGlobal = store.globalTheme;
+  const previousApp = appId ? store.appThemes[appId] : undefined;
+  const hadAppOverride = appId ? appId in store.appThemes : false;
+  try {
+    if (appId) store.setAppTheme(appId, themeId);
+    else store.setGlobalTheme(themeId);
+    return {
+      ok: true,
+      revert: () => {
+        const s = useThemeStore.getState();
+        if (appId) {
+          if (hadAppOverride) s.setAppTheme(appId, previousApp as string);
+          else s.resetAppTheme(appId);
+        } else {
+          s.setGlobalTheme(previousGlobal);
+        }
+      },
+    };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+};
+
+/** Table des applicateurs par outil. C'est ce que la fusion itère.
+ *  Tout outil d'écriture doit y figurer — sinon la fusion s'arrête à
+ *  la première proposition qu'elle ne sait pas appliquer. */
+export const applicateurs: Record<string, Applicator> = {
+  changerTheme: applyThemeChange,
+};
 
 // ────────────────────────────────────────────────────────────────────────────
 // Convenience used by the Settings page — not part of the wire tool surface.
 // ────────────────────────────────────────────────────────────────────────────
 export function listAssistantCharacters() {
   return CHARACTERS.map((c) => ({ id: c.id, name: c.name, width: c.width, height: c.height }));
+}
+
+// DEV-only handle for Playwright capture scripts.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  const w = window as unknown as { __coachos?: Record<string, unknown> };
+  // On s'assure que le theme store est chargé pour le publier aussi.
+  void useThemeStore.getState();
+  w.__coachos = { ...w.__coachos, tools: { applicateurs, applyThemeChange } };
 }

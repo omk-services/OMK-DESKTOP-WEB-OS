@@ -58,17 +58,19 @@ export const lireCollection = tool({
 
 export const changerTheme = tool({
   description:
-    "Change le theme global du bureau, ou le theme d'une seule application si " +
-    'appId est precise. Le themeId doit etre un theme connu (par exemple "nuit", ' +
-    '"aurore", "default").',
+    "PROPOSE un changement de theme (global, ou d'une seule application si " +
+    "appId est precise). Ne touche PAS au theme reel : depose une proposition " +
+    "dans le scenario courant. L'approbateur verra la proposition dans la " +
+    "file d'approbation (People > Approvals) et tranchera. Le themeId doit " +
+    'etre un theme connu (par exemple "nuit", "aurore", "default").',
   inputSchema: z.object({
-    themeId: z.string().describe('Identifiant du theme a appliquer.'),
+    themeId: z.string().describe('Identifiant du theme a proposer.'),
     appId: z
       .string()
       .optional()
       .describe(
-        "Optionnel. Si precise, change le theme de cette application " +
-          'seule, sans affecter le theme global.',
+        "Optionnel. Si precise, propose un changement de theme pour cette " +
+          'application seule.',
       ),
   }),
 })

@@ -14,12 +14,13 @@
  * sprite live (trop lourd en reseau — 12 * 1.3 MB), juste une tuile coloree.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Power, Volume2, RefreshCw, Bot } from 'lucide-react';
+import { Power, Volume2, RefreshCw, Bot, ShieldCheck } from 'lucide-react';
 import { SectionHead } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
 import { useAssistantStore } from '../../stores/assistant.store';
 import { CHARACTERS, getCharacter } from '../../agent/characters';
+import { hasRecognition, hasSynthesis, loadVoicesWithTimeout, type PrivacyMode } from '../../agent/voice';
 
 interface RosterResponse {
   agents: Array<{
@@ -46,6 +47,12 @@ export function AssistantSettings() {
   const setActive = useAssistantStore((s) => s.setActive);
   const voiceEnabled = useAssistantStore((s) => s.voiceEnabled);
   const setVoiceEnabled = useAssistantStore((s) => s.setVoiceEnabled);
+  const voiceName = useAssistantStore((s) => s.voiceName);
+  const setVoiceName = useAssistantStore((s) => s.setVoiceName);
+  const voiceRate = useAssistantStore((s) => s.voiceRate);
+  const setVoiceRate = useAssistantStore((s) => s.setVoiceRate);
+  const voicePrivacy = useAssistantStore((s) => s.voicePrivacy);
+  const setVoicePrivacy = useAssistantStore((s) => s.setVoicePrivacy);
   const agents = useAssistantStore((s) => s.agents);
   const agentOrder = useAssistantStore((s) => s.agentOrder);
   const hydraterRoster = useAssistantStore((s) => s.hydraterRoster);
@@ -56,6 +63,22 @@ export function AssistantSettings() {
   const [roster, setRoster] = useState<RosterResponse | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Disponibilite des APIs navigateur : ce sont des fonctions pures,
+  // pas besoin de les lire dans le store. Calculees au mount.
+  const [, setCanListen] = useState(false);
+  const [canSpeak, setCanSpeak] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  // Charger les voix apres le mount : getVoices() peut etre vide au boot.
+  useEffect(() => {
+    setCanListen(hasRecognition());
+    setCanSpeak(hasSynthesis());
+    let cancelled = false;
+    void loadVoicesWithTimeout().then((v) => {
+      if (!cancelled) setVoices(v);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const charger = useCallback(async () => {
     setBusy(true);
@@ -125,11 +148,113 @@ export function AssistantSettings() {
               <Volume2 className="w-4 h-4 text-[var(--theme-muted)]" />
               <div>
                 <div className="text-sm font-semibold text-[var(--theme-text)]">Read out loud</div>
-                <div className="text-xs text-[var(--theme-muted)]">Speak the agent's reply with the browser's voice.</div>
+                <div className="text-xs text-[var(--theme-muted)]">
+                  Speak the agent's reply with the browser's voice.
+                  {!canSpeak && (
+                    <span className="block text-[10px] mt-1 text-[var(--theme-accent)]" data-voice-unavailable>
+                      Voice API absent on this browser. The toggle stays off.
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <Toggle on={voiceEnabled} onClick={() => setVoiceEnabled(!voiceEnabled)} />
+            <Toggle on={voiceEnabled && canSpeak} onClick={() => canSpeak && setVoiceEnabled(!voiceEnabled)} />
           </div>
+
+          {/* Reglages detailles : voix, vitesse, confidentialite. Actifs
+              des que la voix est activee et l'API presente. */}
+          {voiceEnabled && canSpeak && (
+            <>
+              {/* Choix de la voix */}
+              <div className="px-5 py-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Volume2 className="w-4 h-4 text-[var(--theme-muted)]" />
+                  <div className="text-sm font-semibold text-[var(--theme-text)]">Voice</div>
+                </div>
+                <select
+                  data-voice-select
+                  value={voiceName ?? ''}
+                  onChange={(e) => setVoiceName(e.target.value || null)}
+                  className="w-full rounded-lg border border-[var(--panel-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm text-[var(--theme-text)]"
+                >
+                  <option value="">Default (first French voice)</option>
+                  {voices.map((v) => (
+                    <option key={v.name} value={v.name}>
+                      {v.name} — {v.lang}
+                      {v.localService ? '' : ' (network)'}
+                    </option>
+                  ))}
+                </select>
+                {voices.length === 0 && (
+                  <div className="text-[10px] text-[var(--theme-accent)] mt-1">
+                    No voices loaded yet — try again in a second.
+                  </div>
+                )}
+              </div>
+
+              {/* Vitesse */}
+              <div className="px-5 py-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Volume2 className="w-4 h-4 text-[var(--theme-muted)]" />
+                  <div className="text-sm font-semibold text-[var(--theme-text)]">Speed</div>
+                  <span className="ml-auto text-xs font-semibold text-[var(--theme-muted)] tabular-nums" data-voice-rate-value>
+                    {voiceRate.toFixed(2)}x
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0.5}
+                  max={2.0}
+                  step={0.05}
+                  value={voiceRate}
+                  onChange={(e) => setVoiceRate(Number(e.target.value))}
+                  className="w-full"
+                  data-voice-rate
+                />
+                <div className="flex justify-between text-[10px] text-[var(--theme-muted)] mt-1">
+                  <span>0.5x</span><span>1.0x</span><span>2.0x</span>
+                </div>
+              </div>
+
+              {/* Politique de confidentialite */}
+              <div className="px-5 py-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-[var(--theme-muted)]" />
+                  <div className="text-sm font-semibold text-[var(--theme-text)]">Speech privacy</div>
+                </div>
+                <div className="text-xs text-[var(--theme-muted)] mb-2 leading-relaxed">
+                  The agent speaks client data out loud in open rooms. Pick what gets masked
+                  before the voice reads it.
+                </div>
+                <div className="flex flex-wrap gap-1.5" data-voice-privacy>
+                  {([
+                    { id: 'safe' as const, label: 'Safe — masks cards, emails, phones, IBAN, SSN' },
+                    { id: 'strict' as const, label: 'Strict — also masks amounts and dates' },
+                    { id: 'none' as const, label: 'None — speak the text as written' },
+                  ]).map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setVoicePrivacy(opt.id as PrivacyMode)}
+                      data-voice-privacy-tile={opt.id}
+                      data-active={voicePrivacy === opt.id}
+                      className={`rounded-lg px-3 py-2 text-[11px] font-medium transition-colors ${
+                        voicePrivacy === opt.id
+                          ? 'text-[var(--theme-text)]'
+                          : 'text-[var(--theme-muted)] hover:text-[var(--theme-text)]'
+                      }`}
+                      style={{
+                        border: `1px solid ${voicePrivacy === opt.id ? 'var(--theme-accent)' : 'var(--panel-border)'}`,
+                        background: voicePrivacy === opt.id ? 'var(--theme-surface-hover)' : 'var(--theme-surface)',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </Card>
 

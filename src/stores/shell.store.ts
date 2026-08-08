@@ -194,5 +194,8 @@ export const useShellStore = create<ShellState>((set, get) => ({
  * Vite elimine le bloc entier du bundle.
  */
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  (window as unknown as { __coachos?: unknown }).__coachos = { shell: useShellStore };
+  // Preserve any pre-existing handles (themes, scenarios, tools, assistant…)
+  // — un reset ici écraserait les handles posés par d'autres stores au boot.
+  const w = window as unknown as { __coachos?: Record<string, unknown> };
+  w.__coachos = { ...w.__coachos, shell: useShellStore };
 }

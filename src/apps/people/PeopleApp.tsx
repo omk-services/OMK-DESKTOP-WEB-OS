@@ -15,6 +15,7 @@ import {
   Users, Bot, Heart, Cpu, FileText, Calendar, Clock, Zap,
   Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
   UserSearch, Brain, BookMarked, ShieldCheck, AlertTriangle,
+  ListChecks,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
@@ -27,6 +28,8 @@ import { PeopleItemDetail } from './PeopleItemDetail';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { ApprovalsView } from './ApprovalsView';
+import { useScenariosStore } from '../../stores/scenarios.store';
 
 registerItemDetail('people', PeopleItemDetail);
 import { launchTour, TOUR_IDS } from '../../lib/tours';
@@ -81,6 +84,7 @@ function Overview() {
   const active   = FLEET_AGENTS.filter(a => a.state === 'EXECUTING');
   const idle     = FLEET_AGENTS.filter(a => a.state === 'IDLE');
   const blocked  = FLEET_AGENTS.filter(a => a.state === 'RETRY' || a.state === 'BLOCKED' || a.state === 'AWAITING');
+  const pendingScenarios = useScenariosStore((s) => s.scenarioOrder.filter((id) => s.scenarios[id]?.status === 'pending').length);
 
   // T2 — first standup tour. Fires once when the user lands on the People
   // Overview section (after the localStorage guard in launchTour is checked).
@@ -206,8 +210,17 @@ function Overview() {
             {/* Next concrete action */}
             <div className="mt-5 pt-4 border-t border-[var(--panel-border-subtle)] flex items-center gap-2 text-[11.5px] text-[var(--theme-text-muted)]">
               <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Next</span>
-              <span>Open <span className="font-semibold text-[var(--theme-text)]">Squads</span> to clear the {blocked.length > 0 ? 'blocked' : 'queue'}</span>
-              <span className="ml-auto text-[9.5px] font-mono text-[var(--theme-text-dim)]">~10 min</span>
+              {pendingScenarios > 0 ? (
+                <>
+                  <span>Open <span className="font-semibold text-[var(--theme-text)]">Approvals</span> — {pendingScenarios} scénario{pendingScenarios === 1 ? '' : 's'} à trancher</span>
+                  <span className="ml-auto text-[9.5px] font-mono text-[var(--theme-text-dim)]">~10 min</span>
+                </>
+              ) : (
+                <>
+                  <span>Open <span className="font-semibold text-[var(--theme-text)]">Squads</span> to clear the {blocked.length > 0 ? 'blocked' : 'queue'}</span>
+                  <span className="ml-auto text-[9.5px] font-mono text-[var(--theme-text-dim)]">~10 min</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -940,29 +953,31 @@ export function PeopleApp() {
   };
 
   const sections: AppSection[] = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard, render: Overview },
-    { id: 'team',     label: 'Team',     icon: Users,           render: Team },
-    { id: 'agents',   label: 'Agents',   icon: Bot,             render: Agents },
-    { id: 'fleet',    label: 'Squads',   icon: Cpu,             render: () => <Fleet /> },
-    { id: 'content',  label: 'Content',  icon: FileText,        render: Content },
-    { id: 'schedule', label: 'Cadence',  icon: Calendar,        render: Schedule },
-    { id: 'culture',  label: 'Culture',  icon: Heart,           render: Culture },
-    { id: 'personas', label: 'Personas', icon: UserSearch,      render: Personas },
-    { id: 'memory',   label: 'Mémoire',  icon: Brain,           render: Memoire },
-    { id: 'codex',    label: 'Codex',    icon: BookMarked,      render: Codex },
+    { id: 'overview',  label: 'Overview',   icon: LayoutDashboard, render: Overview },
+    { id: 'approvals', label: 'Approvals',  icon: ListChecks,       render: () => <ApprovalsView /> },
+    { id: 'team',      label: 'Team',       icon: Users,            render: Team },
+    { id: 'agents',    label: 'Agents',     icon: Bot,              render: Agents },
+    { id: 'fleet',     label: 'Squads',     icon: Cpu,              render: () => <Fleet /> },
+    { id: 'content',   label: 'Content',    icon: FileText,         render: Content },
+    { id: 'schedule',  label: 'Cadence',    icon: Calendar,         render: Schedule },
+    { id: 'culture',   label: 'Culture',    icon: Heart,            render: Culture },
+    { id: 'personas',  label: 'Personas',   icon: UserSearch,       render: Personas },
+    { id: 'memory',    label: 'Mémoire',    icon: Brain,            render: Memoire },
+    { id: 'codex',     label: 'Codex',      icon: BookMarked,       render: Codex },
   ];
 
   const groups: Record<string, string> = {
-    overview: 'SOB',
-    team:     'Squads',
-    agents:   'Squads',
-    fleet:    'B3 Agents',
-    content:  'B3 Agents',
-    schedule: 'Cadence',
-    culture:  'Culture',
-    personas: 'Profondeur',
-    memory:   'Profondeur',
-    codex:    'Profondeur',
+    overview:  'SOB',
+    approvals: 'SOB',
+    team:      'Squads',
+    agents:    'Squads',
+    fleet:     'B3 Agents',
+    content:   'B3 Agents',
+    schedule:  'Cadence',
+    culture:   'Culture',
+    personas:  'Profondeur',
+    memory:    'Profondeur',
+    codex:     'Profondeur',
   };
 
   // Picked drill (if any) — one of the 5 CMS collections exposed via

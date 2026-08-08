@@ -27,6 +27,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { CHARACTERS, DEFAULT_CHARACTER_ID } from '../agent/characters';
+import type { PrivacyMode } from '../agent/voice';
 
 export interface ChatTurn {
   id: string;
@@ -78,6 +79,12 @@ export interface AssistantState {
    *  vivent dans `agents[id].position`. */
   position: { x: number; y: number };
   voiceEnabled: boolean;
+  /** Nom de la voix SpeechSelectionnee. Null = laisser le navigateur choisir. */
+  voiceName: string | null;
+  /** Vitesse de lecture. 1.0 = normal. Range 0.5..2.0. */
+  voiceRate: number;
+  /** Mode de sanitisation avant lecture a voix haute. */
+  voicePrivacy: PrivacyMode;
   bubbleOpen: boolean;
   history: ChatTurn[];
 
@@ -105,6 +112,9 @@ export interface AssistantState {
   setPosition: (x: number, y: number) => void;
   resetPosition: () => void;
   setVoiceEnabled: (v: boolean) => void;
+  setVoiceName: (name: string | null) => void;
+  setVoiceRate: (rate: number) => void;
+  setVoicePrivacy: (mode: PrivacyMode) => void;
   setBubbleOpen: (open: boolean) => void;
   toggleBubble: () => void;
 
@@ -169,6 +179,9 @@ export const useAssistantStore = create<AssistantState>()(
       characterId: DEFAULT_CHARACTER_ID,
       position: DEFAULT_POSITION,
       voiceEnabled: false,
+      voiceName: null,
+      voiceRate: 1.0,
+      voicePrivacy: 'safe',
       bubbleOpen: false,
       history: [],
       agents: {},
@@ -185,6 +198,15 @@ export const useAssistantStore = create<AssistantState>()(
       setPosition: (x, y) => set({ position: { x, y } }),
       resetPosition: () => set({ position: DEFAULT_POSITION }),
       setVoiceEnabled: (v) => set({ voiceEnabled: v }),
+      setVoiceName: (name) => set({ voiceName: name }),
+      setVoiceRate: (rate) => {
+        const r = Math.max(0.5, Math.min(2.0, rate));
+        set({ voiceRate: r });
+      },
+      setVoicePrivacy: (mode) => {
+        if (mode !== 'none' && mode !== 'safe' && mode !== 'strict') return;
+        set({ voicePrivacy: mode });
+      },
       setBubbleOpen: (open) => set({ bubbleOpen: open }),
       toggleBubble: () => set((s) => ({ bubbleOpen: !s.bubbleOpen })),
 
@@ -297,6 +319,9 @@ export const useAssistantStore = create<AssistantState>()(
         characterId: s.characterId,
         position: s.position,
         voiceEnabled: s.voiceEnabled,
+        voiceName: s.voiceName,
+        voiceRate: s.voiceRate,
+        voicePrivacy: s.voicePrivacy,
         history: s.history,
         // La selection survit au rechargement — sans quoi le reglage se
         // reperd a chaque ouverture et le geste ne sert a rien.
@@ -322,11 +347,27 @@ export const useAssistantStore = create<AssistantState>()(
         const personnageValide =
           typeof p.characterId === 'string' &&
           CHARACTERS.some((c) => c.id === p.characterId);
+        // Le merge valide les champs de la parole : un rate forge peut
+        // faire crasher speechSynthesis.voice=, ou pire, parler 50x plus
+        // vite. Les voix sanitizer le mode inconnu. voiceName est un
+        // simple string — il sera ignore par le hook si la liste de voix
+        // ne le contient pas (defense en profondeur).
+        const voiceRateValide =
+          typeof p.voiceRate === 'number' && Number.isFinite(p.voiceRate) &&
+          p.voiceRate >= 0.5 && p.voiceRate <= 2.0
+            ? p.voiceRate
+            : 1.0;
+        const voicePrivacyValide: PrivacyMode =
+          p.voicePrivacy === 'none' || p.voicePrivacy === 'safe' || p.voicePrivacy === 'strict'
+            ? p.voicePrivacy
+            : 'safe';
         return {
           ...courant,
           ...p,
           position: positionValide ? p.position! : DEFAULT_POSITION,
           characterId: personnageValide ? p.characterId! : DEFAULT_CHARACTER_ID,
+          voiceRate: voiceRateValide,
+          voicePrivacy: voicePrivacyValide,
           history: Array.isArray(p.history) ? p.history.slice(-MAX_HISTORY) : [],
           agentsVisibles: Array.isArray((p as { agentsVisibles?: unknown }).agentsVisibles)
             ? ((p as { agentsVisibles: string[] }).agentsVisibles).filter((x) => typeof x === 'string')
