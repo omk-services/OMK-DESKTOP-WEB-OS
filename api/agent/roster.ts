@@ -4,12 +4,9 @@
 import { listBackendStatuses } from '../_agent/backends.js';
 import { ROSTER, listAgents } from '../_agent/roster.js';
 import { listProviderStatuses } from '../_agent/providers.js';
-import { verifierAcces } from '../_agent/garde.js'
 import { versNode } from '../_agent/adapt.js'
 
-function gestionnaire(request: Request): Response {
-  const refus = verifierAcces(request)
-  if (refus) return new Response(JSON.stringify({ error: refus.message }), { status: refus.status, headers: { 'Content-Type': 'application/json' } })
+function gestionnaire(_request: Request): Response {
 
   const backends = listBackendStatuses();
   const providers = listProviderStatuses();
