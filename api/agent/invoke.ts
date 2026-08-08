@@ -17,10 +17,6 @@ import { demarrerSessionMultica, type MulticaHandle } from '../_agent/backends/m
 import { demarrerSessionModel, type ModelHandle } from '../_agent/backends/model.js'
 import { verifierAcces, verifierTaille, MAX_MESSAGES } from '../_agent/garde.js'
 
-export const config = {
-  runtime: 'nodejs',
-}
-
 function jsonError(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: message }), {
     status,

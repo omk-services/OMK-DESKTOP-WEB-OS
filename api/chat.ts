@@ -22,10 +22,6 @@ import { tools } from './_agent/tools.js'
 import { composeSystem } from './_agent/prompt.js'
 import { verifierAcces, verifierTaille, MAX_MESSAGES } from './_agent/garde.js'
 
-export const config = {
-  runtime: 'nodejs',
-}
-
 const KNOWN_PROVIDERS = listProviders().map((spec) => spec.id)
 
 function jsonError(status: number, message: string): Response {

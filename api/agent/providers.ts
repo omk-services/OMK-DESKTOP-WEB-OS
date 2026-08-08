@@ -5,10 +5,6 @@
 import { listProviderStatuses } from '../_agent/providers.js'
 import { verifierAcces } from '../_agent/garde.js'
 
-export const config = {
-  runtime: 'nodejs',
-}
-
 export default function handler(request: Request): Response {
   const refus = verifierAcces(request)
   if (refus) return new Response(JSON.stringify({ error: refus.message }), { status: refus.status, headers: { 'Content-Type': 'application/json' } })
