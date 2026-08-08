@@ -5,8 +5,9 @@ import { listBackendStatuses } from '../_agent/backends.js';
 import { ROSTER, listAgents } from '../_agent/roster.js';
 import { listProviderStatuses } from '../_agent/providers.js';
 import { verifierAcces } from '../_agent/garde.js'
+import { versNode } from '../_agent/adapt.js'
 
-export default function handler(request: Request): Response {
+function gestionnaire(request: Request): Response {
   const refus = verifierAcces(request)
   if (refus) return new Response(JSON.stringify({ error: refus.message }), { status: refus.status, headers: { 'Content-Type': 'application/json' } })
 
@@ -38,3 +39,6 @@ export default function handler(request: Request): Response {
     },
   );
 }
+
+// Enveloppe pour le runtime Node de Vercel (cf. adapt.ts).
+export default versNode(gestionnaire)

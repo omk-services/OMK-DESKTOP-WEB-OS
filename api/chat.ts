@@ -21,6 +21,7 @@ import {
 import { tools } from './_agent/tools.js'
 import { composeSystem } from './_agent/prompt.js'
 import { verifierAcces, verifierTaille, MAX_MESSAGES } from './_agent/garde.js'
+import { versNode } from './_agent/adapt.js'
 
 const KNOWN_PROVIDERS = listProviders().map((spec) => spec.id)
 
@@ -43,7 +44,7 @@ function isUIMessageArray(value: unknown): value is UIMessage[] {
   )
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function gestionnaire(request: Request): Promise<Response> {
   const refus = verifierAcces(request) ?? verifierTaille(request)
   if (refus) return jsonError(refus.status, refus.message)
 
@@ -117,3 +118,6 @@ export default async function handler(request: Request): Promise<Response> {
 
   return result.toUIMessageStreamResponse()
 }
+
+// Enveloppe pour le runtime Node de Vercel (cf. adapt.ts).
+export default versNode(gestionnaire)

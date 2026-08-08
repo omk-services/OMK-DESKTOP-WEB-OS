@@ -16,6 +16,7 @@ import { demarrerSessionBuzz, type BuzzHandle } from '../_agent/backends/buzz.js
 import { demarrerSessionMultica, type MulticaHandle } from '../_agent/backends/multica.js'
 import { demarrerSessionModel, type ModelHandle } from '../_agent/backends/model.js'
 import { verifierAcces, verifierTaille, MAX_MESSAGES } from '../_agent/garde.js'
+import { versNode } from '../_agent/adapt.js'
 
 function jsonError(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: message }), {
@@ -52,7 +53,7 @@ function dernierTexteUtilisateur(messages: UIMessage[]): string {
   return ''
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function gestionnaire(request: Request): Promise<Response> {
   const refus = verifierAcces(request) ?? verifierTaille(request)
   if (refus) return jsonError(refus.status, refus.message)
 
@@ -202,3 +203,6 @@ export default async function handler(request: Request): Promise<Response> {
     },
   })
 }
+
+// Enveloppe pour le runtime Node de Vercel (cf. adapt.ts).
+export default versNode(gestionnaire)
