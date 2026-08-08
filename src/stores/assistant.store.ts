@@ -61,6 +61,15 @@ export interface AgentSlot {
   history: ChatTurn[];
 }
 
+/** Ce que l'utilisateur a choisi pour un agent, et qui doit survivre au
+ *  rechargement. Le reste (nom, description, disponibilite) revient du
+ *  serveur, qui fait autorite. */
+export interface PrefsAgent {
+  personnageId?: string;
+  backend?: 'modele' | 'multica' | 'buzz';
+  position?: { x: number; y: number };
+}
+
 export interface AssistantState {
   active: boolean;
   /** LEGACY — persiste pour la migration v1. L'agent effectif est dans `agents`. */
@@ -77,6 +86,15 @@ export interface AssistantState {
   agents: Record<string, AgentSlot>;
   /** Ordre d'affichage (clefs dans `agents`). Pour la stabilite du DOM. */
   agentOrder: string[];
+  /** Agents REELLEMENT poses sur le bureau.
+   *
+   *  Distinct de `agentOrder`, qui est le roster complet. Les douze
+   *  s'ouvraient tous au demarrage : une foule qui recouvre le bureau alors
+   *  qu'on en veut un. On garde donc la selection, et elle est persistee —
+   *  c'est le meme geste que la Visibilite du bureau pour les apps. */
+  agentsVisibles: string[];
+  /** Choix par agent, relus a l'hydratation. */
+  agentsPrefs: Record<string, PrefsAgent>;
 
   setActive: (active: boolean) => void;
   toggleActive: () => void;
@@ -109,6 +127,10 @@ export interface AssistantState {
       multicaAgentId: string | null;
     }>,
   ) => void;
+  /** Pose ou retire un agent du bureau. */
+  basculerVisible: (agentId: string) => void;
+  /** N'en garder qu'un — le geste « je veux juste celui-la ». */
+  seulementVisible: (agentId: string) => void;
   setAgentPersonnage: (agentId: string, personnageId: string) => void;
   setAgentBackend: (agentId: string, backend: 'modele' | 'multica' | 'buzz') => void;
   setAgentPosition: (agentId: string, x: number, y: number) => void;
@@ -151,6 +173,8 @@ export const useAssistantStore = create<AssistantState>()(
       history: [],
       agents: {},
       agentOrder: [],
+      agentsVisibles: [],
+      agentsPrefs: {},
 
       setActive: (active) => set({ active }),
       toggleActive: () => set((s) => ({ active: !s.active })),
@@ -181,21 +205,43 @@ export const useAssistantStore = create<AssistantState>()(
             id: e.id,
             name: e.name,
             description: e.description,
-            personnageId: prec?.personnageId ?? e.personnageId,
-            backend: prec?.backend ?? e.backend,
+            personnageId: prec?.personnageId ?? s.agentsPrefs[e.id]?.personnageId ?? e.personnageId,
+            backend: prec?.backend ?? s.agentsPrefs[e.id]?.backend ?? e.backend,
             backendAvailable: e.available,
             provider: e.provider,
             buzzModel: e.buzzModel,
             multicaAgentId: e.multicaAgentId,
             // Position : on preserve la position persistee si elle existe,
             // sinon on prend la ieme position initiale.
-            position: prec?.position ?? POSITIONS_INITIALES[nextOrder.length - 1] ?? DEFAULT_POSITION,
+            position:
+              prec?.position ??
+              s.agentsPrefs[e.id]?.position ??
+              POSITIONS_INITIALES[nextOrder.length - 1] ??
+              DEFAULT_POSITION,
             bubbleOpen: prec?.bubbleOpen ?? false,
             history: prec?.history ?? [],
           };
         }
-        return { agents: nextAgents, agentOrder: nextOrder };
+        // Au tout premier demarrage, un seul agent est pose. Ensuite on
+        // respecte la selection persistee, en ecartant les agents que le
+        // serveur ne connait plus — un id disparu laisserait une case vide.
+        const connus = new Set(nextOrder);
+        const retenus = s.agentsVisibles.filter((id) => connus.has(id));
+        const visibles =
+          retenus.length > 0 ? retenus : nextOrder.slice(0, 1);
+        return { agents: nextAgents, agentOrder: nextOrder, agentsVisibles: visibles };
       }),
+
+      basculerVisible: (agentId) => set((s) => {
+        const dedans = s.agentsVisibles.includes(agentId);
+        return {
+          agentsVisibles: dedans
+            ? s.agentsVisibles.filter((x) => x !== agentId)
+            : [...s.agentsVisibles, agentId],
+        };
+      }),
+
+      seulementVisible: (agentId) => set({ agentsVisibles: [agentId] }),
 
       setAgentPersonnage: (agentId, personnageId) => set((s) => {
         if (!CHARACTERS.some(c => c.id === personnageId)) return {};
@@ -252,6 +298,17 @@ export const useAssistantStore = create<AssistantState>()(
         position: s.position,
         voiceEnabled: s.voiceEnabled,
         history: s.history,
+        // La selection survit au rechargement — sans quoi le reglage se
+        // reperd a chaque ouverture et le geste ne sert a rien.
+        agentsVisibles: s.agentsVisibles,
+        // Les choix par agent aussi : personnage, dos, position. Le reste
+        // (nom, description, disponibilite) revient du serveur.
+        agentsPrefs: Object.fromEntries(
+          Object.values(s.agents).map((a) => [
+            a.id,
+            { personnageId: a.personnageId, backend: a.backend, position: a.position },
+          ]),
+        ),
       }),
       version: 1,
 
@@ -271,6 +328,14 @@ export const useAssistantStore = create<AssistantState>()(
           position: positionValide ? p.position! : DEFAULT_POSITION,
           characterId: personnageValide ? p.characterId! : DEFAULT_CHARACTER_ID,
           history: Array.isArray(p.history) ? p.history.slice(-MAX_HISTORY) : [],
+          agentsVisibles: Array.isArray((p as { agentsVisibles?: unknown }).agentsVisibles)
+            ? ((p as { agentsVisibles: string[] }).agentsVisibles).filter((x) => typeof x === 'string')
+            : [],
+          agentsPrefs:
+            (p as { agentsPrefs?: unknown }).agentsPrefs &&
+            typeof (p as { agentsPrefs?: unknown }).agentsPrefs === 'object'
+              ? (p as { agentsPrefs: Record<string, PrefsAgent> }).agentsPrefs
+              : {},
         };
       },
     },

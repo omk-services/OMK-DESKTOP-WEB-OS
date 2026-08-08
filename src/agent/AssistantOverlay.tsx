@@ -39,6 +39,9 @@ export function AssistantOverlay() {
   const active = useAssistantStore((s) => s.active);
   const agents = useAssistantStore((s) => s.agents);
   const agentOrder = useAssistantStore((s) => s.agentOrder);
+  // On ne rend que les agents POSES sur le bureau. `agentOrder` reste le
+  // roster complet — il sert au menu de selection, pas a l'affichage.
+  const agentsVisibles = useAssistantStore((s) => s.agentsVisibles);
   const hydraterRoster = useAssistantStore((s) => s.hydraterRoster);
 
   const toggleAgentBubble = useAssistantStore((s) => s.toggleAgentBubble);
@@ -80,7 +83,7 @@ export function AssistantOverlay() {
   // Chaque AgentTile est independant et monte son propre useChat / stream.
   return (
     <>
-      {agentOrder.map((id) => {
+      {agentOrder.filter((id) => agentsVisibles.includes(id)).map((id) => {
         const agent = agents[id];
         if (!agent) return null;
         return (
@@ -95,7 +98,7 @@ export function AssistantOverlay() {
           />
         );
       })}
-      {agentOrder.length === 0 && rosterErreur && (
+      {agentsVisibles.length === 0 && rosterErreur && (
         <div
           className="fixed z-[4500] left-4 bottom-4 rounded-lg px-3 py-2 text-[11px] shadow-md"
           style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
