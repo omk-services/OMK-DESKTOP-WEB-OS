@@ -1,26 +1,59 @@
 /**
  * Chat — conversation with one agent at a time. Pick from the left rail,
  * the thread fills the right pane. Empty state is intentional, not a fallback.
+ *
+ * Draft persistence: `Brouillonner` pushes the current textarea content
+ * into a local `extrasByAgent` map keyed by agent id, so the user's own
+ * messages stay visible in the thread even when switching agents. The
+ * map is in-memory only — it survives agent switches within a session,
+ * not page reloads. A real LLM call would replace the seeded assistant
+ * replies; for now we keep the seed and append user drafts on top.
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowRight, Bot, MessageSquare, ShieldCheck, Sparkles, Send } from 'lucide-react';
-import { AGENTS, CHAT_BY_AGENT } from '../seed';
+import { AGENTS, CHAT_BY_AGENT, type ChatMessage } from '../seed';
+import { useShellStore } from '../../../../stores/shell.store';
 import { ACCENT, GhostButton, IconChip, Panel, Pill, PrimaryButton, SectionTitle } from '../Primitives';
+
+function nowStamp(): string {
+  const d = new Date();
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function makeId(): string {
+  return `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
 
 export function Chat() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0]?.id ?? '');
   const [draft, setDraft] = useState<string>('');
+  // User-submitted drafts, per agent. Seed messages stay below; user
+  // drafts are appended in the order they were submitted so the thread
+  // reads chronologically. Switching agents preserves each agent's draft
+  // thread independently.
+  const [extrasByAgent, setExtrasByAgent] = useState<Record<string, ChatMessage[]>>({});
+  const addToast = useShellStore((s) => s.addToast);
   const active = AGENTS.find((a) => a.id === activeId);
-  const messages = CHAT_BY_AGENT[activeId] ?? [];
+  const seedMessages = CHAT_BY_AGENT[activeId] ?? [];
+  const extraMessages = extrasByAgent[activeId] ?? [];
+  // Render the merged thread: seed first (system/assistant context), then
+  // user drafts in submission order.
+  const messages = useMemo(() => [...seedMessages, ...extraMessages], [seedMessages, extraMessages]);
 
   const submitDraft = (): void => {
-    // BRIEF-D: the chat is in draft mode. No real LLM call yet. We append
-    // the draft to the thread as a "user" message tagged (draft), so the
-    // user can see their own input and the placeholder agent reply. When
-    // the API is wired, the agent reply will replace the placeholder.
-    if (!draft.trim() || !activeId) return;
-    // Mutations are gated on the future live API; for now we just clear.
+    const trimmed = draft.trim();
+    if (!trimmed || !activeId) return;
+    const next: ChatMessage = { id: makeId(), role: 'user', at: nowStamp(), content: trimmed };
+    setExtrasByAgent((prev) => {
+      const existing = prev[activeId] ?? [];
+      return { ...prev, [activeId]: [...existing, next] };
+    });
     setDraft('');
+    addToast({
+      source: 'Chat',
+      type: 'success',
+      message: `Brouillon ajouté au fil · ${trimmed.length} caractère${trimmed.length > 1 ? 's' : ''}`,
+    });
   };
   const clearDraft = (): void => setDraft('');
 
@@ -66,7 +99,7 @@ export function Chat() {
           style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text-muted)' }}
         >
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: ACCENT }} />
-          <span>Aucune mutation n'est faite depuis cette vue. Les réponses sont des brouillons ; tu valides avant chaque envoi.</span>
+          <span>Brouillons locaux. Touche <kbd className="rounded border px-1 py-0.5 text-[9.5px]" style={{ borderColor: 'var(--panel-border)' }}>Brouillonner</kbd> ou <kbd className="rounded border px-1 py-0.5 text-[9.5px]" style={{ borderColor: 'var(--panel-border)' }}>Entrée</kbd> pour ajouter au fil.</span>
         </div>
       </Panel>
 

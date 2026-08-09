@@ -20,7 +20,7 @@ export function Agents({ onSelect }: { onSelect: (agentId: string) => void }) {
         action={<Pill tone="ok">{AGENTS.length} actifs</Pill>}
       />
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3">
         {AGENTS.map((a) => {
           const tone =
             a.state === 'healthy' ? 'ok'
@@ -30,7 +30,7 @@ export function Agents({ onSelect }: { onSelect: (agentId: string) => void }) {
             <Panel
               key={a.id}
               pad="p-5"
-              className="group flex flex-col gap-3 text-left transition-all hover:-translate-y-0.5"
+              className="group flex min-w-0 flex-col gap-3 text-left transition-all hover:-translate-y-0.5"
               style={{ cursor: 'pointer' }}
             >
               <button

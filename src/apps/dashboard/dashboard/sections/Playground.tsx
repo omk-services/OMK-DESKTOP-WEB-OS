@@ -81,7 +81,7 @@ export function Playground() {
       </Panel>
 
       {/* KPIs row */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiTile label="Modèles comparés" value={PLAYGROUND_MODELS.length} tone="accent" />
         <KpiTile label="Coût total" value={`$${totalCost.toFixed(4)}`} tone="ok" hint="par appel, jeu complet" />
         <KpiTile label="Latence médiane" value={`${median(PLAYGROUND_MODELS.map((m) => m.latencyMs))} ms`} tone="info" />

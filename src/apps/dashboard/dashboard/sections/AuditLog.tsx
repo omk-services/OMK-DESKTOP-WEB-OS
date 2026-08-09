@@ -51,7 +51,7 @@ export function AuditLog() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiTile label="Événements" value={AUDIT_LOG.length} tone="accent" hint="sur 24 h glissantes" />
         <KpiTile label="DLP · clés AWS" value="0" tone="ok" hint="0 tentative bloquée" />
         <KpiTile label="DLP · PEM" value="0" tone="ok" hint="0 header de clé privée" />

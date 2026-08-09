@@ -65,7 +65,7 @@ export function Cost() {
       ) : null}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiTile
           label="Ce mois · à date"
           value={`$${MONTH_SUMMARY.monthToDateUsd.toFixed(0)}`}
