@@ -92,6 +92,27 @@ const contextItems: CmsItem[] = [
   },
 ];
 
+/* ═══ Scores — 5 dimensions of rep performance ═══ */
+
+const scoresDef = def({
+  id: 'sales_scores', name: 'Sales scores', singular: 'Score', accent: '#ea580c',
+  titleField: 'label', subtitleField: 'note', badgeField: 'tone',
+  fields: [
+    { key: 'value', label: 'Score', type: 'number' },
+    { key: 'outOf', label: 'Out of', type: 'number' },
+    { key: 'note', label: 'Note', type: 'longtext' },
+    { key: 'tone', label: 'Tone', type: 'badge' },
+  ],
+});
+
+const scoresItems: CmsItem[] = [
+  { id: 'sc-discovery', label: 'Discovery', value: 8.0, outOf: 10, note: 'Bottleneck — qualify live, do not pitch the offer early.', tone: 'ok' },
+  { id: 'sc-demo', label: 'Demo', value: 7.5, outOf: 10, note: 'Tailored to the stack, but the architecture question is loose.', tone: 'ok' },
+  { id: 'sc-objection', label: 'Objection', value: 6.6, outOf: 10, note: 'Price vs. low-anchor and build-it-myself. Push confidence, not value.', tone: 'warn' },
+  { id: 'sc-rapport', label: 'Rapport', value: 8.1, outOf: 10, note: 'Peer energy, real questions, no over-selling.', tone: 'ok' },
+  { id: 'sc-close', label: 'Close', value: 5.6, outOf: 10, note: 'Hits the SOP move but softens the ask. Lock the slot in the room.', tone: 'danger' },
+];
+
 let seeded = false;
 
 export function seedSalesCms(): void {
@@ -105,4 +126,5 @@ export function seedSalesCms(): void {
   store.registerCollection(snapshotDef, snapshotItems);
   store.registerCollection(stagesDef, stagesItems);
   store.registerCollection(contextDef, contextItems);
+  store.registerCollection(scoresDef, scoresItems);
 }

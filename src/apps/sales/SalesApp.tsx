@@ -210,13 +210,8 @@ const TRENDS: TrendSeries[] = [
   },
 ];
 
-const SCORES: DimensionScore[] = [
-  { id: 'sc-discovery', label: 'Discovery', value: 8.0, outOf: 10, note: 'Bottleneck — qualify live, do not pitch the offer early.', tone: 'ok' },
-  { id: 'sc-demo', label: 'Demo', value: 7.5, outOf: 10, note: 'Tailored to the stack, but the architecture question is loose.', tone: 'ok' },
-  { id: 'sc-objection', label: 'Objection', value: 6.6, outOf: 10, note: 'Price vs. low-anchor and build-it-myself. Push confidence, not value.', tone: 'warn' },
-  { id: 'sc-rapport', label: 'Rapport', value: 8.1, outOf: 10, note: 'Peer energy, real questions, no over-selling.', tone: 'ok' },
-  { id: 'sc-close', label: 'Close', value: 5.6, outOf: 10, note: 'Hits the SOP move but softens the ask. Lock the slot in the room.', tone: 'danger' },
-];
+const SCORES: DimensionScore[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void SCORES;
 
 const CONTEXT: ContextGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
 void CONTEXT;
@@ -723,6 +718,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   // (HMR can mount before the global seed runs).
   const snapshotItems = useCmsStore(s => s.items['sales_snapshot']) ?? [];
   const stageItems = useCmsStore(s => s.items['sales_stages']) ?? [];
+  const scoreItems = useCmsStore(s => s.items['sales_scores']) ?? [];
   const txt = (item: CmsItem | undefined, key: string): string => {
     if (!item) return '';
     const v = item[key];
@@ -930,9 +926,9 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
           style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
         >
           <ul className="space-y-4">
-            {SCORES.map((s) => {
-              const pct = Math.round((s.value / s.outOf) * 100);
-              const color = s.tone === 'ok' ? WIN : s.tone === 'warn' ? RELANCE : LOSE;
+            {scoreItems.map((s) => {
+              const pct = Math.round((num(s, 'value') / num(s, 'outOf')) * 100);
+              const color = txt(s, 'tone') === 'ok' ? WIN : txt(s, 'tone') === 'warn' ? RELANCE : LOSE;
               return (
                 <li key={s.id}>
                   <div className="flex items-baseline justify-between gap-3">
@@ -940,13 +936,13 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                       className="text-[12.5px] font-bold"
                       style={{ color: 'var(--theme-text)' }}
                     >
-                      {s.label}
+                      {txt(s, 'label') || '—'}
                     </span>
                     <span
                       className="text-[18px] font-extrabold tabular-nums"
                       style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                     >
-                      {s.value.toFixed(1)}
+                      {num(s, 'value').toFixed(1)}
                     </span>
                   </div>
                   <div
@@ -959,7 +955,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                     />
                   </div>
                   <p className="mt-1.5 text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-                    {s.note}
+                    {txt(s, 'note') || '—'}
                   </p>
                 </li>
               );
