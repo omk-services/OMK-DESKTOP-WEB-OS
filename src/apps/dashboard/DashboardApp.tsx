@@ -402,11 +402,11 @@ export function DashboardApp() {
 
   const sections: AppSection[] = [
     { id: 'overview',  label: 'Overview',      icon: BarChart3,   render: ({ navigateToSection }) => <Overview navigateToSection={navigateToSection} /> },
+    { id: 'cockpit',   label: 'CEO Cockpit',   icon: Compass,     render: CeoCockpit },
     { id: 'agents',    label: 'Agents',        icon: Bot,         render: () => <Agents onSelect={setOpenAgentId} /> },
     { id: 'chat',      label: 'Chat',          icon: MessageSquare, render: () => <Chat /> },
     { id: 'playground',label: 'Playground',    icon: Sparkles,    render: () => <Playground /> },
     { id: 'jarvis',    label: 'Jarvis',        icon: Sparkles,    render: () => <Jarvis /> },
-    { id: 'cockpit',   label: 'CEO Cockpit',   icon: Compass,     render: CeoCockpit },
     { id: 'validation',label: 'Wind Direction',icon: Wind,        render: Validation },
     { id: 'pipeline',  label: 'Client Pipeline', icon: GitBranch, render: Pipeline },
     { id: 'sessions',  label: 'Sessions',      icon: History,     render: () => <Sessions /> },
