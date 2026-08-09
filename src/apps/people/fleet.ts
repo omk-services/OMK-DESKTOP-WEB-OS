@@ -139,7 +139,7 @@ export const CONTENT_DOCS: ContentDoc[] = [
     title: 'Mission Control — Build Notes',
     modifiedAt: '2026-07-23T08:56:46Z',
     size: 1845,
-    excerpt: 'Stack: Python stdlib server, read-only on Hermes DBs. SSE live stream + agent drawer + content library. TODO: Telegram alerts, Schedule tab.',
+    excerpt: 'Stack: Python stdlib server, read-only on Hermes DBs. SSE live stream + agent drawer + content library.',
     tags: ['build', 'infra'],
   },
   {
