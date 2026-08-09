@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch } from 'lucide-react';
+import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch, Plus, CheckCircle2 } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { ThemedSectionHead } from './ThemedSectionHead';
@@ -9,6 +9,7 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ItRdDetailPage, type ItRdDetailItem } from './ItRdDetailPage';
@@ -62,6 +63,15 @@ export function ItRdApp() {
   const [detail, setDetail] = useState<ItRdDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
+  /* Brief-F — couche d'écriture. Un humain doit pouvoir :
+   *   1. acquitter une entrée de drift (severity = alert)
+   *   2. poster une nouvelle entrée de journal (manuel + agent)
+   * Les deux passent par `addItem` / `updateItem` du store CMS. Toast
+   * global au résultat (succès, warning, info). */
+  const addToast = useShellStore(s => s.addToast);
+  const addItem = useCmsStore(s => s.addItem);
+  const updateItem = useCmsStore(s => s.updateItem);
+
   useEffect(() => {
     if (detail) {
       setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
@@ -78,6 +88,51 @@ export function ItRdApp() {
   const evals = useCmsStore(s => s.items['it_evals']) ?? [];
   const okCount = useCmsStore(s => (s.items['services'] ?? []).filter(x => x.status === 'ok').length);
   const totalServices = useCmsStore(s => s.items['services']?.length ?? 0);
+
+  const acknowledgeDrift = (id: string): void => {
+    const current = (drift as Array<Record<string, unknown>>).find((d) => d.id === id);
+    if (!current) return;
+    if (current.severity === 'ok') {
+      addToast({ source: 'IT/R&D', type: 'info', message: 'Déjà nominal.' });
+      return;
+    }
+    updateItem('it_drift', id, { severity: 'ok' });
+    addToast({ source: 'IT/R&D', type: 'success', message: 'Drift acquitté — marqué ok.' });
+  };
+
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerTitle, setComposerTitle] = useState('');
+  const [composerAction, setComposerAction] = useState<'note' | 'deploy' | 'drift' | 'lock' | 'eval' | 'correction' | 'rollback' | 'wake'>('note');
+
+  const submitJournalEntry = (): void => {
+    const title = composerTitle.trim();
+    if (title.length === 0) {
+      addToast({ source: 'IT/R&D', type: 'warning', message: 'Le titre est obligatoire.' });
+      return;
+    }
+    const result = addItem('it_journal', {
+      title,
+      actor: 'human:ops',
+      action: composerAction,
+      entity: composerAction === 'deploy' ? 'manual deploy' : 'manual note',
+      ts: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      outcome: 'recorded',
+      projects: title,
+      note: title,
+    });
+    if (result.ok) {
+      addToast({ source: 'IT/R&D', type: 'success', message: `Journal mis à jour : ${title}` });
+      setComposerTitle('');
+      setComposerOpen(false);
+    } else {
+      addToast({ source: 'IT/R&D', type: 'warning', message: result.error ?? 'Création impossible.' });
+    }
+  };
+
+  const cancelComposer = (): void => {
+    setComposerTitle('');
+    setComposerOpen(false);
+  };
 
   const openService = (id: string): void => {
     const item = services.find(c => c.id === id);
@@ -187,8 +242,91 @@ export function ItRdApp() {
         <ThemedSectionHead
           title="Journal"
           subtitle="Append-only log of every act by humans and agents. The latest snapshot is the projected state."
-          action={<Badge tone="accent">{journal.length} entries</Badge>}
+          action={
+            <div className="flex items-center gap-2">
+              <Badge tone="accent">{journal.length} entries</Badge>
+              <button
+                type="button"
+                onClick={() => setComposerOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.16em] transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+                aria-label="Ajouter une entrée de journal"
+              >
+                <Plus className="w-3 h-3" />
+                Ajouter
+              </button>
+            </div>
+          }
         />
+
+        {composerOpen ? (
+          <div
+            className="rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <label
+              className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="it-journal-title"
+            >
+              Titre de l'entrée
+            </label>
+            <input
+              id="it-journal-title"
+              autoFocus
+              value={composerTitle}
+              onChange={(e) => setComposerTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitJournalEntry();
+                if (e.key === 'Escape') cancelComposer();
+              }}
+              placeholder="Décrire l'événement…"
+              className="w-full rounded-lg px-3 py-2 text-sm font-mono outline-none focus:ring-2"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            />
+            <label
+              className="mt-3 block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="it-journal-action"
+            >
+              Action
+            </label>
+            <select
+              id="it-journal-action"
+              value={composerAction}
+              onChange={(e) => setComposerAction(e.target.value as typeof composerAction)}
+              className="w-full rounded-lg px-3 py-2 text-sm font-mono outline-none focus:ring-2"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            >
+              <option value="note">note</option>
+              <option value="deploy">deploy</option>
+              <option value="drift">drift</option>
+              <option value="lock">lock</option>
+              <option value="eval">eval</option>
+              <option value="correction">correction</option>
+              <option value="rollback">rollback</option>
+              <option value="wake">wake</option>
+            </select>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90"
+                style={{ background: 'transparent', color: 'var(--theme-text-dim)', border: '1px solid var(--panel-border)' }}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={submitJournalEntry}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+              >
+                Pousser l'entrée
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 flex-1 min-h-0">
           <section
@@ -402,12 +540,11 @@ export function ItRdApp() {
             const ratio = !Number.isNaN(ref) && ref !== 0 && !Number.isNaN(cur) ? ((cur - ref) / Math.abs(ref)) * 100 : 0;
             const barPct = Math.max(8, Math.min(100, Math.abs(ratio) * 4));
             return (
-              <button
+              <div
                 key={String(entry.id)}
-                type="button"
-                onClick={() => driftDrill.open(String(entry.id))}
-                className="text-left rounded-2xl border bg-[var(--theme-surface)] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-[var(--theme-accent)]"
+                className="text-left rounded-2xl border bg-[var(--theme-surface)] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-[var(--theme-accent)] cursor-pointer"
                 style={{ borderColor: 'var(--panel-border)' }}
+                onClick={() => driftDrill.open(String(entry.id))}
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-[14px] font-bold text-[var(--theme-text)] leading-snug min-w-0 flex-1">
@@ -440,11 +577,24 @@ export function ItRdApp() {
                     }}
                   />
                 </div>
-                <div className="mt-2 pt-2 border-t border-[var(--panel-border-subtle)] flex items-center justify-between text-[10.5px] font-mono text-[var(--theme-text-dim)]">
-                  <span>{String(entry.metric ?? '—')}</span>
-                  <span>alert at {String(entry.threshold ?? '—')}</span>
+                <div className="mt-2 pt-2 border-t border-[var(--panel-border-subtle)] flex items-center justify-between gap-2 text-[10.5px] font-mono text-[var(--theme-text-dim)]">
+                  <span className="truncate">{String(entry.metric ?? '—')}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span>alert at {String(entry.threshold ?? '—')}</span>
+                    {severity !== 'ok' ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); acknowledgeDrift(String(entry.id)); }}
+                        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider transition-all hover:opacity-90"
+                        style={{ background: 'rgba(22,163,74,0.18)', color: '#15803d', border: '1px solid #86efac' }}
+                        aria-label={`Acquitter ${entry.name}`}
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> acquitter
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

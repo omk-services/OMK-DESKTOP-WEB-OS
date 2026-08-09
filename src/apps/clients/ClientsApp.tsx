@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, BookText, GraduationCap } from 'lucide-react';
+import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, BookText, GraduationCap, Plus } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -11,6 +11,7 @@ import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { ClientsItemDetail } from './ClientsItemDetail';
+import { useShellStore } from '../../stores/shell.store';
 
 registerItemDetail('clients', ClientsItemDetail);
 
@@ -20,6 +21,8 @@ export function ClientsApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
   const drill = useCollectionDrill('clients', ['Active', 'Onboarding', 'Churn Risk', 'Directory']);
   const vaultDrill = useCollectionDrill('session_notes', 'IP Vault');
+  const addItem = useCmsStore(s => s.addItem);
+  const addToast = useShellStore(s => s.addToast);
   const [detail, setDetail] = useState<ClientsDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -35,6 +38,51 @@ export function ClientsApp() {
   const onboardingClients = clients.filter(c => c.status === 'Onboarding');
   const riskClients = clients.filter(c => c.status === 'At risk');
   const sessionNotes = useCmsStore(s => s.items['session_notes']) ?? [];
+
+  /** Compose a new client. The mini-form takes a name and a monthly ticket;
+   *  everything else is defaulted to canonical Citadelle values so the new
+   *  row slots into the existing lists cleanly (Active section, Directory
+   *  card, etc.). The mutation flows through `addItem` so the new client
+   *  appears in the right tab without any manual refresh. */
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerName, setComposerName] = useState('');
+  const [composerSegment, setComposerSegment] = useState('Citadelle — high ticket');
+  const [composerTicket, setComposerTicket] = useState('1800');
+
+  const submitNewClient = (): void => {
+    const name = composerName.trim();
+    if (name.length === 0) {
+      addToast({ source: 'Clients', type: 'warning', message: 'Client name is required.' });
+      return;
+    }
+    const ticket = Number(composerTicket);
+    const result = addItem('clients', {
+      name,
+      segment: composerSegment.trim() || 'Citadelle — high ticket',
+      ticket: Number.isFinite(ticket) && ticket > 0 ? ticket : 1000,
+      openThreads: 0,
+      nextSession: 'Not scheduled',
+      health: 100,
+      onboardingStep: '1 / 7',
+      status: 'Onboarding',
+    });
+    if (result.ok) {
+      addToast({ source: 'Clients', type: 'success', message: `Client added: ${name}` });
+      setComposerName('');
+      setComposerSegment('Citadelle — high ticket');
+      setComposerTicket('1800');
+      setComposerOpen(false);
+    } else {
+      addToast({ source: 'Clients', type: 'warning', message: result.error ?? 'Could not add client.' });
+    }
+  };
+
+  const cancelComposer = (): void => {
+    setComposerName('');
+    setComposerSegment('Citadelle — high ticket');
+    setComposerTicket('1800');
+    setComposerOpen(false);
+  };
 
   const openClient = (id: string): void => {
     const item = clients.find(c => c.id === id);
@@ -164,7 +212,138 @@ export function ClientsApp() {
   const Directory = () => {
     return (
       <div className="p-7">
-        <SectionHead title="Directory" subtitle="Every client — one shared page template (CMS-driven)" />
+        <SectionHead
+          title="Directory"
+          subtitle="Every client — one shared page template (CMS-driven)"
+          action={
+            !composerOpen ? (
+              <button
+                onClick={() => setComposerOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'var(--theme-surface)',
+                  border: '1px solid var(--panel-border)',
+                  color: 'var(--theme-text)',
+                }}
+                aria-label="Add a new client"
+              >
+                <Plus className="w-4 h-4" />
+                New client
+              </button>
+            ) : null
+          }
+        />
+        {composerOpen ? (
+          <div
+            className="mb-4 rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="clients-composer-name"
+                >
+                  Name
+                </label>
+                <input
+                  id="clients-composer-name"
+                  autoFocus
+                  value={composerName}
+                  onChange={(e) => setComposerName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewClient();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Elena Marquez"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="clients-composer-segment"
+                >
+                  Segment
+                </label>
+                <input
+                  id="clients-composer-segment"
+                  value={composerSegment}
+                  onChange={(e) => setComposerSegment(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewClient();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Citadelle — high ticket"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="clients-composer-ticket"
+                >
+                  Monthly ticket (USD)
+                </label>
+                <input
+                  id="clients-composer-ticket"
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  value={composerTicket}
+                  onChange={(e) => setComposerTicket(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewClient();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="1800"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                onClick={cancelComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--theme-text-dim)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitNewClient}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: ACCENT,
+                  color: '#ffffff',
+                }}
+              >
+                Add client
+              </button>
+            </div>
+          </div>
+        ) : null}
         <CMSCardList
           collectionId="clients"
           onOpen={openClient}

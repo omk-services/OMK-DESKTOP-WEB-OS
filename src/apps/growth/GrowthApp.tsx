@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Sprout, Filter, Radio, FlaskConical, TrendingUp, Map, Handshake, Sparkles } from 'lucide-react';
+import { Sprout, Filter, Radio, FlaskConical, TrendingUp, Map, Handshake, Sparkles, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge, StatCard } from '../_ui/kit';
 import { FunnelStep, Table } from '../_ui/widgets';
@@ -13,7 +13,9 @@ import { GrowthDetailPage, type GrowthDetailItem } from './GrowthDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { GrowthItemDetail } from './GrowthItemDetail';
 import { CMSCardList } from '../_ui/CMSCardList';
+import { FleetItemGrid } from '../_ui/FleetItemCard';
 import { seedGrowthCms } from './seed';
+import { useShellStore } from '../../stores/shell.store';
 
 seedGrowthCms();
 registerItemDetail('growth', GrowthItemDetail);
@@ -43,20 +45,6 @@ function Funnel() {
 
 /* ═══ Acquisition, Strategie, Partenariats, AEO — typed shapes ═══ */
 
-interface AcquisitionItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  category: string;
-  virality: number;
-  conversion: number;
-  cost: number;
-  ease: number;
-  global: number;
-  verdict: string;
-  whatWorks: string;
-  whatFailed: string;
-}
-
 interface StrategieItem extends Record<string, unknown> {
   id: string;
   name: string;
@@ -66,17 +54,6 @@ interface StrategieItem extends Record<string, unknown> {
   criteria: string;
   state: string;
   focus: string;
-}
-
-interface PartenariatItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  type: string;
-  brings: string;
-  expects: string;
-  state: string;
-  contact: string;
-  touched: string;
 }
 
 interface AeoItem extends Record<string, unknown> {
@@ -153,12 +130,15 @@ const AEO_POSITION_ACCENT: Record<string, string> = {
 export function GrowthApp() {
   const channels = useCmsStore(s => s.items['growth_channels']) ?? [];
   const experiments = useCmsStore(s => s.items['growth_experiments']) ?? [];
+  const acquisition = useCmsStore(s => s.items['growth_acquisition']) ?? [];
   const channelsDrill = useCollectionDrill('growth_channels', 'Channels');
   const experimentsDrill = useCollectionDrill('growth_experiments', 'Experiments');
   const acquisitionDrill = useCollectionDrill('growth_acquisition', 'Acquisition');
   const strategieDrill = useCollectionDrill('growth_strategie', 'Strategie');
   const partenariatsDrill = useCollectionDrill('growth_partenariats', 'Partenariats');
   const aeoDrill = useCollectionDrill('growth_aeo', 'AEO');
+  const updateItem = useCmsStore(s => s.updateItem);
+  const addToast = useShellStore(s => s.addToast);
   const [detail, setDetail] = useState<GrowthDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -169,6 +149,25 @@ export function GrowthApp() {
       setWindowDetail(null);
     }
   }, [detail, setWindowDetail]);
+
+  /** Cycle the verdict on an acquisition channel: invest more → hold steady →
+   *  cut or rework → hold steady → invest more. The global score stays the
+   *  same — what changes is the team's stance. The brief calls for a
+   *  mutation, not a re-computation: the rerating would be a separate flow. */
+  const cycleVerdict = (id: string): void => {
+    const item = acquisition.find((a) => a.id === id);
+    if (!item) return;
+    const currentKey = String(item.verdict).split(' ·')[0];
+    const order = ['invest more', 'hold steady', 'cut or rework'];
+    const idx = order.indexOf(currentKey);
+    const next = idx === -1 ? 'hold steady' : order[(idx + 1) % order.length];
+    const global = Number(item.global ?? 0);
+    const nextVerdict = `${next} · ${global}/100`;
+    const result = updateItem('growth_acquisition', id, { verdict: nextVerdict });
+    if (result !== undefined) {
+      addToast({ source: 'Growth', type: 'success', message: `${String(item.name)} → ${next}` });
+    }
+  };
 
   const openChannel = (id: string): void => {
     const item = channels.find(c => c.id === id);
@@ -241,28 +240,96 @@ export function GrowthApp() {
           title="Acquisition"
           subtitle="Every channel scored on virality, conversion, cost, ease of execution — the global score drives the verdict"
         />
-        <CMSCardList<AcquisitionItem>
-          collectionId="growth_acquisition"
-          onOpen={acquisitionDrill.open}
-          cols={2}
-          render={(a) => {
+        <FleetItemGrid cols={2}>
+          {acquisition.map((a) => {
             const verdictKey = String(a.verdict).split(' ·')[0];
             const tone = ACQ_VERDICT_TONE[verdictKey] ?? 'neutral';
             const accent = ACQ_VERDICT_ACCENT[verdictKey] ?? ACCENT;
-            return {
-              title: a.name,
-              subtitle: `${a.category} · ${a.verdict}`,
-              description: a.whatWorks.split('.')[0] ?? a.whatWorks,
-              statusLabel: verdictKey,
-              statusTone: tone,
-              accent,
-              icon: <TrendingUp className="w-5 h-5" />,
-              metricLabel: 'global',
-              metricValue: `${a.global}/100`,
-              meta: `V${a.virality} · C${a.conversion} · $${a.cost} · E${a.ease}`,
-            };
-          }}
-        />
+            const nextVerdict = (() => {
+              const order = ['invest more', 'hold steady', 'cut or rework'];
+              const idx = order.indexOf(verdictKey);
+              return idx === -1 ? 'hold steady' : order[(idx + 1) % order.length];
+            })();
+            const VerdictIcon = nextVerdict === 'invest more' ? ArrowUp : nextVerdict === 'cut or rework' ? ArrowDown : Minus;
+            const itemName = String(a.name);
+            const itemCategory = String(a.category);
+            const itemWhatWorks = String(a.whatWorks);
+            return (
+              <div
+                key={String(a.id)}
+                className="relative rounded-2xl border shadow-sm"
+                style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => acquisitionDrill.open(String(a.id))}
+                  className="flex w-full items-start gap-4 p-4 text-left"
+                  style={{ color: 'var(--theme-text)' }}
+                >
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
+                    style={{ background: accent }}
+                  >
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start gap-2">
+                      <div className="min-w-[9rem] flex-1">
+                        <div className="text-[14px] font-bold" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {itemName}
+                        </div>
+                        <div className="text-[11.5px] truncate mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                          {itemCategory}
+                        </div>
+                      </div>
+                      <span
+                        className="shrink-0 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{
+                          color: tone === 'ok' ? '#15803d' : tone === 'warn' ? '#b45309' : tone === 'danger' ? '#b91c1c' : '#57534e',
+                          background: tone === 'ok' ? '#dcfce7' : tone === 'warn' ? '#fef3c7' : tone === 'danger' ? '#fee2e2' : '#f5f5f4',
+                        }}
+                      >
+                        {verdictKey}
+                      </span>
+                    </div>
+                    <p className="text-[12px] leading-snug line-clamp-2 mt-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+                      {itemWhatWorks.split('.')[0] ?? itemWhatWorks}
+                    </p>
+                    <div
+                      className="flex items-center gap-3 text-[10.5px] font-mono mt-2.5 pt-2 border-t"
+                      style={{ color: 'var(--theme-text-dim)', borderColor: 'var(--panel-border-subtle)' }}
+                    >
+                      <span className="font-semibold tabular-nums" style={{ color: 'var(--theme-text)' }}>
+                        <span className="mr-1" style={{ color: 'var(--theme-text-dim)' }}>global</span>
+                        {String(a.global)}/100
+                      </span>
+                      <span className="truncate flex-1">V{String(a.virality)} · C{String(a.conversion)} · ${String(a.cost)} · E{String(a.ease)}</span>
+                    </div>
+                  </div>
+                </button>
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 border-t"
+                  style={{ borderColor: 'var(--panel-border-subtle)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); cycleVerdict(String(a.id)); }}
+                    className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                    style={{
+                      background: 'var(--theme-surface-hover)',
+                      color: 'var(--theme-text)',
+                      border: '1px solid var(--panel-border)',
+                    }}
+                    aria-label={`Cycle verdict on ${itemName}`}
+                  >
+                    <VerdictIcon className="w-3.5 h-3.5" />
+                    Switch to {nextVerdict}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </FleetItemGrid>
       </div>
     );
   };
@@ -300,33 +367,112 @@ export function GrowthApp() {
   };
 
   const Partenariats = () => {
+    const updateItem = useCmsStore(s => s.updateItem);
+    const partenariats = useCmsStore(s => s.items['growth_partenariats']) ?? [];
+    const cyclePartnerState = (id: string): void => {
+      const item = partenariats.find((p) => p.id === id);
+      if (!item) return;
+      const order = ['prospect', 'en discussion', 'actif', 'dormant'];
+      const idx = order.indexOf(String(item.state));
+      const next = idx === -1 ? 'prospect' : order[(idx + 1) % order.length];
+      const result = updateItem('growth_partenariats', id, { state: next });
+      if (result !== undefined) {
+        addToast({ source: 'Growth', type: 'success', message: `${String(item.name)} → ${next}` });
+      }
+    };
     return (
       <div className="p-7">
         <SectionHead
           title="Partenariats"
           subtitle="Ce qu'ils apportent, ce qu'ils attendent, etat de la relation"
         />
-        <CMSCardList<PartenariatItem>
-          collectionId="growth_partenariats"
-          onOpen={partenariatsDrill.open}
-          cols={2}
-          render={(p) => {
-            const tone = PARTNER_STATE_TONE[p.state] ?? 'neutral';
-            const accent = PARTNER_STATE_ACCENT[p.state] ?? ACCENT;
-            return {
-              title: p.name,
-              subtitle: `${p.type} · ${p.contact}`,
-              description: p.brings.split('.')[0] ?? p.brings,
-              statusLabel: p.state,
-              statusTone: tone,
-              accent,
-              icon: <Handshake className="w-5 h-5" />,
-              metricLabel: 'touched',
-              metricValue: p.touched,
-              meta: p.expects.split('.')[0] ?? p.expects,
-            };
-          }}
-        />
+        <FleetItemGrid cols={2}>
+          {partenariats.map((p) => {
+            const tone = PARTNER_STATE_TONE[String(p.state)] ?? 'neutral';
+            const accent = PARTNER_STATE_ACCENT[String(p.state)] ?? ACCENT;
+            const stateOrder = ['prospect', 'en discussion', 'actif', 'dormant'];
+            const curIdx = stateOrder.indexOf(String(p.state));
+            const nextState = curIdx === -1 ? 'prospect' : stateOrder[(curIdx + 1) % stateOrder.length];
+            const partnerName = String(p.name);
+            const partnerType = String(p.type);
+            const partnerContact = String(p.contact);
+            const partnerBrings = String(p.brings);
+            const partnerExpects = String(p.expects);
+            return (
+              <div
+                key={String(p.id)}
+                className="relative rounded-2xl border shadow-sm"
+                style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => partenariatsDrill.open(String(p.id))}
+                  className="flex w-full items-start gap-4 p-4 text-left"
+                  style={{ color: 'var(--theme-text)' }}
+                >
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
+                    style={{ background: accent }}
+                  >
+                    <Handshake className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start gap-2">
+                      <div className="min-w-[9rem] flex-1">
+                        <div className="text-[14px] font-bold" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {partnerName}
+                        </div>
+                        <div className="text-[11.5px] truncate mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                          {partnerType} · {partnerContact}
+                        </div>
+                      </div>
+                      <span
+                        className="shrink-0 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{
+                          color: tone === 'ok' ? '#15803d' : tone === 'warn' ? '#b45309' : tone === 'danger' ? '#b91c1c' : tone === 'accent' ? '#1d4ed8' : '#57534e',
+                          background: tone === 'ok' ? '#dcfce7' : tone === 'warn' ? '#fef3c7' : tone === 'danger' ? '#fee2e2' : tone === 'accent' ? '#dbeafe' : '#f5f5f4',
+                        }}
+                      >
+                        {String(p.state)}
+                      </span>
+                    </div>
+                    <p className="text-[12px] leading-snug line-clamp-2 mt-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+                      {partnerBrings.split('.')[0] ?? partnerBrings}
+                    </p>
+                    <div
+                      className="flex items-center gap-3 text-[10.5px] font-mono mt-2.5 pt-2 border-t"
+                      style={{ color: 'var(--theme-text-dim)', borderColor: 'var(--panel-border-subtle)' }}
+                    >
+                      <span className="font-semibold tabular-nums" style={{ color: 'var(--theme-text)' }}>
+                        <span className="mr-1" style={{ color: 'var(--theme-text-dim)' }}>touched</span>
+                        {String(p.touched)}
+                      </span>
+                      <span className="truncate flex-1">{partnerExpects.split('.')[0] ?? partnerExpects}</span>
+                    </div>
+                  </div>
+                </button>
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 border-t"
+                  style={{ borderColor: 'var(--panel-border-subtle)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); cyclePartnerState(String(p.id)); }}
+                    className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                    style={{
+                      background: 'var(--theme-surface-hover)',
+                      color: 'var(--theme-text)',
+                      border: '1px solid var(--panel-border)',
+                    }}
+                    aria-label={`Cycle state on ${partnerName}`}
+                  >
+                    Move to {nextState}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </FleetItemGrid>
       </div>
     );
   };

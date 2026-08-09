@@ -34,7 +34,16 @@ function lireCorps(req: IncomingMessage): Promise<Buffer | undefined> {
 }
 
 export function versNode(gestionnaire: GestionnaireWeb) {
-  return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+  // Deux appelants, deux formes. Vercel invoque `(req, res)` ; le plugin Vite du
+  // serveur de dev invoque `(request)` et lit la `Response` rendue. Envelopper
+  // sans le voir cassait le developpement — `res` y est `undefined`.
+  return async function adapte(
+    req: IncomingMessage | Request,
+    res?: ServerResponse,
+  ): Promise<void | Response> {
+    if (!res || req instanceof Request) {
+      return gestionnaire(req as Request)
+    }
     try {
       const hote = req.headers.host ?? 'localhost'
       // Le protocole vient de l'en-tete pose par le proxy ; en local il manque.

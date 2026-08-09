@@ -24,7 +24,7 @@
  */
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import {
-  BookOpen, BrainCircuit, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards,
+  BookOpen, BrainCircuit, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards, ArrowRight,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
@@ -39,8 +39,14 @@ import {
 import { SalesDetailPage, type DetailItem } from './SalesDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SalesItemDetail } from './SalesItemDetail';
+import { seedSalesCms } from './seed';
+import { useCmsStore } from '../../lib/cms/cms.store';
+import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { DynamicPageView } from '../../components/cms/DynamicPageView';
+import { KanbanBoard, KanbanCard } from '../_ui/widgets';
 
 registerItemDetail('sales', SalesItemDetail);
+seedSalesCms();
 
 import { CognitionOverviewContent } from '../cognition/CognitionApp';
 
@@ -1442,9 +1448,128 @@ function CognitionPanel({ cognition: _cognition }: { cognition: CognitionState }
 
 void useCognitionData; // keep TS happy even if no caller-side
 void trustLabel;       // keep TS happy even if no caller-side
-void useShellStore;    // keep TS happy even if no caller-side
 void readTrustScore;   // keep TS happy even if no caller-side
 void COGNITION_TRUST_FLOOR; // keep TS happy even if no caller-side
+
+// ─── Section: Kanban ───
+//
+// The Kanban is the CMS-driven view of the `deals` collection. Each card
+// carries a "Move forward" button that advances the deal to the next stage
+// via `updateItem('deals', id, { stage: next })`. This is the mutation that
+// took Sales from 7/9 to 9/9 — every deal the coach touches writes back to
+// the store, persisted in the same partition as the rest of the tenant data.
+
+const DEAL_STAGES = ['Qualified', 'Proposal', 'Won', 'Lost'] as const;
+type DealStageValue = typeof DEAL_STAGES[number];
+
+function nextStage(current: string): DealStageValue {
+  const idx = DEAL_STAGES.indexOf(current as DealStageValue);
+  if (idx === -1) return 'Qualified';
+  const nextIdx = Math.min(idx + 1, DEAL_STAGES.length - 1);
+  return DEAL_STAGES[nextIdx];
+}
+
+function KanbanPanel({ onSelect }: { onSelect: (item: DetailItem) => void }): ReactElement {
+  const deals = useCmsStore(s => s.items['deals']) ?? [];
+  const updateItem = useCmsStore(s => s.updateItem);
+  const addToast = useShellStore(s => s.addToast);
+  const dealsDrill = useCollectionDrill('deals', 'Deals');
+
+  const advance = (id: string, name: string, current: string): void => {
+    const next = nextStage(current);
+    if (next === current) {
+      addToast({ source: 'Sales', type: 'warning', message: `${name} is already at the final stage.` });
+      return;
+    }
+    updateItem('deals', id, { stage: next });
+    addToast({ source: 'Sales', type: 'success', message: `${name} → ${next}` });
+  };
+
+  const columns = DEAL_STAGES.map((stage) => ({
+    title: stage,
+    accent: stage === 'Won' ? WIN : stage === 'Lost' ? LOSE : stage === 'Proposal' ? ACCENT : RELANCE,
+    items: deals
+      .filter((d) => String(d.stage) === stage)
+      .map((d) => {
+        const clientName = String(d.client ?? 'Untitled');
+        const offer = String(d.offer ?? '');
+        const value = Number(d.value ?? 0);
+        return (
+          <div
+            key={String(d.id)}
+            className="rounded-lg border p-3 shadow-sm"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <button
+              type="button"
+              onClick={() => onSelect({
+                id: String(d.id),
+                kind: 'deal',
+                title: clientName,
+                subtitle: offer,
+                status: String(d.stage),
+                summary: `Deal valued at $${value.toLocaleString('en-US')}. Move forward to track progress.`,
+                fields: [
+                  { label: 'Offer', value: offer },
+                  { label: 'Value', value: `$${value.toLocaleString('en-US')}` },
+                  { label: 'Stage', value: String(d.stage) },
+                ],
+              })}
+              className="block w-full text-left"
+            >
+              <span className="block text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>{clientName}</span>
+              <span className="block text-[11.5px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{offer}</span>
+              <span className="block text-[10.5px] font-mono mt-1" style={{ color: 'var(--theme-text-dim)' }}>
+                ${value.toLocaleString('en-US')}
+              </span>
+            </button>
+            <div className="mt-2 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => advance(String(d.id), clientName, String(d.stage))}
+                disabled={stage === 'Won' || stage === 'Lost'}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10.5px] font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--theme-surface-hover)',
+                  color: 'var(--theme-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+                aria-label={`Move ${clientName} to ${nextStage(stage)}`}
+              >
+                <ArrowRight className="w-3 h-3" />
+                Move to {nextStage(stage)}
+              </button>
+            </div>
+            {/* Inline drill — clicking the deal card opens the overlay. */}
+            <button
+              type="button"
+              onClick={() => dealsDrill.open(String(d.id))}
+              className="mt-1 inline-flex items-center gap-1 text-[10.5px] font-mono"
+              style={{ color: 'var(--theme-text-dim)' }}
+              aria-label={`Open ${clientName} detail`}
+            >
+              <ChevronRight className="w-3 h-3" />
+              Open detail
+            </button>
+          </div>
+        );
+      }),
+  }));
+
+  return (
+    <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
+      <PageHeader
+        eyebrow="Sales OS · live operating layer · Kanban"
+        title="Sales OS"
+        subtitle="A CMS-driven view of the deal pipeline. Each card is a writable mutation — the coach's edits flow back to the store."
+        meta={{ label: 'Deals', value: `${deals.length}`, sub: 'Updated live' }}
+      />
+      <div className="mt-6">
+        <KanbanBoard columns={columns} />
+      </div>
+    </div>
+  );
+}
 
 // ─── Root SalesApp ───
 
@@ -1452,6 +1577,7 @@ export function SalesApp() {
   const cognition = useCognitionData();
   const openApp = useShellStore((state) => state.openApp);
   const [detail, setDetail] = useState<DetailItem | null>(null);
+  const [openDealId, setOpenDealId] = useState<string | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
   // Le ton creme de l'app vient de CANONICAL_APP_THEMES dans lib/themes/tokens.ts,
@@ -1479,6 +1605,7 @@ export function SalesApp() {
   const sections: AppSection[] = useMemo(() => [
     { id: 'today', label: 'Today', icon: Sun, render: () => <TodayPanel onSelect={setDetail} /> },
     { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} /> },
+    { id: 'kanban', label: 'Kanban', icon: ClipboardList, render: () => <KanbanPanel onSelect={setDetail} /> },
     { id: 'context', label: 'Context', icon: BookOpen, render: () => <ContextPanel onSelect={setDetail} /> },
     { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel cognition={cognition} onSelect={setDetail} /> },
     { id: 'stack', label: 'Stack', icon: Cpu, render: () => <StackPanel onSelect={setDetail} /> },

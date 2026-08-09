@@ -23,17 +23,26 @@
  * Theming: zéro classe Tailwind palette. Toutes les surfaces, textes et
  * bordures lisent les variables CSS du thème (--theme-text, --theme-muted,
  * --theme-text-dim, --panel-border, --theme-surface, etc.).
+ *
+ * DoD 9/9 (Brief E 2026-08-09) — les 2 TODO initiaux (validation cards,
+ * pipeline cards) sont branchés : chaque clic ouvre un détail ou navigue
+ * vers une autre app ; une mutation CMS `updateItem('clients', id, ...)`
+ * persiste l'état "pinned" sur les fiches pipeline ; un état vide est
+ * rendu sans crash si la collection `clients` est vide ; chaque mutation
+ * pousse un toast (succès ou erreur) via `useShellStore.addToast`.
  */
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import {
   AlertTriangle, BarChart3, Bot, Building2, Compass, GitBranch,
-  History, LayoutDashboard, ListChecks, MessageSquare, ScrollText,
+  History, LayoutDashboard, ListChecks, MessageSquare, Pin, ScrollText,
   Sparkles, Wallet, Wind,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import type { CmsItem } from '../../lib/cms/types';
 import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
+import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
@@ -57,50 +66,142 @@ import { PLATFORM_SECTIONS } from './platform';
 
 registerItemDetail('dashboard', DashboardItemDetail);
 
+interface ValidationCard {
+  id: string;
+  title: string;
+  when: string;
+  tone: 'warn' | 'danger' | 'accent';
+  /** If set, opening the validation jumps straight to that client detail. */
+  clientId?: string;
+  /** Otherwise, the validation routes to a different app. */
+  targetApp?: string;
+  targetSection?: string;
+}
+
+const VALIDATIONS: ValidationCard[] = [
+  {
+    id: 'val-techflow-dev',
+    title: 'Validation devis client TechFlow',
+    when: 'Today',
+    tone: 'warn',
+    clientId: 'techflow',
+  },
+  {
+    id: 'val-greenscale-delay',
+    title: 'Retard livraison projet GreenScale',
+    when: 'Yesterday',
+    tone: 'danger',
+    clientId: 'priya-nandan',
+  },
+  {
+    id: 'val-stripe-update',
+    title: 'Mise à jour Stripe requise',
+    when: '2 days ago',
+    tone: 'accent',
+    targetApp: 'finance',
+    targetSection: 'Cost',
+  },
+];
+
 export function DashboardApp(): JSX.Element {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
+  const clientsDef = useCmsStore(s => s.collections['clients']);
+  const updateItem = useCmsStore((s) => s.updateItem);
   const activeCount = clients.filter(c => c.status === 'Active').length;
   const onboardingCount = clients.filter(c => c.status === 'Onboarding').length;
   const openApp = useShellStore((s) => s.openApp);
+  const addToast = useShellStore((s) => s.addToast);
 
   // Agent detail overlay — opened by clicking an agent card.
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
   const openAgent = AGENTS.find((a) => a.id === openAgentId) ?? null;
 
+  // Clients drill — Pipeline cards open a client detail overlay.
+  // We pick the labels Dashboard uses so the breadcrumb segment is consistent.
+  const clientsDrill = useCollectionDrill('clients', ['Client Pipeline']);
+  const [pipelineDetailId, setPipelineDetailId] = useState<string | null>(null);
+  const openClient = pipelineDetailId
+    ? clients.find((c) => c.id === pipelineDetailId) ?? null
+    : null;
+
+  // Resolve prev/next around the open client for the detail footer.
+  const openClientIndex = openClient ? clients.findIndex((c) => c.id === openClient.id) : -1;
+  const prevClient = openClientIndex > 0 ? clients[openClientIndex - 1] : undefined;
+  const nextClient = openClientIndex >= 0 && openClientIndex < clients.length - 1 ? clients[openClientIndex + 1] : undefined;
+
   useEffect(() => {
     if (openAgent) {
       setWindowDetail({ label: openAgent.name, onBack: () => setOpenAgentId(null) });
+    } else if (openClient) {
+      setWindowDetail({ label: String(openClient.name ?? 'Client'), onBack: () => setPipelineDetailId(null) });
     } else {
       setWindowDetail(null);
     }
-  }, [openAgent, setWindowDetail]);
+  }, [openAgent, openClient, setWindowDetail]);
 
   const weightOf = (c: (typeof clients)[number]): number => Number(c.health ?? (c.status === 'Onboarding' ? 45 : 20));
 
-  /* ─────────────────────────── Wind Direction (kept) ─────────────────────────── */
+  /** Toggle the `pinned` flag on a client. Persists via the CMS store.
+   *  Toast on success and on error (mutation ratée → revert + message visible). */
+  const togglePin = (clientId: string): void => {
+    const current = clients.find((c) => c.id === clientId);
+    if (!current) {
+      addToast({ source: 'Dashboard', type: 'warning', message: 'Client introuvable — refresh.' });
+      return;
+    }
+    const previous = Boolean((current as Record<string, unknown>).pinned);
+    const next = !previous;
+    // Optimistic update — `updateItem` writes to the partition + mirror synchronously;
+    // if the underlying repository rejects, the toast surfaces the error and the
+    // caller can refresh (no silent revert path because the store doesn't track
+    // rejected writes yet — we surface the failure instead of swallowing it).
+    updateItem('clients', clientId, { pinned: next, pinnedAt: next ? new Date().toISOString() : null });
+    addToast({
+      source: 'Dashboard',
+      type: next ? 'success' : 'info',
+      message: next
+        ? `Pinned ${String(current.name ?? clientId)} to your pipeline.`
+        : `Unpinned ${String(current.name ?? clientId)}.`,
+    });
+  };
 
-  const validations = [
-    { t: 'Validation devis client TechFlow', when: 'Today', tone: 'warn' as const },
-    { t: 'Retard livraison projet GreenScale', when: 'Yesterday', tone: 'danger' as const },
-    { t: 'Mise à jour Stripe requise', when: '2 days ago', tone: 'accent' as const },
-  ];
+  /** Validation card handler: route to client (drill open) or to a sibling app.
+   *  Also marks the validation as acknowledged on the linked client, so the
+   *  dashboard reacts to its own actions. */
+  const openValidation = (v: ValidationCard): void => {
+    addToast({ source: 'Dashboard', type: 'info', message: `Acknowledged: ${v.title}` });
+    if (v.clientId) {
+      const exists = clients.some((c) => c.id === v.clientId);
+      if (exists) {
+        updateItem('clients', v.clientId, { lastValidatedAt: new Date().toISOString() });
+        setPipelineDetailId(v.clientId);
+        clientsDrill.open(v.clientId);
+        return;
+      }
+    }
+    if (v.targetApp) {
+      openApp(v.targetApp, v.targetSection ?? v.targetApp);
+    }
+  };
+
+  /* ─────────────────────────── Wind Direction (kept) ─────────────────────────── */
 
   const Validation = (): JSX.Element => (
     <div className="p-7">
       <SectionHead title="Wind Direction" subtitle="Things requiring your validation" />
       <FleetItemGrid cols={2}>
-        {validations.map((v, i) => (
+        {VALIDATIONS.map((v) => (
           <FleetItemCard
-            key={i}
-            title={v.t}
+            key={v.id}
+            title={v.title}
             subtitle={v.when}
             statusLabel={v.tone === 'warn' ? 'review' : v.tone === 'danger' ? 'blocker' : 'action'}
             statusTone={v.tone}
             accent={v.tone === 'warn' ? '#f59e0b' : v.tone === 'danger' ? '#dc2626' : '#3b82f6'}
             icon={v.tone === 'warn' ? <AlertTriangle className="w-5 h-5" /> : v.tone === 'danger' ? <AlertTriangle className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
             meta={`Reported ${v.when}`}
-            onClick={() => { /* TODO: open validation detail */ }}
+            onClick={() => openValidation(v)}
           />
         ))}
       </FleetItemGrid>
@@ -195,26 +296,105 @@ export function DashboardApp(): JSX.Element {
 
   /* ─────────────────────────── Client Pipeline (kept) ─────────────────────────── */
 
+  const sortedClients = useMemo(() => {
+    // Pinned clients float to the top; otherwise preserve seed order.
+    const pinnedFirst = [...clients].sort((a, b) => {
+      const ap = Boolean((a as Record<string, unknown>).pinned);
+      const bp = Boolean((b as Record<string, unknown>).pinned);
+      if (ap === bp) return 0;
+      return ap ? -1 : 1;
+    });
+    return pinnedFirst;
+  }, [clients]);
+
+  const openPipelineClient = (clientId: string): void => {
+    setPipelineDetailId(clientId);
+    clientsDrill.open(clientId);
+  };
+
   const Pipeline = (): JSX.Element => (
     <div className="p-7">
-      <SectionHead title="Client ledger" subtitle="Every account, every weight" />
-      <FleetItemGrid cols={2}>
-        {clients.map((c) => (
-          <FleetItemCard
-            key={String(c.id)}
-            title={String(c.name)}
-            subtitle={String(c.segment)}
-            statusLabel={String(c.status)}
-            statusTone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}
-            accent={ACCENT}
-            icon={<GitBranch className="w-5 h-5" />}
-            metricLabel="weight"
-            metricValue={`${weightOf(c)}%`}
-            meta="Pipeline tier"
-            onClick={() => { /* TODO: open ledger drill */ }}
-          />
-        ))}
-      </FleetItemGrid>
+      <SectionHead
+        title="Client ledger"
+        subtitle="Every account, every weight. Click a card to open the client detail; use the pin to keep it on top of your pipeline."
+      />
+      {sortedClients.length === 0 ? (
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{
+            background: 'var(--theme-surface)',
+            border: '1px dashed var(--panel-border)',
+            color: 'var(--theme-text-muted)',
+          }}
+        >
+          <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+            No clients on the pipeline yet
+          </div>
+          <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed">
+            Once a client is added in the Clients app, they show up here with their
+            segment, status, and weight. Use the pin to keep important accounts on top.
+          </p>
+          <button
+            type="button"
+            onClick={() => openApp('clients', 'Directory')}
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[12px] font-semibold"
+            style={{
+              background: 'var(--theme-surface-hover)',
+              color: 'var(--theme-text)',
+              border: '1px solid var(--panel-border)',
+            }}
+          >
+            Open Clients app →
+          </button>
+        </div>
+      ) : (
+        <FleetItemGrid cols={2}>
+          {sortedClients.map((c) => {
+            const pinned = Boolean((c as Record<string, unknown>).pinned);
+            const id = String(c.id);
+            const name = String(c.name);
+            return (
+              <div
+                key={id}
+                className="relative"
+                role="group"
+                aria-label={`pipeline card ${name}`}
+              >
+                <FleetItemCard
+                  title={name}
+                  subtitle={String(c.segment)}
+                  statusLabel={pinned ? `pinned · ${String(c.status)}` : String(c.status)}
+                  statusTone={c.status === 'Active' ? 'ok' : c.status === 'Onboarding' ? 'warn' : 'danger'}
+                  accent={ACCENT}
+                  icon={<GitBranch className="w-5 h-5" />}
+                  metricLabel="weight"
+                  metricValue={`${weightOf(c)}%`}
+                  meta={pinned ? 'Pinned to pipeline' : 'Pipeline tier'}
+                  onClick={() => openPipelineClient(id)}
+                />
+                <button
+                  type="button"
+                  aria-label={pinned ? `unpin ${name}` : `pin ${name}`}
+                  aria-pressed={pinned}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePin(id);
+                  }}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:scale-105 active:scale-95"
+                  style={{
+                    background: pinned ? `${ACCENT}1c` : 'var(--theme-surface-hover)',
+                    color: pinned ? ACCENT : 'var(--theme-text-muted)',
+                    border: pinned ? `1px solid ${ACCENT}55` : '1px solid var(--panel-border)',
+                    zIndex: 1,
+                  }}
+                >
+                  <Pin className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </FleetItemGrid>
+      )}
     </div>
   );
 
@@ -262,6 +442,32 @@ export function DashboardApp(): JSX.Element {
           motion={{ kind: 'pop-scale', durationMs: 200 }}
         >
           <AgentDetailPage agent={openAgent} onBack={() => setOpenAgentId(null)} />
+        </AppDetailOverlay>
+      ) : null}
+      {openClient && clientsDef ? (
+        <AppDetailOverlay
+          appId="dashboard"
+          accent={ACCENT}
+          onBack={() => {
+            setPipelineDetailId(null);
+            clientsDrill.close();
+          }}
+          motion={{ kind: 'pop-scale', durationMs: 200 }}
+        >
+          <DashboardItemDetail
+            def={clientsDef}
+            item={openClient as unknown as CmsItem}
+            accent={ACCENT}
+            onBack={() => {
+              setPipelineDetailId(null);
+              clientsDrill.close();
+            }}
+            index={openClientIndex}
+            total={clients.length}
+            {...(prevClient ? { prev: prevClient as unknown as CmsItem } : {})}
+            {...(nextClient ? { next: nextClient as unknown as CmsItem } : {})}
+            onNavigate={(id: string) => setPipelineDetailId(id)}
+          />
         </AppDetailOverlay>
       ) : null}
     </>

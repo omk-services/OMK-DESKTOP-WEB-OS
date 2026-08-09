@@ -343,6 +343,66 @@ const codexItems: CmsItem[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
+ *  APPROVAL DECISIONS — auditable trail of every approve/reject
+ *  Each entry is a log line the B1 Gatekeeper can scan: who decided what
+ *  on which scenario, and the rationale the approver wrote (or auto-
+ *  generated). The collection exists so the ApprovalsView is not a UI
+ *  bubble: a decision is a CMS row, mutable, and visible to tests.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const approvalDecisionsDef: CmsCollectionDef = {
+  id: 'approval_decisions',
+  name: 'Approval decisions',
+  singular: 'Decision',
+  accent: APP_ACCENT,
+  titleField: 'scenarioName',
+  subtitleField: 'decidedBy',
+  badgeField: 'verdict',
+  fields: [
+    { key: 'scenarioId', label: 'Scenario id', type: 'text' },
+    { key: 'scenarioName', label: 'Scenario', type: 'text' },
+    { key: 'verdict', label: 'Verdict', type: 'badge' },
+    { key: 'decidedBy', label: 'Decided by', type: 'text' },
+    { key: 'proposalCount', label: 'Proposals', type: 'number' },
+    { key: 'rationale', label: 'Rationale', type: 'longtext' },
+    { key: 'decidedAt', label: 'Decided at', type: 'text' },
+  ],
+};
+
+const approvalDecisionsItems: CmsItem[] = [
+  {
+    id: 'dec-2026-08-04-amber-rollout',
+    scenarioId: 'scn_legacy_2026_08_04_amber',
+    scenarioName: 'Rollout onboarding tour v3 à 100%',
+    verdict: 'approved',
+    decidedBy: 'B1 Gatekeeper',
+    proposalCount: 3,
+    rationale: 'Tour v3 derrière flag depuis 12 jours, métriques time-to-first-session en hausse. Risque résiduel accepté.',
+    decidedAt: '2026-08-04 09:42',
+  },
+  {
+    id: 'dec-2026-08-05-voice-v3-rollback',
+    scenarioId: 'scn_legacy_2026_08_05_voice',
+    scenarioName: 'Rollback voice-clone v3 → v2',
+    verdict: 'approved',
+    decidedBy: 'B1 Gatekeeper',
+    proposalCount: 1,
+    rationale: 'MOS v3 = 3.91 vs v2 = 4.21. Le rollback est documenté dans mem-voice-fidelity-v2, la décision est réversible.',
+    decidedAt: '2026-08-05 14:08',
+  },
+  {
+    id: 'dec-2026-08-06-newsletter-23',
+    scenarioId: 'scn_legacy_2026_08_06_nl23',
+    scenarioName: 'Newsletter #23 — A/B subject',
+    verdict: 'rejected',
+    decidedBy: 'B1 Gatekeeper',
+    proposalCount: 1,
+    rationale: 'Le test A/B sur la #22 a déjà tranché : curiosity hook gagne. Refuser la 2e vague pour ne pas noyer le signal.',
+    decidedAt: '2026-08-06 16:55',
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
  *  Registration — idempotent, called once at module load.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -355,4 +415,5 @@ export function seedPeopleCms(): void {
   store.registerCollection(personasDef, personasItems);
   store.registerCollection(memoryDef, memoryItems);
   store.registerCollection(codexDef, codexItems);
+  store.registerCollection(approvalDecisionsDef, approvalDecisionsItems);
 }

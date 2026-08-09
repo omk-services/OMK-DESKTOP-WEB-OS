@@ -12,13 +12,14 @@
 import { useMemo } from 'react';
 import {
   BrainCircuit, FileText, Layers, Lock, Repeat, Shield,
-  TrendingUp, Database, Cog, Languages, type LucideIcon,
+  TrendingUp, Database, Cog, Languages, CheckCircle2, type LucideIcon,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { useCmsStore } from '../../lib/cms/cms.store';
+import { useShellStore } from '../../stores/shell.store';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { AuditItemDetail } from './AuditItemDetail';
 import { seedAuditCms, FREQ_BADGE_ACCENT } from './seed';
@@ -110,6 +111,20 @@ export function AuditApp() {
   const automatabiliteDrill = useCollectionDrill('audit_automatabilite', 'Automatabilité');
   const roiDrill = useCollectionDrill('audit_arbitrage_roi', 'Arbitrage & ROI');
 
+  /* Brief-F — couche d'écriture. Le manuel est D4 append-only sur le fond,
+   * mais une fiche par critère gagne un état "relue" (signé humain). C'est
+   * la seule mutation : on pose un timestamp + un actor sur l'item, sans
+   * toucher au contenu canonique. Toast global au résultat. */
+  const updateItem = useCmsStore(s => s.updateItem);
+  const addToast = useShellStore(s => s.addToast);
+  const markReviewed = (collectionId: string, id: string, label: string): void => {
+    const reviewedAt = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    const result = updateItem(collectionId, id, { reviewedAt, reviewedBy: 'human:ops' });
+    if (result !== undefined) {
+      addToast({ source: 'Audit', type: 'success', message: `Critère marqué relu : ${label}` });
+    }
+  };
+
   const sections: AppSection[] = useMemo(() => [
     {
       id: 'overview',
@@ -135,6 +150,7 @@ export function AuditApp() {
           icon={GRILLES[1].icon}
           collectionId="audit_arbitrage"
           drill={arbitrageDrill}
+          onMarkReviewed={(id, label) => markReviewed('audit_arbitrage', id, label)}
         />
       ),
     },
@@ -150,6 +166,7 @@ export function AuditApp() {
           icon={GRILLES[2].icon}
           collectionId="audit_contexte"
           drill={contexteDrill}
+          onMarkReviewed={(id, label) => markReviewed('audit_contexte', id, label)}
         />
       ),
     },
@@ -165,6 +182,7 @@ export function AuditApp() {
           icon={GRILLES[3].icon}
           collectionId="audit_donnees"
           drill={donneesDrill}
+          onMarkReviewed={(id, label) => markReviewed('audit_donnees', id, label)}
         />
       ),
     },
@@ -180,6 +198,7 @@ export function AuditApp() {
           icon={GRILLES[4].icon}
           collectionId="audit_automatabilite"
           drill={automatabiliteDrill}
+          onMarkReviewed={(id, label) => markReviewed('audit_automatabilite', id, label)}
         />
       ),
     },
@@ -195,6 +214,7 @@ export function AuditApp() {
           icon={GRILLES[5].icon}
           collectionId="audit_arbitrage_roi"
           drill={roiDrill}
+          onMarkReviewed={(id, label) => markReviewed('audit_arbitrage_roi', id, label)}
         />
       ),
     },
@@ -242,6 +262,12 @@ export function AuditApp() {
 }
 
 function OverviewContent() {
+  const navigateToSection = (label: string): void => {
+    if (typeof document === 'undefined') return;
+    const target = document.querySelector(`[data-section="${label}"]`);
+    if (target instanceof HTMLElement) target.click();
+  };
+
   return (
     <div className="space-y-6">
       <SectionHead
@@ -272,11 +298,23 @@ function OverviewContent() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {GRILLES.map((g) => {
             const Icon = g.icon;
+            // Map grille ID to the sidebar label (which is what `data-section`
+            // carries on the AppFrame buttons). Maturité is the special case
+            // — it's a static grid, the other five have a CMS drill.
+            const sectionLabel =
+              g.id === 'maturite' ? 'Maturité'
+              : g.id === 'arbitrage' ? 'Arbitrage'
+              : g.id === 'contexte' ? 'Contexte'
+              : g.id === 'donnees' ? 'Données'
+              : g.id === 'automatabilite' ? 'Automatabilité'
+              : g.id === 'roi' ? 'ROI'
+              : '';
             return (
-              <a
+              <button
                 key={g.id}
-                href={`#${g.id}`}
-                onClick={(e) => { e.preventDefault(); /* nav sidebar is the entry point */ }}
+                type="button"
+                onClick={() => navigateToSection(sectionLabel)}
+                aria-label={`Ouvrir la grille ${g.title}`}
                 className="text-left rounded-xl border border-[var(--panel-border)] bg-[var(--theme-bg)] p-3 transition-all hover:border-[var(--theme-text-dim)] hover:shadow-md"
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -290,7 +328,7 @@ function OverviewContent() {
                 </div>
                 <p className="text-[11px] leading-snug text-[var(--theme-muted)]">{g.tagline}</p>
                 <p className="mt-1 text-[10px] font-mono text-[var(--theme-text-dim)]">p. {g.page}</p>
-              </a>
+              </button>
             );
           })}
         </div>
@@ -406,6 +444,7 @@ function CriterionGrid({
   icon: Icon,
   collectionId,
   drill,
+  onMarkReviewed,
 }: {
   title: string;
   subtitle: string;
@@ -413,31 +452,77 @@ function CriterionGrid({
   icon: LucideIcon;
   collectionId: string;
   drill: CollectionDrill;
+  onMarkReviewed: (id: string, label: string) => void;
 }) {
+  const items = useCmsStore(s => s.items[collectionId] ?? []) as CriterionItem[];
   return (
     <div className="p-7">
       <SectionHead title={title} subtitle={subtitle} />
-      <CMSCardList<CriterionItem>
-        collectionId={collectionId}
-        onOpen={(id) => drill.open(id)}
-        cols={2}
-        render={(c) => {
-          const freq = String(c.frequency ?? '').toLowerCase();
-          const freqAccent = FREQ_BADGE_ACCENT[freq] ?? accent;
-          return {
-            title: String(c.criterion ?? '—'),
-            subtitle: String(c.question ?? ''),
-            description: String(c.observe ?? '').slice(0, 160),
-            statusLabel: freq || '—',
-            statusTone: freq === 'quotidien' ? 'danger' : freq === 'hebdo' ? 'warn' : 'accent',
-            accent: freqAccent,
-            icon: <Icon className="w-5 h-5" />,
-            metricLabel: 'axe',
-            metricValue: String(c.axis ?? '—'),
-            meta: `3 niveaux · ${String(c.id ?? '')}`,
-          };
-        }}
-      />
+      {items.length === 0 ? (
+        <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>No items yet.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {items.map((c) => {
+            const freq = String(c.frequency ?? '').toLowerCase();
+            const freqAccent = FREQ_BADGE_ACCENT[freq] ?? accent;
+            const freqBg: Record<string, string> = { quotidien: '#fee2e2', hebdo: '#fef3c7', mensuel: '#ccfbf1', ponctuel: '#e0e7ff' };
+            const freqFg: Record<string, string> = { quotidien: '#b91c1c', hebdo: '#b45309', mensuel: '#0f766e', ponctuel: '#4338ca' };
+            const isReviewed = Boolean(c.reviewedAt);
+            return (
+              <div
+                key={String(c.id)}
+                className="rounded-2xl border shadow-sm p-4 flex flex-col gap-2 cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+                style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+                onClick={() => drill.open(String(c.id))}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: freqAccent }}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-2 flex-wrap">
+                      <span className="text-[14px] font-bold flex-1 min-w-[9rem]" style={{ color: 'var(--theme-text)' }}>{String(c.criterion ?? '—')}</span>
+                      <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: freqFg[freq] ?? 'var(--theme-text-muted)', background: freqBg[freq] ?? 'var(--theme-surface)' }}>
+                        {freq || '—'}
+                      </span>
+                    </div>
+                    <div className="text-[11.5px] truncate mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{String(c.question ?? '')}</div>
+                  </div>
+                </div>
+                <p className="text-[12px] leading-snug line-clamp-2" style={{ color: 'var(--theme-text-muted)' }}>
+                  {String(c.observe ?? '').slice(0, 160)}
+                </p>
+                <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+                  <span className="text-[10.5px] font-mono" style={{ color: 'var(--theme-text-dim)' }}>
+                    axe <span className="font-semibold" style={{ color: 'var(--theme-text)' }}>{String(c.axis ?? '—')}</span>
+                    <span className="mx-2">·</span>
+                    {isReviewed ? `relue ${String(c.reviewedAt ?? '')}` : `3 niveaux · ${String(c.id ?? '')}`}
+                  </span>
+                  {isReviewed ? (
+                    <span
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider shrink-0"
+                      style={{ background: 'rgba(22,163,74,0.14)', color: '#15803d', border: '1px solid #86efac' }}
+                      aria-label="Critère déjà relu"
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> relu
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onMarkReviewed(String(c.id), String(c.criterion ?? c.id)); }}
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all hover:opacity-90 shrink-0"
+                      style={{ background: 'rgba(99,102,241,0.14)', color: '#4338ca', border: '1px solid #c7d2fe' }}
+                      aria-label={`Marquer relu : ${c.criterion}`}
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> relire
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Settings, SlidersHorizontal, ShieldAlert, Plug, Palette, Check, RotateC
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
+import { useCmsStore } from '../../lib/cms/cms.store';
 import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
@@ -11,8 +12,7 @@ import { ThemeDetailPage } from './ThemeDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SettingsItemDetail } from './SettingsItemDetail';
 import { AssistantSettings } from './AssistantSettings';
-
-registerItemDetail('settings', SettingsItemDetail);
+import { seedSettingsCms } from './seed';
 import { useCanvasFxStore } from '../../stores/canvasFx.store';
 import {
   THEME_TO_CANVAS_UI,
@@ -29,7 +29,59 @@ import {
 } from '../../lib/wallpaper';
 import posthog from 'posthog-js';
 
+registerItemDetail('settings', SettingsItemDetail);
+seedSettingsCms();
+
 const ACCENT = '#78716c';
+
+/** localStorage key for the General/Privacy toggle flags. Versioned
+ *  (`-v1`) so a future schema change can ship a clean break without
+ *  dragging stale shape into a new release. */
+const FLAGS_STORAGE_KEY = 'coach-os-settings-flags-v1';
+
+interface FlagState {
+  autoBrief: boolean;
+  autoFollowup: boolean;
+  voicePublish: boolean;
+  egressLock: boolean;
+  localOnly: boolean;
+  weeklyDigest: boolean;
+}
+
+const DEFAULT_FLAGS: FlagState = {
+  autoBrief: true,
+  autoFollowup: true,
+  voicePublish: false,
+  egressLock: true,
+  localOnly: true,
+  weeklyDigest: true,
+};
+
+/** Read the persisted flag set, falling back to defaults when the key
+ *  is absent or the payload is malformed (older versions, partial
+ *  writes). Each field is read independently so a partial schema still
+ *  loads — no reason to throw the user back to defaults for one missing
+ *  key. */
+function loadFlags(): FlagState {
+  if (typeof window === 'undefined') return DEFAULT_FLAGS;
+  try {
+    const raw = window.localStorage.getItem(FLAGS_STORAGE_KEY);
+    if (!raw) return DEFAULT_FLAGS;
+    const parsed = JSON.parse(raw) as Partial<FlagState>;
+    return { ...DEFAULT_FLAGS, ...parsed };
+  } catch {
+    return DEFAULT_FLAGS;
+  }
+}
+
+function saveFlags(next: FlagState): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(FLAGS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // best-effort — QuotaExceeded or private mode. Don't crash the toggle.
+  }
+}
 
 // Registered business-domain apps (matches app-discovery.ts).
 const APP_REGISTRY: Array<{ id: string; name: string; }> = [
@@ -422,15 +474,18 @@ function WallpaperPanel() {
 }
 
 export function SettingsApp() {
-  const [flags, setFlags] = useState({
-    autoBrief: true,
-    autoFollowup: true,
-    voicePublish: false,
-    egressLock: true,
-    localOnly: true,
-    weeklyDigest: true,
-  });
-  const set = (k: keyof typeof flags) => setFlags(f => ({ ...f, [k]: !f[k] }));
+  // Flags are now persisted across reloads (Phase-D1).
+  // Hydration runs once on mount via the lazy initializer; subsequent
+  // updates write back to localStorage in the same render that flips
+  // the toggle, so a reload immediately reflects the new state.
+  const [flags, setFlags] = useState<FlagState>(() => loadFlags());
+  const set = (k: keyof FlagState) => {
+    setFlags((f) => {
+      const next = { ...f, [k]: !f[k] };
+      saveFlags(next);
+      return next;
+    });
+  };
 
   const [observabilityOptIn, setObservabilityOptInState] = useState<boolean>(() => getObservabilityConsent());
   const onToggleObservability = (next: boolean) => {
@@ -445,7 +500,7 @@ export function SettingsApp() {
     }
   };
 
-  const Row = ({ label, hint, k }: { label: string; hint: string; k: keyof typeof flags }) => (
+  const Row = ({ label, hint, k }: { label: string; hint: string; k: keyof FlagState }) => (
     <div className="flex items-center justify-between px-5 py-4">
       <div>
         <div className="text-sm font-medium text-[var(--theme-text)]">{label}</div>
@@ -519,22 +574,48 @@ export function SettingsApp() {
     );
   };
 
-  const Integrations = () => (
-    <div className="p-7">
-      <SectionHead title="Integrations" subtitle="Connected via the Marketplace" />
-      <div className="flex flex-col gap-3">
-        {[['Stripe', 'connected'], ['Calendly', 'connected'], ['LinkedIn', 'not connected']].map(([n, s]) => (
-          <Card key={n} className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
-              <span className="text-sm font-semibold text-[var(--theme-text)]">{n}</span>
-            </div>
-            <Badge tone={s === 'connected' ? 'ok' : 'neutral'}>{s}</Badge>
-          </Card>
-        ))}
+  const Integrations = () => {
+    // Phase-D2 : les intégrations vivent dans la collection CMS
+    // `settings_integrations`, enregistrée par `seedSettingsCms()` au
+    // chargement du module. Plus de valeurs en dur dans le JSX — un
+    // futur « ajouter Stripe Connect » passera par `useCmsStore.addItem`.
+    const items = useCmsStore((s) => s.items['settings_integrations']) ?? [];
+
+    return (
+      <div className="p-7">
+        <SectionHead title="Integrations" subtitle="Connected via the Marketplace" />
+        {items.length === 0 ? (
+          <div className="text-[13px] text-[var(--theme-text-dim)] italic px-1 py-4">
+            Aucune integration enregistree. Connectez Stripe, Calendly ou
+            LinkedIn depuis le Marketplace.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {items.map((it) => {
+              const name = String(it.name ?? '—');
+              const status = String(it.status ?? 'not connected');
+              return (
+                <Card key={String(it.id)} className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-[var(--theme-text)]">{name}</div>
+                      {it.description ? (
+                        <div className="text-[11px] text-[var(--theme-muted)] mt-0.5 line-clamp-1">
+                          {String(it.description)}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <Badge tone={status === 'connected' ? 'ok' : 'neutral'}>{status}</Badge>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   /* ════════════════════════════════════════════════════════════════════════
    *  Help section — replay any of the 5 onboarding tours.
@@ -849,8 +930,16 @@ export function SettingsApp() {
     { id: 'help', label: 'Help', icon: HelpCircle, render: Help },
   ];
 
-  // If cross-window intent asked us to focus Themes, force it on first render
-  void themesSection;
+  // If cross-window intent asked us to focus Themes, click the sidebar
+  // button that AppFrame renders with `data-section={label}`. AppFrame
+  // owns its own `activeId` state, so we drive the navigation through
+  // the same DOM hook the sidebar uses internally — same trick as
+  // WelcomeApp for its brand labels (cf. `navigateToPage`).
+  useEffect(() => {
+    if (!themesSection) return;
+    const btn = document.querySelector('[data-section="Themes"]');
+    if (btn instanceof HTMLButtonElement) btn.click();
+  }, [themesSection]);
 
   return (
     <AppFrame
@@ -860,9 +949,6 @@ export function SettingsApp() {
       accent={ACCENT}
       sections={sections}
       disableSignatureFx
-      // AppFrame's internal activeId is local state; we can't pre-select from
-      // props without extending it. The cross-window intent is best-effort: it
-      // flashes a console hint so the user knows to click "Themes".
     />
   );
 }

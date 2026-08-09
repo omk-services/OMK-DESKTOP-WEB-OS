@@ -8,7 +8,7 @@
  *  apps that want it, but Product itself uses the standard 2-column layout.
  */
 import { useEffect, useState } from 'react';
-import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode, Trophy, Send, Hammer, Sparkles } from 'lucide-react';
+import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode, Trophy, Send, Hammer, Sparkles, Plus, ChevronRight } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
@@ -24,6 +24,7 @@ import { CMSCardList } from '../_ui/CMSCardList';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
 import { seedProductCms } from './seed';
+import { useShellStore } from '../../stores/shell.store';
 
 registerItemDetail('product', ProductItemDetail);
 seedProductCms();
@@ -157,6 +158,9 @@ export function ProductApp() {
   const launchesDrill = useCollectionDrill('product_launches', 'Lancement');
   const mvpsDrill = useCollectionDrill('product_mvps', 'MVP');
   const ideasDrill = useCollectionDrill('product_ideas', 'Idéation');
+  const updateItem = useCmsStore(s => s.updateItem);
+  const addItem = useCmsStore(s => s.addItem);
+  const addToast = useShellStore(s => s.addToast);
   const [detail, setDetail] = useState<ProductDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -169,6 +173,28 @@ export function ProductApp() {
   }, [detail, setWindowDetail]);
 
   const byStage = (stage: string) => items.filter(i => i.stage === stage);
+
+  /* Brief-F+ — mutations on the CMS. Roadmap columns are now movable: a
+   * coach clicks "Move → next stage" on a Spec card and the item jumps
+   * forward in the canonical Kanban order. The order is defined in
+   * `STAGE_NEXT` so that "backlog" is not followed by anything but
+   * "later" — the loop terminates cleanly. */
+  const STAGE_NEXT: Record<string, string | null> = {
+    backlog: 'later',
+    later: 'next',
+    next: 'now',
+    now: null,
+  };
+
+  const moveStage = (id: string, fromStage: string): void => {
+    const next = STAGE_NEXT[fromStage];
+    if (!next) {
+      addToast({ source: 'Product', type: 'warning', message: 'Déjà sur "now" — fin de la chaîne.' });
+      return;
+    }
+    updateItem('product_items', id, { stage: next });
+    addToast({ source: 'Product', type: 'success', message: `Déplacé vers "${next}"` });
+  };
 
   const openItem = (id: string): void => {
     const item = items.find(c => c.id === id);
@@ -287,23 +313,83 @@ export function ProductApp() {
     return (
       <div className="p-7">
         <SectionHead title="Specs" subtitle="Every product_items row has a spec (CMS-driven)" action={<Badge tone="accent">{items.length}</Badge>} />
-        <CMSCardList<ProductItem>
-          collectionId="product_items"
-          onOpen={openItem}
-          cols={2}
-          render={(it) => ({
-            title: it.title,
-            subtitle: `${it.stage} · ${it.meta}`,
-            description: `Spec: ${it.specStatus ?? 'draft'}${it.owner ? ` · Owner: ${it.owner}` : ''}`,
-            statusLabel: it.specStatus ?? 'draft',
-            statusTone: SPEC_TONE[it.specStatus ?? 'draft'] ?? 'neutral',
-            accent: STAGE_ACCENT[it.stage] ?? ACCENT,
-            icon: <FileCode className="w-5 h-5" />,
-            metricLabel: 'owner',
-            metricValue: it.owner ?? '—',
-            meta: `stage: ${it.stage}`,
-          })}
-        />
+        {items.length === 0 ? (
+          <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>
+            No specs yet.
+          </div>
+        ) : (
+          <FleetItemGrid cols={2}>
+            {items.map((raw) => {
+              const it = raw as unknown as ProductItem;
+              const stage = String(it.stage ?? 'backlog');
+              const nextStage = STAGE_NEXT[stage];
+              return (
+                <div
+                  key={String(it.id)}
+                  className="rounded-2xl border shadow-sm p-4 flex flex-col gap-2.5"
+                  style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => openItem(String(it.id))}
+                    data-spec-id={String(it.id)}
+                    className="text-left flex items-start gap-4 w-full"
+                  >
+                    <div
+                      className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-white"
+                      style={{ background: STAGE_ACCENT[stage] ?? ACCENT }}
+                    >
+                      <FileCode className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-start gap-2">
+                        <div className="min-w-[9rem] flex-1">
+                          <div className="text-[14px] font-bold" style={{ color: 'var(--theme-text)' }}>{String(it.title)}</div>
+                          <div className="text-[11.5px] truncate mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                            {stage} · {String(it.meta ?? '')}
+                          </div>
+                        </div>
+                        <span
+                          className="shrink-0 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                          style={{ color: SPEC_TONE[it.specStatus ?? 'draft'] === 'ok' ? '#15803d' : SPEC_TONE[it.specStatus ?? 'draft'] === 'warn' ? '#b45309' : '#57534e',
+                                   background: SPEC_TONE[it.specStatus ?? 'draft'] === 'ok' ? '#dcfce7' : SPEC_TONE[it.specStatus ?? 'draft'] === 'warn' ? '#fef3c7' : '#f5f5f4' }}
+                        >
+                          {it.specStatus ?? 'draft'}
+                        </span>
+                      </div>
+                      <p className="text-[12px] leading-snug line-clamp-2 mt-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+                        {`Spec: ${it.specStatus ?? 'draft'}${it.owner ? ` · Owner: ${it.owner}` : ''}`}
+                      </p>
+                    </div>
+                  </button>
+                  {/* Mutation row — separated from the drill button so a
+                   * click on "Move" never opens the detail. The button
+                   * only renders when there is a next stage. */}
+                  <div
+                    className="flex items-center justify-between pt-2 border-t text-[10.5px] font-mono"
+                    style={{ borderColor: 'var(--panel-border-subtle)', color: 'var(--theme-text-dim)' }}
+                  >
+                    <span>owner · <span className="text-[var(--theme-text-muted)] font-semibold">{it.owner ?? '—'}</span></span>
+                    {nextStage ? (
+                      <button
+                        type="button"
+                        data-move-stage={String(it.id)}
+                        onClick={() => moveStage(String(it.id), stage)}
+                        className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-white px-2.5 py-1 rounded-md transition-all hover:opacity-90"
+                        style={{ background: STAGE_ACCENT[nextStage] ?? ACCENT }}
+                        title={`Passer de "${stage}" à "${nextStage}"`}
+                      >
+                        <ChevronRight className="w-3 h-3" /> → {nextStage}
+                      </button>
+                    ) : (
+                      <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">shipped</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </FleetItemGrid>
+        )}
       </div>
     );
   };
@@ -408,31 +494,189 @@ export function ProductApp() {
   };
 
   const MVP = () => {
+    const mvpCount = useCmsStore(s => s.items['product_mvps']?.length ?? 0);
+    const [composerOpen, setComposerOpen] = useState(false);
+    const [composerName, setComposerName] = useState('');
+    const [composerFeature, setComposerFeature] = useState('');
+    const [composerClient, setComposerClient] = useState('');
+    const [composerWeeks, setComposerWeeks] = useState('2');
+
+    const submitNewMvp = (): void => {
+      const name = composerName.trim();
+      const feature = composerFeature.trim();
+      const client = composerClient.trim();
+      if (!name) {
+        addToast({ source: 'Product', type: 'warning', message: 'Le nom est obligatoire.' });
+        return;
+      }
+      if (!feature) {
+        addToast({ source: 'Product', type: 'warning', message: 'La feature est obligatoire.' });
+        return;
+      }
+      const weeks = Number(composerWeeks);
+      if (!Number.isFinite(weeks) || weeks <= 0) {
+        addToast({ source: 'Product', type: 'warning', message: 'Le nombre de semaines doit être > 0.' });
+        return;
+      }
+      const result = addItem('product_mvps', {
+        name,
+        feature,
+        client: client || '—',
+        body: `MVP défini depuis l'UI : ${feature} pour ${client || 'un client non précisé'}.`,
+        overflow: 'ok',
+        weeksToShip: weeks,
+        eta: 'TBD',
+        owner: '—',
+        successMetric: '—',
+        notes: '',
+      });
+      if (result.ok) {
+        addToast({ source: 'Product', type: 'success', message: `MVP ajouté : ${name}` });
+        setComposerName('');
+        setComposerFeature('');
+        setComposerClient('');
+        setComposerWeeks('2');
+        setComposerOpen(false);
+      } else {
+        addToast({ source: 'Product', type: 'warning', message: result.error ?? 'Création impossible.' });
+      }
+    };
+
+    const cancelComposer = (): void => {
+      setComposerName('');
+      setComposerFeature('');
+      setComposerClient('');
+      setComposerWeeks('2');
+      setComposerOpen(false);
+    };
+
     return (
       <div className="p-7">
         <SectionHead
           title="MVP"
           subtitle="Plus petit livrable : une fonctionnalité, un client, un problème — signal quand l'un déborde"
-          action={<Badge tone="accent">discipline du plus petit</Badge>}
+          action={
+            <div className="flex items-center gap-2">
+              <Badge tone="accent">discipline du plus petit</Badge>
+              {!composerOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white px-3 py-1.5 rounded-lg transition-all hover:opacity-90"
+                  style={{ background: ACCENT }}
+                  data-add-mvp
+                >
+                  <Plus className="w-3.5 h-3.5" /> Ajouter MVP
+                </button>
+              ) : null}
+            </div>
+          }
         />
-        <CMSCardList<MvpItem>
-          collectionId="product_mvps"
-          onOpen={mvpsDrill.open}
-          cols={2}
-          render={(it) => ({
-            title: it.name,
-            subtitle: `client · ${it.client}`,
-            description: it.body,
-            statusLabel: it.overflow === 'ok' ? 'discipliné' : `overflow · ${it.overflow}`,
-            statusTone: OVERFLOW_TONE[it.overflow] ?? 'neutral',
-            accent: OVERFLOW_ACCENT[it.overflow] ?? ACCENT,
-            icon: <Hammer className="w-5 h-5" />,
-            metricLabel: 'semaines',
-            metricValue: `${it.weeksToShip}`,
-            meta: `${it.feature.split(' ').slice(0, 6).join(' ')}…`,
-          })}
-          emptyMessage="Aucun MVP défini pour l'instant."
-        />
+        {composerOpen ? (
+          <div
+            className="mb-4 rounded-xl border p-4 flex flex-col gap-2.5"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <div className="text-[10.5px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>
+              — Nouveau MVP
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Nom</span>
+                <input
+                  autoFocus
+                  value={composerName}
+                  onChange={(e) => setComposerName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewMvp(); if (e.key === 'Escape') cancelComposer(); }}
+                  placeholder="ex. Export de 3 posts LinkedIn"
+                  className="text-[12px] rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                  data-mvp-name
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Feature</span>
+                <input
+                  value={composerFeature}
+                  onChange={(e) => setComposerFeature(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewMvp(); if (e.key === 'Escape') cancelComposer(); }}
+                  placeholder="ex. Bouton Export sur transcript"
+                  className="text-[12px] rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                  data-mvp-feature
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Client (optionnel)</span>
+                <input
+                  value={composerClient}
+                  onChange={(e) => setComposerClient(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewMvp(); if (e.key === 'Escape') cancelComposer(); }}
+                  placeholder="ex. Priya N."
+                  className="text-[12px] rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                  data-mvp-client
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Semaines pour shipper</span>
+                <input
+                  value={composerWeeks}
+                  onChange={(e) => setComposerWeeks(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewMvp(); if (e.key === 'Escape') cancelComposer(); }}
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  className="text-[12px] rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                  data-mvp-weeks
+                />
+              </label>
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelComposer}
+                className="text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-90"
+                style={{ background: 'transparent', color: 'var(--theme-text-dim)', border: '1px solid var(--panel-border)' }}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={submitNewMvp}
+                className="text-[11px] font-semibold text-white px-3 py-1.5 rounded-lg transition-all hover:opacity-90"
+                style={{ background: ACCENT }}
+                data-mvp-submit
+              >
+                Ajouter le MVP
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {mvpCount === 0 ? (
+          <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>
+            Aucun MVP défini pour l'instant.
+          </div>
+        ) : (
+          <CMSCardList<MvpItem>
+            collectionId="product_mvps"
+            onOpen={mvpsDrill.open}
+            cols={2}
+            render={(it) => ({
+              title: it.name,
+              subtitle: `client · ${it.client}`,
+              description: it.body,
+              statusLabel: it.overflow === 'ok' ? 'discipliné' : `overflow · ${it.overflow}`,
+              statusTone: OVERFLOW_TONE[it.overflow] ?? 'neutral',
+              accent: OVERFLOW_ACCENT[it.overflow] ?? ACCENT,
+              icon: <Hammer className="w-5 h-5" />,
+              metricLabel: 'semaines',
+              metricValue: `${it.weeksToShip}`,
+              meta: `${it.feature.split(' ').slice(0, 6).join(' ')}…`,
+            })}
+          />
+        )}
       </div>
     );
   };

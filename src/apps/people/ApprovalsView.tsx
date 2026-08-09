@@ -27,6 +27,8 @@ import { useScenariosStore, type Scenario, type Proposal } from '../../stores/sc
 import { applicateurs } from '../../agent/tools';
 import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META } from '../../lib/themes/tokens';
+import { useCmsStore } from '../../lib/cms/cms.store';
+import { useShellStore } from '../../stores/shell.store';
 
 function shortDate(ts: number): string {
   return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -298,10 +300,50 @@ function ScenarioDetail({
 
   const handleReject = () => {
     rejectScenario(scenario.id);
+    // Mirror the approve path: a rejection is also a decision that must
+    // be auditable. Persist it through the CMS, with the same toast on
+    // success or failure. Keeping the two paths symmetric means a
+    // regression on one will not silently affect the other.
+    const addItem = useCmsStore.getState().addItem;
+    const addToast = useShellStore.getState().addToast;
+    const result = addItem('approval_decisions', {
+      scenarioId: scenario.id,
+      scenarioName: scenario.name,
+      verdict: 'rejected',
+      decidedBy: 'B1 Gatekeeper',
+      proposalCount: scenario.proposals.length,
+      rationale: scenario.rationale ?? '—',
+      decidedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    });
+    if (result.ok) {
+      addToast({ source: 'Approvals', type: 'success', message: `Rejet enregistré : ${scenario.name}` });
+    } else {
+      addToast({ source: 'Approvals', type: 'warning', message: result.error ?? 'Rejet non enregistré.' });
+    }
   };
 
   const handleApproveAndMerge = () => {
     approveAndMerge(scenario.id, applicateurs);
+    // Log the decision in the CMS — the audit trail lives next to the
+    // scenario, not in the volatile scenarios store. `addItem` is the
+    // canonical write path; it returns `{ ok, error }` so a failure to
+    // register is surfaced as a toast instead of being silently dropped.
+    const addItem = useCmsStore.getState().addItem;
+    const addToast = useShellStore.getState().addToast;
+    const result = addItem('approval_decisions', {
+      scenarioId: scenario.id,
+      scenarioName: scenario.name,
+      verdict: 'approved',
+      decidedBy: 'B1 Gatekeeper',
+      proposalCount: scenario.proposals.length,
+      rationale: scenario.rationale ?? '—',
+      decidedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    });
+    if (result.ok) {
+      addToast({ source: 'Approvals', type: 'success', message: `Décision enregistrée : ${scenario.name}` });
+    } else {
+      addToast({ source: 'Approvals', type: 'warning', message: result.error ?? 'Décision non enregistrée.' });
+    }
   };
 
   return (

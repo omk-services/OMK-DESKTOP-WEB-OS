@@ -11,7 +11,23 @@
  *  pas deviné. Les champs déclarés par la collection (titleField,
  *  subtitleField, badgeField) sont lus depuis `def` — on ne réinvente pas la
  *  forme par app. Le `removeItem` du repository Supabase est ajouté à part,
- *  pour suivre le contrat « supprimer seulement ce qu'on a créé ». */
+ *  pour suivre le contrat « supprimer seulement ce qu'on a créé ».
+ *
+ *  Phase 3 (multi-tenant, 2026-08-09) — the canonical storage is now
+ *  tenant-partitioned (`itemsByTenant`, `collectionsByTenant`), matching
+ *  `src/lib/tenant/contract.ts` §7.1. A flat view (`items`, `collections`)
+ *  is kept alongside it as a mirror of the *active tenant's* slice — this
+ *  is what every existing app selector still reads via
+ *  `useCmsStore(s => s.items['tasks'])`. The brief allows minimal app
+ *  edits only; the mirror keeps the 19 apps working unchanged. On
+ *  `setTenant(id)` the flat view is regenerated from the new tenant's
+ *  slice; on every mutation, both the partition and the mirror update.
+ *
+ *  Retro-compat: items without `tenant_id` (e.g. legacy seed data
+ *  registered before the migration) are tagged with the active tenant on
+ *  the next read or mutation. The contract invariant #5 holds:
+ *  `multiTenantEnabled` stays false (the gate is not flipped yet), so
+ *  `useCmsStore` keeps behaving exactly like it did before. */
 import { create } from 'zustand';
 import type { CmsCollectionDef, CmsItem } from './types';
 import {
@@ -20,6 +36,13 @@ import {
   upsertCollectionDef,
   removeItem as repoRemoveItem,
 } from './repository';
+import type {
+  CmsItemTenant,
+  CmsCollectionDefTenant,
+  TenantId,
+} from '../tenant/contract';
+import { TENANT_DEFAULT } from '../tenant/contract';
+import { useTenantStore, TENANT_DEMO_COACH } from '../../stores/tenant.store';
 
 interface AddItemResult {
   ok: boolean;
@@ -27,13 +50,60 @@ interface AddItemResult {
   error?: string;
 }
 
+/** Cast helper: every legacy item is at minimum a CmsItemTenant once it
+ *  passes through the store (we stamp `tenant_id` on the way in). The
+ *  type-only widening keeps the public API compatible with both shapes. */
+type AnyItem = CmsItem & Partial<CmsItemTenant>;
+type AnyCollection = CmsCollectionDef & Partial<CmsCollectionDefTenant>;
+
 interface CmsState {
-  collections: Record<string, CmsCollectionDef>;
-  items: Record<string, CmsItem[]>;
+  /** The active tenant id (mirrored from `useTenantStore`). Reads/writes
+   *  flow through this id. Kept on the CMS store too so it is captured
+   *  in any single `useCmsStore.setState({ activeTenantId })` call. */
+  activeTenantId: TenantId;
+
+  /* ── Canonical partition (per contract §7.1) ────────────────────────── */
+  collectionsByTenant: Record<TenantId, Record<string, CmsCollectionDefTenant>>;
+  itemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>>;
+
+  /* ── Flat view: legacy app selectors read these. Mirrors the active
+   *    tenant's slice. Regenerated on `setTenant`. ────────────────────── */
+  collections: Record<string, CmsCollectionDefTenant>;
+  items: Record<string, CmsItemTenant[]>;
+
+  /* ── Legacy CRUD (active tenant, flat view) ─────────────────────────── */
   registerCollection: (def: CmsCollectionDef, seedItems: CmsItem[]) => void;
   updateItem: (collectionId: string, id: string, patch: Partial<CmsItem>) => void;
   addItem: (collectionId: string, partial: Omit<CmsItem, 'id'>) => AddItemResult;
   removeItem: (collectionId: string, id: string) => { ok: boolean; error?: string };
+
+  /* ── Tenant-aware CRUD (partition shape) ────────────────────────────── */
+  registerCollectionFor: (
+    tenantId: TenantId,
+    def: CmsCollectionDefTenant,
+    seedItems: CmsItemTenant[]
+  ) => void;
+  updateItemFor: (
+    tenantId: TenantId,
+    collectionId: string,
+    id: string,
+    patch: Partial<CmsItemTenant>
+  ) => void;
+  addItemFor: (
+    tenantId: TenantId,
+    collectionId: string,
+    partial: Omit<CmsItemTenant, 'id'>
+  ) => AddItemResult;
+  removeItemFor: (
+    tenantId: TenantId,
+    collectionId: string,
+    id: string
+  ) => { ok: boolean; error?: string };
+
+  /* ── Tenant lifecycle ───────────────────────────────────────────────── */
+  setTenant: (tenantId: TenantId) => void;
+  seedFor: (tenantId: TenantId) => Promise<void>;
+  purge: (tenantId: TenantId) => void;
 }
 
 /** Génère un identifiant stable et unique pour une ligne CMS.
@@ -48,76 +118,290 @@ function makeId(collectionId: string): string {
   return `${collectionId}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Tag an item with the active tenant if it does not already carry one.
+ *  This is the retro-compat path called out in the brief: legacy seed
+ *  items registered without `tenant_id` get stamped with the active
+ *  tenant on first read or first mutation. */
+function stampTenant(item: AnyItem, tenantId: TenantId): CmsItemTenant {
+  if (item.tenant_id) return item as CmsItemTenant;
+  return { ...item, tenant_id: tenantId };
+}
+
+function stampCollection(def: AnyCollection, tenantId: TenantId): CmsCollectionDefTenant {
+  if ((def as CmsCollectionDefTenant).tenant_id) return def as CmsCollectionDefTenant;
+  return { ...def, tenant_id: tenantId };
+}
+
+/** Rebuild the flat view (`items`, `collections`) from the active
+ *  tenant's slice in the partition. Called on every mutation and on
+ *  `setTenant`. Keeps the mirror in lock-step so app selectors like
+ *  `useCmsStore(s => s.items['tasks'])` keep returning the right data. */
+function rebuildFlatView(
+  collectionsByTenant: Record<TenantId, Record<string, CmsCollectionDefTenant>>,
+  itemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>>,
+  activeTenantId: TenantId,
+): { collections: Record<string, CmsCollectionDefTenant>; items: Record<string, CmsItemTenant[]> } {
+  return {
+    collections: { ...(collectionsByTenant[activeTenantId] ?? {}) },
+    items: { ...(itemsByTenant[activeTenantId] ?? {}) },
+  };
+}
+
 export const useCmsStore = create<CmsState>((set, get) => ({
+  activeTenantId: TENANT_DEMO_COACH,
+  collectionsByTenant: {
+    [TENANT_DEMO_COACH]: {},
+    [TENANT_DEFAULT]: {},
+  },
+  itemsByTenant: {
+    [TENANT_DEMO_COACH]: {},
+    [TENANT_DEFAULT]: {},
+  },
+  // Flat view mirrors active tenant (defaults to demo-coach on first render).
   collections: {},
   items: {},
 
-  registerCollection: (def, seedItems) => {
-    if (get().collections[def.id]) return; // idempotent — HMR-safe
+  /* ── Tenant-aware registration ─────────────────────────────────────── */
+  registerCollectionFor: (tenantId, def, seedItems) => {
+    const stampedDef = stampCollection(def, tenantId);
+    const stampedItems = seedItems.map((it) => stampTenant(it, tenantId));
 
-    set((s) => ({
-      collections: { ...s.collections, [def.id]: def },
-      items: { ...s.items, [def.id]: seedItems },
-    }));
+    set((s) => {
+      const tenantCollections = s.collectionsByTenant[tenantId] ?? {};
+      const tenantItems = s.itemsByTenant[tenantId] ?? {};
+      if (tenantCollections[stampedDef.id]) return s; // idempotent — HMR-safe
 
-    // Best-effort: if a coach is signed in, prefer their live data over the seed.
-    void upsertCollectionDef(def);
-    void hydrateCollection(def.id).then((liveItems) => {
+      const nextCollectionsByTenant: Record<TenantId, Record<string, CmsCollectionDefTenant>> = {
+        ...s.collectionsByTenant,
+        [tenantId]: { ...tenantCollections, [stampedDef.id]: stampedDef },
+      };
+      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+        ...s.itemsByTenant,
+        [tenantId]: { ...tenantItems, [stampedDef.id]: stampedItems },
+      };
+      const isActive = s.activeTenantId === tenantId;
+      return {
+        collectionsByTenant: nextCollectionsByTenant,
+        itemsByTenant: nextItemsByTenant,
+        ...(isActive
+          ? rebuildFlatView(nextCollectionsByTenant, nextItemsByTenant, tenantId)
+          : {}),
+      };
+    });
+
+    // Best-effort persistence (Supabase side, single-tenant today).
+    void upsertCollectionDef(stampedDef);
+    void hydrateCollection(stampedDef.id).then((liveItems) => {
       if (liveItems && liveItems.length > 0) {
-        set((s) => ({ items: { ...s.items, [def.id]: liveItems } }));
+        const stamped = liveItems.map((it) => stampTenant(it, tenantId));
+        set((s) => {
+          const tenantItemsMap = (s.itemsByTenant[tenantId] ?? {}) as Record<string, CmsItemTenant[]>;
+          const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+            ...s.itemsByTenant,
+            [tenantId]: { ...tenantItemsMap, [stampedDef.id]: stamped },
+          };
+          const isActive = s.activeTenantId === tenantId;
+          const nextFlat = isActive
+            ? { ...(nextItemsByTenant[tenantId] as Record<string, CmsItemTenant[]>) }
+            : {};
+          return {
+            itemsByTenant: nextItemsByTenant,
+            ...(isActive ? { items: nextFlat } : {}),
+          };
+        });
       }
     });
   },
 
-  updateItem: (collectionId, id, patch) => {
-    set((s) => ({
-      items: {
-        ...s.items,
-        [collectionId]: (s.items[collectionId] ?? []).map(it => it.id === id ? { ...it, ...patch } : it),
-      },
-    }));
+  /* ── Legacy registration — routes to active tenant ─────────────────── */
+  registerCollection: (def, seedItems) => {
+    const tenantId = get().activeTenantId;
+    get().registerCollectionFor(tenantId, def, seedItems);
+  },
 
-    const updated = get().items[collectionId]?.find(it => it.id === id);
+  /* ── Tenant-aware update ───────────────────────────────────────────── */
+  updateItemFor: (tenantId, collectionId, id, patch) => {
+    set((s) => {
+      const tenantItems = (s.itemsByTenant[tenantId] ?? {}) as Record<string, CmsItemTenant[]>;
+      const list = tenantItems[collectionId] ?? [];
+      const nextList = list.map((it) => (it.id === id ? { ...it, ...patch, tenant_id: tenantId } : it));
+      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+        ...s.itemsByTenant,
+        [tenantId]: { ...tenantItems, [collectionId]: nextList },
+      };
+      const isActive = s.activeTenantId === tenantId;
+      const nextFlat = isActive
+        ? { ...(nextItemsByTenant[tenantId] as Record<string, CmsItemTenant[]>) }
+        : {};
+      return {
+        itemsByTenant: nextItemsByTenant,
+        ...(isActive ? { items: nextFlat } : {}),
+      };
+    });
+
+    const updated = get().itemsByTenant[tenantId]?.[collectionId]?.find((it) => it.id === id);
     if (updated) void repoUpsertItem(collectionId, updated);
   },
 
-  addItem: (collectionId, partial) => {
-    const def = get().collections[collectionId];
+  updateItem: (collectionId, id, patch) => {
+    const tenantId = get().activeTenantId;
+    get().updateItemFor(tenantId, collectionId, id, patch);
+  },
+
+  /* ── Tenant-aware add ──────────────────────────────────────────────── */
+  addItemFor: (tenantId, collectionId, partial) => {
+    const def = get().collectionsByTenant[tenantId]?.[collectionId];
     if (!def) return { ok: false, error: `Collection inconnue : "${collectionId}".` };
     const id = makeId(collectionId);
-    const item: CmsItem = { id, ...partial };
-    set((s) => ({
-      items: {
-        ...s.items,
-        [collectionId]: [...(s.items[collectionId] ?? []), item],
-      },
-    }));
+    const item: CmsItemTenant = { id, tenant_id: tenantId, ...partial };
+    set((s) => {
+      const tenantItems = (s.itemsByTenant[tenantId] ?? {}) as Record<string, CmsItemTenant[]>;
+      const list = tenantItems[collectionId] ?? [];
+      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+        ...s.itemsByTenant,
+        [tenantId]: { ...tenantItems, [collectionId]: [...list, item] },
+      };
+      const isActive = s.activeTenantId === tenantId;
+      const nextFlat = isActive
+        ? { ...(nextItemsByTenant[tenantId] as Record<string, CmsItemTenant[]>) }
+        : {};
+      return {
+        itemsByTenant: nextItemsByTenant,
+        ...(isActive ? { items: nextFlat } : {}),
+      };
+    });
     void repoUpsertItem(collectionId, item);
     return { ok: true, item };
   },
 
-  removeItem: (collectionId, id) => {
-    const def = get().collections[collectionId];
+  addItem: (collectionId, partial) => {
+    const tenantId = get().activeTenantId;
+    return get().addItemFor(tenantId, collectionId, partial);
+  },
+
+  /* ── Tenant-aware remove ───────────────────────────────────────────── */
+  removeItemFor: (tenantId, collectionId, id) => {
+    const def = get().collectionsByTenant[tenantId]?.[collectionId];
     if (!def) return { ok: false, error: `Collection inconnue : "${collectionId}".` };
-    const before = get().items[collectionId] ?? [];
+    const before = get().itemsByTenant[tenantId]?.[collectionId] ?? [];
     if (!before.some((it) => it.id === id)) {
       return { ok: false, error: `Item introuvable : "${id}" dans "${collectionId}".` };
     }
-    set((s) => ({
-      items: {
-        ...s.items,
-        [collectionId]: (s.items[collectionId] ?? []).filter((it) => it.id !== id),
-      },
-    }));
+    set((s) => {
+      const tenantItems = (s.itemsByTenant[tenantId] ?? {}) as Record<string, CmsItemTenant[]>;
+      const list = tenantItems[collectionId] ?? [];
+      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+        ...s.itemsByTenant,
+        [tenantId]: {
+          ...tenantItems,
+          [collectionId]: list.filter((it) => it.id !== id),
+        },
+      };
+      const isActive = s.activeTenantId === tenantId;
+      const nextFlat = isActive
+        ? { ...(nextItemsByTenant[tenantId] as Record<string, CmsItemTenant[]>) }
+        : {};
+      return {
+        itemsByTenant: nextItemsByTenant,
+        ...(isActive ? { items: nextFlat } : {}),
+      };
+    });
     void repoRemoveItem(collectionId, id);
     return { ok: true };
   },
+
+  removeItem: (collectionId, id) => {
+    const tenantId = get().activeTenantId;
+    return get().removeItemFor(tenantId, collectionId, id);
+  },
+
+  /* ── Tenant lifecycle ──────────────────────────────────────────────── */
+  setTenant: (tenantId) => {
+    set((s) => {
+      const nextCollectionsByTenant = s.collectionsByTenant[tenantId]
+        ? s.collectionsByTenant
+        : { ...s.collectionsByTenant, [tenantId]: {} };
+      const nextItemsByTenant = s.itemsByTenant[tenantId]
+        ? s.itemsByTenant
+        : { ...s.itemsByTenant, [tenantId]: {} };
+      const flat = rebuildFlatView(nextCollectionsByTenant, nextItemsByTenant, tenantId);
+      return {
+        activeTenantId: tenantId,
+        collectionsByTenant: nextCollectionsByTenant,
+        itemsByTenant: nextItemsByTenant,
+        collections: flat.collections,
+        items: flat.items,
+      };
+    });
+  },
+
+  seedFor: async (tenantId) => {
+    // Lazy import — `seed.ts` imports `cms.store.ts`, so we cannot statically
+    // import it here without a cycle. The function only runs at bootstrap or
+    // on tenant switch, so the dynamic import cost is one-shot.
+    const { seedCms } = await import('./seed');
+    seedCms();
+    // After seedCms registers everything under the *current* active tenant,
+    // copy each registered collection into the requested tenant's slice.
+    const seeded = useCmsStore.getState();
+    set((s) => {
+      const nextCollectionsByTenant: Record<TenantId, Record<string, CmsCollectionDefTenant>> = {
+        ...s.collectionsByTenant,
+      };
+      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
+        ...s.itemsByTenant,
+      };
+      // Copy active tenant's collections + items into the target tenant.
+      const activeCollections = seeded.collectionsByTenant[seeded.activeTenantId] ?? {};
+      const activeItems = seeded.itemsByTenant[seeded.activeTenantId] ?? {};
+      const targetCollections: Record<string, CmsCollectionDefTenant> = {};
+      const targetItems: Record<string, CmsItemTenant[]> = {};
+      for (const [cid, cdef] of Object.entries(activeCollections)) {
+        targetCollections[cid] = stampCollection(cdef, tenantId);
+        targetItems[cid] = (activeItems[cid] ?? []).map((it) => stampTenant(it, tenantId));
+      }
+      nextCollectionsByTenant[tenantId] = { ...(nextCollectionsByTenant[tenantId] ?? {}), ...targetCollections };
+      nextItemsByTenant[tenantId] = { ...(nextItemsByTenant[tenantId] ?? {}), ...targetItems };
+      const isActive = s.activeTenantId === tenantId;
+      return {
+        collectionsByTenant: nextCollectionsByTenant,
+        itemsByTenant: nextItemsByTenant,
+        ...(isActive ? rebuildFlatView(nextCollectionsByTenant, nextItemsByTenant, tenantId) : {}),
+      };
+    });
+  },
+
+  purge: (tenantId) => {
+    set((s) => {
+      const { [tenantId]: _c, ...restCollections } = s.collectionsByTenant;
+      const { [tenantId]: _i, ...restItems } = s.itemsByTenant;
+      const isActive = s.activeTenantId === tenantId;
+      return {
+        collectionsByTenant: restCollections as Record<TenantId, Record<string, CmsCollectionDefTenant>>,
+        itemsByTenant: restItems as Record<TenantId, Record<string, CmsItemTenant[]>>,
+        ...(isActive ? { collections: {}, items: {} } : {}),
+      };
+    });
+  },
 }));
 
+/* ── Cross-store wiring — keep `useTenantStore.activeTenantId` in lock-step
+ *    with `useCmsStore.activeTenantId`. `useTenantStore` is the single source
+ *    of truth; `useCmsStore` mirrors it via subscription so a single
+ *    `setTenant()` call propagates everywhere without callers needing to
+ *    know about both stores. */
+useTenantStore.subscribe((state, prev) => {
+  if (state.activeTenantId !== prev.activeTenantId) {
+    useCmsStore.getState().setTenant(state.activeTenantId);
+  }
+});
+
+/** Backwards-compat helper. Reads the active tenant's def. */
 export function getCollectionDef(collectionId: string): CmsCollectionDef | undefined {
   return useCmsStore.getState().collections[collectionId];
 }
 
+/** Backwards-compat helper. Reads the active tenant's items. */
 export function getCollectionItems(collectionId: string): CmsItem[] {
   return useCmsStore.getState().items[collectionId] ?? [];
 }

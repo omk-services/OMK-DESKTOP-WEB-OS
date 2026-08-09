@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Store, Sparkles, Package, Check } from 'lucide-react';
+import { Store, Sparkles, Package, Check, X } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -36,6 +36,19 @@ export function MarketplaceApp() {
       addToast({ source: 'Marketplace', type: 'success', message: `Installed ${current.name}.` });
     }
     updateItem('marketplace_listings', id, { installed: 'Yes' });
+  };
+
+  /* Uninstall — symmetric to install. The audit notes the install path
+   * is canonical; we close the round-trip here so a coach can reverse
+   * a mistaken install without leaving the marketplace. The same
+   * `updateItem` write path is used, with a guard against the no-op
+   * `already uninstalled` toast that `install` already guards against. */
+  const uninstall = (id: string) => {
+    const current = items.find(l => l.id === id);
+    if (current && current.installed === 'Yes') {
+      addToast({ source: 'Marketplace', type: 'success', message: `Uninstalled ${current.name}.` });
+    }
+    updateItem('marketplace_listings', id, { installed: 'No' });
   };
 
   const openListing = (id: string): void => {
@@ -78,7 +91,17 @@ export function MarketplaceApp() {
               <div className="flex items-center justify-between mt-3">
                 <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide">{String(l.tag)}</span>
                 {l.installed === 'Yes' ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700"><Check className="w-3.5 h-3.5" /> Installed</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700"><Check className="w-3.5 h-3.5" /> Installed</span>
+                    <button
+                      onClick={() => uninstall(String(l.id))}
+                      data-uninstall={String(l.id)}
+                      className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-stone-500 hover:text-red-600 px-2 py-1 rounded-md transition-colors"
+                      title="Désinstaller cette intégration"
+                    >
+                      <X className="w-3 h-3" /> Uninstall
+                    </button>
+                  </div>
                 ) : (
                   <button onClick={() => install(String(l.id))} className="text-xs font-semibold text-white px-3 py-1.5 rounded-lg shadow-sm active:scale-95 transition-transform" style={{ background: ACCENT }}>Install</button>
                 )}

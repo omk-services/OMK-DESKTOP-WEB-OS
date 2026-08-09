@@ -394,6 +394,70 @@ const formesItems: CmsItem[] = [
   },
 ];
 
+/* ═══ Overview KPIs + Runway projection — unit economics at a glance ═══ */
+
+const overviewDef = def({
+  id: 'finance_overview', name: 'Finance overview', singular: 'Overview metric', accent: '#0d9488',
+  titleField: 'label', subtitleField: 'hint', badgeField: 'tone',
+  fields: [
+    { key: 'value', label: 'Value', type: 'text' },
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'tone', label: 'Tone', type: 'badge' },
+    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'projection', label: '12-month projection (k$)', type: 'longtext' },
+    { key: 'note', label: 'Note', type: 'longtext' },
+  ],
+});
+
+const overviewItems: CmsItem[] = [
+  {
+    id: 'overview-mrr',
+    label: 'MRR',
+    value: '$3,600',
+    unit: 'USD',
+    tone: 'ok',
+    hint: '2 Citadelle clients',
+    note: 'Monthly Recurring Revenue — base installée en abonnement mensuel.',
+  },
+  {
+    id: 'overview-burn',
+    label: 'Monthly burn',
+    value: '$1,450',
+    unit: 'USD',
+    tone: 'warn',
+    hint: 'tokens + infra + 1 ETP mi-temps',
+    note: 'Sortie mensuelle moyenne — modèle + hébergement + ops. Hors investissement R&D.',
+  },
+  {
+    id: 'overview-runway',
+    label: 'Runway',
+    value: '17 mo',
+    unit: 'months',
+    tone: 'accent',
+    hint: 'at current burn',
+    note: 'Mois de coussin au burn actuel avant d\'atteindre zéro. Cible : > 12 mois.',
+  },
+  {
+    id: 'overview-ltv-cac',
+    label: 'LTV : CAC',
+    value: '9.4 : 1',
+    unit: 'ratio',
+    tone: 'ok',
+    hint: 'marketplace + in-voice channels',
+    note: 'Lifetime Value / Customer Acquisition Cost. Seuil sain : > 3:1. Au-dessus de 5:1, on sous-investit dans la croissance.',
+  },
+  {
+    id: 'overview-projection',
+    label: 'Cash projection',
+    value: '42 → 25',
+    unit: 'k$',
+    tone: 'warn',
+    hint: '12 months forward',
+    projection: '[42, 40, 39, 37, 36, 34, 33, 31, 30, 28, 27, 25]',
+    note: 'Projection linéaire sur 12 mois au burn actuel. Sans nouvelle levée ni accélération du MRR, le coussin fond de 17k$ sur l\'année.',
+  },
+];
+
 /* ═══ Registration ═══ */
 
 let seeded = false;
@@ -406,4 +470,5 @@ export function seedFinanceCms(): void {
   store.registerCollection(courbeDef, courbeItems);
   store.registerCollection(budgetTokensDef, budgetTokensItems);
   store.registerCollection(formesDef, formesItems);
+  store.registerCollection(overviewDef, overviewItems);
 }

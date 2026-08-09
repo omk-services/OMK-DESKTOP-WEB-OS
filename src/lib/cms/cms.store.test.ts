@@ -15,6 +15,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useCmsStore } from './cms.store';
 import type { CmsCollectionDef } from './types';
+import { TENANT_DEFAULT } from '../tenant/contract';
+import { TENANT_DEMO_COACH } from '../../stores/tenant.store';
 
 const tasksDef: CmsCollectionDef = {
   id: 'tasks',
@@ -31,10 +33,22 @@ const tasksDef: CmsCollectionDef = {
   ],
 };
 
+/** Reset the multi-tenant store back to its empty state. Phase 3 added a
+ *  tenant partition alongside the flat view; clearing only the flat view
+ *  would leave leftover data in the partition and break the length
+ *  assertions in the tests below. */
 function reset(): void {
   useCmsStore.setState({
     collections: {},
     items: {},
+    collectionsByTenant: {
+      [TENANT_DEMO_COACH]: {},
+      [TENANT_DEFAULT]: {},
+    } as Record<string, Record<string, never>>,
+    itemsByTenant: {
+      [TENANT_DEMO_COACH]: {},
+      [TENANT_DEFAULT]: {},
+    } as Record<string, Record<string, never>>,
   });
 }
 

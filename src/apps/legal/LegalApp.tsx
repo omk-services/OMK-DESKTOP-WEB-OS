@@ -12,26 +12,21 @@ import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { LegalItemDetail } from './LegalItemDetail';
+import { seedLegalCms } from './seed';
 
 registerItemDetail('legal', LegalItemDetail);
+seedLegalCms();
 
 const ACCENT = '#64748b';
 
-const aiActSeed = [
-  { id: 'a1', label: 'Risk classification documented', done: true },
-  { id: 'a2', label: 'Human-in-the-loop on client-facing actions', done: true },
-  { id: 'a3', label: 'Transparency notice on AI-drafted content', done: true },
-  { id: 'a4', label: 'Data-processing register up to date', done: false },
-  { id: 'a5', label: 'Incident logging & reporting path', done: false },
-];
-
 export function LegalApp() {
-  const [checks, setChecks] = useState(aiActSeed);
   const addToast = useShellStore(s => s.addToast);
   const contractsDrill = useCollectionDrill('contracts', 'Contracts');
   const policiesDrill = useCollectionDrill('policies', 'Policies');
   const contracts = useCmsStore(s => s.items['contracts']) ?? [];
   const policies = useCmsStore(s => s.items['policies']) ?? [];
+  const checks = useCmsStore(s => s.items['legal_ai_act_checks']) ?? [];
+  const updateItem = useCmsStore(s => s.updateItem);
   const [detail, setDetail] = useState<LegalDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -43,12 +38,26 @@ export function LegalApp() {
     }
   }, [detail, setWindowDetail]);
 
+  /** Toggle an AI-Act check. The store carries the boolean as `done: 'Yes' |
+   *  'No'` (matches the badgeField) so a single mutation both flips the
+   *  status and the visibility pill on the Compliance summary. The clearedAt
+   *  timestamp is stamped on the transition to 'Yes' so the audit trail
+   *  shows when each item was actually signed off. */
   const toggle = (id: string) => {
     const current = checks.find(c => c.id === id);
-    if (current && !current.done) {
-      addToast({ source: 'Legal', type: 'success', message: `AI-Act item cleared: ${current.label}` });
+    if (!current) return;
+    const isDone = String(current.done) === 'Yes';
+    const nextDone = isDone ? 'No' : 'Yes';
+    const label = String(current.label);
+    updateItem('legal_ai_act_checks', id, {
+      done: nextDone,
+      clearedAt: isDone ? '—' : new Date().toISOString().slice(0, 10),
+    });
+    if (!isDone) {
+      addToast({ source: 'Legal', type: 'success', message: `AI-Act item cleared: ${label}` });
+    } else {
+      addToast({ source: 'Legal', type: 'warning', message: `AI-Act item re-opened: ${label}` });
     }
-    setChecks(cs => cs.map(c => c.id === id ? { ...c, done: !c.done } : c));
   };
 
   const openContract = (id: string): void => {
@@ -109,7 +118,7 @@ export function LegalApp() {
     policiesDrill.open(id);
   };
 
-  const cleared = checks.filter(c => c.done).length;
+  const cleared = checks.filter(c => String(c.done) === 'Yes').length;
 
   // Une échéance AI-Act figée à 2026-08-02 est passée depuis plusieurs jours
   // et l'ancien rendu (« Deadline 2026-08-02 » en gris neutre) ne le disait
@@ -148,17 +157,29 @@ export function LegalApp() {
       </div>
       <Card>
         <div className="divide-y divide-[var(--hairline)]">
-          {checks.map(c => (
-            <div key={c.id} className="flex items-center justify-between px-5 py-3.5">
-              <span
-                className="text-sm"
-                style={{ color: c.done ? 'var(--theme-text)' : 'var(--theme-muted)' }}
-              >
-                {c.label}
-              </span>
-              <Toggle on={c.done} onClick={() => toggle(c.id)} />
-            </div>
-          ))}
+          {checks.map(c => {
+            const isDone = String(c.done) === 'Yes';
+            const clearedAt = String(c.clearedAt ?? '—');
+            return (
+              <div key={String(c.id)} className="flex items-center justify-between gap-4 px-5 py-3.5">
+                <div className="min-w-0 flex-1">
+                  <span
+                    className="text-sm block"
+                    style={{ color: isDone ? 'var(--theme-text)' : 'var(--theme-muted)' }}
+                  >
+                    {String(c.label)}
+                  </span>
+                  <span
+                    className="text-[10.5px] font-mono mt-0.5 block"
+                    style={{ color: 'var(--theme-text-dim)' }}
+                  >
+                    {String(c.category ?? '')} · {isDone ? `cleared ${clearedAt}` : 'not cleared'}
+                  </span>
+                </div>
+                <Toggle on={isDone} onClick={() => toggle(String(c.id))} />
+              </div>
+            );
+          })}
         </div>
       </Card>
     </div>

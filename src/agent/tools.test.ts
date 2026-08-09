@@ -24,6 +24,8 @@ import {
   applicateurs,
 } from './tools';
 import type { CmsCollectionDef } from '../lib/cms/types';
+import { TENANT_DEFAULT } from '../lib/tenant/contract';
+import { TENANT_DEMO_COACH } from '../stores/tenant.store';
 
 const tasksDef: CmsCollectionDef = {
   id: 'tasks',
@@ -40,8 +42,23 @@ const tasksDef: CmsCollectionDef = {
   ],
 };
 
+/** Reset both the flat view AND the tenant partition. Phase 3 added a
+ *  partition alongside the flat view; clearing only the flat view leaves
+ *  the partition populated and breaks the length assertions in these
+ *  tests. */
 function reset(): void {
-  useCmsStore.setState({ collections: {}, items: {} });
+  useCmsStore.setState({
+    collections: {},
+    items: {},
+    collectionsByTenant: {
+      [TENANT_DEMO_COACH]: {},
+      [TENANT_DEFAULT]: {},
+    } as Record<string, Record<string, never>>,
+    itemsByTenant: {
+      [TENANT_DEMO_COACH]: {},
+      [TENANT_DEFAULT]: {},
+    } as Record<string, Record<string, never>>,
+  });
   useScenariosStore.setState({
     scenarios: {},
     scenarioOrder: [],
