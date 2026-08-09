@@ -400,8 +400,8 @@ export function SectionHead({ title, subtitle, action }: { title: string; subtit
   return (
     <div className="flex items-start justify-between gap-4 mb-5">
       <div>
-        <h2 className="text-lg font-bold tracking-tight text-stone-900 font-outfit">{title}</h2>
-        {subtitle && <p className="text-sm text-stone-500 mt-0.5">{subtitle}</p>}
+        <h2 className="text-lg font-bold tracking-tight font-outfit" style={{ color: 'var(--theme-text)' }}>{title}</h2>
+        {subtitle && <p className="text-sm mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{subtitle}</p>}
       </div>
       {action}
     </div>
