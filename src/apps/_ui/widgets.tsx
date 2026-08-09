@@ -21,9 +21,12 @@ export function Dot({ tone = 'ok' }: { tone?: 'ok' | 'warn' | 'danger' | 'idle' 
 export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${on ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-surface-hover)]'}`}
-      aria-pressed={on}
+      role="switch"
+      aria-checked={on}
+      aria-label={on ? 'On' : 'Off'}
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
     </button>
