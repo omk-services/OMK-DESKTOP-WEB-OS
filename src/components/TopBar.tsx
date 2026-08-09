@@ -15,6 +15,7 @@ import { useAppVisibility } from '../stores/appVisibility.store';
 import { TopBarMenu } from './TopBarMenu';
 import { ChangelogTabs } from './ChangelogTabs';
 import { CharacterMenu } from '../agent/CharacterMenu';
+import { TenantPill } from './TenantPill';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -279,6 +280,11 @@ export function TopBar() {
               />
             </span>
           </div>
+
+          {/* Tenant pill — multi-tenant selector (Phase 3). Today there is
+              only one tenant; the dropdown still works and persists via
+              useTenantStore.switchTenant(). */}
+          <TenantPill />
 
           {voice.supported && (
             <button
