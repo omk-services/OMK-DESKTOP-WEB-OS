@@ -197,6 +197,52 @@ const trendsItems: CmsItem[] = [
   },
 ];
 
+/* ═══ Stack — 3 groups, each with N tools (nested as JSON) ═══ */
+
+const stackDef = def({
+  id: 'sales_stack', name: 'Sales stack', singular: 'Stack group', accent: '#ea580c',
+  titleField: 'name', subtitleField: 'caption', badgeField: 'name',
+  fields: [
+    { key: 'caption', label: 'Caption', type: 'longtext' },
+    { key: 'tools', label: 'Tools (JSON)', type: 'longtext' },
+  ],
+});
+
+const stackItems: CmsItem[] = [
+  {
+    id: 'g-core', name: 'Core and system of record',
+    caption: 'Attio is the system of record — everything else feeds it.',
+    tools: JSON.stringify([
+      { id: 't-attio', name: 'Attio', role: 'CRM · source of truth for the AI Business OS list', cost: '~$100/mo', status: 'live' },
+      { id: 't-pandadoc', name: 'PandaDoc', role: 'Proposals · e-sign · declined, voided, viewed, paid', status: 'live' },
+      { id: 't-fireflies', name: 'Fireflies', role: 'Call recording · transcript feed for scoring', status: 'live' },
+      { id: 't-aircall', name: 'Aircall', role: 'Outbound calling · moved here from Lemnlist', status: 'connected' },
+      { id: 't-gws', name: 'Google Workspace', role: 'Calendar · Mail · Sheets · daily brief and lead-list', status: 'live' },
+      { id: 't-slack', name: 'Slack', role: 'Escalations · self-DMs, sent only when a decision is owed', status: 'pending' },
+    ]),
+  },
+  {
+    id: 'g-prospect', name: 'Prospecting and lead-gen',
+    caption: 'The outbound engine. Dormant while the pipeline is full enough.',
+    tools: JSON.stringify([
+      { id: 't-vibe', name: 'Vibe Prospecting', role: 'AI sourcing · natural-language prospect and enrich', status: 'pending' },
+      { id: 't-apify', name: 'Apify', role: 'Scraping · $80 plan · actors for databases, maps, LinkedIn', status: 'connected' },
+      { id: 't-apollo', name: 'Apollo', role: 'B2B database · decision-maker contacts and firmographics', status: 'pending' },
+      { id: 't-li', name: 'LinkedIn Sales Navigator', role: '~$100/mo · B2B search layer, queries feed the scrapers', status: 'dormant' },
+      { id: 't-vain', name: 'Vain.io', role: '~$40/mo · scrapes Sales Navigator queries and WhatsApp', status: 'dormant' },
+      { id: 't-amf', name: 'AnyMailFinder', role: 'Email · phone enrichment for the lead list', status: 'dormant' },
+    ]),
+  },
+  {
+    id: 'g-outreach', name: 'Outreach',
+    caption: 'Cadences and the cold-message template set.',
+    tools: JSON.stringify([
+      { id: 't-instantly', name: 'Instantly', role: 'Cold email · ~$34/mo', status: 'dormant' },
+      { id: 't-lemnlist', name: 'Lemlist', role: 'LinkedIn · occasional', status: 'dormant' },
+    ]),
+  },
+];
+
 let seeded = false;
 
 export function seedSalesCms(): void {
@@ -214,4 +260,5 @@ export function seedSalesCms(): void {
   store.registerCollection(skillsDef, skillsItems);
   store.registerCollection(routinesDef, routinesItems);
   store.registerCollection(trendsDef, trendsItems);
+  store.registerCollection(stackDef, stackItems);
 }

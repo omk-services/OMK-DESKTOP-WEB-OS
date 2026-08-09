@@ -1273,6 +1273,32 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
 // ─── Section: Stack ───
 
 function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+  // Read the formerly in-memory STACK from the CMS store. Tools are
+  // JSON-serialized in a longtext field; parsed here. Falls back to the
+  // legacy STACK constant if the collection isn't registered yet (HMR).
+  const cmsStack = useCmsStore(s => s.items['sales_stack']) ?? [];
+  const txt = (item: CmsItem | undefined, key: string): string => {
+    if (!item) return '';
+    const v = item[key];
+    return typeof v === 'string' ? v : '';
+  };
+  type StackTool = { id: string; name: string; role: string; cost?: string; status: ToolStatus };
+  const toolsOf = (item: CmsItem | undefined): StackTool[] => {
+    if (!item) return [];
+    const raw = item['tools'];
+    if (typeof raw !== 'string' || raw.length === 0) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((t): t is StackTool =>
+        t && typeof t === 'object' && typeof t.id === 'string' && typeof t.name === 'string' && typeof t.role === 'string'
+      );
+    } catch {
+      return [];
+    }
+  };
+  // Use the CMS data if any group is present, else fall back to in-memory.
+  const useCms = cmsStack.length > 0;
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
       <PageHeader
@@ -1321,31 +1347,40 @@ function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
       </section>
 
       <div className="mt-8 space-y-10">
-        {STACK.map((group) => (
-          <section key={group.id}>
+        {(useCms ? cmsStack : STACK).map((group, gi) => {
+          // When using CMS data, hydrate tools from the JSON-serialized field.
+          // Otherwise use the in-memory STACK tools directly.
+          const tools = useCms
+            ? toolsOf(cmsStack[gi])
+            : (group as StackGroup).tools;
+          const groupId = String((group as { id: string }).id);
+          const groupName = useCms ? txt(cmsStack[gi], 'name') || '—' : (group as StackGroup).name;
+          const groupCaption = useCms ? txt(cmsStack[gi], 'caption') || '' : (group as StackGroup).caption;
+          return (
+          <section key={groupId}>
             <div className="mb-2 flex items-end justify-between gap-3">
               <div className="flex items-baseline gap-3">
                 <span
                   className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
                   style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
                 >
-                  {String(STACK.indexOf(group) + 2).padStart(2, '0')}
+                  {String(gi + 2).padStart(2, '0')}
                 </span>
                 <h2
                   className="text-[20px] font-extrabold tracking-tight"
                   style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                 >
-                  {group.name}
+                  {groupName}
                 </h2>
               </div>
-              <Eyebrow>{group.caption}</Eyebrow>
+              <Eyebrow>{groupCaption}</Eyebrow>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {group.tools.map((tool) => (
+              {tools.map((tool) => (
                 <button
                   type="button"
                   key={tool.id}
-                  onClick={() => onSelect(stackDetail(tool, group.name))}
+                  onClick={() => onSelect(stackDetail(tool, groupName))}
                   className="group flex items-start gap-3 rounded-2xl p-5 text-left"
                   style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
                 >
@@ -1396,7 +1431,8 @@ function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
               ))}
             </div>
           </section>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
