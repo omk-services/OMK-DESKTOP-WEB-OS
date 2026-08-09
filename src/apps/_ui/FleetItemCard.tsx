@@ -245,6 +245,14 @@ export function FleetItemCard(props: FleetItemCardProps) {
 
 /** FleetItemGrid — responsive grid wrapper for FleetItemCard. */
 export function FleetItemGrid({ children, cols = 2 }: { children: React.ReactNode; cols?: 1 | 2 | 3 }) {
-  const cls = cols === 1 ? 'grid grid-cols-1 gap-3' : cols === 3 ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3' : 'grid grid-cols-1 sm:grid-cols-2 gap-3';
+  // Stay single-column until 2xl (1536px) so cards don't stretch thin when
+  // the OSWindow is maximized. At xl they still sit side-by-side at a
+  // comfortable 2-up density; 3-up only on truly wide viewports.
+  const cls =
+    cols === 1
+      ? 'grid grid-cols-1 gap-3'
+      : cols === 3
+        ? 'grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3'
+        : 'grid grid-cols-1 2xl:grid-cols-2 gap-3';
   return <div className={cls}>{children}</div>;
 }

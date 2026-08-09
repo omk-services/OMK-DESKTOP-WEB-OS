@@ -368,7 +368,7 @@ export function DashboardApp() {
         </div>
 
         {/* Two-column feed: top open deals (left) and clients in motion (right) */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 2xl:grid-cols-2">
           <div
             className="rounded-2xl p-5"
             style={{

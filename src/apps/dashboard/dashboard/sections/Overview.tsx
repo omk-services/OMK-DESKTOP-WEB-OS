@@ -144,7 +144,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
       </div>
 
       {/* Two columns: Agents / Recent sessions */}
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-3 2xl:grid-cols-2">
         <Panel pad="p-5">
           <SectionTitle
             eyebrow="Core"
