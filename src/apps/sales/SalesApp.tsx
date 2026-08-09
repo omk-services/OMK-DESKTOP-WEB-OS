@@ -80,6 +80,7 @@ interface SnapshotStat { id: string; label: string; value: string; sub: string; 
 interface DealStage { id: string; label: string; count: number; weighted: string; tone: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral'; }
 interface TrendSeries { id: string; title: string; caption: string; unit: string; points: { label: string; value: number }[]; accent: 'ok' | 'accent' | 'warn' | 'danger'; }
 interface DimensionScore { id: string; label: string; value: number; outOf: number; note: string; tone: 'ok' | 'warn' | 'danger'; }
+void (null as unknown as DimensionScore | null); // type kept for future re-migration
 interface ContextGroup { id: string; eyebrow: string; items: { id: string; title: string; subtitle: string; }[]; }
 interface SkillRecord { id: string; name: string; description: string; icon: typeof BookOpen; }
 interface RoutineRecord { id: string; name: string; trigger: string; last: string; kind: 'event' | 'time' | 'manual'; isActive: boolean; }
@@ -166,53 +167,8 @@ function SnapshotCard({ stat }: { stat: SnapshotStat }) {
 const STAGES: DealStage[] = [];
 void STAGES;
 
-const TRENDS: TrendSeries[] = [
-  {
-    id: 'tr-meetings',
-    title: 'Meetings booked per week',
-    caption: 'Twelve weeks of booked meetings. Volume is not the problem, qualification is.',
-    unit: 'meetings',
-    points: [
-      { label: 'W1', value: 14 },
-      { label: 'W2', value: 18 },
-      { label: 'W3', value: 16 },
-      { label: 'W4', value: 22 },
-      { label: 'W5', value: 20 },
-      { label: 'W6', value: 24 },
-      { label: 'W7', value: 28 },
-      { label: 'W8', value: 26 },
-      { label: 'W9', value: 32 },
-      { label: 'W10', value: 35 },
-      { label: 'W11', value: 38 },
-      { label: 'W12', value: 44 },
-    ],
-    accent: 'accent',
-  },
-  {
-    id: 'tr-revenue',
-    title: 'Revenue and commission per week',
-    caption: 'Weekly revenue in $k, commission drawn as a lighter band on the same axis.',
-    unit: '$k',
-    points: [
-      { label: 'W1', value: 18 },
-      { label: 'W2', value: 22 },
-      { label: 'W3', value: 20 },
-      { label: 'W4', value: 28 },
-      { label: 'W5', value: 32 },
-      { label: 'W6', value: 36 },
-      { label: 'W7', value: 34 },
-      { label: 'W8', value: 42 },
-      { label: 'W9', value: 38 },
-      { label: 'W10', value: 48 },
-      { label: 'W11', value: 52 },
-      { label: 'W12', value: 60 },
-    ],
-    accent: 'ok',
-  },
-];
-
-const SCORES: DimensionScore[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
-void SCORES;
+const TRENDS: TrendSeries[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void TRENDS;
 
 const CONTEXT: ContextGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
 void CONTEXT;
@@ -220,52 +176,10 @@ void CONTEXT;
 const SKILLS: SkillRecord[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
 void SKILLS;
 
-const ROUTINES: RoutineRecord[] = [
-  { id: 'r-morning', name: 'Morning routine', trigger: 'Daily · 08:00', last: 'Today 08:00', kind: 'time', isActive: true },
-  { id: 'r-crm', name: 'CRM sync', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
-  { id: 'r-scoring', name: 'Call scoring', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
-  { id: 'r-monthly', name: 'Monthly intelligence report', trigger: '1st of the month', last: 'Jul 1 · 09:14', kind: 'time', isActive: true },
-  { id: 'r-quarterly', name: 'Quarterly review', trigger: 'Quarter close', last: 'Q2 close · 09:02', kind: 'time', isActive: true },
-  { id: 'r-campaign', name: 'Campaign metrics', trigger: 'On demand', last: 'Yesterday 17:11', kind: 'manual', isActive: true },
-];
-
-const STACK: StackGroup[] = [
-  {
-    id: 'g-core',
-    name: 'Core and system of record',
-    caption: 'Attio is the system of record — everything else feeds it.',
-    tools: [
-      { id: 't-attio', name: 'Attio', role: 'CRM · source of truth for the AI Business OS list', cost: '~$100/mo', status: 'live' },
-      { id: 't-pandadoc', name: 'PandaDoc', role: 'Proposals · e-sign · declined, voided, viewed, paid', status: 'live' },
-      { id: 't-fireflies', name: 'Fireflies', role: 'Call recording · transcript feed for scoring', status: 'live' },
-      { id: 't-aircall', name: 'Aircall', role: 'Outbound calling · moved here from Lemnlist', status: 'connected' },
-      { id: 't-gws', name: 'Google Workspace', role: 'Calendar · Mail · Sheets · daily brief and lead-list', status: 'live' },
-      { id: 't-slack', name: 'Slack', role: 'Escalations · self-DMs, sent only when a decision is owed', status: 'pending' },
-    ],
-  },
-  {
-    id: 'g-prospect',
-    name: 'Prospecting and lead-gen',
-    caption: 'The outbound engine. Dormant while the pipeline is full enough.',
-    tools: [
-      { id: 't-vibe', name: 'Vibe Prospecting', role: 'AI sourcing · natural-language prospect and enrich', status: 'pending' },
-      { id: 't-apify', name: 'Apify', role: 'Scraping · $80 plan · actors for databases, maps, LinkedIn', status: 'connected' },
-      { id: 't-apollo', name: 'Apollo', role: 'B2B database · decision-maker contacts and firmographics', status: 'pending' },
-      { id: 't-li', name: 'LinkedIn Sales Navigator', role: '~$100/mo · B2B search layer, queries feed the scrapers', status: 'dormant' },
-      { id: 't-vain', name: 'Vain.io', role: '~$40/mo · scrapes Sales Navigator queries and WhatsApp', status: 'dormant' },
-      { id: 't-amf', name: 'AnyMailFinder', role: 'Email · phone enrichment for the lead list', status: 'dormant' },
-    ],
-  },
-  {
-    id: 'g-outreach',
-    name: 'Outreach',
-    caption: 'Cadences and the cold-message template set.',
-    tools: [
-      { id: 't-instantly', name: 'Instantly', role: 'Cold email · ~$34/mo', status: 'dormant' },
-      { id: 't-lemnlist', name: 'Lemlist', role: 'LinkedIn · occasional', status: 'dormant' },
-    ],
-  },
-];
+const ROUTINES: RoutineRecord[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void ROUTINES;
+const STACK: StackGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void STACK;
 
 const EMPTY_COGNITION: CognitionState = { routines: [], eventCount: 0, eventTypes: [], manifest: null, live: false, loading: true, error: null };
 
@@ -712,6 +626,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   const snapshotItems = useCmsStore(s => s.items['sales_snapshot']) ?? [];
   const stageItems = useCmsStore(s => s.items['sales_stages']) ?? [];
   const scoreItems = useCmsStore(s => s.items['sales_scores']) ?? [];
+  const trendItems = useCmsStore(s => s.items['sales_trends']) ?? [];
   const txt = (item: CmsItem | undefined, key: string): string => {
     if (!item) return '';
     const v = item[key];
@@ -721,6 +636,22 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
     if (!item) return 0;
     const v = item[key];
     return typeof v === 'number' ? v : 0;
+  };
+  // TRENDS points are JSON-stringified in the CMS longtext field.
+  const pointsOf = (item: CmsItem | undefined): { label: string; value: number }[] => {
+    if (!item) return [];
+    const raw = item['points'];
+    if (typeof raw !== 'string' || raw.length === 0) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((p): p is { label: string; value: number } =>
+          p && typeof p === 'object' && typeof p.label === 'string' && typeof p.value === 'number'
+        );
+    } catch {
+      return [];
+    }
   };
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
@@ -891,9 +822,22 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
           <Eyebrow>Regenerate daily</Eyebrow>
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {TRENDS.map((t) => (
-            <TrendCard key={t.id} series={t} />
-          ))}
+          {trendItems.map((t) => {
+            const accent = (txt(t, 'accent') || 'accent') as TrendSeries['accent'];
+            return (
+              <TrendCard
+                key={t.id}
+                series={{
+                  id: String(t.id),
+                  title: txt(t, 'title') || '—',
+                  caption: txt(t, 'caption') || '',
+                  unit: txt(t, 'unit') || '',
+                  points: pointsOf(t),
+                  accent,
+                }}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -1143,9 +1087,11 @@ function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
 // ─── Section: Capabilities ───
 
 function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState; onSelect: (item: DetailItem) => void }) {
-  // Read the formerly in-memory SKILLS from the CMS store. Icon is stored
-  // as a string identifier; the renderer maps it to a Lucide component.
+  // Read the formerly in-memory SKILLS + ROUTINES from the CMS store. Icon
+  // is stored as a string identifier; the renderer maps it to a Lucide
+  // component. Routines' `kind` is also a string enum.
   const skillItems = useCmsStore(s => s.items['sales_skills']) ?? [];
+  const routineItems = useCmsStore(s => s.items['sales_routines']) ?? [];
   const txt = (item: CmsItem | undefined, key: string): string => {
     if (!item) return '';
     const v = item[key];
@@ -1263,8 +1209,9 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
           style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
         >
           <ul>
-            {ROUTINES.map((r, i) => {
-              const KindIcon = r.kind === 'event' ? Layers : r.kind === 'time' ? Calendar : Mic;
+            {routineItems.map((r, i) => {
+              const kind = txt(r, 'kind');
+              const KindIcon = kind === 'event' ? Layers : kind === 'time' ? Calendar : Mic;
               return (
                 <li
                   key={r.id}
@@ -1273,7 +1220,14 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
                 >
                   <button
                     type="button"
-                    onClick={() => onSelect(routineDetail(r))}
+                    onClick={() => onSelect(routineDetail({
+                      id: String(r.id),
+                      name: txt(r, 'name') || '—',
+                      trigger: txt(r, 'trigger') || '',
+                      last: txt(r, 'last') || '',
+                      kind: (kind === 'event' || kind === 'time' || kind === 'manual' ? kind : 'time') as 'event' | 'time' | 'manual',
+                      isActive: Boolean(r['isActive']),
+                    }))}
                     className="flex flex-1 items-center gap-3 text-left"
                   >
                     <span
@@ -1287,13 +1241,13 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
                         className="block text-[14.5px] font-extrabold tracking-tight"
                         style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                       >
-                        {r.name}
+                        {txt(r, 'name') || '—'}
                       </span>
                       <span
                         className="mt-0.5 block text-[10.5px] font-bold uppercase"
                         style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}
                       >
-                        {r.trigger}
+                        {txt(r, 'trigger') || '—'}
                       </span>
                     </span>
                   </button>
@@ -1303,7 +1257,7 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
                       className="mt-1 text-[12.5px] font-bold"
                       style={{ color: 'var(--theme-text)' }}
                     >
-                      {r.last}
+                      {txt(r, 'last') || '—'}
                     </div>
                   </div>
                 </li>

@@ -135,6 +135,68 @@ const skillsItems: CmsItem[] = [
   { id: 's-proposal', name: 'Proposal generation', description: 'Assemble a one-page offer from the second brain.', icon: 'BriefcaseBusiness' },
 ];
 
+/* ═══ Routines — 6 routine records with kind enum ═══ */
+
+const routinesDef = def({
+  id: 'sales_routines', name: 'Sales routines', singular: 'Routine', accent: '#ea580c',
+  titleField: 'name', subtitleField: 'last', badgeField: 'kind',
+  fields: [
+    { key: 'trigger', label: 'Trigger', type: 'text' },
+    { key: 'last', label: 'Last', type: 'text' },
+    { key: 'kind', label: 'Kind', type: 'badge' },
+    { key: 'isActive', label: 'Active', type: 'badge' },
+  ],
+});
+
+const routinesItems: CmsItem[] = [
+  { id: 'r-morning', name: 'Morning routine', trigger: 'Daily · 08:00', last: 'Today 08:00', kind: 'time', isActive: true },
+  { id: 'r-crm', name: 'CRM sync', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
+  { id: 'r-scoring', name: 'Call scoring', trigger: 'After every call', last: 'Today 12:48', kind: 'event', isActive: true },
+  { id: 'r-monthly', name: 'Monthly intelligence report', trigger: '1st of the month', last: 'Jul 1 · 09:14', kind: 'time', isActive: true },
+  { id: 'r-quarterly', name: 'Quarterly review', trigger: 'Quarter close', last: 'Q2 close · 09:02', kind: 'time', isActive: true },
+  { id: 'r-campaign', name: 'Campaign metrics', trigger: 'On demand', last: 'Yesterday 17:11', kind: 'manual', isActive: true },
+];
+
+/* ═══ Trends — 2 series with 12 points each, JSON-stringified ═══ */
+
+const trendsDef = def({
+  id: 'sales_trends', name: 'Sales trends', singular: 'Trend series', accent: '#ea580c',
+  titleField: 'title', subtitleField: 'caption', badgeField: 'accent',
+  fields: [
+    { key: 'unit', label: 'Unit', type: 'text' },
+    { key: 'points', label: 'Points (JSON)', type: 'longtext' },
+    { key: 'caption', label: 'Caption', type: 'longtext' },
+    { key: 'accent', label: 'Accent tone', type: 'badge' },
+  ],
+});
+
+const trendsItems: CmsItem[] = [
+  {
+    id: 'tr-meetings', title: 'Meetings booked per week',
+    caption: 'Twelve weeks of booked meetings. Volume is not the problem, qualification is.',
+    unit: 'meetings',
+    accent: 'accent',
+    points: JSON.stringify([
+      { label: 'W1', value: 14 }, { label: 'W2', value: 18 }, { label: 'W3', value: 16 },
+      { label: 'W4', value: 22 }, { label: 'W5', value: 20 }, { label: 'W6', value: 24 },
+      { label: 'W7', value: 28 }, { label: 'W8', value: 26 }, { label: 'W9', value: 32 },
+      { label: 'W10', value: 35 }, { label: 'W11', value: 38 }, { label: 'W12', value: 44 },
+    ]),
+  },
+  {
+    id: 'tr-revenue', title: 'Revenue and commission per week',
+    caption: 'Weekly revenue in $k, commission drawn as a lighter band on the same axis.',
+    unit: '$k',
+    accent: 'ok',
+    points: JSON.stringify([
+      { label: 'W1', value: 18 }, { label: 'W2', value: 22 }, { label: 'W3', value: 20 },
+      { label: 'W4', value: 28 }, { label: 'W5', value: 32 }, { label: 'W6', value: 36 },
+      { label: 'W7', value: 34 }, { label: 'W8', value: 42 }, { label: 'W9', value: 38 },
+      { label: 'W10', value: 48 }, { label: 'W11', value: 52 }, { label: 'W12', value: 60 },
+    ]),
+  },
+];
+
 let seeded = false;
 
 export function seedSalesCms(): void {
@@ -150,4 +212,6 @@ export function seedSalesCms(): void {
   store.registerCollection(contextDef, contextItems);
   store.registerCollection(scoresDef, scoresItems);
   store.registerCollection(skillsDef, skillsItems);
+  store.registerCollection(routinesDef, routinesItems);
+  store.registerCollection(trendsDef, trendsItems);
 }
