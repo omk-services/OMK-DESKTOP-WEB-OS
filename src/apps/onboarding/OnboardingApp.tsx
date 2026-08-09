@@ -256,8 +256,10 @@ function CitadelPanel() {
                       else setStepIdx(stepIdx + 1);
                     }}
                     disabled={answers[q.id] === undefined}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-semibold text-[var(--theme-bg)] shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{ background: '#0d9488' }}
+                    aria-disabled={answers[q.id] === undefined}
+                    title={answers[q.id] === undefined ? 'Sélectionnez une option pour continuer' : isLast ? 'Voir votre démo' : 'Question suivante'}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:opacity-30"
+                    style={{ background: answers[q.id] === undefined ? '#94a3b8' : '#0d9488' }}
                   >
                     {isLast ? 'See your demo' : 'Next'} <ArrowRight className="w-3 h-3" />
                   </button>
