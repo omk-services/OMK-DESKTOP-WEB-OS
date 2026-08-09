@@ -113,6 +113,28 @@ const scoresItems: CmsItem[] = [
   { id: 'sc-close', label: 'Close', value: 5.6, outOf: 10, note: 'Hits the SOP move but softens the ask. Lock the slot in the room.', tone: 'danger' },
 ];
 
+/* ═══ Skills — 8 capabilities with name, description, icon ═══ */
+
+const skillsDef = def({
+  id: 'sales_skills', name: 'Sales skills', singular: 'Skill', accent: '#ea580c',
+  titleField: 'name', subtitleField: 'description', badgeField: 'icon',
+  fields: [
+    { key: 'description', label: 'Description', type: 'longtext' },
+    { key: 'icon', label: 'Icon', type: 'text' },
+  ],
+});
+
+const skillsItems: CmsItem[] = [
+  { id: 's-call', name: 'Call prep', description: 'Prepare a grounded brief for an upcoming call.', icon: 'Phone' },
+  { id: 's-onepager', name: 'Client one-pager', description: 'Turn second-brain context into a buyer one-pager.', icon: 'FileText' },
+  { id: 's-leadgen', name: 'Lead generation', description: 'Find and qualify target accounts through connected sources.', icon: 'Target' },
+  { id: 's-linkedin', name: 'LinkedIn extraction', description: 'Pull a buyer profile into a structured brief.', icon: 'Users' },
+  { id: 's-outreach', name: 'Outreach drafting', description: 'Direct email and LinkedIn sequences grounded in ICP.', icon: 'Mail' },
+  { id: 's-pipeline', name: 'Pipeline review', description: 'Flag stale deals and missing next actions.', icon: 'ClipboardList' },
+  { id: 's-followup', name: 'Relance drafting', description: 'Compose the next follow-up from call context.', icon: 'MessageSquare' },
+  { id: 's-proposal', name: 'Proposal generation', description: 'Assemble a one-page offer from the second brain.', icon: 'BriefcaseBusiness' },
+];
+
 let seeded = false;
 
 export function seedSalesCms(): void {
@@ -127,4 +149,5 @@ export function seedSalesCms(): void {
   store.registerCollection(stagesDef, stagesItems);
   store.registerCollection(contextDef, contextItems);
   store.registerCollection(scoresDef, scoresItems);
+  store.registerCollection(skillsDef, skillsItems);
 }

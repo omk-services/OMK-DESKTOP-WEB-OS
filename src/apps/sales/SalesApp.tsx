@@ -25,6 +25,7 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import {
   BookOpen, BrainCircuit, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards, ArrowRight,
+  type LucideIcon,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
@@ -216,16 +217,8 @@ void SCORES;
 const CONTEXT: ContextGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
 void CONTEXT;
 
-const SKILLS: SkillRecord[] = [
-  { id: 's-call', name: 'Call prep', description: 'Prepare a grounded brief for an upcoming call.', icon: Phone },
-  { id: 's-onepager', name: 'Client one-pager', description: 'Turn second-brain context into a buyer one-pager.', icon: FileText },
-  { id: 's-leadgen', name: 'Lead generation', description: 'Find and qualify target accounts through connected sources.', icon: Target },
-  { id: 's-linkedin', name: 'LinkedIn extraction', description: 'Pull a buyer profile into a structured brief.', icon: Users },
-  { id: 's-outreach', name: 'Outreach drafting', description: 'Direct email and LinkedIn sequences grounded in ICP.', icon: Mail },
-  { id: 's-pipeline', name: 'Pipeline review', description: 'Flag stale deals and missing next actions.', icon: ClipboardList },
-  { id: 's-followup', name: 'Relance drafting', description: 'Compose the next follow-up from call context.', icon: MessageSquare },
-  { id: 's-proposal', name: 'Proposal generation', description: 'Assemble a one-page offer from the second brain.', icon: BriefcaseBusiness },
-];
+const SKILLS: SkillRecord[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void SKILLS;
 
 const ROUTINES: RoutineRecord[] = [
   { id: 'r-morning', name: 'Morning routine', trigger: 'Daily · 08:00', last: 'Today 08:00', kind: 'time', isActive: true },
@@ -1150,6 +1143,20 @@ function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
 // ─── Section: Capabilities ───
 
 function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState; onSelect: (item: DetailItem) => void }) {
+  // Read the formerly in-memory SKILLS from the CMS store. Icon is stored
+  // as a string identifier; the renderer maps it to a Lucide component.
+  const skillItems = useCmsStore(s => s.items['sales_skills']) ?? [];
+  const txt = (item: CmsItem | undefined, key: string): string => {
+    if (!item) return '';
+    const v = item[key];
+    return typeof v === 'string' ? v : '';
+  };
+  // Map icon string identifiers to Lucide components. Add new icons here
+  // when extending the sales_skills collection.
+  const iconMap: Record<string, LucideIcon> = {
+    Phone, FileText, Target, Users, Mail, ClipboardList, MessageSquare, BriefcaseBusiness,
+  };
+  void onSelect;
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
       <PageHeader
@@ -1194,13 +1201,21 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
           <Eyebrow>on demand</Eyebrow>
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {SKILLS.map((s) => {
-            const Icon = s.icon;
+          {skillItems.map((s) => {
+            // Map icon string (stored in CMS) to Lucide component.
+            // If the icon name doesn't match, fall back to Phone.
+            const iconName = txt(s, 'icon') || 'Phone';
+            const Icon = iconMap[iconName] ?? Phone;
             return (
               <button
                 type="button"
                 key={s.id}
-                onClick={() => onSelect(skillDetail(s))}
+                onClick={() => onSelect(skillDetail({
+                  id: String(s.id),
+                  name: txt(s, 'name') || '—',
+                  description: txt(s, 'description') || '',
+                  icon: Icon,
+                }))}
                 className="group flex items-start gap-3 rounded-2xl p-5 text-left"
                 style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
               >
@@ -1215,10 +1230,10 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
                     className="block text-[15px] font-extrabold tracking-tight"
                     style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                   >
-                    {s.name}
+                    {txt(s, 'name') || '—'}
                   </span>
                   <span className="mt-0.5 block text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-                    {s.description}
+                    {txt(s, 'description') || '—'}
                   </span>
                 </span>
               </button>
