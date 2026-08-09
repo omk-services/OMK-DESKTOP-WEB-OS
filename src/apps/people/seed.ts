@@ -402,6 +402,69 @@ const approvalDecisionsItems: CmsItem[] = [
   },
 ];
 
+/* ═══ Team — X-Men human squad, anchor that makes the squad work ═══ */
+
+const teamDef: CmsCollectionDef = {
+  id: 'team', name: 'Team', singular: 'Member', accent: '#dc2626',
+  titleField: 'name', subtitleField: 'role', badgeField: 'status',
+  fields: [
+    { key: 'codename', label: 'Codename', type: 'text' },
+    { key: 'role', label: 'Role', type: 'text' },
+    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'joinedAt', label: 'Joined at', type: 'text' },
+    { key: 'focus', label: 'Primary focus', type: 'longtext' },
+    { key: 'availability', label: 'Availability', type: 'text' },
+    { key: 'squad', label: 'Squad', type: 'text' },
+  ],
+};
+
+const teamItems: CmsItem[] = [
+  { id: 'team-prof-x', name: 'Charles Xavier', codename: 'Professor X', role: 'Head of People', status: 'online', joinedAt: '2024-03-12', focus: 'Strategy · ethics guard · 2-week sprint cadence for the B-squad.', availability: 'Mon-Fri 9-12', squad: 'X-Mansion' },
+  { id: 'team-cyclops', name: 'Scott Summers', codename: 'Cyclops', role: 'Ops Lead', status: 'online', joinedAt: '2024-04-02', focus: 'Runbook ownership · incident commander during kill-switch events.', availability: 'Mon-Fri 14-18', squad: 'X-Mansion' },
+  { id: 'team-storm', name: 'Ororo Munroe', codename: 'Storm', role: 'Climate / Process', status: 'online', joinedAt: '2024-05-20', focus: 'Cortex weather-watch · seasonal benchmark reviews · dependency rotations.', availability: 'Tue/Thu 10-16', squad: 'X-Mansion' },
+  { id: 'team-jean', name: 'Jean Grey', codename: 'Phoenix', role: 'Lead Coach', status: 'online', joinedAt: '2024-06-15', focus: 'Top-tier 1:1 sessions · ethics override gate · resurrection reviews.', availability: 'Mon/Wed/Fri', squad: 'X-Mansion' },
+  { id: 'team-kitty', name: 'Kitty Pryde', codename: 'Shadowcat', role: 'Knowledge Steward', status: 'busy', joinedAt: '2024-08-01', focus: 'Phase through the IP vault · zero-pii handles in plain sight.', availability: 'Async + Tue meetings', squad: 'X-Mansion' },
+  { id: 'team-bobby', name: 'Bobby Drake', codename: 'Iceman', role: 'Cool-Down Engineer', status: 'idle', joinedAt: '2024-09-10', focus: 'Hot-fix rollback engineer · freeze the cost-cap breach before deploy.', availability: 'On-call only', squad: 'X-Mansion' },
+];
+
+const squadsDef: CmsCollectionDef = {
+  id: 'squads', name: 'Squads', singular: 'Squad', accent: '#0ea5e9',
+  titleField: 'name', subtitleField: 'mission', badgeField: 'status',
+  fields: [
+    { key: 'mission', label: 'Mission', type: 'longtext' },
+    { key: 'lead', label: 'Lead', type: 'text' },
+    { key: 'members', label: 'Members', type: 'text' },
+    { key: 'rank', label: 'Rank', type: 'text' },
+    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'lastSprint', label: 'Last sprint', type: 'text' },
+  ],
+};
+
+const squadsItems: CmsItem[] = [
+  { id: 'squad-xmansion', name: 'X-Mansion', mission: 'Steward the human-team doctrine, ship runbooks, gate kill-switches.', lead: 'Charles Xavier', members: '6', rank: 'A', status: 'active', lastSprint: '2026-08-04 · 3 of 4 proposals approved' },
+  { id: 'squad-bfactory', name: 'B-Factory', mission: 'Spawn and curate AI agents. 2-week capability sprints, B1 Gatekeeper review.', lead: 'B1 Gatekeeper', members: '5', rank: 'S', status: 'active', lastSprint: '2026-08-09 · 3/5 agents ran overnight' },
+  { id: 'squad-phoenix', name: 'Phoenix Cell', mission: 'Resurrection reviews + ethics overrides + high-stakes reversibility.', lead: 'Jean Grey', members: '3', rank: 'S', status: 'idle', lastSprint: '2026-07-28 · 0 reversions' },
+];
+
+const contentDef: CmsCollectionDef = {
+  id: 'content', name: 'Content', singular: 'Piece', accent: '#7c3aed',
+  titleField: 'title', subtitleField: 'channel', badgeField: 'status',
+  fields: [
+    { key: 'channel', label: 'Channel', type: 'text' },
+    { key: 'audience', label: 'Audience', type: 'text' },
+    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'readTime', label: 'Read time', type: 'text' },
+    { key: 'hook', label: 'Hook', type: 'longtext' },
+    { key: 'cta', label: 'Call to action', type: 'text' },
+  ],
+};
+
+const contentItems: CmsItem[] = [
+  { id: 'content-nl23', title: 'Newsletter #23 — A/B subject line', channel: 'Newsletter', audience: '5 200 subscribers', status: 'draft', readTime: '6 min', hook: 'Curiosity-hook vs straight-pitch — which wins on a Tuesday send?', cta: 'Approve the A/B test or skip this round' },
+  { id: 'content-standup', title: 'Daily standup — 9am digest', channel: 'Slack #standup', audience: 'team + agents', status: 'live', readTime: '90s', hook: 'Auto-posted at 8:55am by the B1 standup agent.', cta: 'React with emoji to ack' },
+  { id: 'content-fireside', title: 'Fireside chat — ethics override', channel: 'Long-form', audience: 'B1 + leads', status: 'draft', readTime: '14 min', hook: 'When the safe answer is the wrong one.', cta: 'Submit questions before the session' },
+];
+
 /* ═══════════════════════════════════════════════════════════════════════════
  *  Registration — idempotent, called once at module load.
  * ═══════════════════════════════════════════════════════════════════════════ */
@@ -416,4 +479,7 @@ export function seedPeopleCms(): void {
   store.registerCollection(memoryDef, memoryItems);
   store.registerCollection(codexDef, codexItems);
   store.registerCollection(approvalDecisionsDef, approvalDecisionsItems);
+  store.registerCollection(teamDef, teamItems);
+  store.registerCollection(squadsDef, squadsItems);
+  store.registerCollection(contentDef, contentItems);
 }
