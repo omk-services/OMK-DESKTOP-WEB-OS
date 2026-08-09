@@ -144,7 +144,7 @@ export function PeopleItemDetail(props: ItemDetailProps) {
             </div>
             <dl className="space-y-2.5">
               {def.fields
-                .filter(f => !['rank', 'focus', 'bio', 'task', 'status', 'domain', 'squad', 'cadence', 'skills', def.titleField, def.subtitleField, def.badgeField].includes(f.key))
+                .filter(f => !['rank', 'focus', 'bio', 'domain', 'squad', 'cadence', 'skills', def.titleField, def.subtitleField, def.badgeField].includes(f.key))
                 .map(f => (
                   <div key={f.key} className="flex flex-col">
                     <dt className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>
