@@ -94,7 +94,7 @@ const APP_REGISTRY: Array<{ id: string; name: string; }> = [
   { id: 'marketplace', name: 'Marketplace' },
   { id: 'product', name: 'Product' },
   { id: 'growth', name: 'Growth' },
-  { id: 'sales', name: 'Sales Sanctum' },
+  { id: 'sales', name: 'Sales OS' },
 
 ];
 

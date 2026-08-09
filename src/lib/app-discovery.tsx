@@ -35,7 +35,7 @@ registerApp({ id: 'tasks',       name: 'Tasks',                icon: CheckSquare
 registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,           accent: '#db2777', description: 'Sandboxed integrations',                         component: MarketplaceApp });
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
-registerApp({ id: 'sales',       name: 'Sales Sanctum',        icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
+registerApp({ id: 'sales',       name: 'Sales OS',             icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
 // Audit Diagnostic IA (Drawbridge Task 4 2026-07-28: extrait from C:\Users\amado\Downloads\audit.pdf)
 registerApp({ id: 'audit',       name: 'Audit Diagnostic IA',    icon: Shield,          accent: '#b91c1c', description: 'Manuel de diagnostic IA · 6 grilles canon',     component: AuditApp,     hidden: true });
 registerApp({ id: 'finance',     name: 'Finance',              icon: Wallet,          accent: '#ca8a04', description: 'Unit economics, runway, invoices',               component: FinanceApp });

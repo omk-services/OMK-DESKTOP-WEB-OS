@@ -7,7 +7,7 @@ import { useAppVisibility } from '../stores/appVisibility.store';
 import { HAUTEUR_DOCK } from './Dock';
 
 /** Hauteur d'une case, calee sur la PLUS HAUTE : pastille 48 + libelle sur deux
- *  lignes + gouttieres. « People / Agents » et « Sales Sanctum » passent a la
+ *  lignes + gouttieres. « People / Agents » et « Sales OS » passent a la
  *  ligne ; caler sur une case a une ligne sous-estimerait la rangee et ferait
  *  se chevaucher les libelles. */
 const HAUTEUR_CASE = 104;
