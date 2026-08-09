@@ -23,7 +23,7 @@ function sparklineForLast12h(): number[] {
   return USAGE_TODAY.costPerHourUsd;
 }
 
-export function Overview() {
+export function Overview({ navigateToSection }: { navigateToSection: (id: string) => void } = { navigateToSection: () => {} }) {
   const todayUsd = USAGE_TODAY.costUsd;
   const trendPct = -23;
   const activeAgents = AGENTS.filter(a => a.state !== 'tripped').length;
@@ -115,15 +115,19 @@ export function Overview() {
         <Pill tone="neutral">0 coupé-circuit</Pill>
       </div>
 
-      {/* 3 quick actions */}
+      {/* 3 quick actions — wired to navigateToSection so they actually do
+       *  something instead of being decorative. Routing:
+       *    routine → IT/R&D Kernel (where routines live)
+       *    agent   → Agents section (CRM persona board)
+       *    chat    → Chat section (start a new conversation) */}
       <div className="flex flex-wrap items-center gap-2.5">
-        <PrimaryButton>
+        <PrimaryButton onClick={() => navigateToSection('it-rd')}>
           <Sparkles className="h-3.5 w-3.5" /> Lancer une routine
         </PrimaryButton>
-        <GhostButton>
+        <GhostButton onClick={() => navigateToSection('agents')}>
           <Bot className="h-3.5 w-3.5" /> Ouvrir un agent
         </GhostButton>
-        <GhostButton>
+        <GhostButton onClick={() => navigateToSection('chat')}>
           <MessageSquare className="h-3.5 w-3.5" /> Démarrer une session chat
         </GhostButton>
       </div>

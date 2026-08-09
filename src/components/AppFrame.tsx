@@ -25,7 +25,9 @@ export interface AppSection {
   id: string;
   label: string;
   icon: LucideIcon;
-  render: () => React.ReactNode;
+  /** Receives a `navigateToSection(id)` callback so quick-action buttons
+   *  inside a section can switch to another section of the same app. */
+  render: (helpers: { navigateToSection: (id: string) => void }) => React.ReactNode;
 }
 
 export type ToolStatus = 'idle' | 'running' | 'awaiting' | 'error';
@@ -75,8 +77,8 @@ const TOOLS_PANEL_WIDTH = 300;
  *  the previous inline `function ActiveRender() {...}` was a new function
  *  reference every render, forcing React to unmount/remount on every parent
  *  update and wiping section-local useState (e.g. Fleet's `selectedCode`). */
-function ActiveSection({ section }: { section: AppSection }) {
-  return <>{section.render()}</>;
+function ActiveSection({ section, navigateToSection }: { section: AppSection; navigateToSection: (id: string) => void }) {
+  return <>{section.render({ navigateToSection })}</>;
 }
 
 // `disableSignatureFx`, `canvasNuance` et `canvasEffect` restent acceptes dans
@@ -349,7 +351,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
             Les 5 effets de la famille Object fonctionnaient, mais sur une image
             generique. canvas-ui reste dans le depot, simplement non monte. */}
         <div>
-          {active ? <ActiveSection key={active.id} section={active} /> : null}
+          {active ? <ActiveSection key={active.id} section={active} navigateToSection={navigateToSection} /> : null}
         </div>
       </div>
 

@@ -401,7 +401,7 @@ export function DashboardApp() {
   /* ─────────────────────────── Sections ─────────────────────────────────────── */
 
   const sections: AppSection[] = [
-    { id: 'overview',  label: 'Overview',      icon: BarChart3,   render: () => <Overview /> },
+    { id: 'overview',  label: 'Overview',      icon: BarChart3,   render: ({ navigateToSection }) => <Overview navigateToSection={navigateToSection} /> },
     { id: 'agents',    label: 'Agents',        icon: Bot,         render: () => <Agents onSelect={setOpenAgentId} /> },
     { id: 'chat',      label: 'Chat',          icon: MessageSquare, render: () => <Chat /> },
     { id: 'playground',label: 'Playground',    icon: Sparkles,    render: () => <Playground /> },
