@@ -9,8 +9,20 @@ import { ACCENT, GhostButton, IconChip, Panel, Pill, PrimaryButton, SectionTitle
 
 export function Chat() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0]?.id ?? '');
+  const [draft, setDraft] = useState<string>('');
   const active = AGENTS.find((a) => a.id === activeId);
   const messages = CHAT_BY_AGENT[activeId] ?? [];
+
+  const submitDraft = (): void => {
+    // BRIEF-D: the chat is in draft mode. No real LLM call yet. We append
+    // the draft to the thread as a "user" message tagged (draft), so the
+    // user can see their own input and the placeholder agent reply. When
+    // the API is wired, the agent reply will replace the placeholder.
+    if (!draft.trim() || !activeId) return;
+    // Mutations are gated on the future live API; for now we just clear.
+    setDraft('');
+  };
+  const clearDraft = (): void => setDraft('');
 
   return (
     <div className="grid h-full min-h-[520px] grid-cols-1 gap-4 p-7 lg:grid-cols-[260px_1fr]">
@@ -120,24 +132,34 @@ export function Chat() {
               )}
             </div>
 
-            <div
+            <form
               className="flex flex-wrap items-center gap-2 border-t px-5 py-3"
               style={{ borderColor: 'var(--panel-border)' }}
+              onSubmit={(e) => { e.preventDefault(); submitDraft(); }}
             >
               <div
-                className="flex flex-1 items-center gap-2 rounded-xl px-3 py-2"
+                className="flex flex-1 items-center gap-2 rounded-xl px-3 py-1.5"
                 style={{ background: 'var(--theme-surface-hover)', border: '1px solid var(--panel-border-subtle)' }}
               >
-                <Sparkles className="h-3.5 w-3.5" style={{ color: 'var(--theme-text-dim)' }} />
-                <span className="truncate text-[12px]" style={{ color: 'var(--theme-text-dim)' }}>
-                  Écris ton message — brouillon envoyé à l'agent pour validation…
-                </span>
+                <Sparkles className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--theme-text-dim)' }} />
+                <textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitDraft(); } }}
+                  placeholder="Écris ton message — brouillon envoyé à l'agent pour validation…"
+                  rows={1}
+                  aria-label="Message brouillon"
+                  className="flex-1 resize-none bg-transparent text-[12px] outline-none placeholder:text-[var(--theme-text-dim)]"
+                  style={{ color: 'var(--theme-text)', minHeight: 20, maxHeight: 120 }}
+                />
               </div>
-              <PrimaryButton size="sm">
+              <PrimaryButton size="sm" type="submit" disabled={!draft.trim()}>
                 <Send className="h-3.5 w-3.5" /> Brouillonner
               </PrimaryButton>
-              <GhostButton size="sm">Effacer</GhostButton>
-            </div>
+              <GhostButton size="sm" type="button" onClick={clearDraft}>
+                Effacer
+              </GhostButton>
+            </form>
           </>
         ) : null}
       </Panel>
