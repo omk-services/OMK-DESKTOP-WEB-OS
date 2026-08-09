@@ -61,8 +61,10 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
         </div>
       </Panel>
 
-      {/* 4 KPI cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* 4 KPI cards — stay 2-up until xl so the sparkline card has enough room
+       *  to breathe. At xl and above the row becomes 4-up and the sparkline
+       *  stretches to fill its cell. */}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiTile
           label="Today's spend"
           value={`$${todayUsd.toFixed(2)}`}
@@ -77,7 +79,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
           <div className="text-[10.5px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--theme-text-dim)' }}>
             Today's spend · 12h
           </div>
-          <Sparkline values={spark} width={220} height={48} />
+          <Sparkline values={spark} width={220} height={48} responsive />
           <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>
             <span>00:00</span><span>now</span>
           </div>

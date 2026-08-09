@@ -158,11 +158,17 @@ export function Sparkline({
   height = 28,
   width = 96,
   stroke,
+  responsive = false,
 }: {
   values: number[];
   height?: number;
   width?: number;
   stroke?: string;
+  /** When true, the SVG stretches to fill its parent and the polyline uses
+   *  preserveAspectRatio="none". This is what makes the curve track the
+   *  card width at every breakpoint — without it, the sparkline stays
+   *  pinned to its `width` prop and looks stranded inside a wider card. */
+  responsive?: boolean;
 }) {
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
@@ -171,6 +177,28 @@ export function Sparkline({
   const points = values
     .map((v, i) => `${(i * step).toFixed(2)},${(height - ((v - min) / range) * (height - 4) - 2).toFixed(2)}`)
     .join(' ');
+  if (responsive) {
+    return (
+      <svg
+        width="100%"
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        style={{ display: 'block' }}
+      >
+        <polyline
+          points={points}
+          fill="none"
+          stroke={stroke ?? ACCENT}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    );
+  }
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
       <polyline
