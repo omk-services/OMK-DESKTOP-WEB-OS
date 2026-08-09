@@ -5,11 +5,12 @@
  * Draft persistence: `Brouillonner` pushes the current textarea content
  * into a local `extrasByAgent` map keyed by agent id, so the user's own
  * messages stay visible in the thread even when switching agents. The
- * map is in-memory only — it survives agent switches within a session,
- * not page reloads. A real LLM call would replace the seeded assistant
- * replies; for now we keep the seed and append user drafts on top.
+ * map is mirrored to localStorage (key `coach-os:chat-drafts:v1`) so the
+ * thread survives a page reload. A real LLM call would replace the
+ * seeded assistant replies; for now we keep the seed and append user
+ * drafts on top.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Bot, MessageSquare, ShieldCheck, Sparkles, Send } from 'lucide-react';
 import { AGENTS, CHAT_BY_AGENT, type ChatMessage } from '../seed';
 import { useShellStore } from '../../../../stores/shell.store';
@@ -24,14 +25,39 @@ function makeId(): string {
   return `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+const STORAGE_KEY = 'coach-os:chat-drafts:v1';
+
+function loadExtras(): Record<string, ChatMessage[]> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed as Record<string, ChatMessage[]>;
+  } catch {
+    return {};
+  }
+}
+
+function saveExtras(map: Record<string, ChatMessage[]>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  } catch {
+    // Storage quota or private mode — silently degrade to in-memory only.
+  }
+}
+
 export function Chat() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0]?.id ?? '');
   const [draft, setDraft] = useState<string>('');
   // User-submitted drafts, per agent. Seed messages stay below; user
   // drafts are appended in the order they were submitted so the thread
   // reads chronologically. Switching agents preserves each agent's draft
-  // thread independently.
-  const [extrasByAgent, setExtrasByAgent] = useState<Record<string, ChatMessage[]>>({});
+  // thread independently. Mirrored to localStorage so a page reload
+  // doesn't wipe what the user typed.
+  const [extrasByAgent, setExtrasByAgent] = useState<Record<string, ChatMessage[]>>(() => loadExtras());
   const addToast = useShellStore((s) => s.addToast);
   const active = AGENTS.find((a) => a.id === activeId);
   const seedMessages = CHAT_BY_AGENT[activeId] ?? [];
@@ -39,6 +65,12 @@ export function Chat() {
   // Render the merged thread: seed first (system/assistant context), then
   // user drafts in submission order.
   const messages = useMemo(() => [...seedMessages, ...extraMessages], [seedMessages, extraMessages]);
+
+  // Persist drafts on every change. The hook runs after the state update
+  // is committed, so the value reflects the latest map.
+  useEffect(() => {
+    saveExtras(extrasByAgent);
+  }, [extrasByAgent]);
 
   const submitDraft = (): void => {
     const trimmed = draft.trim();
@@ -56,6 +88,21 @@ export function Chat() {
     });
   };
   const clearDraft = (): void => setDraft('');
+  /** Wipe every draft message for the active agent. Confirms via toast —
+   *  the user can refresh to undo, since the persistence layer is local
+   *  storage and we snapshot on every change. The seed thread stays. */
+  const clearAllDrafts = (): void => {
+    setExtrasByAgent((prev) => {
+      const next = { ...prev };
+      delete next[activeId];
+      return next;
+    });
+    addToast({
+      source: 'Chat',
+      type: 'info',
+      message: `Brouillons effacés pour ${active?.name ?? 'cet agent'}`,
+    });
+  };
 
   return (
     <div className="grid h-full min-h-0 grid-cols-1 gap-4 p-7 lg:grid-cols-[260px_1fr]">
@@ -128,6 +175,18 @@ export function Chat() {
                 </div>
               </div>
               <Pill tone="info">session live</Pill>
+              {extraMessages.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={clearAllDrafts}
+                  data-clear-drafts
+                  className="rounded-lg px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider transition-colors hover:bg-[var(--theme-surface-hover)]"
+                  style={{ color: 'var(--theme-text-muted)' }}
+                  title={`Effacer les ${extraMessages.length} brouillon${extraMessages.length > 1 ? 's' : ''} pour ${active.name}`}
+                >
+                  Vider ({extraMessages.length})
+                </button>
+              ) : null}
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 custom-scrollbar">
