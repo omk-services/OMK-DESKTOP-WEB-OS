@@ -316,7 +316,7 @@ export function DashboardApp() {
           subtitle="Interconnected view across core business domains. Live metrics from your CMS — click any tile to drill into its app."
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
           {domains.map((d) => {
             const Icon = d.icon;
             const toneColor = d.tone === 'ok' ? '#15803d' : d.tone === 'warn' ? '#b45309' : d.accent;
