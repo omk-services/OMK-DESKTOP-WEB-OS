@@ -15,7 +15,6 @@
  *   - change: why + risk/policy chips
  *   - alert: hypothesis + monospace trace + enrichment state
  */
-import type { JSX } from 'react';
 import {
   AlertOctagon,
   BookOpen,
@@ -77,7 +76,7 @@ function readList(item: Record<string, unknown>, key: string): string[] {
   return raw.split(/[·•]/).map(s => s.trim()).filter(Boolean);
 }
 
-export function OperationsItemDetail(props: ItemDetailProps): JSX.Element {
+export function OperationsItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -208,7 +207,7 @@ export function OperationsItemDetail(props: ItemDetailProps): JSX.Element {
   );
 }
 
-function RunbookSteps({ body }: { body: string }): JSX.Element {
+function RunbookSteps({ body }: { body: string }) {
   // Render lines starting with "##" as numbered steps, else as body.
   const blocks = body.split(/\n\n+/).filter(Boolean);
   const steps = blocks.filter(b => /^##\s/.test(b));
@@ -260,7 +259,7 @@ function RunbookSteps({ body }: { body: string }): JSX.Element {
   );
 }
 
-function ArticleProse({ body }: { body: string }): JSX.Element {
+function ArticleProse({ body }: { body: string }) {
   if (!body) {
     return <p className="text-sm" style={{ color: 'var(--theme-muted)' }}>No body yet.</p>;
   }
@@ -284,7 +283,7 @@ function ArticleProse({ body }: { body: string }): JSX.Element {
   );
 }
 
-function IncidentTimeline({ body, accent }: { body: string; accent: string }): JSX.Element {
+function IncidentTimeline({ body, accent }: { body: string; accent: string }) {
   const lines = body.split(/\n+/).filter(Boolean).slice(0, 6);
   return (
     <div>
@@ -322,7 +321,7 @@ function IncidentTimeline({ body, accent }: { body: string; accent: string }): J
 
 /* ═══ Processus — cartography surface ═══ */
 
-function ProcessBody({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function ProcessBody({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const inputs = readList(item, 'inputs');
   const outputs = readList(item, 'outputs');
   const deps = readList(item, 'dependsOn');
@@ -416,7 +415,7 @@ function ListColumn({
   items: string[];
   fallback: string;
   borderLeft?: boolean;
-}): JSX.Element {
+}) {
   return (
     <div
       className="p-4"
@@ -445,7 +444,7 @@ function ListColumn({
 
 /* ═══ Benchmarks — pass-rate surface ═══ */
 
-function BenchmarkBody({ item }: { item: Record<string, unknown> }): JSX.Element {
+function BenchmarkBody({ item }: { item: Record<string, unknown> }) {
   const status = readString(item, 'status').toLowerCase();
   const tone = BENCHMARK_TONE[status] ?? BENCHMARK_TONE.flaky;
   const passRateRaw = Number(item.passRate ?? 0);
@@ -520,7 +519,7 @@ function BenchmarkBody({ item }: { item: Record<string, unknown> }): JSX.Element
 
 /* ═══ Changements — change proposal surface ═══ */
 
-function ChangeBody({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function ChangeBody({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const status = readString(item, 'status').toLowerCase();
   const risk = readString(item, 'risk').toLowerCase();
   const statusTone = CHANGE_STATUS_TONE[status] ?? CHANGE_STATUS_TONE.proposed;
@@ -591,7 +590,7 @@ function ChangeBody({ item, accent }: { item: Record<string, unknown>; accent: s
 
 /* ═══ Alertes — pre-enriched incident surface ═══ */
 
-function AlertBody({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function AlertBody({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const severity = readString(item, 'severity').toLowerCase();
   const enrichment = readString(item, 'enrichment').toLowerCase();
   const severityTone = SEVERITY_TONE[severity] ?? SEVERITY_TONE.warn;

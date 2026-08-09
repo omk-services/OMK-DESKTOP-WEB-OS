@@ -16,9 +16,8 @@ import {
   BookOpen,
   RotateCw,
   Cpu,
-  type LucideIcon,
 } from 'lucide-react';
-import { DetailPage, type DetailField, type DetailItemBase, type DetailMeta } from '../../components/DetailPage';
+import { DetailPage, type DetailItemBase, type DetailMeta } from '../../components/DetailPage';
 
 export type DetailKind = 'deal' | 'call' | 'task' | 'doc' | 'routine' | 'tool';
 
@@ -71,7 +70,7 @@ interface SalesDetailPageProps {
   onNavigate?: (appId: string) => void;
 }
 
-export function SalesDetailPage({ item, onBack, onNavigate }: SalesDetailPageProps): JSX.Element {
+export function SalesDetailPage({ item, onBack, onNavigate }: SalesDetailPageProps) {
   return (
     <DetailPage
       item={item}

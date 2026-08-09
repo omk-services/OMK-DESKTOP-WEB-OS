@@ -54,7 +54,7 @@ interface DetailPageProps {
   meta: DetailMeta;
 }
 
-export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: DetailPageProps): JSX.Element {
+export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: DetailPageProps) {
   const Icon = meta.icon;
 
   const handleAction = (): void => {

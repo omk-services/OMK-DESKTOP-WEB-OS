@@ -82,7 +82,7 @@ function titleCase(value: string): string {
 
 /* ── Primitives ─────────────────────────────────────────────────────────── */
 
-function Label({ children }: { children: ReactNode }): JSX.Element {
+function Label({ children }: { children: ReactNode }) {
   return (
     <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.24em] text-[var(--theme-text-dim)]">
       {children}
@@ -90,7 +90,7 @@ function Label({ children }: { children: ReactNode }): JSX.Element {
   );
 }
 
-function Keycap({ children }: { children: ReactNode }): JSX.Element {
+function Keycap({ children }: { children: ReactNode }) {
   return (
     <kbd className="inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-[var(--theme-radius-sm)] border border-[var(--theme-border)] bg-[var(--theme-bg)] px-1.5 font-mono text-[9.5px] font-medium uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
       {children}
@@ -98,7 +98,7 @@ function Keycap({ children }: { children: ReactNode }): JSX.Element {
   );
 }
 
-function SectionHeading({ title, hint }: { title: string; hint?: string }): JSX.Element {
+function SectionHeading({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="mb-5 flex items-center gap-4">
       <Label>{title}</Label>
@@ -112,7 +112,7 @@ function SectionHeading({ title, hint }: { title: string; hint?: string }): JSX.
   );
 }
 
-function Caret({ reduced }: { reduced: boolean }): JSX.Element {
+function Caret({ reduced }: { reduced: boolean }) {
   return (
     <motion.span
       aria-hidden="true"
@@ -135,7 +135,7 @@ interface RevealProps {
   children: ReactNode;
 }
 
-function Reveal({ delay, reduced, className, children }: RevealProps): JSX.Element {
+function Reveal({ delay, reduced, className, children }: RevealProps) {
   return (
     <motion.section
       className={className}
@@ -154,7 +154,7 @@ export function TasksDetailPage({
   item,
   onBack,
   backLabel = 'Back to Tasks',
-}: TasksDetailPageProps): JSX.Element {
+}: TasksDetailPageProps) {
   const reduced = useReducedMotion() ?? false;
 
   // Command-palette behaviour: esc closes the detail. Genuinely wired, so the

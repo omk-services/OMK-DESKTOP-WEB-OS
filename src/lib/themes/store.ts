@@ -31,7 +31,7 @@ export const useThemeStore = create<ThemeStore>()(
         // _v sentinel: forces Zustand to detect a change even when the same themeId is re-set.
         // Without this, Zustand sees `{...s.appThemes, [appId]: themeId}` as shallow-equal and skips re-render.
         appThemes: { ...s.appThemes, [appId]: themeId, _v: Date.now() },
-      })),
+      } as Partial<ThemeStore>)),
       resetAppTheme: (appId) => set((s) => {
         const next = { ...s.appThemes };
         delete next[appId];

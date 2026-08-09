@@ -142,7 +142,7 @@ export function PeopleDetailPage({
   onBack,
   backLabel = 'Back to People',
   onNavigate,
-}: PeopleDetailPageProps): JSX.Element {
+}: PeopleDetailPageProps) {
   const reduced = useReducedMotion();
   const isDark = useThemeFor('people').isDark;
   const [logFilter, setLogFilter] = useState<'all' | 'attention'>('all');
@@ -777,7 +777,7 @@ function SoftHead({
   accent: string;
   title: string;
   note?: string;
-}): JSX.Element {
+}) {
   return (
     <div className="flex items-center gap-2.5">
       <span

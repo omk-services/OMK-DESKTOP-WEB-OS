@@ -2,12 +2,11 @@
  * Usage — consommation & facturation du jour. Plafond journalier, projection
  * 24 h, distribution par fournisseur, et projection fin de mois.
  */
-import type { JSX } from 'react';
 import { AlertTriangle, Coins, Gauge, Timer, TrendingUp } from 'lucide-react';
 import { AGENTS, COST_BUCKETS, MONTH_SUMMARY, USAGE_TODAY } from '../seed';
 import { ACCENT, IconChip, KpiTile, Panel, ProgressBar, SectionTitle, Sparkline } from '../Primitives';
 
-export function Usage(): JSX.Element {
+export function Usage() {
   const overRate = USAGE_TODAY.costUsd / USAGE_TODAY.budgetUsd;
   const remaining = USAGE_TODAY.budgetUsd - USAGE_TODAY.costUsd;
   const tokensTotal = USAGE_TODAY.tokensIn + USAGE_TODAY.tokensOut;
@@ -136,7 +135,7 @@ export function Usage(): JSX.Element {
   );
 }
 
-function Small({ label, value }: { label: string; value: string }): JSX.Element {
+function Small({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg p-3" style={{ background: 'var(--theme-surface-hover)' }}>
       <div className="text-[9.5px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>

@@ -120,7 +120,7 @@ function derive(seed: string): Derived {
 
 /* ── Small building blocks ────────────────────────────────────────────────── */
 
-function Kicker({ children }: { children: React.ReactNode }): JSX.Element {
+function Kicker({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--theme-text-dim)]">
       {children}
@@ -128,7 +128,7 @@ function Kicker({ children }: { children: React.ReactNode }): JSX.Element {
   );
 }
 
-function Chip({ children }: { children: React.ReactNode }): JSX.Element {
+function Chip({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="inline-flex items-center gap-1 rounded-[var(--theme-radius-sm)] px-2 py-1 text-[11px] font-semibold text-[var(--theme-text-muted)]"
@@ -146,7 +146,7 @@ interface PlateProps {
 }
 
 /** The refractive glass plate every section is built on. */
-function Plate({ children, className = '', pad = 'p-5' }: PlateProps): JSX.Element {
+function Plate({ children, className = '', pad = 'p-5' }: PlateProps) {
   return (
     <section
       className={`relative overflow-hidden rounded-[var(--theme-radius-lg)] border backdrop-blur-2xl ${pad} ${className}`}
@@ -185,7 +185,7 @@ interface VitrineProps {
   installed: boolean;
 }
 
-function Vitrine({ categoryIcon, category, featured, installed }: VitrineProps): JSX.Element {
+function Vitrine({ categoryIcon, category, featured, installed }: VitrineProps) {
   const [shot, setShot] = useState(0);
   const shots: { label: string; icon: LucideIcon }[] = [
     { label: 'Overview', icon: categoryIcon },
@@ -316,7 +316,7 @@ export function MarketplaceDetailPage({
   onBack,
   backLabel = 'Back to Marketplace',
   onInstall,
-}: MarketplaceDetailPageProps): JSX.Element {
+}: MarketplaceDetailPageProps) {
   const reduced = useReducedMotion() ?? false;
   const derived = useMemo(() => derive(item.id + item.title), [item.id, item.title]);
 

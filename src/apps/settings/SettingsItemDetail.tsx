@@ -4,7 +4,6 @@
  * Theme: warm-paper.
  * Motion: pop-scale 200ms.
  */
-import type { JSX } from 'react';
 import { useMemo, useState } from 'react';
 import { Eye, Sliders } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
@@ -18,7 +17,7 @@ function readString(item: Record<string, unknown>, ...keys: string[]): string | 
   return undefined;
 }
 
-export function SettingsItemDetail(props: ItemDetailProps): JSX.Element {
+export function SettingsItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

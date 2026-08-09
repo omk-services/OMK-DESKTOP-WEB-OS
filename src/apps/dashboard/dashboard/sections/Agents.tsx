@@ -6,12 +6,11 @@
  * Status pills use semantic colors (green = healthy, amber = degraded,
  * red = tripped) via the Tone primitive, not Tailwind palette classes.
  */
-import type { JSX } from 'react';
 import { Bot, ChevronRight, MessageSquare, Plug, ShieldCheck, Sparkles } from 'lucide-react';
 import { AGENTS } from '../seed';
 import { Panel, IconChip, Pill, ProgressBar, SectionTitle } from '../Primitives';
 
-export function Agents({ onSelect }: { onSelect: (agentId: string) => void }): JSX.Element {
+export function Agents({ onSelect }: { onSelect: (agentId: string) => void }) {
   return (
     <div className="flex flex-col gap-5 p-7">
       <SectionTitle
@@ -104,7 +103,7 @@ export function Agents({ onSelect }: { onSelect: (agentId: string) => void }): J
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }): JSX.Element {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div
       className="rounded-lg p-2"

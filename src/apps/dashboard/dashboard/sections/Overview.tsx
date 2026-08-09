@@ -7,7 +7,6 @@
  *
  * Renders purely from the local seed; no live data wiring in this iteration.
  */
-import type { JSX } from 'react';
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronRight, Clock,
   MessageSquare, Sparkles, TrendingDown, TrendingUp, Wallet, Zap,
@@ -24,7 +23,7 @@ function sparklineForLast12h(): number[] {
   return USAGE_TODAY.costPerHourUsd;
 }
 
-export function Overview(): JSX.Element {
+export function Overview() {
   const todayUsd = USAGE_TODAY.costUsd;
   const trendPct = -23;
   const activeAgents = AGENTS.filter(a => a.state !== 'tripped').length;

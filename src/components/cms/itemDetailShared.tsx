@@ -3,7 +3,6 @@
  *  page looks right under any of the 12 themes (light and dark). */
 
 import type { ReactNode } from 'react';
-import type { JSX } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CmsCollectionDef, CmsItem } from '../../lib/cms/types';
 
@@ -15,7 +14,7 @@ export function BackAffordance({
   label: string;
   onBack: () => void;
   accent?: string;
-}): JSX.Element {
+}) {
   return (
     <button
       type="button"
@@ -43,7 +42,7 @@ export function PrevNextFooter({
   prev?: CmsItem;
   next?: CmsItem;
   onNavigate: (itemId: string) => void;
-}): JSX.Element {
+}) {
   const labelPrev = prev ? String(prev[def.titleField]) : 'Start';
   const labelNext = next ? String(next[def.titleField]) : 'End';
   return (
@@ -92,7 +91,7 @@ export function PillBadge({
   children: ReactNode;
   accent: string;
   tone?: 'soft' | 'solid';
-}): JSX.Element {
+}) {
   const bg = tone === 'solid' ? accent : `${accent}1f`;
   const fg = tone === 'solid' ? '#ffffff' : accent;
   return (

@@ -3,8 +3,7 @@
  * Each variant is a maximally different design language (per A+ directive "designs ultra-premium, anti basic").
  * Source inspiration: bergside/awesome-design-skills — Apple Vision Pro, Bento, Editorial, Brutalism, Cyberpunk.
  */
-import { useMemo } from 'react';
-import { Check, Sparkles, Lock, Activity, Target, Layers, Box } from 'lucide-react';
+import { Check, Sparkles, Activity, Layers, Box } from 'lucide-react';
 import { THEMES } from '../../lib/themes/tokens';
 
 const motionGrammar = {

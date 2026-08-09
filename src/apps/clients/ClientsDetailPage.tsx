@@ -249,7 +249,7 @@ interface SectionProps {
   children: ReactNode;
 }
 
-function ClaySection({ icon: Icon, title, caption, index, reduced, children }: SectionProps): JSX.Element {
+function ClaySection({ icon: Icon, title, caption, index, reduced, children }: SectionProps) {
   return (
     <motion.section
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.99 }}
@@ -289,7 +289,7 @@ interface DialProps {
 }
 
 /** Health dial — conic arc + pressed clay hole, built from divs only. */
-function HealthDial({ pct }: DialProps): JSX.Element {
+function HealthDial({ pct }: DialProps) {
   const deg = Math.round((pct / 100) * 360);
   return (
     <div className="relative h-[124px] w-[124px] shrink-0" aria-hidden="true">
@@ -322,7 +322,7 @@ interface BeadProps {
   reduced: boolean;
 }
 
-function VitalBead({ pill, index, reduced }: BeadProps): JSX.Element {
+function VitalBead({ pill, index, reduced }: BeadProps) {
   const hue = TONE_HUE[pill.tone];
   return (
     <motion.li
@@ -357,7 +357,7 @@ export function ClientsDetailPage({
   item,
   onBack,
   backLabel = 'Back to Clients',
-}: ClientsDetailPageProps): JSX.Element {
+}: ClientsDetailPageProps) {
   const reduced = useReducedMotion() === true;
 
   const health = readPct(findPill(item.pills, 'health')?.value);

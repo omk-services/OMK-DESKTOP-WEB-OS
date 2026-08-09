@@ -3,7 +3,7 @@
  * outcome. Columns: agent, channel, started-at, duration, tokens, cost,
  * outcome pill.
  */
-import { useMemo, useState, type JSX } from 'react';
+import { useMemo, useState } from 'react';
 import { Filter, History } from 'lucide-react';
 import { AGENTS, SESSIONS } from '../seed';
 import type { DashboardSession } from '../seed';
@@ -12,7 +12,7 @@ import { ACCENT, IconChip, Panel, Pill, SectionTitle } from '../Primitives';
 type OutcomeFilter = 'all' | 'completed' | 'escalated' | 'failed' | 'flagged';
 type ChannelFilter = 'all' | 'in-app' | 'email' | 'slack' | 'telegram' | 'webhook';
 
-export function Sessions(): JSX.Element {
+export function Sessions() {
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>('all');
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>('all');
@@ -117,7 +117,7 @@ export function Sessions(): JSX.Element {
   );
 }
 
-function SessionRow({ session }: { session: DashboardSession }): JSX.Element {
+function SessionRow({ session }: { session: DashboardSession }) {
   const agent = AGENTS.find((a) => a.id === session.agentId);
   const tone =
     session.outcome === 'failed' ? 'danger'
@@ -165,7 +165,7 @@ function Select({
   value: string;
   onChange: (v: string) => void;
   options: Array<{ id: string; label: string }>;
-}): JSX.Element {
+}) {
   return (
     <label className="inline-flex items-center gap-2 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
       <span className="text-[10px] font-bold uppercase tracking-[0.16em]">{label}</span>

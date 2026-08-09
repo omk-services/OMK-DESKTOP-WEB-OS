@@ -8,7 +8,6 @@
  * Covers: session_notes (the IP Vault). Designed so any client-derived
  * item still feels claymorphic.
  */
-import type { JSX } from 'react';
 import { Heart, IdCard, Rocket, ShieldCheck, Sparkles } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -21,7 +20,7 @@ function readString(item: Record<string, unknown>, ...keys: string[]): string | 
   return undefined;
 }
 
-export function ClientsItemDetail(props: ItemDetailProps): JSX.Element {
+export function ClientsItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

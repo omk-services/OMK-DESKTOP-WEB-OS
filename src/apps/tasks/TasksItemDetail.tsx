@@ -5,7 +5,6 @@
  * Theme: editorial (serif display, generous leading).
  * Motion: slide-bottom 220ms.
  */
-import type { JSX } from 'react';
 import { CalendarDays, Sparkles } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -18,7 +17,7 @@ function readString(item: Record<string, unknown>, ...keys: string[]): string | 
   return undefined;
 }
 
-export function TasksItemDetail(props: ItemDetailProps): JSX.Element {
+export function TasksItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

@@ -125,7 +125,7 @@ function makeRise(reduced: boolean, i: number): RiseProps {
 }
 
 /** Signature element — diagonal caution tape in the app accent. */
-function TapeStrip(): JSX.Element {
+function TapeStrip() {
   return (
     <div
       aria-hidden="true"
@@ -145,7 +145,7 @@ function SectionHeader({
   title: string;
   note: string;
   Icon: LucideIcon;
-}): JSX.Element {
+}) {
   return (
     <div className="mb-4 flex flex-wrap items-end gap-x-4 gap-y-1 border-b-[5px] border-[color:var(--theme-text)] pb-1.5">
       <span
@@ -165,7 +165,7 @@ function SectionHeader({
   );
 }
 
-function Readout({ label, value, tone }: { label: string; value: string; tone: string }): JSX.Element {
+function Readout({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
     <div
       className="min-w-[128px] flex-1 border-r-[3px] border-[color:var(--theme-text)] px-4 py-3 last:border-r-0"
@@ -183,7 +183,7 @@ export function OperationsDetailPage({
   item,
   onBack,
   backLabel = 'Back to Operations',
-}: OperationsDetailPageProps): JSX.Element {
+}: OperationsDetailPageProps) {
   const reduced = useReducedMotion() ?? false;
   const segments = useMemo<Segment[]>(() => parseBody(item.body), [item.body]);
   const steps = useMemo<Segment[]>(() => segments.filter((s) => s.kind === 'step'), [segments]);

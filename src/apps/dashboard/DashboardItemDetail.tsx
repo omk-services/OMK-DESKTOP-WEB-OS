@@ -7,7 +7,6 @@
  *
  * Covers: clients (the "Client Pipeline" view).
  */
-import type { JSX } from 'react';
 import { Activity, ArrowUpRight, Layers, TrendingUp } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -22,7 +21,7 @@ function numeric(item: Record<string, unknown>, key: string): number | undefined
   return undefined;
 }
 
-export function DashboardItemDetail(props: ItemDetailProps): JSX.Element {
+export function DashboardItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

@@ -13,7 +13,6 @@
  *  Canon: docs/superpowers/specs/2026-07-30-coach-os-app-detail-pages-design.md
  */
 import type { ReactNode } from 'react';
-import type { JSX } from 'react';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import type { CmsField } from '../../lib/cms/types';
@@ -38,7 +37,7 @@ function formatFieldValue(value: unknown, type: CmsField['type']): ReactNode {
 /** Generic fallback — only used when no per-app component is registered.
  *  Composed enough to be readable in light + dark themes, never the polished
  *  presentation. Every Coach OS app should replace it via registerItemDetail. */
-function GenericItemDetail({ def, item, index, total, accent, onBack, prev, next, onNavigate }: ItemDetailProps): JSX.Element {
+function GenericItemDetail({ def, item, index, total, accent, onBack, prev, next, onNavigate }: ItemDetailProps) {
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : undefined;
   const badgeValue = def.badgeField ? item[def.badgeField] : undefined;
@@ -190,7 +189,7 @@ function GenericItemDetail({ def, item, index, total, accent, onBack, prev, next
   );
 }
 
-export function DynamicPageView({ collectionId, itemId, onBack, onNavigate }: DynamicPageViewProps): JSX.Element | null {
+export function DynamicPageView({ collectionId, itemId, onBack, onNavigate }: DynamicPageViewProps) {
   const def = useCmsStore(s => s.collections[collectionId]);
   const items = useCmsStore(s => s.items[collectionId]) ?? [];
   const index = items.findIndex(it => it.id === itemId);

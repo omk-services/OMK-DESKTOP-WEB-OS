@@ -93,7 +93,7 @@ describe('creerItem — propose, ne mute pas', () => {
   it('refuse une collection inconnue', () => {
     const r = creerItem({ collectionId: 'unknown', fields: { label: 'x' } });
     expect(r.ok).toBe(false);
-    expect(r.error).toMatch(/unknown/i);
+    expect((r as { ok: false; error: string }).error).toMatch(/unknown/i);
   });
 
   it('refuse si le titre (champ déclaré par la collection) manque', () => {
@@ -101,7 +101,7 @@ describe('creerItem — propose, ne mute pas', () => {
     store.registerCollection(tasksDef, []);
     const r = creerItem({ collectionId: 'tasks', fields: { when: 'today' } });
     expect(r.ok).toBe(false);
-    expect(r.error).toMatch(/label/i);
+    expect((r as { ok: false; error: string }).error).toMatch(/label/i);
   });
 
   it('ignore les champs qui ne sont pas déclarés par la collection', () => {
@@ -166,7 +166,7 @@ describe('modifierItem — propose, ne mute pas', () => {
     store.registerCollection(tasksDef, []);
     const r = modifierItem({ collectionId: 'tasks', id: 'ghost', patch: { done: true } });
     expect(r.ok).toBe(false);
-    expect(r.error).toMatch(/introuvable/i);
+    expect((r as { ok: false; error: string }).error).toMatch(/introuvable/i);
   });
 });
 

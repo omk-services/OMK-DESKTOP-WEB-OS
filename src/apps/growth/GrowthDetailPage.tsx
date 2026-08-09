@@ -15,7 +15,6 @@
  * l'accent app (#16a34a), reserve aux moments signatures (badge, CTA).
  */
 import { useEffect, useMemo } from 'react';
-import type { JSX } from 'react';
 import { ArrowLeft, TrendingUp, GitBranch, Radio, FlaskConical, Tag, History, Sparkles, type LucideIcon, Plus, Minus, X } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
@@ -54,7 +53,7 @@ function readString(value: unknown): string {
 
 /* ── Tiny primitives ── */
 
-function Eyebrow({ children }: { children: React.ReactNode }): JSX.Element {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
@@ -75,7 +74,7 @@ function Card({
   icon: LucideIcon;
   hint?: string;
   children: React.ReactNode;
-}): JSX.Element {
+}) {
   return (
     <section
       className="rounded-none border-2 p-5"
@@ -103,7 +102,7 @@ function ToneBadge({
 }: {
   label: string;
   tone: 'good' | 'warn' | 'accent' | 'neutral';
-}): JSX.Element {
+}) {
   const color =
     tone === 'good'
       ? 'var(--ok)'
@@ -141,7 +140,7 @@ export function GrowthDetailPage({
   item,
   onBack,
   backLabel = 'Back to Growth',
-}: GrowthDetailPageProps): JSX.Element {
+}: GrowthDetailPageProps) {
   const addToast = useShellStore((s) => s.addToast);
   const channels = useCmsStore((s) => s.items['growth_channels']) ?? [];
   const experiments = useCmsStore((s) => s.items['growth_experiments']) ?? [];

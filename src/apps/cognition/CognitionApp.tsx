@@ -10,15 +10,13 @@
  * Sister: src/lib/cognition/queries.ts (Supabase cognition schema).
  */
 
-import { BrainCircuit, ShieldCheck, AlertCircle, Sparkles, Cpu } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Sparkles, Cpu } from 'lucide-react';
 import { SectionHead } from '../../components/AppFrame';
 import { StatCard } from '../_ui/kit';
 import { COGNITION_TRUST_FLOOR } from '../../lib/observability';
 import { COGNITION_ORG_ID } from '../../lib/cognition/queries';
 import { supabaseConfigured } from '../../lib/supabase';
 import type { EventTypeCount, Manifest, Routine } from '../../lib/cognition/queries';
-
-const ACCENT = '#7c3aed';
 
 // Stub data shape (Phase 39a) — live fetch wired in 39b.
 export interface CognitionOverviewData {
@@ -41,7 +39,7 @@ const STUB_DATA: CognitionOverviewData = {
  * CognitionOverviewContent — pure content (no AppFrame wrapper).
  * Use this from sibling apps' sections, or from <CognitionApp>'s Overview section.
  */
-export function CognitionOverviewContent({ data = STUB_DATA }: { data?: CognitionOverviewData }): JSX.Element {
+export function CognitionOverviewContent({ data = STUB_DATA }: { data?: CognitionOverviewData }) {
   return (
     <div className="space-y-6">
       <SectionHead

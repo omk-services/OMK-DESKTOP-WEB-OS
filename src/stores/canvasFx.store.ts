@@ -26,9 +26,9 @@ import {
 } from '../components/canvasui/v30/theme-canvas-mapping';
 
 interface CanvasFxState {
-  /** appId → CanvasEffectId override. Absent = use theme dominant. */
-  appFxOverrides: Record<string, CanvasEffectId>;
-  setAppFx: (appId: string, effectId: CanvasEffectId) => void;
+  /** appId → CanvasEffectId override. 'auto' = use theme dominant. */
+  appFxOverrides: Record<string, CanvasEffectId | 'auto'>;
+  setAppFx: (appId: string, effectId: CanvasEffectId | 'auto') => void;
   clearAppFx: (appId: string) => void;
   clearAll: () => void;
 }
@@ -40,7 +40,7 @@ export const useCanvasFxStore = create<CanvasFxState>()(
       setAppFx: (appId, effectId) => set((s) => ({
         // _v sentinel to force re-render on same-effectId re-set (mirrors themes.store.ts pattern)
         appFxOverrides: { ...s.appFxOverrides, [appId]: effectId, _v: String(Date.now()) },
-      })),
+      } as Partial<CanvasFxState>)),
       clearAppFx: (appId) => set((s) => {
         const next = { ...s.appFxOverrides };
         delete next[appId];
@@ -82,7 +82,7 @@ export function useCanvasFxFor(appId: string): CanvasEffectId {
 }
 
 /** Read the override store without subscribing (for one-off reads). */
-export function readCanvasFxOverride(appId: string): CanvasEffectId | undefined {
+export function readCanvasFxOverride(appId: string): CanvasEffectId | 'auto' | undefined {
   return useCanvasFxStore.getState().appFxOverrides[appId];
 }
 

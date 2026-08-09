@@ -18,7 +18,6 @@
  * entry, loops as a 4-organ card, drift as a reference/current gauge,
  * evals as a pass-rate gauge.
  */
-import type { JSX } from 'react';
 import { Activity, Cpu, FlaskConical, Hash, Rocket, Terminal, Zap, ScrollText, Repeat, TrendingDown, LineChart, GitBranch, AlertOctagon, CheckCircle2, CircleDashed } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge } from '../../components/cms/itemDetailShared';
@@ -56,7 +55,7 @@ function toneFor(status: string | undefined): { fg: string; bg: string; border: 
   return { fg: '#a78bfa', bg: 'rgba(167,139,250,0.12)', border: '#a78bfa55' };
 }
 
-export function ItRdItemDetail(props: ItemDetailProps): JSX.Element {
+export function ItRdItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -210,7 +209,7 @@ function ServicesCard({
   note: string | undefined;
   detail: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   return (
     <div
       className="rounded-md"
@@ -263,7 +262,7 @@ function ExperimentCard({
   stage: string | undefined;
   notes: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   const stages = ['idea', 'building', 'shipped'];
   const stageIdx = Math.max(0, stages.indexOf((stage ?? '').toLowerCase()));
   return (
@@ -328,7 +327,7 @@ function DeploysCard({
   target: string | undefined;
   status: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   const checkpoints = ['build', 'test', 'deploy', 'verify'];
   return (
     <div
@@ -405,7 +404,7 @@ function JournalCard({
   projects: string | undefined;
   note: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   return (
     <div
       className="rounded-md"
@@ -491,7 +490,7 @@ function LoopsCard({
   lastActionAt: string | undefined;
   note: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   const organs = [
     { label: 'Capteur', value: capteur, hint: 'measures' },
     { label: 'Consigne', value: consigne, hint: 'setpoint' },
@@ -578,7 +577,7 @@ function DriftCard({
   method: string | undefined;
   note: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   const refNum = Number(reference);
   const curNum = Number(current);
   const thresholdNum = Number(threshold);
@@ -676,7 +675,7 @@ function EvalsCard({
   note: string | undefined;
   ranAt: string | undefined;
   tone: { fg: string; bg: string; border: string };
-}): JSX.Element {
+}) {
   const trialsNum = Number(trials);
   const distParts = distribution?.split('/').map(p => Number(p.trim())) ?? [];
   const pass = distParts[0] ?? 0;

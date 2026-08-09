@@ -19,7 +19,6 @@
  * meaning demands it (the rule line, the "You are here" chip, the IP stem).
  * No Tailwind palette classes (stone / white / black / etc.).
  */
-import type { JSX } from 'react';
 import { useState } from 'react';
 import {
   ChevronDown,
@@ -169,7 +168,7 @@ function Panel({
 }: {
   children: React.ReactNode;
   padding?: string;
-}): JSX.Element {
+}) {
   return (
     <section
       className={`${padding} rounded-md`}
@@ -194,7 +193,7 @@ function SectionHeader({
   eyebrow: string;
   title: string;
   caption: string;
-}): JSX.Element {
+}) {
   return (
     <header className="mb-5 border-b pb-4" style={{ borderColor: 'var(--panel-border)' }}>
       <div className="mb-2 flex items-center gap-2">
@@ -221,7 +220,7 @@ function SectionHeader({
 
 /* ── The page ──────────────────────────────────────────────── */
 
-export function LegalItemDetail(props: ItemDetailProps): JSX.Element {
+export function LegalItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

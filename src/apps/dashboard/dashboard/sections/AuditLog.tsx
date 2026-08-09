@@ -5,13 +5,13 @@
  * The DLP gate (Enterprise OS blueprint §"9 motifs DLP") is surfaced here as
  * a row count and a "no leak" badge — when an entry appears, it shows up here.
  */
-import { useMemo, useState, type JSX } from 'react';
+import { useMemo, useState } from 'react';
 import { Lock, Search } from 'lucide-react';
 import { AUDIT_LOG } from '../seed';
 import type { AuditEntry } from '../seed';
 import { ACCENT, IconChip, KpiTile, Panel, Pill, SectionTitle } from '../Primitives';
 
-export function AuditLog(): JSX.Element {
+export function AuditLog() {
   const [query, setQuery] = useState('');
   const [actorFilter, setActorFilter] = useState('all');
 
@@ -140,7 +140,7 @@ export function AuditLog(): JSX.Element {
   );
 }
 
-function EntryRow({ entry }: { entry: AuditEntry }): JSX.Element {
+function EntryRow({ entry }: { entry: AuditEntry }) {
   const isHuman = entry.actor.startsWith('human');
   const tone = entry.action.includes('failed') ? 'danger'
     : entry.action.includes('flag') ? 'warn'

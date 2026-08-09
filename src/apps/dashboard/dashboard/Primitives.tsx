@@ -9,7 +9,7 @@
  * over budget, amber = warning, blue = informational. They are explicitly opted
  * into via `tone` props, never asserted as Tailwind classes.
  */
-import type { CSSProperties, JSX, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export const ACCENT = '#059669';
 
@@ -38,7 +38,7 @@ export function Panel({
   pad?: string;
   flat?: boolean;
   style?: CSSProperties;
-}): JSX.Element {
+}) {
   return (
     <div
       className={`rounded-2xl border ${pad} ${className}`}
@@ -65,7 +65,7 @@ export function SectionTitle({
   title: string;
   subtitle?: string;
   action?: ReactNode;
-}): JSX.Element {
+}) {
   return (
     <div className="mb-5 flex items-start justify-between gap-4">
       <div>
@@ -97,7 +97,7 @@ export function Pill({
   tone?: Tone;
   children: ReactNode;
   className?: string;
-}): JSX.Element {
+}) {
   const meta = TONE_META[tone];
   return (
     <span
@@ -122,7 +122,7 @@ export function KpiTile({
   hint?: string;
   tone?: Tone;
   trend?: { dir: 'up' | 'down' | 'flat'; value: string };
-}): JSX.Element {
+}) {
   const meta = TONE_META[tone];
   return (
     <Panel pad="p-4" className="flex flex-col gap-1.5">
@@ -163,7 +163,7 @@ export function Sparkline({
   height?: number;
   width?: number;
   stroke?: string;
-}): JSX.Element {
+}) {
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
   const range = Math.max(1, max - min);
@@ -186,7 +186,7 @@ export function Sparkline({
 }
 
 /** A tiny dot used as a presence / live indicator. */
-export function LiveDot({ tone = 'ok', size = 6 }: { tone?: Tone; size?: number }): JSX.Element {
+export function LiveDot({ tone = 'ok', size = 6 }: { tone?: Tone; size?: number }) {
   return (
     <span
       className="inline-block rounded-full"
@@ -205,7 +205,7 @@ export function IconChip({
   children: ReactNode;
   tone?: Tone;
   size?: number;
-}): JSX.Element {
+}) {
   const meta = TONE_META[tone];
   return (
     <span
@@ -237,7 +237,7 @@ export function PrimaryButton({
   size?: 'sm' | 'md';
   type?: 'button' | 'submit';
   disabled?: boolean;
-}): JSX.Element {
+}) {
   return (
     <button
       type={type}
@@ -268,7 +268,7 @@ export function GhostButton({
   onClick?: () => void;
   size?: 'sm' | 'md';
   type?: 'button' | 'submit';
-}): JSX.Element {
+}) {
   return (
     <button
       type={type}
@@ -288,7 +288,7 @@ export function GhostButton({
 }
 
 /** A simple key/value pair row, used in detail pages. */
-export function KV({ label, value, mono = false }: { label: string; value: ReactNode; mono?: boolean }): JSX.Element {
+export function KV({ label, value, mono = false }: { label: string; value: ReactNode; mono?: boolean }) {
   return (
     <div className="rounded-lg p-3" style={{ background: 'var(--theme-surface-hover)' }}>
       <div className="text-[9.5px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>
@@ -305,7 +305,7 @@ export function KV({ label, value, mono = false }: { label: string; value: React
 }
 
 /** Mini progress bar (0..100). */
-export function ProgressBar({ value, tone = 'accent' }: { value: number; tone?: Tone }): JSX.Element {
+export function ProgressBar({ value, tone = 'accent' }: { value: number; tone?: Tone }) {
   const meta = TONE_META[tone];
   return (
     <div

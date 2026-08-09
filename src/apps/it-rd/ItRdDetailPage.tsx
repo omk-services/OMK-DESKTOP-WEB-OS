@@ -16,7 +16,6 @@
  * l'accent app (#7c3aed), reserve aux moments signatures (badge, CTA).
  */
 import { useEffect } from 'react';
-import type { JSX } from 'react';
 import { ArrowLeft, Terminal, Cpu, FlaskConical, Rocket, Tag, ScrollText, GitBranch, History, Activity, type LucideIcon } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
@@ -69,17 +68,9 @@ const STATUS_BG: Record<string, string> = {
   neutral: 'color-mix(in srgb, var(--theme-text) 8%, transparent)',
 };
 
-function colorFor(tone: 'good' | 'warn' | 'danger' | 'neutral'): string {
-  return STATUS_COLOR[tone];
-}
-
-function bgFor(tone: 'good' | 'warn' | 'danger' | 'neutral'): string {
-  return STATUS_BG[tone];
-}
-
 /* ── Tiny primitives ── */
 
-function Eyebrow({ children }: { children: React.ReactNode }): JSX.Element {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
@@ -100,7 +91,7 @@ function Card({
   icon: LucideIcon;
   hint?: string;
   children: React.ReactNode;
-}): JSX.Element {
+}) {
   return (
     <section
       className="rounded-none border-2 p-5"
@@ -128,7 +119,7 @@ function ToneBadge({
 }: {
   label: string;
   tone: 'good' | 'warn' | 'danger' | 'neutral';
-}): JSX.Element {
+}) {
   return (
     <span
       className="inline-flex items-center gap-1 border-2 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em]"
@@ -150,7 +141,7 @@ export function ItRdDetailPage({
   item,
   onBack,
   backLabel = 'Back to IT / R&D',
-}: ItRdDetailPageProps): JSX.Element {
+}: ItRdDetailPageProps) {
   const addToast = useShellStore((s) => s.addToast);
   const deploys = useCmsStore((s) => s.items['deploys']) ?? [];
   const experiments = useCmsStore((s) => s.items['it_experiments']) ?? [];

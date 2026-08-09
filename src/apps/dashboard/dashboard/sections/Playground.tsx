@@ -5,7 +5,7 @@
  * Adaptation to Coach OS: providers here are real (Claude Opus/Sonnet/Haiku,
  * MiniMax-M3, plus OpenRouter open models). Bedrock is not used.
  */
-import { useMemo, useState, type JSX } from 'react';
+import { useMemo, useState } from 'react';
 import { Beaker, Clock, Coins, Sparkles } from 'lucide-react';
 import { PLAYGROUND_MODELS, PLAYGROUND_PROMPT } from '../seed';
 import type { PlaygroundModel } from '../seed';
@@ -17,7 +17,7 @@ const VENDOR_META: Record<string, { label: string; color: string }> = {
   OpenRouter: { label: 'OpenRouter', color: '#0891b2' },
 };
 
-export function Playground(): JSX.Element {
+export function Playground() {
   const [prompt, setPrompt] = useState(PLAYGROUND_PROMPT);
 
   const totalCost = useMemo(
@@ -115,7 +115,7 @@ export function Playground(): JSX.Element {
   );
 }
 
-function ModelCard({ model, vendorColor, prompt }: { model: PlaygroundModel; vendorColor: string; prompt: string }): JSX.Element {
+function ModelCard({ model, vendorColor, prompt }: { model: PlaygroundModel; vendorColor: string; prompt: string }) {
   // Estimate tokens in/out from the prompt length so the displayed cost reflects what
   // the user would pay if they actually fired this call right now.
   const tokensIn = Math.max(64, Math.ceil(prompt.length / 3.5));
@@ -169,7 +169,7 @@ function ModelCard({ model, vendorColor, prompt }: { model: PlaygroundModel; ven
   );
 }
 
-function Mini({ label, value, icon }: { label: string; value: string; icon?: JSX.Element }): JSX.Element {
+function Mini({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div className="flex flex-col">
       <span className="text-[9px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>

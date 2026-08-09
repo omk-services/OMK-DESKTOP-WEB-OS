@@ -12,7 +12,6 @@
  *   - codex        → proven pattern (situation + recipe + count)
  */
 import { useMemo } from 'react';
-import type { JSX } from 'react';
 import { Briefcase, Sparkles, Users, UserSearch, Brain, BookMarked, AlertTriangle, ShieldCheck, Anchor, Quote, Repeat2 } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -49,7 +48,7 @@ function verifyTone(verification: string | undefined): { label: string; fg: stri
   }
 }
 
-export function PeopleItemDetail(props: ItemDetailProps): JSX.Element {
+export function PeopleItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
 
   const title = String(item[def.titleField] ?? '');
@@ -273,7 +272,7 @@ export function PeopleItemDetail(props: ItemDetailProps): JSX.Element {
 
 function PersonaSurface({
   def, item, accent, onBack, prev, next, onNavigate, index, total,
-}: ItemDetailProps): JSX.Element {
+}: ItemDetailProps) {
   const name = String(item.name ?? '');
   const role = String(item.role ?? '');
   const pronouns = String(item.pronouns ?? '');
@@ -445,7 +444,7 @@ function PersonaSurface({
 
 function MemorySurface({
   def, item, accent, onBack, prev, next, onNavigate, index, total,
-}: ItemDetailProps): JSX.Element {
+}: ItemDetailProps) {
   const fact = String(item.fact ?? '');
   const provenance = String(item.provenance ?? '');
   const retainedOn = String(item.retainedOn ?? '');
@@ -604,7 +603,7 @@ function MemorySurface({
 
 function CodexSurface({
   def, item, accent, onBack, prev, next, onNavigate, index, total,
-}: ItemDetailProps): JSX.Element {
+}: ItemDetailProps) {
   const situation = String(item.situation ?? '');
   const recipe = String(item.recipe ?? '');
   const why = String(item.why ?? '');

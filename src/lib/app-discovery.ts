@@ -1,6 +1,6 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, BrainCircuit, Shield, Wand2, Network } from 'lucide-react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, Shield, Wand2, Network } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 

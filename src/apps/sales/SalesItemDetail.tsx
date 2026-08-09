@@ -7,7 +7,6 @@
  * We branch on the offer (Citadelle vs Programme) and on the stage to
  * give each deal a distinct surface — they're not interchangeable.
  */
-import type { JSX } from 'react';
 import { Building2, Handshake, Sparkles, Target } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -49,7 +48,7 @@ const OFFER_BLURBS: Record<string, string> = {
     'Twelve-week cohort programme — group coaching plus async support, the on-ramp into the practice.',
 };
 
-export function SalesItemDetail(props: ItemDetailProps): JSX.Element {
+export function SalesItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

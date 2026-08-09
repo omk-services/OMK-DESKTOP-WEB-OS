@@ -7,7 +7,6 @@
  * milestones tab. Each item is rendered with theme CSS vars only.
  */
 import { useState } from 'react';
-import type { JSX } from 'react';
 import { ListChecks, History, Compass } from 'lucide-react';
 import { CHANGELOG, ROADMAP, type RoadmapItem } from '../data/changelog';
 
@@ -27,7 +26,7 @@ const STATUS_LABEL: Record<RoadmapItem['status'], string> = {
   deferred: 'DEFERRED',
 };
 
-export function ChangelogTabs(): JSX.Element {
+export function ChangelogTabs() {
   const [tab, setTab] = useState<TabId>('milestones');
 
   return (
@@ -74,10 +73,10 @@ function TabButton({
   id: TabId;
   active: boolean;
   onClick: () => void;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   label: string;
   count: number;
-}): JSX.Element {
+}) {
   return (
     <button
       type="button"
@@ -107,7 +106,7 @@ function TabButton({
   );
 }
 
-function MilestonesList(): JSX.Element {
+function MilestonesList() {
   return (
     <div
       role="tabpanel"
@@ -154,7 +153,7 @@ function MilestonesList(): JSX.Element {
   );
 }
 
-function RoadmapList(): JSX.Element {
+function RoadmapList() {
   if (ROADMAP.length === 0) {
     return (
       <div

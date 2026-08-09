@@ -13,7 +13,6 @@
  *  CSS variables. The only fixed colours are the per-grid accent (mirror of
  *  the def / app accent) and the 3 frequency / level tones (domain data).
  */
-import type { JSX } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -27,6 +26,7 @@ import {
   Repeat,
   type LucideIcon,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter } from '../../components/cms/itemDetailShared';
 
@@ -65,7 +65,7 @@ function readString(item: Record<string, unknown>, key: string): string {
   return typeof v === 'string' ? v : '';
 }
 
-function readField(item: Record<string, unknown>, def: ItemDetailProps['def'], key: string): JSX.Element | string {
+function readField(item: Record<string, unknown>, def: ItemDetailProps['def'], key: string): ReactNode {
   const field = def.fields.find(f => f.key === key);
   if (!field) return '—';
   const raw = item[key];
@@ -75,7 +75,7 @@ function readField(item: Record<string, unknown>, def: ItemDetailProps['def'], k
   return String(raw);
 }
 
-export function AuditItemDetail(props: ItemDetailProps): JSX.Element {
+export function AuditItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

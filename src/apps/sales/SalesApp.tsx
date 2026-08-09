@@ -42,8 +42,7 @@ import { SalesItemDetail } from './SalesItemDetail';
 import { seedSalesCms } from './seed';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
-import { DynamicPageView } from '../../components/cms/DynamicPageView';
-import { KanbanBoard, KanbanCard } from '../_ui/widgets';
+import { KanbanBoard } from '../_ui/widgets';
 
 registerItemDetail('sales', SalesItemDetail);
 seedSalesCms();
@@ -1577,7 +1576,6 @@ export function SalesApp() {
   const cognition = useCognitionData();
   const openApp = useShellStore((state) => state.openApp);
   const [detail, setDetail] = useState<DetailItem | null>(null);
-  const [openDealId, setOpenDealId] = useState<string | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
   // Le ton creme de l'app vient de CANONICAL_APP_THEMES dans lib/themes/tokens.ts,

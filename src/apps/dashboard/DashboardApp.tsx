@@ -31,7 +31,7 @@
  * rendu sans crash si la collection `clients` est vide ; chaque mutation
  * pousse un toast (succès ou erreur) via `useShellStore.addToast`.
  */
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle, BarChart3, Bot, Building2, Compass, GitBranch,
   History, LayoutDashboard, ListChecks, MessageSquare, Pin, ScrollText,
@@ -103,7 +103,7 @@ const VALIDATIONS: ValidationCard[] = [
   },
 ];
 
-export function DashboardApp(): JSX.Element {
+export function DashboardApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
   const clientsDef = useCmsStore(s => s.collections['clients']);
   const updateItem = useCmsStore((s) => s.updateItem);
@@ -187,7 +187,7 @@ export function DashboardApp(): JSX.Element {
 
   /* ─────────────────────────── Wind Direction (kept) ─────────────────────────── */
 
-  const Validation = (): JSX.Element => (
+  const Validation = () => (
     <div className="p-7">
       <SectionHead title="Wind Direction" subtitle="Things requiring your validation" />
       <FleetItemGrid cols={2}>
@@ -210,7 +210,7 @@ export function DashboardApp(): JSX.Element {
 
   /* ─────────────────────────── CEO Cockpit (kept, theme-aware) ───────────────── */
 
-  const CeoCockpit = (): JSX.Element => {
+  const CeoCockpit = () => {
     const navigate = (appId: string): void => openApp(appId, '');
     const domains = [
       { id: 'sales',      label: 'Sales',          icon: Compass,         accent: '#ea580c', metric: '$67K',  delta: '+12%', sub: 'pipeline this quarter',  tone: 'accent' as const },
@@ -312,7 +312,7 @@ export function DashboardApp(): JSX.Element {
     clientsDrill.open(clientId);
   };
 
-  const Pipeline = (): JSX.Element => (
+  const Pipeline = () => (
     <div className="p-7">
       <SectionHead
         title="Client ledger"

@@ -8,7 +8,6 @@
  * Covers: product_items, product_releases. Branches on def.id so releases
  * get a numeric version chip and items get a roadmap lane.
  */
-import type { JSX } from 'react';
 import { Layers, Link2, Rocket } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -35,7 +34,7 @@ function readNumber(item: Record<string, unknown>, ...keys: string[]): number | 
 
 const ROADMAP_STAGES = ['Discovery', 'Design', 'In build', 'QA', 'Ship'] as const;
 
-export function ProductItemDetail(props: ItemDetailProps): JSX.Element {
+export function ProductItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

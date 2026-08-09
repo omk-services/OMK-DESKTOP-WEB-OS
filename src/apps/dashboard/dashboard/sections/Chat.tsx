@@ -2,12 +2,12 @@
  * Chat — conversation with one agent at a time. Pick from the left rail,
  * the thread fills the right pane. Empty state is intentional, not a fallback.
  */
-import { useState, type JSX } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Bot, MessageSquare, ShieldCheck, Sparkles, Send } from 'lucide-react';
 import { AGENTS, CHAT_BY_AGENT } from '../seed';
 import { ACCENT, GhostButton, IconChip, Panel, Pill, PrimaryButton, SectionTitle } from '../Primitives';
 
-export function Chat(): JSX.Element {
+export function Chat() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0]?.id ?? '');
   const active = AGENTS.find((a) => a.id === activeId);
   const messages = CHAT_BY_AGENT[activeId] ?? [];
@@ -145,7 +145,7 @@ export function Chat(): JSX.Element {
   );
 }
 
-function EmptyThread({ agent }: { agent: string }): JSX.Element {
+function EmptyThread({ agent }: { agent: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 py-12 text-center">
       <IconChip tone="neutral" size={56}>

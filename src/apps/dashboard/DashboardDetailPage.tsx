@@ -13,7 +13,7 @@
  *
  * Public contract unchanged: same export names, same props signature.
  */
-import { useMemo, useState, type CSSProperties, type JSX } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import {
   Activity,
   ArrowLeft,
@@ -131,7 +131,7 @@ function SectionLabel({
   icon: typeof Activity;
   title: string;
   caption?: string;
-}): JSX.Element {
+}) {
   return (
     <div className="flex items-center gap-2.5">
       <span
@@ -155,7 +155,7 @@ function SectionLabel({
   );
 }
 
-function Sparkline({ values, height = 26 }: { values: number[]; height?: number }): JSX.Element {
+function Sparkline({ values, height = 26 }: { values: number[]; height?: number }) {
   const max = Math.max(...values, 1);
   return (
     <div className="flex items-end gap-[2px]" style={{ height }} aria-hidden="true">
@@ -182,7 +182,7 @@ export function DashboardDetailPage({
   item,
   onBack,
   backLabel = 'Back to Dashboard',
-}: DashboardDetailPageProps): JSX.Element {
+}: DashboardDetailPageProps) {
   const [range, setRange] = useState<RangeId>('30D');
   const reduced = useReducedMotion() ?? false;
 

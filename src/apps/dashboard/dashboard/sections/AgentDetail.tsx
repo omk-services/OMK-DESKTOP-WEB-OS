@@ -6,7 +6,7 @@
  * The detail is rendered as a sibling of AppFrame (so it follows the topbar
  * theme, not the app sidebar theme — see ClientsApp precedent).
  */
-import { useState, type JSX } from 'react';
+import { useState } from 'react';
 import {
   ArrowLeft, Bot, BrainCircuit, Cable, Database, History, MessageSquare,
   Plug, Settings, ShieldCheck, Sparkles, Wrench,
@@ -35,7 +35,7 @@ export function AgentDetailPage({
 }: {
   agent: DashboardAgent;
   onBack: () => void;
-}): JSX.Element {
+}) {
   const [tab, setTab] = useState<TabId>('system');
 
   return (
@@ -152,7 +152,7 @@ export function AgentDetailPage({
   );
 }
 
-function SystemTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function SystemTab({ agent }: { agent: DashboardAgent }) {
   return (
     <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
       <Panel pad="p-5">
@@ -188,7 +188,7 @@ function SystemTab({ agent }: { agent: DashboardAgent }): JSX.Element {
   );
 }
 
-function ConversationTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function ConversationTab({ agent }: { agent: DashboardAgent }) {
   const messages = CHAT_BY_AGENT[agent.id] ?? [];
   return (
     <Panel pad="p-5">
@@ -238,7 +238,7 @@ function ConversationTab({ agent }: { agent: DashboardAgent }): JSX.Element {
   );
 }
 
-function SessionsTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function SessionsTab({ agent }: { agent: DashboardAgent }) {
   // Local aggregation — driven by seed. The numbers add up to a believable 24h trace.
   const last24h = [
     { at: '08:48', tokens: 1840, cost: 0.014, channel: 'webhook', outcome: 'completed' },
@@ -277,7 +277,7 @@ function SessionsTab({ agent }: { agent: DashboardAgent }): JSX.Element {
   );
 }
 
-function MemoriesTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function MemoriesTab({ agent }: { agent: DashboardAgent }) {
   const sample = [
     { fact: 'Ava Chen · ready for Q3 pricing repositioning', scope: 'shared', weight: 0.92, date: 'Jul 18' },
     { fact: 'Marcus Reyes · stretched across 3 cohort launches', scope: 'agent-only', weight: 0.61, date: 'Jul 12' },
@@ -313,7 +313,7 @@ function MemoriesTab({ agent }: { agent: DashboardAgent }): JSX.Element {
   );
 }
 
-function ConnectionsTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function ConnectionsTab({ agent }: { agent: DashboardAgent }) {
   const meta: Record<string, { label: string; tone: 'ok' | 'warn' | 'info' }> = {
     telegram: { label: 'Telegram',  tone: 'info' },
     slack:    { label: 'Slack',     tone: 'info' },
@@ -355,7 +355,7 @@ function ConnectionsTab({ agent }: { agent: DashboardAgent }): JSX.Element {
   );
 }
 
-function SettingsTab({ agent }: { agent: DashboardAgent }): JSX.Element {
+function SettingsTab({ agent }: { agent: DashboardAgent }) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <Panel pad="p-5">
@@ -391,10 +391,10 @@ const USAGE_BUDGET: Record<string, string> = {
 function EmptyState({
   icon, title, hint,
 }: {
-  icon: JSX.Element;
+  icon: React.ReactNode;
   title: string;
   hint: string;
-}): JSX.Element {
+}) {
   return (
     <div
       className="flex flex-col items-center gap-2 rounded-xl py-10 text-center"

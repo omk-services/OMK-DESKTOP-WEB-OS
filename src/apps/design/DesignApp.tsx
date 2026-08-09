@@ -544,7 +544,7 @@ function EditorialHero() {
       <div className="relative z-10 mt-10">
         <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-700">Essay · 12 min read</div>
         <h1 className="mt-3 text-7xl font-normal leading-[0.92] tracking-tight text-stone-900"
-          style={{ fontFamily: 'Fraunces, Georgia, serif', fontVariation: "'opsz' 144, 'wght' 400" }}>
+          style={{ fontFamily: 'Fraunces, Georgia, serif', fontVariationSettings: "'opsz' 144, 'wght' 400" }}>
           The fine <span className="italic underline decoration-amber-600 decoration-[3px] underline-offset-[10px]">rule</span><br/>
           between<br/>
           beauty<br/>

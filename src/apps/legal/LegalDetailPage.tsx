@@ -25,7 +25,6 @@
  *     theme radius (6px) and borders.
  */
 import { useState } from 'react';
-import type { JSX } from 'react';
 import {
   ArrowLeft,
   ChevronDown,
@@ -352,7 +351,7 @@ function Panel({
 }: {
   children: React.ReactNode;
   padding?: string;
-}): JSX.Element {
+}) {
   return (
     <section
       className={`${padding} rounded-md`}
@@ -377,7 +376,7 @@ function SectionHeader({
   eyebrow: string;
   title: string;
   caption: string;
-}): JSX.Element {
+}) {
   return (
     <header className="mb-5 border-b pb-4" style={{ borderColor: 'var(--panel-border)' }}>
       <div className="mb-2 flex items-center gap-2">
@@ -411,7 +410,7 @@ export function LegalDetailPage({
   item,
   onBack,
   backLabel = 'Back to Legal',
-}: LegalDetailPageProps): JSX.Element {
+}: LegalDetailPageProps) {
   const [openClause, setOpenClause] = useState<number>(0);
   const isPolicy = item.collection === 'policies';
   const collection = item.collection ?? 'contracts';

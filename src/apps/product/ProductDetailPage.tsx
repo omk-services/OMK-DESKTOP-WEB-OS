@@ -14,7 +14,6 @@
  * l'accent app (#ea580c), reserve aux moments signatures (badge, CTA).
  */
 import { useEffect } from 'react';
-import type { JSX } from 'react';
 import { ArrowLeft, Map, CalendarClock, Link2, Layers, GitBranch, Hammer, Sparkles, Tag, Lightbulb, FileCode, CheckCircle2 } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
@@ -59,7 +58,7 @@ function readString(value: unknown): string {
 
 /* ── Tiny primitives ── */
 
-function Eyebrow({ children }: { children: React.ReactNode }): JSX.Element {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
@@ -80,7 +79,7 @@ function Card({
   icon: React.ComponentType<{ className?: string }>;
   hint?: string;
   children: React.ReactNode;
-}): JSX.Element {
+}) {
   return (
     <section
       className="rounded-none border-2 p-5"
@@ -108,7 +107,7 @@ function ToneBadge({
 }: {
   label: string;
   tone: 'good' | 'accent' | 'warn' | 'neutral';
-}): JSX.Element {
+}) {
   const color =
     tone === 'good'
       ? 'var(--ok)'
@@ -146,7 +145,7 @@ export function ProductDetailPage({
   item,
   onBack,
   backLabel = 'Back to Product',
-}: ProductDetailPageProps): JSX.Element {
+}: ProductDetailPageProps) {
   const addToast = useShellStore((s) => s.addToast);
   const releases = useCmsStore((s) => s.items['product_releases']) ?? [];
   const allItems = useCmsStore((s) => s.items['product_items']) ?? [];
@@ -615,7 +614,7 @@ export function ProductDetailPage({
 
 /* ── Inline icons (kept here to avoid one more import line) ── */
 
-function ArrowRightIcon({ className }: { className?: string }): JSX.Element {
+function ArrowRightIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={3}>
       <path d="M5 12h14M13 5l7 7-7 7" />
@@ -623,7 +622,7 @@ function ArrowRightIcon({ className }: { className?: string }): JSX.Element {
   );
 }
 
-function ListTodoIcon({ className }: { className?: string }): JSX.Element {
+function ListTodoIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2.4}>
       <rect x="3" y="4" width="18" height="16" rx="1.5" />

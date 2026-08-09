@@ -388,8 +388,8 @@ export function TasksApp() {
                 <button
                   onClick={() => toggle(String(t.id))}
                   className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors`}
-                  style={t.done ? { background: ACCENT, borderColor: 'transparent', color: '#ffffff' } : undefined}
-                  aria-checked={t.done}
+                  style={Boolean(t.done) ? { background: ACCENT, borderColor: 'transparent' as const, color: '#ffffff' } : undefined}
+                  aria-checked={Boolean(t.done)}
                   role="checkbox"
                 >
                   {t.done ? <Check className="w-3.5 h-3.5" /> : null}

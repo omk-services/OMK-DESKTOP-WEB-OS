@@ -3,12 +3,11 @@
  * si le budget est dépassé (cf. 11-cost-spend.png du brief), et répartition
  * « où part l'argent » (cf. 12-cost-repartition.png).
  */
-import type { JSX } from 'react';
 import { AlertOctagon, Coins, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { COST_BUCKETS, COST_TREND, MONTH_SUMMARY } from '../seed';
 import { IconChip, KpiTile, Panel, Pill, ProgressBar, SectionTitle, Sparkline } from '../Primitives';
 
-export function Cost(): JSX.Element {
+export function Cost() {
   const monthlyPct = (MONTH_SUMMARY.monthToDateUsd / MONTH_SUMMARY.monthBudgetUsd) * 100;
   const overBy = MONTH_SUMMARY.monthToDateUsd - MONTH_SUMMARY.monthBudgetUsd;
   const variancePct = ((MONTH_SUMMARY.monthToDateUsd - MONTH_SUMMARY.monthPreviousUsd) / MONTH_SUMMARY.monthPreviousUsd) * 100;
@@ -174,7 +173,7 @@ export function Cost(): JSX.Element {
   );
 }
 
-function Small({ label, value }: { label: string; value: string }): JSX.Element {
+function Small({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg p-3" style={{ background: 'var(--theme-surface-hover)' }}>
       <div className="text-[9.5px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>

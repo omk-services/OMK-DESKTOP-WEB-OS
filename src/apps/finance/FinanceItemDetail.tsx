@@ -10,7 +10,6 @@
  *         swap the data table for a tailored body that matches the primitive
  *         each collection actually carries.
  */
-import type { JSX } from 'react';
 import { ArrowDownRight, ArrowUpRight, Calculator, Wallet, TrendingDown, TrendingUp, LineChart, Coins, Receipt, Scale, CircleDollarSign } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -55,7 +54,7 @@ const CASHFLOW_TONE: Record<string, { fg: string; bg: string; border: string }> 
   deferred:  { fg: '#7c3aed', bg: '#ede9fe', border: '#c4b5fd' },
 };
 
-export function FinanceItemDetail(props: ItemDetailProps): JSX.Element {
+export function FinanceItemDetail(props: ItemDetailProps) {
   const { def } = props;
   const collection = def.id;
 
@@ -78,7 +77,7 @@ interface InvoiceRow {
   status: string;
 }
 
-function InvoiceDetail(props: ItemDetailProps): JSX.Element {
+function InvoiceDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -236,7 +235,7 @@ function InvoiceDetail(props: ItemDetailProps): JSX.Element {
 
 /* ═══ Plancher de marge — cost / floor / price bar + gap ═══ */
 
-function PlancherDetail(props: ItemDetailProps): JSX.Element {
+function PlancherDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -402,7 +401,7 @@ function PlancherDetail(props: ItemDetailProps): JSX.Element {
   );
 }
 
-function PriceTile({ label, icon: Icon, value, color, sub }: { label: string; icon: typeof TrendingDown; value: string; color: string; sub: string }): JSX.Element {
+function PriceTile({ label, icon: Icon, value, color, sub }: { label: string; icon: typeof TrendingDown; value: string; color: string; sub: string }) {
   return (
     <div
       className="rounded-xl p-4"
@@ -418,7 +417,7 @@ function PriceTile({ label, icon: Icon, value, color, sub }: { label: string; ic
   );
 }
 
-function LegendDot({ color, label }: { color: string; label: string }): JSX.Element {
+function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="inline-block w-3 h-3 rounded-sm" style={{ background: color }} />
@@ -447,7 +446,7 @@ function parseScenarios(raw: string): ScenarioPoint[] {
     .filter((p): p is ScenarioPoint => p !== null);
 }
 
-function CourbeDetail(props: ItemDetailProps): JSX.Element {
+function CourbeDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -597,7 +596,7 @@ function CourbeDetail(props: ItemDetailProps): JSX.Element {
 
 /* ═══ Budget tokens — model spend vs FTE it replaces ═══ */
 
-function BudgetTokensDetail(props: ItemDetailProps): JSX.Element {
+function BudgetTokensDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -766,7 +765,7 @@ function BudgetTokensDetail(props: ItemDetailProps): JSX.Element {
 
 /* ═══ Formes de prix — billing shape with cashflow + commitment ═══ */
 
-function FormesPrixDetail(props: ItemDetailProps): JSX.Element {
+function FormesPrixDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -885,7 +884,7 @@ function FormesPrixDetail(props: ItemDetailProps): JSX.Element {
 
 /* ═══ Generic fallback — keeps the page readable if a new collection is added ═══ */
 
-function GenericFinanceDetail(props: ItemDetailProps): JSX.Element {
+function GenericFinanceDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

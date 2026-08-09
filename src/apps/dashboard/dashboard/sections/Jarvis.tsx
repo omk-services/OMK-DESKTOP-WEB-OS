@@ -11,13 +11,13 @@
  * labelled read-only, and the suggestion cards explicitly carry a `read-only`
  * field that consumers cannot un-set.
  */
-import { useEffect, useRef, type JSX } from 'react';
+import { useEffect, useRef } from 'react';
 import { Bot, Lock, Mic, MicOff, Sparkles } from 'lucide-react';
 import { AGENTS, JARVIS_ROUTINES, JARVIS_SUGGESTIONS, USAGE_TODAY, MONTH_SUMMARY } from '../seed';
 import { ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill, SectionTitle } from '../Primitives';
 import { useVoiceNavigation } from '../../../../hooks/useVoiceNavigation';
 
-export function Jarvis(): JSX.Element {
+export function Jarvis() {
   const { listening, toggle, supported, lastTranscript } = useVoiceNavigation();
   const transcriptRef = useRef<HTMLDivElement>(null);
 

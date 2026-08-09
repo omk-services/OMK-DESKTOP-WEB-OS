@@ -18,8 +18,10 @@ export function AppShell({ title, subtitle, action, children }: {
   );
 }
 
-export function StatCard({ label, value, hint, tone = 'default' }: {
+export function StatCard({ label, value, hint, tone = 'default', icon: Icon, accent }: {
   label: string; value: React.ReactNode; hint?: string; tone?: 'default' | 'ok' | 'warn' | 'danger' | 'accent';
+  icon?: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>;
+  accent?: string;
 }) {
   const toneClass = {
     default: 'text-[var(--theme-text)]',
@@ -30,7 +32,16 @@ export function StatCard({ label, value, hint, tone = 'default' }: {
   }[tone];
   return (
     <div className="bg-[var(--theme-surface)] p-4 rounded-xl border border-[var(--panel-border)] shadow-sm">
-      <div className="text-[var(--theme-muted)] text-[13px] font-medium mb-1.5">{label}</div>
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="text-[var(--theme-muted)] text-[13px] font-medium">{label}</div>
+        {Icon && (
+          <Icon
+            className="w-4 h-4"
+            strokeWidth={2}
+            style={accent ? { color: accent } : undefined}
+          />
+        )}
+      </div>
       <div className={`text-[26px] leading-none font-extrabold ${toneClass}`}>{value}</div>
       {hint && <div className="text-xs text-[var(--theme-text-dim)] mt-1.5">{hint}</div>}
     </div>

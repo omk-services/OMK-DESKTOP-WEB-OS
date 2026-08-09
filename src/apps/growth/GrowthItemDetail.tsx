@@ -20,7 +20,6 @@
  * semantics: 4-criteria radar for acquisition, objective+criteria for
  * strategie, give/get ledger for partenariats, position+movement for aeo.
  */
-import type { JSX } from 'react';
 import {
   Beaker, Megaphone, TrendingUp, TrendingDown, Minus, Map, Handshake, Sparkles,
   CheckCircle2, XCircle, Target, Clock, AlertOctagon,
@@ -54,7 +53,7 @@ function parseLiftPct(lift: string | undefined): number | undefined {
   return m ? Number(m[1]) : undefined;
 }
 
-function trendIcon(trend: string | undefined): JSX.Element {
+function trendIcon(trend: string | undefined) {
   if (!trend) return <Minus className="w-3 h-3" />;
   if (trend.includes('↑')) return <TrendingUp className="w-3 h-3" />;
   if (trend.includes('↓')) return <TrendingDown className="w-3 h-3" />;
@@ -103,7 +102,7 @@ function toneFor(value: string | undefined, kind: 'verdict' | 'phase' | 'state' 
   return { fg: '#57534e', bg: '#f5f5f4' };
 }
 
-export function GrowthItemDetail(props: ItemDetailProps): JSX.Element {
+export function GrowthItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
@@ -401,7 +400,7 @@ export function GrowthItemDetail(props: ItemDetailProps): JSX.Element {
 }
 
 /** Tiny inline scoreboards — the 4-row "table" of the canon layout. */
-function ChannelScoreboard({ accent }: { accent: string }): JSX.Element {
+function ChannelScoreboard({ accent }: { accent: string }) {
   const rows = [
     { c: 'Intro.co',     ltv: 380, cac: 41,  ctr: 4.8 },
     { c: 'LinkedIn',     ltv: 420, cac: 0,   ctr: 3.1 },
@@ -432,7 +431,7 @@ function ChannelScoreboard({ accent }: { accent: string }): JSX.Element {
   );
 }
 
-function ExperimentScoreboard({ accent, currentId }: { accent: string; currentId: string }): JSX.Element {
+function ExperimentScoreboard({ accent, currentId }: { accent: string; currentId: string }) {
   const rows = [
     { id: 'quiz-headline',     title: 'Quiz headline',     lift: '+18%', tone: '#15803d' },
     { id: 'followup-timing',   title: 'Follow-up at +2h',  lift: '+9%',  tone: '#15803d' },
@@ -476,7 +475,7 @@ function ExperimentScoreboard({ accent, currentId }: { accent: string; currentId
 
 /* ═══ Acquisition — 4-criteria bars + what-works/what-failed ═══ */
 
-function AcquisitionCriteriaPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function AcquisitionCriteriaPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const criteria: { key: string; label: string; hint: string }[] = [
     { key: 'virality',   label: 'Virality',   hint: 'organic spread' },
     { key: 'conversion', label: 'Conversion', hint: 'lead → won rate' },
@@ -523,7 +522,7 @@ function AcquisitionCriteriaPanel({ item, accent }: { item: Record<string, unkno
   );
 }
 
-function AcquisitionNarrativePanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function AcquisitionNarrativePanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const works = String(item.whatWorks ?? '');
   const failed = String(item.whatFailed ?? '');
   return (
@@ -570,7 +569,7 @@ function AcquisitionNarrativePanel({ item, accent }: { item: Record<string, unkn
 
 /* ═══ Strategie — objective + criteria for passing ═══ */
 
-function StrategieObjectivePanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function StrategieObjectivePanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const objective = String(item.objective ?? '');
   const focus = String(item.focus ?? '');
   const duration = String(item.duration ?? '');
@@ -608,7 +607,7 @@ function StrategieObjectivePanel({ item, accent }: { item: Record<string, unknow
   );
 }
 
-function StrategieCriteriaPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function StrategieCriteriaPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const criteria = String(item.criteria ?? '');
   const stateVal = String(item.state ?? '');
   return (
@@ -638,7 +637,7 @@ function StrategieCriteriaPanel({ item, accent }: { item: Record<string, unknown
 
 /* ═══ Partenariats — give/get ledger ═══ */
 
-function PartenariatsBringsPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function PartenariatsBringsPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const brings = String(item.brings ?? '');
   const contact = String(item.contact ?? '');
   const touched = String(item.touched ?? '');
@@ -677,7 +676,7 @@ function PartenariatsBringsPanel({ item, accent }: { item: Record<string, unknow
   );
 }
 
-function PartenariatsExpectsPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function PartenariatsExpectsPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const expects = String(item.expects ?? '');
   return (
     <div
@@ -706,7 +705,7 @@ function PartenariatsExpectsPanel({ item, accent }: { item: Record<string, unkno
 
 /* ═══ AEO — position + movement ═══ */
 
-function AeoPositionPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function AeoPositionPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const position = String(item.position ?? '');
   const cited = String(item.cited ?? '');
   const intent = String(item.intent ?? '');
@@ -766,7 +765,7 @@ function AeoPositionPanel({ item, accent }: { item: Record<string, unknown>; acc
   );
 }
 
-function AeoMovementPanel({ item, accent }: { item: Record<string, unknown>; accent: string }): JSX.Element {
+function AeoMovementPanel({ item, accent }: { item: Record<string, unknown>; accent: string }) {
   const history = String(item.history ?? '');
   const competitor = String(item.competitor ?? '');
   return (

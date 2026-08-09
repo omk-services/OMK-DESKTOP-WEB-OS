@@ -5,7 +5,6 @@
  * Theme: glassmorphism (refractive layers, editorial serif headings).
  * Motion: fade-blur 240ms.
  */
-import type { JSX } from 'react';
 import { Download, Layers, Sparkles, Star } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
@@ -30,7 +29,7 @@ function readNumber(item: Record<string, unknown>, ...keys: string[]): number | 
   return undefined;
 }
 
-export function MarketplaceItemDetail(props: ItemDetailProps): JSX.Element {
+export function MarketplaceItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';

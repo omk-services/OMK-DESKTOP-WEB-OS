@@ -148,15 +148,15 @@ export function renderCanvasForTheme(
   opts?: { accent?: string; objectSrc?: string; className?: string; style?: React.CSSProperties; disableCssFallback?: boolean },
 ): ReactElement {
   const effectId = resolveEffectId({
-    themeId,
-    objectSrc: opts?.objectSrc,
+    themeId: themeId ?? undefined,
+    objectSrc: opts?.objectSrc ?? undefined,
     accent: opts?.accent,
     className: opts?.className,
     style: opts?.style,
     disableCssFallback: opts?.disableCssFallback,
   });
   const cssLayer = opts?.disableCssFallback ? null : (
-    <CssFallback effectId={effectId} themeId={themeId ?? 'warm-paper'} className={opts?.className} style={opts?.style} />
+    <CssFallback effectId={effectId} themeId={themeId ?? 'warm-paper'} className={opts?.className ?? ''} style={opts?.style ?? {}} />
   );
 
   if (OBJECT_EFFECTS.has(effectId)) {

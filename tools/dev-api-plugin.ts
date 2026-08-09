@@ -49,7 +49,7 @@ function buildFetchRequest(req: IncomingMessage, body: Uint8Array | undefined): 
     headers,
   }
   if (body !== undefined) {
-    init.body = body as BodyInit
+    init.body = body as RequestInit['body']
     ;(init as RequestInit & { duplex: 'half' }).duplex = 'half'
   }
   return new Request(url, init)

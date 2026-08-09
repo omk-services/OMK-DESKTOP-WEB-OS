@@ -25,7 +25,7 @@ export function FinanceDetailPage({
   item,
   onBack,
   backLabel = 'Back to Finance',
-}: FinanceDetailPageProps): JSX.Element {
+}: FinanceDetailPageProps) {
   const columns = item.rows.length > 0 ? Object.keys(item.rows[0]!) : [];
 
   return (
