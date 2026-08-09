@@ -67,9 +67,9 @@ export function DesktopIcons() {
           return (
             <button
               key={app.id}
-              onClick={(e) => { e.stopPropagation(); setSelected(app.id); }}
+              onClick={(e) => { e.stopPropagation(); openApp(app.id, app.name); }}
               onDoubleClick={(e) => { e.stopPropagation(); openApp(app.id, app.name); }}
-              title={`${app.name} — double-click to open`}
+              title={`${app.name} — click to open`}
               className={`pointer-events-auto w-[86px] flex flex-col items-center gap-1.5 px-1.5 py-2 rounded-xl transition-all group ${
                 isSel ? 'bg-white/55 ring-1 ring-[var(--theme-accent)]/40' : 'hover:bg-white/35'
               }`}
