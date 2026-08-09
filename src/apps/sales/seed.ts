@@ -61,6 +61,37 @@ const stagesItems: CmsItem[] = [
   { id: 'stage-lost', label: 'Lost or cold', count: 19, weighted: 're-engagement targets', tone: 'danger' },
 ];
 
+/* ═══ Context — 3 groups (What / Who / How) with items each ═══ */
+
+const contextDef = def({
+  id: 'sales_context', name: 'Sales context', singular: 'Context group', accent: '#ea580c',
+  titleField: 'eyebrow', subtitleField: 'groupId', badgeField: 'groupId',
+  fields: [
+    { key: 'item1Title', label: 'Item 1 title', type: 'text' },
+    { key: 'item1Sub', label: 'Item 1 subtitle', type: 'longtext' },
+    { key: 'item2Title', label: 'Item 2 title', type: 'text' },
+    { key: 'item2Sub', label: 'Item 2 subtitle', type: 'longtext' },
+  ],
+});
+
+const contextItems: CmsItem[] = [
+  {
+    id: 'ctx-what', groupId: 'g-what', eyebrow: 'What we sell',
+    item1Title: 'The offer', item1Sub: '30-day AI enablement program · $5k · 50% refund guarantee',
+    item2Title: 'Positioning and objections', item2Sub: 'The frame, every objection, and the proof points',
+  },
+  {
+    id: 'ctx-who', groupId: 'g-who', eyebrow: 'To whom',
+    item1Title: 'ICP, the buyer', item1Sub: 'US SMB owner with AI FOMO, 1-25 employees, sweet spot 3 to 7',
+    item2Title: 'Disqualification signals', item2Sub: 'Sub-1k revenue, build-it-myself founder, or partner-held decision',
+  },
+  {
+    id: 'ctx-how', groupId: 'g-how', eyebrow: 'How we sell',
+    item1Title: 'Sales process', item1Sub: 'Stage by stage, from booking to close, with next-action rules',
+    item2Title: 'Voice and tone', item2Sub: 'Direct, specific, grounded in the buyer context, never generic',
+  },
+];
+
 let seeded = false;
 
 export function seedSalesCms(): void {
@@ -73,4 +104,5 @@ export function seedSalesCms(): void {
   const store = useCmsStore.getState();
   store.registerCollection(snapshotDef, snapshotItems);
   store.registerCollection(stagesDef, stagesItems);
+  store.registerCollection(contextDef, contextItems);
 }

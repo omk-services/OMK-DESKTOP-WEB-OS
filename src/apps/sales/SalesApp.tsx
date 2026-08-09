@@ -218,32 +218,8 @@ const SCORES: DimensionScore[] = [
   { id: 'sc-close', label: 'Close', value: 5.6, outOf: 10, note: 'Hits the SOP move but softens the ask. Lock the slot in the room.', tone: 'danger' },
 ];
 
-const CONTEXT: ContextGroup[] = [
-  {
-    id: 'g-what',
-    eyebrow: 'What we sell',
-    items: [
-      { id: 'c-offer', title: 'The offer', subtitle: '30-day AI enablement program · $5k · 50% refund guarantee' },
-      { id: 'c-positioning', title: 'Positioning and objections', subtitle: 'The frame, every objection, and the proof points' },
-    ],
-  },
-  {
-    id: 'g-who',
-    eyebrow: 'To whom',
-    items: [
-      { id: 'c-icp', title: 'ICP, the buyer', subtitle: 'US SMB owner with AI FOMO, 1-25 employees, sweet spot 3 to 7' },
-      { id: 'c-disqual', title: 'Disqualification signals', subtitle: 'Sub-1k revenue, build-it-myself founder, or partner-held decision' },
-    ],
-  },
-  {
-    id: 'g-how',
-    eyebrow: 'How we sell',
-    items: [
-      { id: 'c-process', title: 'Sales process', subtitle: 'Stage by stage, from booking to close, with next-action rules' },
-      { id: 'c-voice', title: 'Voice and tone', subtitle: 'Direct, specific, grounded in the buyer context, never generic' },
-    ],
-  },
-];
+const CONTEXT: ContextGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
+void CONTEXT;
 
 const SKILLS: SkillRecord[] = [
   { id: 's-call', name: 'Call prep', description: 'Prepare a grounded brief for an upcoming call.', icon: Phone },
@@ -1069,6 +1045,14 @@ function TrendCard({ series }: { series: TrendSeries }): ReactElement {
 // ─── Section: Context ───
 
 function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+  // Read the formerly in-memory CONTEXT from the CMS store.
+  const contextItems = useCmsStore(s => s.items['sales_context']) ?? [];
+  void onSelect;
+  const txt = (item: CmsItem | undefined, key: string): string => {
+    if (!item) return '';
+    const v = item[key];
+    return typeof v === 'string' ? v : '';
+  };
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
       <PageHeader
@@ -1115,15 +1099,20 @@ function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
       </section>
 
       <div className="mt-8 space-y-8">
-        {CONTEXT.map((group) => (
+        {contextItems.map((group) => {
+          const docs = [
+            { id: `${group.id}-1`, title: txt(group, 'item1Title') || '—', subtitle: txt(group, 'item1Sub') || '' },
+            { id: `${group.id}-2`, title: txt(group, 'item2Title') || '—', subtitle: txt(group, 'item2Sub') || '' },
+          ];
+          return (
           <section key={group.id}>
-            <Eyebrow>{group.eyebrow}</Eyebrow>
+            <Eyebrow>{txt(group, 'eyebrow') || '—'}</Eyebrow>
             <ul className="mt-3 space-y-3">
-              {group.items.map((doc) => (
+              {docs.map((doc) => (
                 <li key={doc.id}>
                   <button
                     type="button"
-                    onClick={() => onSelect(docDetail(doc, doc.subtitle))}
+                    onClick={() => onSelect(docDetail({ id: doc.id, title: doc.title, subtitle: doc.subtitle }, doc.subtitle))}
                     className="group flex w-full items-center justify-between gap-3 rounded-2xl px-5 py-4 text-left"
                     style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
                   >
@@ -1155,7 +1144,8 @@ function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
               ))}
             </ul>
           </section>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
