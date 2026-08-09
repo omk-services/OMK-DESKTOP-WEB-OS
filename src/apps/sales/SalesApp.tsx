@@ -331,6 +331,7 @@ function Frame({ children, accent }: { children: React.ReactNode; accent?: 'ok' 
 // ─── Section: Today ───
 
 function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+  const addToast = useShellStore(s => s.addToast);
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
       <PageHeader
@@ -394,8 +395,18 @@ function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
           <ul className="mt-3 space-y-3">
             {CALENDAR.map((c) => (
               <li key={c.id} className="text-[12.5px]">
-                <div className="font-bold" style={{ color: 'var(--theme-text)' }}>{c.label}</div>
-                <div style={{ color: 'var(--theme-text-muted)' }}>{c.detail}</div>
+                <button
+                  type="button"
+                  onClick={() => addToast({
+                    source: 'Sales',
+                    type: 'info',
+                    message: `${c.label} — ${c.detail}`,
+                  })}
+                  className="text-left rounded-lg p-1.5 -m-1.5 transition-colors hover:bg-[var(--theme-surface-hover)]"
+                >
+                  <div className="font-bold" style={{ color: 'var(--theme-text)' }}>{c.label}</div>
+                  <div style={{ color: 'var(--theme-text-muted)' }}>{c.detail}</div>
+                </button>
               </li>
             ))}
           </ul>
