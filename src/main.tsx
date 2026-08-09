@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import './lib/app-discovery'; // side-effect: registers all apps before first render
+// (file extension is .tsx, resolved by Vite at build time)
 import { initObservability } from './lib/observability';
 import { initWindowOpenTracker } from './lib/windowOpenTracker';
 import { useTenantStore } from './stores/tenant.store';

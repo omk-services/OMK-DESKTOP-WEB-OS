@@ -1,6 +1,7 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, Shield, Wand2, Network } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, Shield, Wand2, Network, BrainCircuit } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 
@@ -56,3 +57,22 @@ registerApp({ id: 'design',      name: 'Design',                icon: Wand2,    
 // Accent `#0f766e` (teal plus fonce que `#0d9488` pris par Onboarding) pour
 // eviter la collision visuelle. Icon `Network` non encore utilise ailleurs.
 registerApp({ id: 'ontology',    name: 'Ontology',              icon: Network,         accent: '#0f766e', description: 'Registre des 12 entites metier',              component: OntologyApp });
+
+/** Cognition — STUB standalone. The full cognition layer (routines, manifest,
+ *  trust score) now lives inside Sales > Cognition (SovereignGate).
+ *  This placeholder keeps the /app/cognition URL from rendering the
+ *  "not registered" dead-end if someone opens it from a saved window. */
+function CognitionStub(): ReactNode {
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4 p-12 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[var(--canvas)] border border-[var(--panel-border)] flex items-center justify-center text-2xl">🧠</div>
+      <h3 className="text-lg font-bold text-[var(--theme-text)]">Cognition has moved</h3>
+      <p className="text-sm text-[var(--theme-text-muted)] max-w-md">
+        The cognition layer (routines, manifest, trust score, SovereignGate) now lives inside
+        <strong> Sales &gt; Cognition</strong> as a section of the editorial Pipeline. This standalone
+        window is a stub kept for navigation continuity.
+      </p>
+    </div>
+  );
+}
+registerApp({ id: 'cognition',  name: 'Cognition',              icon: BrainCircuit,    accent: '#7c3aed', description: 'SovereignGate — now inside Sales',             component: CognitionStub, hidden: true });
