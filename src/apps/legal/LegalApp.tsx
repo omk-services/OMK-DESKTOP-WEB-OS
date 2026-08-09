@@ -140,10 +140,10 @@ export function LegalApp() {
     <div className="p-7">
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-stone-900 font-outfit">AI-Act compliance</h2>
+          <h2 style={{color: 'var(--theme-text)'}} className="text-lg font-bold tracking-tight  font-outfit">AI-Act compliance</h2>
           <p
             className={`text-sm mt-0.5 inline-flex items-center gap-1.5 ${
-              overdue ? 'text-red-600 font-semibold' : 'text-stone-500'
+              overdue ? 'text-red-600 font-semibold' : ''
             }`}
           >
             {overdue && <AlertTriangle className="w-3.5 h-3.5" />}

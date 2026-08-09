@@ -1,13 +1,13 @@
 /** ThemedSectionHead — copy locale de `SectionHead` depuis `components/AppFrame.tsx`.
  *
  *  Meme raison que `src/apps/it-rd/ThemedSectionHead.tsx` : le `SectionHead`
- *  canonique utilise `text-stone-900` / `text-stone-500` (Tailwind fige),
+ *  canonique utilise `` / `` (Tailwind fige),
  *  invisibles sous les themes sombres.
  *
  *  Ontology n'a pas d'entree dans `CANONICAL_APP_THEMES`, elle herite du
  *  theme global. La QA signale le defaut sous `dark-oled` ; le meme
  *  probleme reapparait sous `aurora`, `cyberpunk`, `dark-oled` (tous
- *  sombres). Sous `warm-paper` (defaut clair) le `text-stone-900`
+ *  sombres). Sous `warm-paper` (defaut clair) le ``
  *  reste lisible, donc le remplacement par `var(--theme-text)` ne
  *  degrade aucun theme clair.
  *

@@ -52,7 +52,7 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700">
+            <h2 style={{color: 'var(--theme-text-muted)'}} className="text-sm font-bold uppercase tracking-wider">
               Knowledge sovereignty
             </h2>
           </div>
@@ -68,7 +68,7 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
               : 'not published'}
           </span>
         </div>
-        <p className="text-[13px] leading-relaxed text-stone-600">
+        <p style={{color: 'var(--theme-text-muted)'}} className="text-[13px] leading-relaxed">
           {data.manifest
             ? `Manifest v${data.manifest.graph_version} from scope "${data.manifest.source_scope ?? 'unknown'}" — gates open below the trust floor ${COGNITION_TRUST_FLOOR}.`
             : 'No manifest published yet. The SovereignGate stays locked until at least one routine + manifest ships to the cognition schema.'}
@@ -106,28 +106,28 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
 
       {/* Schema metadata */}
       <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <h2 style={{color: 'var(--theme-text-dim)'}} className="mb-3 text-[11px] font-bold uppercase tracking-wider">
           Schema metadata
         </h2>
         <dl className="divide-y divide-stone-100">
           <div className="py-2.5">
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Supabase schema</dt>
-            <dd className="mt-0.5 text-[12.5px] font-mono font-medium text-stone-800">cognition</dd>
+            <dt style={{color: 'var(--theme-text-dim)'}} className="text-[10px] font-bold uppercase tracking-wider">Supabase schema</dt>
+            <dd style={{color: 'var(--theme-text)'}} className="mt-0.5 text-[12.5px] font-mono font-medium">cognition</dd>
           </div>
           <div className="py-2.5">
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Org ID</dt>
-            <dd className="mt-0.5 break-all text-[12px] font-mono text-stone-700">{COGNITION_ORG_ID}</dd>
+            <dt style={{color: 'var(--theme-text-dim)'}} className="text-[10px] font-bold uppercase tracking-wider">Org ID</dt>
+            <dd style={{color: 'var(--theme-text-muted)'}} className="mt-0.5 break-all text-[12px] font-mono">{COGNITION_ORG_ID}</dd>
           </div>
           <div className="py-2.5">
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Live connection</dt>
-            <dd className="mt-0.5 text-[12.5px] font-medium text-stone-800">
+            <dt style={{color: 'var(--theme-text-dim)'}} className="text-[10px] font-bold uppercase tracking-wider">Live connection</dt>
+            <dd style={{color: 'var(--theme-text)'}} className="mt-0.5 text-[12.5px] font-medium">
               {supabaseConfigured ? 'Configured (Supabase env present)' : 'Offline — data shown is stub fallback'}
             </dd>
           </div>
           {data.manifest && (
             <div className="py-2.5">
-              <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Next review</dt>
-              <dd className="mt-0.5 text-[12.5px] font-medium text-stone-800">
+              <dt style={{color: 'var(--theme-text-dim)'}} className="text-[10px] font-bold uppercase tracking-wider">Next review</dt>
+              <dd style={{color: 'var(--theme-text)'}} className="mt-0.5 text-[12.5px] font-medium">
                 {data.manifest.next_review_at ?? '—'}
               </dd>
             </div>
@@ -138,13 +138,13 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
       {/* Routines list */}
       {data.routines.length > 0 ? (
         <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-stone-400">Routines</h2>
+          <h2 style={{color: 'var(--theme-text-dim)'}} className="mb-3 text-[11px] font-bold uppercase tracking-wider">Routines</h2>
           <ul className="divide-y divide-stone-100">
             {data.routines.map((r) => (
               <li key={r.id} className="flex items-center justify-between py-3">
                 <div>
-                  <div className="text-[13px] font-semibold text-stone-900">{r.name}</div>
-                  <div className="mt-0.5 text-[10px] font-mono uppercase tracking-wider text-stone-400">
+                  <div style={{color: 'var(--theme-text)'}} className="text-[13px] font-semibold">{r.name}</div>
+                  <div style={{color: 'var(--theme-text-dim)'}} className="mt-0.5 text-[10px] font-mono uppercase tracking-wider">
                     {r.cadence} · {r.time_of_day ?? 'unscheduled'}
                   </div>
                 </div>

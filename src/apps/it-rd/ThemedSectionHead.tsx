@@ -1,6 +1,6 @@
 /** ThemedSectionHead — copy locale de `SectionHead` depuis `components/AppFrame.tsx`.
  *
- *  Raison : le `SectionHead` canonique utilise `text-stone-900` / `text-stone-500`
+ *  Raison : le `SectionHead` canonique utilise `` / ``
  *  (Tailwind fige, warm-paper-only). Sous le theme cyberpunk (canonique pour
  *  it-rd) ces couleurs sont quasi invisibles : `stone-900 = #1c1917` sur le
  *  fond cyberpunk `bg = #0a0a14` donne un contraste de 1.18:1 (WCAG AAA

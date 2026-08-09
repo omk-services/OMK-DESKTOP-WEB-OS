@@ -40,7 +40,7 @@ export function ProgressRow({ label, value, hint, accent = 'var(--theme-accent)'
         <span className="text-sm font-medium text-[var(--theme-text)]">{label}</span>
         <span className="text-xs font-semibold text-[var(--theme-muted)] tabular-nums">{hint ?? `${v}%`}</span>
       </div>
-      <div className="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
+      <div style={{background: 'var(--theme-surface-hover)'}} className="h-2 w-full rounded-full  overflow-hidden">
         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${v}%`, background: accent }} />
       </div>
     </div>
@@ -74,7 +74,7 @@ export function KanbanCard({ title, meta, accent, onClick }: { title: string; me
       className={`w-full text-left bg-white rounded-lg border border-[var(--panel-border)] p-3 shadow-sm ${onClick ? 'hover:border-[var(--theme-accent)] hover:shadow-md transition-all cursor-pointer' : ''}`}
     >
       {accent && <span className="block w-8 h-1 rounded-full mb-2" style={{ background: accent }} />}
-      <div className="text-sm font-semibold text-stone-800 leading-snug">{title}</div>
+      <div style={{color: 'var(--theme-text)'}} className="text-sm font-semibold  leading-snug">{title}</div>
       {meta && <div className="text-xs text-[var(--theme-text-dim)] mt-1">{meta}</div>}
     </Comp>
   );
@@ -95,7 +95,7 @@ export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.
             <tr
               key={i}
               onClick={onRowClick ? () => onRowClick(i) : undefined}
-              className={`border-t border-[var(--hairline)] hover:bg-stone-50 ${onRowClick ? 'cursor-pointer' : ''}`}
+              className={`border-t border-[var(--hairline)] hover: ${onRowClick ? 'cursor-pointer' : ''}`}
             >
               {r.map((cell, j) => <td key={j} className="px-4 py-3 text-[var(--theme-text)]">{cell}</td>)}
             </tr>
@@ -112,8 +112,8 @@ export function FunnelStep({ label, value, pct, accent = 'var(--theme-accent)' }
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-28 text-sm font-medium text-stone-600 shrink-0">{label}</div>
-      <div className="flex-1 h-9 rounded-lg bg-stone-100 overflow-hidden relative">
+      <div style={{color: 'var(--theme-text-muted)'}} className="w-28 text-sm font-medium  shrink-0">{label}</div>
+      <div style={{background: 'var(--theme-surface-hover)'}} className="flex-1 h-9 rounded-lg  overflow-hidden relative">
         <div className="h-full rounded-lg flex items-center px-3 text-xs font-bold text-white transition-all duration-500"
           style={{ width: `${Math.max(12, pct)}%`, background: accent }}>
           {value}
