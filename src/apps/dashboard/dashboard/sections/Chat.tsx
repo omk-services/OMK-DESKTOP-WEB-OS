@@ -25,7 +25,7 @@ export function Chat() {
   const clearDraft = (): void => setDraft('');
 
   return (
-    <div className="grid h-full min-h-[520px] grid-cols-1 gap-4 p-7 lg:grid-cols-[260px_1fr]">
+    <div className="grid h-full min-h-0 grid-cols-1 gap-4 p-7 lg:grid-cols-[260px_1fr]">
       {/* Left rail — agents */}
       <Panel pad="p-4" className="flex flex-col gap-3">
         <SectionTitle eyebrow="Choisis" title="Un agent" />
@@ -71,7 +71,7 @@ export function Chat() {
       </Panel>
 
       {/* Right pane — thread */}
-      <Panel pad="p-0" className="flex flex-col overflow-hidden">
+      <Panel pad="p-0" className="flex h-full min-h-0 flex-col overflow-hidden">
         {active ? (
           <>
             <div
@@ -97,7 +97,7 @@ export function Chat() {
               <Pill tone="info">session live</Pill>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5 py-5 custom-scrollbar" style={{ minHeight: 280 }}>
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 custom-scrollbar">
               {messages.length === 0 ? (
                 <EmptyThread agent={active.name} />
               ) : (
