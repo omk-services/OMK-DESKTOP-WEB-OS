@@ -36,11 +36,12 @@ import {
   fetchEventCount, fetchEventTypeCounts, fetchLatestManifest, fetchRoutines,
   type EventTypeCount, type Manifest, type Routine,
 } from '../../lib/cognition/queries';
+import { useCmsStore } from '../../lib/cms/cms.store';
+import type { CmsItem } from '../../lib/cms/types';
 import { SalesDetailPage, type DetailItem } from './SalesDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SalesItemDetail } from './SalesItemDetail';
 import { seedSalesCms } from './seed';
-import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { KanbanBoard } from '../_ui/widgets';
 
@@ -121,14 +122,10 @@ const CALENDAR: CalendarRecord[] = [
   { id: 'cal-booked', label: 'Booked ahead · 07-04', detail: 'Tim De La Salle onboarding follow-up.' },
 ];
 
-const SNAPSHOT: SnapshotStat[] = [
-  { id: 's-pipeline', label: 'Pipeline value', value: '$486k', sub: '54 open deals', accent: 'ok' },
-  { id: 's-won', label: 'Won this quarter', value: '$612k', sub: '31 deals closed', accent: 'ok' },
-  { id: 's-winrate', label: 'Win rate', value: '36%', sub: 'of qualified meetings', accent: 'accent' },
-  { id: 's-avg', label: 'Avg deal size', value: '$6.4k', sub: '$4k floor, $10k ceiling', accent: 'neutral' },
-  { id: 's-meet', label: 'Meetings / week', value: '44', sub: '+22% on last week', accent: 'ok' },
-  { id: 's-rep', label: 'Rep score', value: '7.5', sub: 'demo strong, close the gap', accent: 'danger' },
-];
+// SNAPSHOT + STAGES data now live in src/apps/sales/seed.ts as CMS collections
+// (`sales_snapshot`, `sales_stages`). The local arrays are kept as
+// type-only stubs so the legacy `SnapshotStat` / `DealStage` types remain
+// imported — they will be removed once the remaining call sites migrate.
 
 /** Une carte du Snapshot. Le chiffre doit rester grand — c'est la signature de la
  *  reference — mais 40px fixes debordaient : « $486k » etait coupe net par le
@@ -165,13 +162,8 @@ function SnapshotCard({ stat }: { stat: SnapshotStat }) {
   );
 }
 
-const STAGES: DealStage[] = [
-  { id: 'st-meeting', label: 'Meeting booked', count: 24, weighted: '$152k weighted', tone: 'accent' },
-  { id: 'st-qualified', label: 'Next call, qualified', count: 18, weighted: '$118k weighted', tone: 'warn' },
-  { id: 'st-proposal', label: 'Proposal sent', count: 12, weighted: '$96k weighted', tone: 'accent' },
-  { id: 'st-won', label: 'Won, this quarter', count: 31, weighted: '$612k closed', tone: 'ok' },
-  { id: 'st-lost', label: 'Lost or cold', count: 19, weighted: 're-engagement targets', tone: 'danger' },
-];
+const STAGES: DealStage[] = [];
+void STAGES;
 
 const TRENDS: TrendSeries[] = [
   {
@@ -750,6 +742,21 @@ function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title
 
 function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   void onSelect; // PipelinePanel currently exposes data only — no per-item detail
+  // Read the formerly in-memory SNAPSHOT + STAGES from the CMS store.
+  // Falls back to empty arrays if the collection isn't registered yet
+  // (HMR can mount before the global seed runs).
+  const snapshotItems = useCmsStore(s => s.items['sales_snapshot']) ?? [];
+  const stageItems = useCmsStore(s => s.items['sales_stages']) ?? [];
+  const txt = (item: CmsItem | undefined, key: string): string => {
+    if (!item) return '';
+    const v = item[key];
+    return typeof v === 'string' ? v : '';
+  };
+  const num = (item: CmsItem | undefined, key: string): number => {
+    if (!item) return 0;
+    const v = item[key];
+    return typeof v === 'number' ? v : 0;
+  };
   return (
     <div className="mx-auto w-full max-w-[1180px] px-8 py-8" style={{ fontFamily: FONT_BODY }}>
       <PageHeader
@@ -796,13 +803,32 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {SNAPSHOT.slice(0, 5).map((s) => (
-            <SnapshotCard key={s.id} stat={s} />
+          {snapshotItems.slice(0, 5).map((it) => (
+            <SnapshotCard
+              key={it.id}
+              stat={{
+                id: String(it.id),
+                label: txt(it, 'label') || '—',
+                value: txt(it, 'value') || '—',
+                sub: txt(it, 'sub'),
+                accent: (txt(it, 'accent') || 'ok') as SnapshotStat['accent'],
+              }}
+            />
           ))}
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <SnapshotCard stat={SNAPSHOT[5]} />
+          {snapshotItems[5] ? (
+            <SnapshotCard
+              stat={{
+                id: String(snapshotItems[5].id),
+                label: txt(snapshotItems[5], 'label') || '—',
+                value: txt(snapshotItems[5], 'value') || '—',
+                sub: txt(snapshotItems[5], 'sub'),
+                accent: (txt(snapshotItems[5], 'accent') || 'ok') as SnapshotStat['accent'],
+              }}
+            />
+          ) : null}
         </div>
       </section>
 
@@ -830,9 +856,11 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
           style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)' }}
         >
           <ul>
-            {STAGES.map((stage, i) => (
+            {stageItems.map((it, i) => {
+              const stageTone = txt(it, 'tone') || 'accent';
+              return (
               <li
-                key={stage.id}
+                key={it.id}
                 className="flex items-center justify-between gap-4 px-5 py-4"
                 style={{ borderTop: i === 0 ? 'none' : '1px solid var(--panel-border-subtle)' }}
               >
@@ -841,19 +869,19 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                     className="rounded-md px-2.5 py-1 text-[11px] font-bold"
                     style={{
                       background:
-                        stage.tone === 'ok'
+                        stageTone === 'ok'
                           ? 'rgba(21,128,61,0.10)'
-                          : stage.tone === 'warn'
+                          : stageTone === 'warn'
                             ? 'rgba(180,83,9,0.10)'
-                            : stage.tone === 'danger'
+                            : stageTone === 'danger'
                               ? 'rgba(185,28,28,0.10)'
                               : 'rgba(234,88,12,0.10)',
                       color:
-                        stage.tone === 'ok' ? WIN : stage.tone === 'warn' ? RELANCE : stage.tone === 'danger' ? LOSE : ACCENT,
+                        stageTone === 'ok' ? WIN : stageTone === 'warn' ? RELANCE : stageTone === 'danger' ? LOSE : ACCENT,
                       border: '1px solid var(--panel-border)',
                     }}
                   >
-                    {stage.label}
+                    {txt(it, 'label') || '—'}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-3 text-right">
@@ -861,7 +889,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                     className="text-[18px] font-extrabold tabular-nums"
                     style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                   >
-                    {stage.count}
+                    {num(it, 'count')}
                   </span>
                   <span className="text-[10.5px] font-bold uppercase" style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}>
                     deals
@@ -870,11 +898,12 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                     className="ml-4 w-40 text-right text-[12.5px]"
                     style={{ color: 'var(--theme-text-muted)' }}
                   >
-                    {stage.weighted}
+                    {txt(it, 'weighted') || '—'}
                   </span>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </article>
       </section>
