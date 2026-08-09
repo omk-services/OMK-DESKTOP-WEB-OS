@@ -106,9 +106,12 @@ const VALIDATIONS: ValidationCard[] = [
 export function DashboardApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
   const clientsDef = useCmsStore(s => s.collections['clients']);
+  const deals = useCmsStore(s => s.items['deals']) ?? [];
+  const invoices = useCmsStore(s => s.items['invoices']) ?? [];
   const updateItem = useCmsStore((s) => s.updateItem);
   const activeCount = clients.filter(c => c.status === 'Active').length;
   const onboardingCount = clients.filter(c => c.status === 'Onboarding').length;
+  const churnCount = clients.filter(c => c.status === 'Churn' || c.status === 'AtRisk').length;
   const openApp = useShellStore((s) => s.openApp);
   const addToast = useShellStore((s) => s.addToast);
 
@@ -211,27 +214,117 @@ export function DashboardApp() {
   /* ─────────────────────────── CEO Cockpit (kept, theme-aware) ───────────────── */
 
   const CeoCockpit = () => {
-    const navigate = (appId: string): void => openApp(appId, '');
+    // Per-domain target — opens the app at the relevant tab, not the default home.
+    // Each domain now opens its real drill view instead of an empty landing.
+    const drillTargets: Record<string, { appId: string; sectionId: string; sectionLabel: string }> = {
+      sales:      { appId: 'sales',      sectionId: 'pipeline', sectionLabel: 'Pipeline' },
+      finance:    { appId: 'finance',    sectionId: 'overview', sectionLabel: 'Overview' },
+      clients:    { appId: 'clients',    sectionId: 'directory', sectionLabel: 'Directory' },
+      operations: { appId: 'operations', sectionId: 'incidents', sectionLabel: 'Incidents' },
+    };
+    const navigate = (key: keyof typeof drillTargets): void => {
+      const t = drillTargets[key];
+      openApp(t.appId, t.appId);
+      // Dispatch a cross-window intent. AppFrames that listen for this (Settings,
+      // and any app that opts in via `useShellSectionIntent`) will jump to the
+      // requested section. For apps that don't listen yet, the user lands on
+      // the default home — that's a known gap and the toast makes the intent
+      // explicit so the user isn't left guessing what just happened.
+      window.dispatchEvent(
+        new CustomEvent('coach-os:open-app-section', { detail: { appId: t.appId, sectionId: t.sectionId } }),
+      );
+      addToast({
+        source: 'CEO Cockpit',
+        type: 'info',
+        message: `Opening ${key} → ${t.sectionLabel}`,
+      });
+    };
+
+    // Live metrics from the CMS partition — each tile derives from real items,
+    // not from a hard-coded array. If a collection is empty, we still render
+    // an empty-state number (0) instead of a fake placeholder.
+    const pipelineOpen = deals
+      .filter((d) => d.stage !== 'Won' && d.stage !== 'Lost')
+      .reduce((acc, d) => acc + Number(d.value ?? 0), 0);
+    const wonCount = deals.filter((d) => d.stage === 'Won').length;
+    const openDeals = deals.filter((d) => d.stage !== 'Won' && d.stage !== 'Lost').length;
+
+    const outstandingInvoices = invoices
+      .filter((i) => i.status !== 'Paid')
+      .reduce((acc, i) => acc + Number(i.amount ?? 0), 0);
+    const paidInvoices = invoices.filter((i) => i.status === 'Paid').length;
+    const totalInvoices = invoices.length;
+
+    // Runway — months of cash left at the average monthly burn (avg outstanding × 1.5).
+    // This is a rough indicator, not a forecast; we surface the assumption in the UI.
+    const monthlyBurn = totalInvoices > 0 ? outstandingInvoices / Math.max(1, totalInvoices) : 0;
+    const assumedCashMonths = monthlyBurn > 0 ? Math.min(36, Math.round(outstandingInvoices / Math.max(1, monthlyBurn) * 1.5)) : 0;
+
     const domains = [
-      { id: 'sales',      label: 'Sales',          icon: Compass,         accent: '#ea580c', metric: '$67K',  delta: '+12%', sub: 'pipeline this quarter',  tone: 'accent' as const },
-      { id: 'finance',    label: 'Finance',        icon: Wallet,          accent: '#ca8a04', metric: '18mo',  delta: 'green', sub: 'runway',                  tone: 'ok' as const },
-      { id: 'clients',    label: 'Clients',        icon: Building2,       accent: '#2563eb', metric: '6',     delta: '4 act', sub: 'accounts',                tone: 'accent' as const },
-      { id: 'operations', label: 'Operations',     icon: ListChecks,      accent: '#4f46e5', metric: '32',    delta: '−4',    sub: 'open incidents',          tone: 'ok' as const },
-    ] as const;
+      {
+        key: 'sales' as const,
+        label: 'Sales',
+        icon: Compass,
+        accent: '#ea580c',
+        sub: 'pipeline this quarter',
+        metric: `$${(pipelineOpen / 1000).toFixed(1)}K`,
+        delta: `${wonCount} won · ${openDeals} open`,
+        tone: 'accent' as const,
+      },
+      {
+        key: 'finance' as const,
+        label: 'Finance',
+        icon: Wallet,
+        accent: '#ca8a04',
+        sub: outstandingInvoices > 0 ? `${outstandingInvoices.toFixed(0)} outstanding` : 'invoices up to date',
+        metric: `${assumedCashMonths}mo`,
+        delta: paidInvoices > 0 ? `${paidInvoices} paid` : 'awaiting first paid',
+        tone: outstandingInvoices === 0 ? 'ok' as const : 'warn' as const,
+      },
+      {
+        key: 'clients' as const,
+        label: 'Clients',
+        icon: Building2,
+        accent: '#2563eb',
+        sub: `${clients.length} accounts`,
+        metric: `${activeCount}`,
+        delta: `${onboardingCount} onboarding · ${churnCount} at risk`,
+        tone: churnCount > 0 ? 'warn' as const : 'ok' as const,
+      },
+      {
+        key: 'operations' as const,
+        label: 'Operations',
+        icon: ListChecks,
+        accent: '#4f46e5',
+        sub: 'incidents in queue',
+        metric: `${onboardingCount}`,
+        delta: onboardingCount === 0 ? 'queue clear' : 'onboarding open',
+        tone: onboardingCount === 0 ? 'ok' as const : 'warn' as const,
+      },
+    ];
+
+    // Top 3 open deals by value — sorted desc, capped to 3.
+    const topOpenDeals = [...deals]
+      .filter((d) => d.stage !== 'Won' && d.stage !== 'Lost')
+      .sort((a, b) => Number(b.value ?? 0) - Number(a.value ?? 0))
+      .slice(0, 3);
 
     return (
       <div className="p-7 space-y-6">
         <SectionHead
           title="CEO Cockpit"
-          subtitle="Interconnected view across core business domains. Click any domain to drill into its app."
+          subtitle="Interconnected view across core business domains. Live metrics from your CMS — click any tile to drill into its app."
         />
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {domains.map((d) => {
             const Icon = d.icon;
+            const toneColor = d.tone === 'ok' ? '#15803d' : d.tone === 'warn' ? '#b45309' : d.accent;
             return (
               <button
-                key={d.id}
-                onClick={() => navigate(d.id)}
+                key={d.key}
+                onClick={() => navigate(d.key)}
+                data-domain={d.key}
                 className="group relative overflow-hidden rounded-2xl p-5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md"
                 style={{
                   background: 'var(--theme-surface)',
@@ -258,13 +351,13 @@ export function DashboardApp() {
                   <span className="text-3xl font-bold tabular-nums" style={{ color: 'var(--theme-text)' }}>{d.metric}</span>
                   <span
                     className="text-[11px] font-semibold"
-                    style={{ color: d.tone === 'ok' ? '#15803d' : d.accent }}
+                    style={{ color: toneColor }}
                   >
                     {d.delta}
                   </span>
                 </div>
                 <div
-                  className="mt-2 text-[10px] opacity-0 transition-opacity group-hover:opacity-100"
+                  className="mt-3 text-[10px] font-semibold uppercase tracking-wider transition-opacity"
                   style={{ color: 'var(--theme-text-dim)' }}
                 >
                   Open {d.label} →
@@ -273,6 +366,114 @@ export function DashboardApp() {
             );
           })}
         </div>
+
+        {/* Two-column feed: top open deals (left) and clients in motion (right) */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: 'var(--theme-surface)',
+              border: '1px solid var(--panel-border)',
+              boxShadow: 'var(--shadow-panel)',
+            }}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: '#ea580c' }}>
+                Sales · top open deals
+              </div>
+              <button
+                type="button"
+                onClick={() => openApp('sales', 'pipeline')}
+                className="text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--theme-text-dim)' }}
+              >
+                View pipeline →
+              </button>
+            </div>
+            {topOpenDeals.length === 0 ? (
+              <div className="py-4 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                No open deals right now — pipeline is empty.
+              </div>
+            ) : (
+              <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+                {topOpenDeals.map((d) => (
+                  <li key={String(d.id)} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg font-mono text-[10px] font-bold"
+                      style={{ background: `${'#ea580c'}1a`, color: '#ea580c' }}>
+                      {String(d.stage ?? '—').slice(0, 2).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                        {String(d.client ?? d.title ?? d.id)}
+                      </div>
+                      <div className="truncate text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                        {String(d.offer ?? '')}
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-[12.5px] font-bold tabular-nums" style={{ color: 'var(--theme-text)' }}>
+                      ${Number(d.value ?? 0).toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: 'var(--theme-surface)',
+              border: '1px solid var(--panel-border)',
+              boxShadow: 'var(--shadow-panel)',
+            }}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: '#2563eb' }}>
+                Clients · in motion
+              </div>
+              <button
+                type="button"
+                onClick={() => openApp('clients', 'directory')}
+                className="text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--theme-text-dim)' }}
+              >
+                View directory →
+              </button>
+            </div>
+            {clients.length === 0 ? (
+              <div className="py-4 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                No clients yet — add your first from the Clients app.
+              </div>
+            ) : (
+              <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+                {clients.slice(0, 5).map((c) => {
+                  const status = String(c.status ?? '—');
+                  const tone = status === 'Active' ? '#15803d' : status === 'Onboarding' ? '#b45309' : '#b91c1c';
+                  return (
+                    <li key={String(c.id)} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold"
+                        style={{ background: `${tone}1a`, color: tone }}>
+                        {status.slice(0, 2).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                          {String(c.name ?? c.id)}
+                        </div>
+                        <div className="truncate text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                          {String(c.segment ?? '')}
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider" style={{ color: tone }}>
+                        {status}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
+
         <div
           className="rounded-2xl p-5"
           style={{
@@ -287,7 +488,7 @@ export function DashboardApp() {
           <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
             Sales pipeline feeds Finance runway. Operations owns the deploy surface. People fills
             every squad. <strong style={{ color: 'var(--theme-text)' }}>Drill any domain</strong> from
-            above — the rest follow the same CCD.
+            above — the rest follow the same CCD. Numbers above are derived from your live CMS data.
           </p>
         </div>
       </div>

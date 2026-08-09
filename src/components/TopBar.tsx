@@ -26,6 +26,7 @@ export function TopBar() {
   const notificationCount = useShellStore((s) => s.notificationCount);
   const clearNotifications = useShellStore((s) => s.clearNotifications);
   const openApp = useShellStore((s) => s.openApp);
+  const addToast = useShellStore((s) => s.addToast);
   const userHidden = useAppVisibility((s) => s.hidden);
   const toggleAppVisibility = useAppVisibility((s) => s.toggle);
   const resetAppVisibility = useAppVisibility((s) => s.reset);
@@ -117,7 +118,21 @@ export function TopBar() {
                 <Sparkles className="w-3.5 h-3.5" /> AI preferences
               </button>
               <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />
-              <button onClick={() => { console.info('[Coach OS] Sign out clicked (stub)'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text-muted)' }}>
+              <button
+                onClick={() => {
+                  // Sign-out is still a no-op (no auth yet), but at least
+                  // surface a toast and a hint so the click is observable.
+                  // Replace the stub with the real auth flow when the
+                  // Supabase session lands.
+                  addToast({
+                    source: 'Profile',
+                    type: 'info',
+                    message: 'Sign-out arrive avec l\'authentification Supabase — la session actuelle reste valide.',
+                  });
+                }}
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
+                style={{ color: 'var(--theme-text-muted)' }}
+              >
                 <LogOut className="w-3.5 h-3.5" /> Sign out
               </button>
             </TopBarMenu>
