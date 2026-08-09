@@ -156,6 +156,31 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sectionIntent, windowId]);
 
+  // Cross-window section intent: when another app (e.g. CEO Cockpit in
+  // Dashboard) dispatches `coach-os:open-app-section`, this AppFrame matches
+  // the requested `sectionId` against its own `sections` and navigates if
+  // found. The filter is implicit — the dispatch happens on `window`, every
+  // AppFrame receives it, but only the one whose sections list contains the
+  // requested id actually moves. We don't gate on appId here because the
+  // dispatch is global and the AppFrame that owns the relevant sections is
+  // the one that should react; matching by id is enough.
+  useEffect(() => {
+    const handler = (e: Event): void => {
+      const detail = (e as CustomEvent<{ appId?: string; sectionId?: string }>).detail;
+      if (!detail || !detail.sectionId) return;
+      // The intent only targets the right app — but AppFrame can't know its
+      // own appId portably (it relies on `title` slugging). The dashboard's
+      // CEO Cockpit always knows the right target appId, so we filter on it
+      // here too: skip events that name a different app.
+      if (detail.appId && windowId && detail.appId !== windowId) return;
+      const match = sections.find((s) => s.id === detail.sectionId);
+      if (match) navigateToSection(match.id);
+    };
+    window.addEventListener('coach-os:open-app-section', handler);
+    return () => window.removeEventListener('coach-os:open-app-section', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections, windowId]);
+
   /* Watch this window's own content width — collapse the sidebar when the
      window is resized down to mobile-ish width, independent of the other windows. */
   useEffect(() => {
