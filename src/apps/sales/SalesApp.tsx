@@ -991,6 +991,9 @@ function TrendCard({ series }: { series: TrendSeries }): ReactElement {
 function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
   // Read the formerly in-memory CONTEXT from the CMS store.
   const contextItems = useCmsStore(s => s.items['sales_context']) ?? [];
+  // Chaque group porte 2 items (item1Title / item2Title). On derive le count
+  // pour ne pas mentir sur le nombre de documents affichés plus bas.
+  const livingDocs = contextItems.reduce((sum, g) => sum + (g.item1Title ? 1 : 0) + (g.item2Title ? 1 : 0), 0);
   void onSelect;
   const txt = (item: CmsItem | undefined, key: string): string => {
     if (!item) return '';
@@ -1003,7 +1006,7 @@ function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
         eyebrow="Sales OS · live operating layer · Context"
         title="Sales OS"
         subtitle="Everything the OS knows about what we sell and to whom, kept as one folder of living documents."
-        meta={{ label: 'Source', value: 'The single-source brief', sub: '7 living documents · source of truth' }}
+        meta={{ label: 'Source', value: 'The single-source brief', sub: `${livingDocs} living document${livingDocs === 1 ? '' : 's'} · source of truth` }}
       />
 
       <div className="mt-8 flex items-center gap-1.5">
