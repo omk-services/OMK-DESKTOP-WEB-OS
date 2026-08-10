@@ -42,8 +42,11 @@ function Funnel() {
           style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
         >
           <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-            No funnel data yet — register the <code>growth_channels</code> collection
-            and the deals will flow in.
+            No funnel data yet — register a channel in the Channels section, or close a Won deal in Sales,
+            and the funnel will fill in.
+          </p>
+          <p className="mt-2 text-xs" style={{ color: 'var(--theme-text-dim)' }}>
+            Until then, leads stay at 0 and conversion stays at —.
           </p>
         </div>
       </div>

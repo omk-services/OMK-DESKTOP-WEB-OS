@@ -55,11 +55,17 @@ export function ClientsApp() {
       addToast({ source: 'Clients', type: 'warning', message: 'Client name is required.' });
       return;
     }
+    // Ticket must be a positive number — refuse silently-defaulting values so
+    // a coach can't create a row with an unknown monthly value.
     const ticket = Number(composerTicket);
+    if (!Number.isFinite(ticket) || ticket <= 0) {
+      addToast({ source: 'Clients', type: 'warning', message: 'Monthly ticket must be a positive number.' });
+      return;
+    }
     const result = addItem('clients', {
       name,
       segment: composerSegment.trim() || 'Citadelle — high ticket',
-      ticket: Number.isFinite(ticket) && ticket > 0 ? ticket : 1000,
+      ticket,
       openThreads: 0,
       nextSession: 'Not scheduled',
       health: 100,
