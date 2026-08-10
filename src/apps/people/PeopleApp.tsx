@@ -12,9 +12,9 @@
  *  2-level subpage nav: section (left sidebar) → item detail (drill via CMS). */
 import { useEffect, useState } from 'react';
 import {
-  Users, Bot, Heart, Cpu, FileText, Calendar, Clock, Zap,
+  Users, Bot, Heart, Cpu, FileText, Calendar, Zap,
   Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
-  UserSearch, Brain, BookMarked, ShieldCheck, AlertTriangle,
+  UserSearch, Brain, BookMarked,
   ListChecks,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
@@ -22,7 +22,6 @@ import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { PeopleItemDetail } from './PeopleItemDetail';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -36,11 +35,9 @@ import { launchTour, TOUR_IDS } from '../../lib/tours';
 import { PeopleDetailPage, type PeopleDetailItem } from './PeopleDetailPage';
 import {
   FLEET_AGENTS, STATE_META, type FleetAgent,
-  CONTENT_DOCS,
   DAYS, HOURS, SCHEDULE_GRID, SCHEDULE_TASKS, type ScheduleTask,
 } from './fleet';
 import { seedPeopleCms } from './seed';
-import type { CmsItem } from '../../lib/cms/types';
 
 seedPeopleCms();
 
@@ -599,73 +596,16 @@ function Fleet() {
 }
 
 function Content() {
-  const [filter, setFilter] = useState<'all' | 'orchestrator' | 'scout' | 'scribe' | 'reach' | 'dev'>('all');
-  const docs = filter === 'all' ? CONTENT_DOCS : CONTENT_DOCS.filter(d => d.agentKey === filter);
-  const filters: { id: typeof filter; label: string }[] = [
-    { id: 'all', label: 'All' },
-    { id: 'orchestrator', label: 'Orchestrator' },
-    { id: 'scout', label: 'Scout' },
-    { id: 'scribe', label: 'Scribe' },
-    { id: 'reach', label: 'Reach' },
-    { id: 'dev', label: 'Dev' },
-  ];
+  const contentDrill = useCollectionDrill('content', 'Content');
+  const contentCount = useCmsStore((s) => s.items['content']?.length ?? 0);
   return (
-    <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+    <div className="p-7">
       <SectionHead
         title="Content library"
         subtitle="Per-agent docs · versioned by date"
-        action={
-          <div className="flex items-center gap-1.5">
-            {filters.map(f => (
-              <button
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold transition-all ${
-                  filter === f.id ? 'text-[color:#fff]' : 'text-[var(--theme-text-muted)] hover:bg-[var(--panel-border-subtle)]'
-                }`}
-                style={filter === f.id ? { background: ACCENT } : undefined}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        }
+        action={<Badge tone="accent">{contentCount} pieces</Badge>}
       />
-      <div className="flex flex-col gap-2.5">
-        {docs.map(d => {
-          const agent = FLEET_AGENTS.find(a => a.code.toLowerCase() === 'a-' + (d.agentKey === 'orchestrator' ? '00' : d.agentKey === 'scribe' ? '02' : d.agentKey === 'reach' ? '03' : d.agentKey === 'dev' ? '04' : '01') || a.role.toLowerCase().includes(d.agentKey));
-          return (
-            <div key={d.id} className="bg-[var(--panel-solid)] rounded-xl border border-[var(--panel-border)] shadow-sm p-4 hover:border-[var(--theme-accent)] transition-colors">
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-[10px] tracking-wider text-[color:#fff] shrink-0"
-                  style={{ background: agent?.accent ?? 'var(--theme-text-dim)' }}
-                >
-                  {agent?.initials ?? '?'}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13.5px] font-bold text-[var(--theme-text)] truncate">{d.title}</span>
-                    <div className="flex items-center gap-1 ml-auto">
-                      {d.tags.map(t => (
-                        <span key={t} className="text-[9.5px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--panel-border-subtle)] text-[var(--theme-text-muted)]">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="text-[10.5px] font-mono text-[var(--theme-text-dim)] mt-0.5">{d.filename}</div>
-                  <p className="text-[12px] text-[var(--theme-text-muted)] leading-snug mt-2 line-clamp-2">{d.excerpt}</p>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-[var(--theme-text-dim)] mt-2">
-                    <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {new Date(d.modifiedAt).toLocaleDateString()}</span>
-                    <span>·</span>
-                    <span>{d.size} bytes</span>
-                    <span className="ml-auto">by <span className="text-[var(--theme-text-muted)] font-semibold">{agent?.name ?? d.agentKey}</span></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <CollectionRepeater collectionId="content" onOpen={contentDrill.open} />
     </div>
   );
 }
@@ -819,11 +759,13 @@ export function PeopleApp() {
   const personasDrill = useCollectionDrill('personas', 'Personas');
   const memoryDrill = useCollectionDrill('memory', 'Mémoire');
   const codexDrill = useCollectionDrill('codex', 'Codex');
+  const contentDrill = useCollectionDrill('content', 'Content');
   const teamCount = useCmsStore(s => s.items['team']?.length ?? 0);
   const agentsCount = useCmsStore(s => s.items['people_agents']?.length ?? 0);
   const personasCount = useCmsStore(s => s.items['personas']?.length ?? 0);
   const memoryCount = useCmsStore(s => s.items['memory']?.length ?? 0);
   const codexCount = useCmsStore(s => s.items['codex']?.length ?? 0);
+  const contentCount = useCmsStore(s => s.items['content']?.length ?? 0);
   const [detail, setDetail] = useState<PeopleDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -853,25 +795,6 @@ export function PeopleApp() {
     );
   };
 
-  /* Cyan accent for the 3 depth sections (per the brief). Mirrors the
-   * AppDetailOverlay accent and the load-bar mid range in Fleet cards. */
-  const DEPTH_ACCENT = '#0891b2';
-
-  const ANCHOR_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
-    entretien: 'accent',
-    appel:     'accent',
-    atelier:   'accent',
-    ticket:    'neutral',
-    informel:  'warn',
-    'no-anchor': 'danger',
-  };
-
-  const VERIFY_TONE: Record<string, 'ok' | 'warn' | 'danger'> = {
-    confirmed:    'ok',
-    contradicted: 'danger',
-    'to-verify':  'warn',
-  };
-
   const Personas = () => {
     return (
       <div className="p-7">
@@ -880,28 +803,7 @@ export function PeopleApp() {
           subtitle="Premier-class profiles drawn from real sources. The anchor makes the difference — a persona without one is an invention."
           action={<Badge tone="accent">{personasCount} profiles</Badge>}
         />
-        <CMSCardList<CmsItem>
-          collectionId="personas"
-          onOpen={personasDrill.open}
-          cols={2}
-          render={(p) => {
-            const anchorKind = String(p.anchorKind ?? '—');
-            const domain = String(p.domain ?? '');
-            const wants = String(p.wants ?? '');
-            return {
-              title: String(p.name ?? '—'),
-              subtitle: `${String(p.role ?? '')}${domain ? ' · ' + domain : ''}`,
-              description: wants.split(/(?<=\.)/)[0]?.trim() ?? wants,
-              statusLabel: anchorKind,
-              statusTone: ANCHOR_TONE[anchorKind] ?? 'neutral',
-              accent: DEPTH_ACCENT,
-              icon: <UserSearch className="w-5 h-5" />,
-              metricLabel: 'anchored',
-              metricValue: String(p.anchorDate ?? '—'),
-              meta: p.anchor ? `${String(p.anchor).split(/[.·]/)[0].trim().slice(0, 48)}…` : 'no anchor — invention',
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="personas" onOpen={personasDrill.open} />
       </div>
     );
   };
@@ -914,32 +816,7 @@ export function PeopleApp() {
           subtitle="Curated organisational memory. Raw memory is a dump — what matters here is what has been checked."
           action={<Badge tone="accent">{memoryCount} facts</Badge>}
         />
-        <CMSCardList<CmsItem>
-          collectionId="memory"
-          onOpen={memoryDrill.open}
-          cols={2}
-          render={(m) => {
-            const verification = String(m.verification ?? '');
-            const provenance = String(m.provenance ?? '');
-            const fact = String(m.fact ?? '');
-            return {
-              title: fact.split(/(?<=\.)/)[0]?.trim() ?? fact,
-              subtitle: provenance,
-              description: fact.split(/(?<=\.)/)[1]?.trim() ?? fact,
-              statusLabel: verification,
-              statusTone: VERIFY_TONE[verification] ?? 'neutral',
-              accent: verification === 'contradicted' ? '#dc2626'
-                    : verification === 'to-verify'  ? '#f59e0b'
-                    : '#16a34a',
-              icon: verification === 'contradicted' ? <AlertTriangle className="w-5 h-5" />
-                    : verification === 'to-verify'  ? <ShieldCheck className="w-5 h-5" />
-                    : <Brain className="w-5 h-5" />,
-              metricLabel: 'retained',
-              metricValue: String(m.retainedOn ?? '—'),
-              meta: m.recheckOn ? `re-check ${m.recheckOn}` : '',
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="memory" onOpen={memoryDrill.open} />
       </div>
     );
   };
@@ -952,28 +829,7 @@ export function PeopleApp() {
           subtitle="Patterns that have proven themselves. A success repeated once is an anecdote; a method is a success repeated enough."
           action={<Badge tone="accent">{codexCount} patterns</Badge>}
         />
-        <CMSCardList<CmsItem>
-          collectionId="codex"
-          onOpen={codexDrill.open}
-          cols={2}
-          render={(c) => {
-            const situation = String(c.situation ?? '');
-            const recipe = String(c.recipe ?? '');
-            const count = Number(c.appliedCount ?? 0);
-            return {
-              title: situation.split(/(?<=\.)/)[0]?.trim() ?? situation,
-              subtitle: recipe.split(/\.\s/)[0]?.trim() ?? recipe,
-              description: recipe.split(/\.\s/).slice(1, 3).join('. ').trim(),
-              statusLabel: String(c.domain ?? '—'),
-              statusTone: 'accent',
-              accent: DEPTH_ACCENT,
-              icon: <BookMarked className="w-5 h-5" />,
-              metricLabel: 'applied',
-              metricValue: `${count}×`,
-              meta: c.lastApplied ? `last ${c.lastApplied}` : '',
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="codex" onOpen={codexDrill.open} />
       </div>
     );
   };
@@ -1019,6 +875,7 @@ export function PeopleApp() {
     { drill: personasDrill, collectionId: 'personas' },
     { drill: memoryDrill,   collectionId: 'memory' },
     { drill: codexDrill,    collectionId: 'codex' },
+    { drill: contentDrill,  collectionId: 'content' },
   ];
   const activeDrill = drillViews.find((d) => d.drill.openId) ?? null;
 

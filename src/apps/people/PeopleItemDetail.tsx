@@ -6,15 +6,17 @@
  * Covers: team, people_agents, personas, memory, codex. Branches on
  * def.id because each collection carries its own semantic shape:
  *   - team         → human roster (rank + skills + bio)
- *   - people_agents → AI worker (task + capabilities)
+ *   - people_agents → AI worker (task + capabilities + linked scenarios)
  *   - personas     → first-class profile (anchor + wants + blockers)
  *   - memory       → curated fact (provenance + verification)
  *   - codex        → proven pattern (situation + recipe + count)
  */
 import { useMemo } from 'react';
-import { Briefcase, Sparkles, Users, UserSearch, Brain, BookMarked, AlertTriangle, ShieldCheck, Anchor, Quote, Repeat2 } from 'lucide-react';
+import { Briefcase, Sparkles, Users, UserSearch, Brain, BookMarked, AlertTriangle, ShieldCheck, Anchor, Quote, Repeat2, ListChecks, Plus } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
+import { useScenariosStore } from '../../stores/scenarios.store';
+import { getScenariosForAgent } from './scenarioAgents';
 
 function rankTone(rank: string | undefined): { label: string; tone: 'solid' | 'soft' } {
   switch (rank) {
@@ -258,10 +260,124 @@ export function PeopleItemDetail(props: ItemDetailProps) {
               </div>
             </div>
           )}
+
+          {isAgent && (
+            <AgentScenariosPanel agentCodename={String(item.codename ?? '')} accent={accent} />
+          )}
         </div>
 
         <PrevNextFooter def={def} index={index} total={total} prev={prev} next={next} onNavigate={onNavigate} />
       </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  AGENT SCENARIOS PANEL — for people_agents only.
+ *  Lists the scenarios linked to this agent via scenarioAgents.ts. Lets the
+ *  coach jump from an agent's profile into the file d'approbation. The link
+ *  is set by ApprovalsView when the human creates a scenario from the form.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const SCENARIO_STATUS_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
+  draft:     'neutral',
+  pending:   'accent',
+  approved:  'ok',
+  rejected:  'danger',
+  merged:    'ok',
+};
+
+function AgentScenariosPanel({
+  agentCodename,
+  accent,
+}: {
+  agentCodename: string;
+  accent: string;
+}) {
+  const scenarios = useScenariosStore((s) => s.scenarios);
+  const scenarioOrder = useScenariosStore((s) => s.scenarioOrder);
+
+  const linkedIds = useMemo(
+    () => getScenariosForAgent(agentCodename),
+    [agentCodename],
+  );
+
+  const linkedScenarios = linkedIds
+    .map((id) => scenarios[id])
+    .filter((sc): sc is NonNullable<typeof sc> => Boolean(sc));
+
+  const openApprovals = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent('coach-os:open-app-section', {
+        detail: { appId: 'people', sectionId: 'approvals' },
+      }),
+    );
+  };
+
+  return (
+    <div
+      data-agent-scenarios
+      className="md:col-span-3 rounded-2xl p-5"
+      style={{ background: 'var(--panel-solid)', border: '1px solid var(--panel-border)', boxShadow: 'var(--shadow-panel)' }}
+    >
+      <div className="flex items-center gap-2 mb-3" style={{ color: 'var(--theme-muted)' }}>
+        <ListChecks className="w-3.5 h-3.5" />
+        <span className="text-[11px] font-semibold uppercase tracking-wider">Scénarios liés · {linkedScenarios.length}</span>
+        <button
+          type="button"
+          onClick={openApprovals}
+          className="ml-auto inline-flex items-center gap-1 text-[10.5px] font-semibold uppercase tracking-wider px-2 py-1 rounded transition-colors hover:bg-[var(--theme-surface-hover)]"
+          style={{ color: accent }}
+          data-open-approvals
+          title="Ouvrir la file d'approbation"
+        >
+          <Plus className="w-3 h-3" />
+          Nouveau scénario
+        </button>
+      </div>
+
+      {linkedScenarios.length === 0 ? (
+        <p className="text-[12px] italic" style={{ color: 'var(--theme-muted)' }}>
+          Aucun scénario rattaché à cet agent. Va dans Approvals, clique « Nouveau scénario », et choisis {agentCodename || 'cet agent'} dans le menu.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {linkedScenarios.map((sc) => (
+            <li
+              key={sc.id}
+              data-linked-scenario={sc.id}
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              style={{ background: 'var(--canvas)', border: '1px solid var(--panel-border-subtle)' }}
+            >
+              <span className="text-[12.5px] font-semibold truncate flex-1" style={{ color: 'var(--theme-text)' }}>
+                {sc.name}
+              </span>
+              <span
+                className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                style={{
+                  color: SCENARIO_STATUS_TONE[sc.status] === 'ok' ? '#15803d'
+                       : SCENARIO_STATUS_TONE[sc.status] === 'accent' ? '#0891b2'
+                       : SCENARIO_STATUS_TONE[sc.status] === 'danger' ? '#b91c1c'
+                       : '#475569',
+                  background: SCENARIO_STATUS_TONE[sc.status] === 'ok' ? '#dcfce7'
+                            : SCENARIO_STATUS_TONE[sc.status] === 'accent' ? 'rgba(8,145,178,0.12)'
+                            : SCENARIO_STATUS_TONE[sc.status] === 'danger' ? '#fee2e2'
+                            : '#f1f5f9',
+                }}
+              >
+                {sc.status}
+              </span>
+              <span className="text-[10.5px] font-mono" style={{ color: 'var(--theme-text-dim)' }}>
+                {sc.proposals.length} prop.
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Idempotent read of scenarioOrder so React tracks the dependency. */}
+      <span className="hidden">{scenarioOrder.length}</span>
     </div>
   );
 }

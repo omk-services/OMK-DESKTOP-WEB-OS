@@ -19,7 +19,7 @@
 import { useState } from 'react';
 import {
   ListChecks, CheckCircle2, X, AlertTriangle, Trash2, RotateCcw,
-  Sparkles, ShieldCheck, Eye, ChevronRight, GitMerge,
+  Sparkles, ShieldCheck, Eye, ChevronRight, GitMerge, Bot, Plus,
 } from 'lucide-react';
 import { SectionHead } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
@@ -29,9 +29,29 @@ import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META } from '../../lib/themes/tokens';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
+import { FLEET_AGENTS } from './fleet';
+import {
+  linkScenarioToAgent,
+  unlinkScenario,
+  getAgentCodeForScenario,
+} from './scenarioAgents';
 
 function shortDate(ts: number): string {
   return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+/** Combined agent options for the "Nouveau scénario" form.
+ *  Fleet (B3 operational agents) + People agents (RH/méta) — both can
+ *  deposit proposals into a scenario. Order is stable for the dropdown. */
+function useAgentOptions(): { code: string; name: string; source: 'fleet' | 'people' }[] {
+  const peopleAgents = useCmsStore((s) => s.items['people_agents'] ?? []);
+  const fleet = FLEET_AGENTS.map((a) => ({ code: a.code, name: a.name, source: 'fleet' as const }));
+  const people = peopleAgents.map((it) => ({
+    code: String(it.codename ?? it.id),
+    name: String(it.name ?? it.id),
+    source: 'people' as const,
+  }));
+  return [...fleet, ...people];
 }
 
 const STATUS_TONE: Record<Scenario['status'], 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
@@ -277,6 +297,9 @@ function ScenarioDetail({
 
   const canEdit = scenario.status === 'draft' || scenario.status === 'pending';
   const canMerge = scenario.status === 'pending' && scenario.proposals.length > 0;
+  const agentCode = getAgentCodeForScenario(scenario.id);
+  const agentOptions = useAgentOptions();
+  const linkedAgent = agentOptions.find((a) => a.code === agentCode);
 
   const handleEditProposal = (proposalId: string) => {
     const p = scenario.proposals.find((x) => x.id === proposalId);
@@ -418,6 +441,20 @@ function ScenarioDetail({
           <p className="text-[12.5px] text-[var(--theme-text-muted)] max-w-2xl">{scenario.rationale}</p>
         )}
         <div className="flex items-center gap-2 text-[10.5px] font-mono text-[var(--theme-text-dim)]">
+          {linkedAgent && (
+            <>
+              <span
+                data-scenario-detail-agent
+                className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(13,148,136,0.12)', color: '#0d9488', border: '1px solid rgba(13,148,136,0.3)' }}
+                title={`Scénario rattaché à l'agent ${linkedAgent.code} · ${linkedAgent.name}`}
+              >
+                <Bot className="w-2.5 h-2.5" />
+                {linkedAgent.code} · {linkedAgent.name}
+              </span>
+              <span>·</span>
+            </>
+          )}
           <span>créé par {scenario.createdBy}</span>
           <span>·</span>
           <span>{shortDate(scenario.createdAt)}</span>
@@ -563,6 +600,12 @@ function ScenarioRow({
   const proposals = scenario.proposals.length;
   const recommendations = scenario.comparison?.options.length ?? 0;
   const lastUpdate = shortDate(scenario.updatedAt);
+  const agentCode = getAgentCodeForScenario(scenario.id);
+
+  const handleDelete = () => {
+    deleteScenario(scenario.id);
+    unlinkScenario(scenario.id);
+  };
 
   return (
     <button
@@ -580,6 +623,17 @@ function ScenarioRow({
           <Badge tone={STATUS_TONE[scenario.status]}>{STATUS_LABEL[scenario.status]}</Badge>
           {currentScenarioId === scenario.id && (
             <Badge tone="accent">courant</Badge>
+          )}
+          {agentCode && (
+            <span
+              data-scenario-agent
+              className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+              style={{ background: 'rgba(13,148,136,0.12)', color: '#0d9488', border: '1px solid rgba(13,148,136,0.3)' }}
+              title={`Scénario rattaché à l'agent ${agentCode}`}
+            >
+              <Bot className="w-2.5 h-2.5" />
+              {agentCode}
+            </span>
           )}
         </div>
         {scenario.rationale && (
@@ -601,8 +655,8 @@ function ScenarioRow({
         role="button"
         tabIndex={0}
         className="shrink-0 text-[10.5px] text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] cursor-pointer"
-        onClick={(e) => { e.stopPropagation(); deleteScenario(scenario.id); }}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); deleteScenario(scenario.id); } }}
+        onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); handleDelete(); } }}
         data-delete-scenario
         title="Supprimer ce scénario"
       >
@@ -619,6 +673,11 @@ function ScenarioQueue({ onOpen }: { onOpen: (id: string) => void }) {
   const scenarios = useScenariosStore((s) => s.scenarios);
   const createScenario = useScenariosStore((s) => s.createScenario);
   const currentScenarioId = useScenariosStore((s) => s.currentScenarioId);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newAgent, setNewAgent] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
+  const agentOptions = useAgentOptions();
 
   // Tri : pending d'abord, puis draft, puis le reste (récent d'abord à l'intérieur).
   const tier = (s: Scenario): number => {
@@ -634,8 +693,41 @@ function ScenarioQueue({ onOpen }: { onOpen: (id: string) => void }) {
     return sb.updatedAt - sa.updatedAt;
   });
 
+  const resetForm = () => {
+    setCreating(false);
+    setNewName('');
+    setNewAgent('');
+    setNameError(null);
+  };
+
   const handleCreate = () => {
-    const sc = createScenario({ name: 'Nouveau scénario', createdBy: 'human' });
+    setCreating(true);
+    setNameError(null);
+    setNewAgent(agentOptions[0]?.code ?? '');
+  };
+
+  const handleSubmit = () => {
+    const title = newName.trim();
+    if (!title) {
+      setNameError("L'intitulé est obligatoire.");
+      return;
+    }
+    if (!newAgent) {
+      setNameError("L'agent concerné est obligatoire.");
+      return;
+    }
+    // Avoid duplicates by case-insensitive title.
+    const exists = order.some((id) => {
+      const sc = scenarios[id];
+      return sc && sc.name.trim().toLowerCase() === title.toLowerCase();
+    });
+    if (exists) {
+      setNameError(`Un scénario "${title}" existe déjà.`);
+      return;
+    }
+    const sc = createScenario({ name: title, createdBy: 'human' });
+    linkScenarioToAgent(sc.id, newAgent);
+    resetForm();
     onOpen(sc.id);
   };
 
@@ -658,17 +750,112 @@ function ScenarioQueue({ onOpen }: { onOpen: (id: string) => void }) {
               Désactiver le scénario courant
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleCreate}
-            className="text-[11px] font-bold text-[color:#fff] px-3 py-1.5 rounded-lg"
-            style={{ background: '#059669' }}
-            data-create-scenario
-          >
-            + Nouveau scénario
-          </button>
+          {!creating && (
+            <button
+              type="button"
+              onClick={handleCreate}
+              className="text-[11px] font-bold text-[color:#fff] px-3 py-1.5 rounded-lg"
+              style={{ background: '#059669' }}
+              data-create-scenario
+            >
+              <Plus className="w-3 h-3 inline-block mr-1" />
+              Nouveau scénario
+            </button>
+          )}
         </div>
       </div>
+
+      {creating && (
+        <div
+          data-new-scenario-form
+          className="rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-solid)] p-4 flex flex-col gap-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-[11.5px] font-bold text-[var(--theme-text)]">Nouveau scénario</div>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text)]"
+              aria-label="Annuler"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-muted)]">
+              Intitulé *
+            </span>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Ex : Rollback voice-clone v3 → v2"
+              className="px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+              style={{
+                background: 'var(--theme-bg)',
+                color: 'var(--theme-text)',
+                border: '1px solid var(--panel-border)',
+              }}
+              data-new-scenario-name
+              autoFocus
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-muted)]">
+              Agent concerné *
+            </span>
+            <select
+              value={newAgent}
+              onChange={(e) => setNewAgent(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+              style={{
+                background: 'var(--theme-bg)',
+                color: 'var(--theme-text)',
+                border: '1px solid var(--panel-border)',
+              }}
+              data-new-scenario-agent
+            >
+              {agentOptions.map((a) => (
+                <option key={`${a.source}:${a.code}`} value={a.code}>
+                  {a.code} · {a.name}{a.source === 'people' ? ' · People' : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {nameError && (
+            <div
+              role="alert"
+              className="text-[11px] rounded-lg px-3 py-2"
+              style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+            >
+              {nameError}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-[11px] font-semibold text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] px-3 h-7 rounded-lg"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="text-[11px] font-bold text-[color:#fff] h-7 px-3 rounded-lg"
+              style={{ background: '#059669' }}
+              data-new-scenario-submit
+            >
+              Créer le scénario
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         {sorted.length === 0 && (
           <div
