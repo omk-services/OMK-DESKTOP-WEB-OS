@@ -15,10 +15,11 @@ import {
   Users, Bot, Heart, Cpu, FileText, Calendar, Zap,
   Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
   UserSearch, Brain, BookMarked,
-  ListChecks,
+  ListChecks, Plus, Trash2, X,
 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
+import { useShellStore } from '../../stores/shell.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
@@ -510,36 +511,126 @@ const TASK_KIND_LABEL: Record<ScheduleTask['kind'], string> = {
 };
 
 function Schedule() {
-  // Stats: peak hour + quietest + weekday avg
-  const colSums = Array.from({ length: 24 }, (_, h) =>
-    SCHEDULE_GRID.reduce((s, day) => s + (day[h] ?? 0), 0) / 7
-  );
-  const peakHour = colSums.indexOf(Math.max(...colSums));
-  const quietestHour = colSums.indexOf(Math.min(...colSums));
-  const weekdayAvg = Math.round(SCHEDULE_GRID.slice(0, 5).flat().reduce((s, v) => s + v, 0) / (5 * 24));
-
+  // Brief G — Cadence prioritaire. Les compteurs, le panneau de case et le
+  // contour des cellules réagissent aux tâches réellement planifiées, plus
+  // au seed statique `SCHEDULE_GRID`. La heatmap reste visuellement intacte
+  // (mêmes couleurs, même échelle) ; seuls les compteurs et l'indicateur
+  // « cette case a des tâches » suivent `tasks`.
+  const addToast = useShellStore(s => s.addToast);
+  const [tasks, setTasks] = useState<ScheduleTask[]>(SCHEDULE_TASKS);
   const [picked, setPicked] = useState<{ day: typeof DAYS[number]; hour: number } | null>(null);
   const [agentFilter, setAgentFilter] = useState<string>('all');
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerLabel, setComposerLabel] = useState('');
+  const [composerAgent, setComposerAgent] = useState<string>('Orchestrator');
+  const [composerKind, setComposerKind] = useState<ScheduleTask['kind']>('run');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // T4 — cadence tour. Fires once on first mount of the Cadence section.
   useEffect(() => {
     void launchTour(TOUR_IDS.CADENCE);
   }, []);
 
+  // Auto-cancel a pending delete-confirm after 4 s (same rhythm as
+  // CollectionRepeater — la cohérence évite de réinventer le geste).
+  useEffect(() => {
+    if (!confirmDeleteId) return;
+    const handle = window.setTimeout(() => setConfirmDeleteId(null), 4000);
+    return () => window.clearTimeout(handle);
+  }, [confirmDeleteId]);
+
   const agentOptions = useMemo(() => {
-    const set = new Set<string>();
-    for (const t of SCHEDULE_TASKS) set.add(t.agent);
+    const set = new Set<string>(FLEET_AGENTS.map((a) => a.name));
+    for (const t of tasks) set.add(t.agent);
     return ['all', ...Array.from(set).sort()];
-  }, []);
+  }, [tasks]);
 
   const filteredTasks = picked
-    ? SCHEDULE_TASKS.filter((t) => {
+    ? tasks.filter((t) => {
         const matchesDay = t.day === picked.day;
         const matchesHour = picked.hour >= t.startHour && picked.hour < t.endHour;
         const matchesAgent = agentFilter === 'all' || t.agent === agentFilter;
         return matchesDay && matchesHour && matchesAgent;
       })
     : [];
+
+  // Counters derived from real tasks, not from SCHEDULE_GRID. Pour chaque
+  // heure, on compte le nombre de tâches qui couvrent cette heure
+  // (startHour ≤ h < endHour). peakHour = heure la plus chargée,
+  // quietestHour = heure la moins chargée. weekdayAvg = part des
+  // (jour × heure) en semaine (Mon-Fri, 5×24 = 120 slots) couverte par
+  // au moins une tâche — c'est la métrique que l'utilisateur a explicitée
+  // (« doit suivre les tâches réelles après création »).
+  const hourCounts = useMemo(
+    () => Array.from({ length: 24 }, (_, h) =>
+      tasks.filter((t) => h >= t.startHour && h < t.endHour).length
+    ),
+    [tasks],
+  );
+  const peakHour = hourCounts.indexOf(Math.max(...hourCounts, 0));
+  const quietestHour = hourCounts.indexOf(Math.min(...hourCounts, 0));
+  const weekdayAvg = useMemo(() => {
+    const weekdayDays: ReadonlyArray<typeof DAYS[number]> = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const slots = new Set<string>();
+    for (const t of tasks) {
+      if (!weekdayDays.includes(t.day)) continue;
+      for (let h = t.startHour; h < t.endHour; h += 1) {
+        slots.add(`${t.day}-${h}`);
+      }
+    }
+    return Math.round((slots.size / (5 * 24)) * 100);
+  }, [tasks]);
+
+  const submitTask = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (!picked) return;
+    const label = composerLabel.trim();
+    if (label.length === 0) {
+      addToast({ source: 'Cadence', type: 'warning', message: 'Le titre est obligatoire.' });
+      return;
+    }
+    const newTask: ScheduleTask = {
+      id: `t-cad-${Date.now().toString(36)}`,
+      day: picked.day,
+      startHour: picked.hour,
+      endHour: picked.hour + 1,
+      agent: composerAgent.trim() || 'Orchestrator',
+      label,
+      kind: composerKind,
+    };
+    setTasks((prev) => [...prev, newTask]);
+    setComposerLabel('');
+    setComposerAgent('Orchestrator');
+    setComposerKind('run');
+    setComposerOpen(false);
+    addToast({
+      source: 'Cadence',
+      type: 'success',
+      message: `Tâche planifiée : ${label}`,
+    });
+  };
+
+  const cancelComposer = (): void => {
+    setComposerOpen(false);
+    setComposerLabel('');
+    setComposerAgent('Orchestrator');
+    setComposerKind('run');
+  };
+
+  const handleDeleteClick = (id: string): void => {
+    if (confirmDeleteId !== id) {
+      setConfirmDeleteId(id);
+      return;
+    }
+    const target = tasks.find((t) => t.id === id);
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setConfirmDeleteId(null);
+    addToast({
+      source: 'Cadence',
+      type: 'success',
+      message: `Tâche retirée : ${target?.label ?? id}`,
+    });
+  };
 
   return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
@@ -587,14 +678,14 @@ function Schedule() {
                 <div className="text-[10px] font-mono uppercase text-[var(--theme-text-muted)] font-semibold pr-2 text-right self-center">{day}</div>
                 {HOURS.map(h => {
                   const isPicked = picked?.day === day && picked.hour === h;
-                  const hasTask = SCHEDULE_TASKS.some(
+                  const hasTask = tasks.some(
                     (t) => t.day === day && h >= t.startHour && h < t.endHour,
                   );
                   return (
                     <button
                       key={h}
                       type="button"
-                      onClick={() => setPicked({ day, hour: h })}
+                      onClick={() => { setPicked({ day, hour: h }); setConfirmDeleteId(null); }}
                       data-cadence-cell
                       data-day={day}
                       data-hour={h}
@@ -613,7 +704,7 @@ function Schedule() {
           </div>
         </div>
 
-        {/* Stats row */}
+        {/* Stats row — derived from real tasks, per brief G */}
         <div className="mt-4 pt-3 border-t border-[var(--panel-border-subtle)] grid grid-cols-3 gap-4">
           <div>
             <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Peak hour</div>
@@ -630,7 +721,7 @@ function Schedule() {
         </div>
       </div>
 
-      {/* Picked cell detail — what runs at this hour/day */}
+      {/* Picked cell detail — what runs at this hour/day, with create + delete */}
       {picked && (
         <div
           data-cadence-detail
@@ -659,7 +750,7 @@ function Schedule() {
             </select>
             <button
               type="button"
-              onClick={() => { setPicked(null); setAgentFilter('all'); }}
+              onClick={() => { setPicked(null); setAgentFilter('all'); setConfirmDeleteId(null); setComposerOpen(false); }}
               className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] text-[11px] font-semibold"
               data-cadence-close
               aria-label="Fermer le détail"
@@ -667,39 +758,205 @@ function Schedule() {
               Fermer
             </button>
           </div>
+
+          {/* Create form — opens when composerOpen is true. Hidden when
+              the user is just browsing tasks; the empty-state CTA below
+              flips the flag. */}
+          {composerOpen && (
+            <form
+              data-cadence-composer
+              onSubmit={submitTask}
+              className="mb-4 rounded-xl border p-3 flex flex-col gap-2"
+              style={{
+                background: 'var(--canvas)',
+                borderColor: 'var(--panel-border-subtle)',
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--theme-text-dim)]">
+                  Nouvelle tâche — {picked.day} {String(picked.hour).padStart(2, '0')}:00–{String(picked.hour + 1).padStart(2, '0')}:00
+                </div>
+                <button
+                  type="button"
+                  onClick={cancelComposer}
+                  aria-label="Annuler"
+                  className="w-5 h-5 rounded-md flex items-center justify-center hover:bg-[var(--theme-surface-hover)]"
+                  style={{ color: 'var(--theme-text-muted)' }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <input
+                autoFocus
+                value={composerLabel}
+                onChange={(e) => setComposerLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') cancelComposer();
+                }}
+                placeholder="Intitulé de la tâche…"
+                data-cadence-composer-label
+                className="px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+                style={{
+                  background: 'var(--theme-bg)',
+                  color: 'var(--theme-text)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              />
+              <div className="flex items-center gap-2">
+                <select
+                  value={composerAgent}
+                  onChange={(e) => setComposerAgent(e.target.value)}
+                  data-cadence-composer-agent
+                  className="flex-1 px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    color: 'var(--theme-text)',
+                    border: '1px solid var(--panel-border)',
+                  }}
+                >
+                  {FLEET_AGENTS.map((a) => (
+                    <option key={a.code} value={a.name}>{a.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={composerKind}
+                  onChange={(e) => setComposerKind(e.target.value as ScheduleTask['kind'])}
+                  data-cadence-composer-kind
+                  className="flex-1 px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    color: 'var(--theme-text)',
+                    border: '1px solid var(--panel-border)',
+                  }}
+                >
+                  {(Object.keys(TASK_KIND_LABEL) as ScheduleTask['kind'][]).map((k) => (
+                    <option key={k} value={k}>{TASK_KIND_LABEL[k]}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={cancelComposer}
+                  className="h-7 px-3 rounded-lg text-[11px] font-semibold"
+                  style={{ color: 'var(--theme-text-muted)' }}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  data-cadence-composer-submit
+                  className="h-7 px-3 rounded-lg text-[11px] font-semibold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ background: ACCENT }}
+                >
+                  Planifier
+                </button>
+              </div>
+            </form>
+          )}
+
           {filteredTasks.length === 0 ? (
-            <p className="text-[12px] italic" style={{ color: 'var(--theme-muted)' }}>
-              Aucune tâche prévue à ce créneau
-              {agentFilter !== 'all' ? ` pour ${agentFilter}` : ''}.
-            </p>
+            <div
+              data-cadence-empty
+              className="flex flex-col items-center gap-2 py-6 rounded-xl border border-dashed text-center"
+              style={{
+                borderColor: 'var(--panel-border)',
+                background: 'var(--theme-surface)',
+                color: 'var(--theme-text-muted)',
+              }}
+            >
+              <div className="text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                Aucune tâche sur ce créneau
+                {agentFilter !== 'all' ? ` pour ${agentFilter}` : ''}.
+              </div>
+              <div className="text-[11px]" style={{ color: 'var(--theme-text-dim)' }}>
+                Coche la heatmap puis ouvre le panneau pour planifier ta première tâche.
+              </div>
+              {!composerOpen && (
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(true)}
+                  data-cadence-empty-create
+                  className="mt-1 flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: ACCENT,
+                    color: '#ffffff',
+                    boxShadow: `0 2px 8px ${ACCENT}40`,
+                  }}
+                >
+                  <Plus className="w-3 h-3" />
+                  Planifier une tâche
+                </button>
+              )}
+            </div>
           ) : (
-            <ul className="flex flex-col gap-2">
-              {filteredTasks.map((t) => {
-                const kindColor = TASK_KIND_COLOR[t.kind];
-                const cadenceLabel = TASK_KIND_LABEL[t.kind];
-                return (
-                  <li
-                    key={t.id}
-                    data-cadence-task={t.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                    style={{ background: 'var(--canvas)', border: '1px solid var(--panel-border-subtle)' }}
-                  >
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
-                    <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
-                      {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
-                    </span>
-                    <span
-                      className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
-                      style={{ color: kindColor, background: `${kindColor}1a` }}
+            <>
+              <ul className="flex flex-col gap-2">
+                {filteredTasks.map((t) => {
+                  const kindColor = TASK_KIND_COLOR[t.kind];
+                  const cadenceLabel = TASK_KIND_LABEL[t.kind];
+                  const isConfirming = confirmDeleteId === t.id;
+                  return (
+                    <li
+                      key={t.id}
+                      data-cadence-task={t.id}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg group"
+                      style={{ background: 'var(--canvas)', border: '1px solid var(--panel-border-subtle)' }}
                     >
-                      {cadenceLabel}
-                    </span>
-                    <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
-                    <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
-                  </li>
-                );
-              })}
-            </ul>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
+                      <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
+                        {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
+                      </span>
+                      <span
+                        className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                        style={{ color: kindColor, background: `${kindColor}1a` }}
+                      >
+                        {cadenceLabel}
+                      </span>
+                      <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
+                      <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(t.id)}
+                        aria-label={isConfirming ? `Confirmer la suppression de ${t.label}` : `Supprimer ${t.label}`}
+                        data-cadence-delete={t.id}
+                        className="h-6 px-2 rounded-md text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 transition-all"
+                        style={
+                          isConfirming
+                            ? { background: '#dc2626', color: '#fff' }
+                            : {
+                                background: 'transparent',
+                                color: 'var(--theme-text-dim)',
+                                opacity: 0,
+                              }
+                        }
+                        onMouseEnter={(e) => {
+                          if (!isConfirming) (e.currentTarget as HTMLButtonElement).style.opacity = '1';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isConfirming) (e.currentTarget as HTMLButtonElement).style.opacity = '0';
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        {isConfirming ? 'Confirmer ?' : ''}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              {!composerOpen && (
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(true)}
+                  data-cadence-add-another
+                  className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold transition-all hover:underline"
+                  style={{ color: ACCENT }}
+                >
+                  <Plus className="w-3 h-3" />
+                  Ajouter une autre tâche
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
@@ -709,30 +966,47 @@ function Schedule() {
         <div className="flex items-center gap-2 mb-3">
           <Zap className="w-4 h-4" style={{ color: '#15803d' }} />
           <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— SPRINT CADENCE · THIS WEEK</div>
+          <Badge tone="accent">{tasks.length} tâches</Badge>
         </div>
-        <div className="flex flex-col gap-2">
-          {SCHEDULE_TASKS.map(t => {
-            const kindColor = TASK_KIND_COLOR[t.kind];
-            const cadenceLabel = TASK_KIND_LABEL[t.kind];
-            return (
-              <div key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--theme-surface-hover)] transition-colors">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
-                <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
-                  {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
-                </span>
-                <span
-                  className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
-                  style={{ color: kindColor, background: `${kindColor}1a` }}
-                  title={`Kind: ${t.kind}`}
-                >
-                  {cadenceLabel}
-                </span>
-                <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
-                <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
-              </div>
-            );
-          })}
-        </div>
+        {tasks.length === 0 ? (
+          <div
+            className="flex flex-col items-center gap-2 py-6 rounded-xl border border-dashed text-center"
+            style={{
+              borderColor: 'var(--panel-border)',
+              background: 'var(--theme-surface)',
+              color: 'var(--theme-text-muted)',
+            }}
+          >
+            <div className="text-[12.5px]">Aucune tâche planifiée pour l'instant.</div>
+            <div className="text-[11px]" style={{ color: 'var(--theme-text-dim)' }}>
+              Clique une case de la heatmap puis ouvre le panneau pour planifier la première.
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {tasks.map(t => {
+              const kindColor = TASK_KIND_COLOR[t.kind];
+              const cadenceLabel = TASK_KIND_LABEL[t.kind];
+              return (
+                <div key={t.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--theme-surface-hover)] transition-colors">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
+                  <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
+                    {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
+                  </span>
+                  <span
+                    className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                    style={{ color: kindColor, background: `${kindColor}1a` }}
+                    title={`Kind: ${t.kind}`}
+                  >
+                    {cadenceLabel}
+                  </span>
+                  <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
+                  <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
