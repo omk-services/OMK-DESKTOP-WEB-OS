@@ -3,9 +3,14 @@
  *  - Soft menus with hover + active states (no harsh borders)
  *  - Right cluster: ecosystem seal + theme switcher + voice + bell + clock
  *  - Theme-aware accents (var(--theme-*)) + soft drop shadow (no border-b)
- *  - Global theme quick-switcher dropdown in the middle. */
+ *  - Global theme quick-switcher dropdown in the middle.
+ *
+ *  S_SOCLE chantier 2 (2026-08-10) — the bell-on-click-clears-counter
+ *  shortcut is gone. The bell now opens <NotificationsDropdown>, which
+ *  lists the persistent notification history. The counter still tracks
+ *  unread entries; "Tout marquer comme lu" is the action. */
 import { useState, useEffect, useRef } from 'react';
-import { Bell, RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown, User, CreditCard, Sparkles, LogOut, Settings as SettingsIcon, ListChecks, History } from 'lucide-react';
+import { RotateCcw, Leaf, Mic, MicOff, Palette, Check, ChevronDown, User, CreditCard, Sparkles, LogOut, Settings as SettingsIcon, ListChecks, History } from 'lucide-react';
 import { useShellStore } from '../stores/shell.store';
 import { useVoiceNavigation } from '../hooks/useVoiceNavigation';
 import { useThemeStore } from '../lib/themes/store';
@@ -16,6 +21,7 @@ import { TopBarMenu } from './TopBarMenu';
 import { ChangelogTabs } from './ChangelogTabs';
 import { CharacterMenu } from '../agent/CharacterMenu';
 import { TenantPill } from './TenantPill';
+import { NotificationsDropdown } from './NotificationsDropdown';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -23,8 +29,6 @@ import { TenantPill } from './TenantPill';
 export function TopBar(): import('react').ReactNode {
   const [time, setTime] = useState(new Date());
   const bootClean = useShellStore((s) => s.bootClean);
-  const notificationCount = useShellStore((s) => s.notificationCount);
-  const clearNotifications = useShellStore((s) => s.clearNotifications);
   const openApp = useShellStore((s) => s.openApp);
   const addToast = useShellStore((s) => s.addToast);
   const userHidden = useAppVisibility((s) => s.hidden);
@@ -341,22 +345,7 @@ export function TopBar(): import('react').ReactNode {
 
           <CharacterMenu />
 
-          <button
-            onClick={clearNotifications}
-            className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--theme-surface-hover)]"
-            style={{ color: 'var(--theme-text-muted)' }}
-            title="Notifications"
-          >
-            <Bell className="w-3.5 h-3.5" />
-            {notificationCount > 0 && (
-              <span
-                className="absolute -top-0.5 -right-0.5 text-[var(--theme-on-accent)] text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5"
-                style={{ background: 'var(--theme-accent)', boxShadow: '0 0 0 2px white' }}
-              >
-                {notificationCount > 9 ? '9+' : notificationCount}
-              </span>
-            )}
-          </button>
+          <NotificationsDropdown isDark={globalTokens.isDark} />
 
           <div
             className="flex items-center gap-2 h-7 px-2.5 rounded-lg font-mono text-[11px] tracking-tight"

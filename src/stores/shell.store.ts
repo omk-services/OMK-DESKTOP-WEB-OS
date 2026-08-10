@@ -1,5 +1,13 @@
 /** Shell store — global OS state (windows, dock, notifications, layout).
- *  Forked verbatim from A'Space Life OS canon (proven window engine). */
+ *  Forked verbatim from A'Space Life OS canon (proven window engine).
+ *
+ *  Notifications (S_SOCLE chantier 2, 2026-08-10) — toasts used to vanish
+ *  after ~5s leaving no trace. Every `addToast` now also appends to a
+ *  capped `notifications` history (newest first, max 50). The bell counter
+ *  tracks unread entries only — opening the panel does NOT mark as read,
+ *  the user has to click "Tout marquer comme lu" (which now backs
+ *  `clearNotifications`). The history persists across the session so a
+ *  notification fired 20 minutes ago is still readable in the panel. */
 import { create } from 'zustand';
 
 /* ═══ Types ═══ */
@@ -23,6 +31,18 @@ export interface Toast {
   timestamp: number;
 }
 
+/** Persistent notification entry. Same shape as a Toast plus `read` so the
+ *  bell counter can stay accurate even if the toast itself has already
+ *  auto-dismissed from the screen. */
+export interface Notification {
+  id: string;
+  message: string;
+  source: string;
+  type: Toast['type'];
+  timestamp: number;
+  read: boolean;
+}
+
 function isAppWindow(value: unknown): value is AppWindow {
   if (typeof value !== 'object' || value === null) return false;
   const candidate = value as Partial<AppWindow>;
@@ -41,8 +61,11 @@ function isAppWindow(value: unknown): value is AppWindow {
 interface ShellState {
   windows: AppWindow[];
   activeWindowId: string | null;
+  /** Unread notification count driving the bell badge. */
   notificationCount: number;
   toasts: Toast[];
+  /** Persistent history (newest first). Capped at NOTIFICATIONS_MAX. */
+  notifications: Notification[];
 
   /* windows */
   openApp: (id: string, title: string) => void;
@@ -57,7 +80,14 @@ interface ShellState {
   bootClean: () => void;
   addToast: (toast: Omit<Toast, 'id' | 'timestamp'>) => void;
   dismissToast: (id: string) => void;
+  /** Mark every notification as read (does not erase the history).
+   *  Backs the "Tout marquer comme lu" action in the bell dropdown. */
   clearNotifications: () => void;
+  /** Erase the entire notification history (in case the user wants a
+   *  clean slate). Counter goes to 0 along with the list. */
+  dismissAllNotifications: () => void;
+  /** Remove a single notification from the history. */
+  dismissNotification: (id: string) => void;
 
   /* persistence */
   saveLayout: () => void;
@@ -68,6 +98,7 @@ interface ShellState {
 
 const TOPBAR_HEIGHT = 40;
 const DOCK_SAFE_AREA = 100;
+const NOTIFICATIONS_MAX = 50;
 
 function clampPosition(x: number, y: number) {
   const vWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
@@ -97,6 +128,7 @@ export const useShellStore = create<ShellState>((set, get) => ({
   activeWindowId: null,
   notificationCount: 0,
   toasts: [],
+  notifications: [],
 
   openApp: (id, title) => set((s) => {
     const existing = s.windows.find(w => w.id === id);
@@ -161,18 +193,42 @@ export const useShellStore = create<ShellState>((set, get) => ({
     } catch {
       // The in-memory reset must still work when storage is unavailable.
     }
-    set({ windows: [], activeWindowId: null, notificationCount: 0, toasts: [] });
+    set({ windows: [], activeWindowId: null, notificationCount: 0, toasts: [], notifications: [] });
     window.location.reload();
   },
 
-  addToast: (toast) => set((s) => ({
-    toasts: [...s.toasts, { ...toast, id: toastId(), timestamp: Date.now() }],
-    notificationCount: s.notificationCount + 1,
-  })),
+  addToast: (toast) => set((s) => {
+    const id = toastId();
+    const ts = Date.now();
+    const nextNotifications = [
+      { id, ...toast, timestamp: ts, read: false },
+      ...s.notifications,
+    ].slice(0, NOTIFICATIONS_MAX);
+    return {
+      toasts: [...s.toasts, { ...toast, id, timestamp: ts }],
+      notificationCount: s.notificationCount + 1,
+      notifications: nextNotifications,
+    };
+  }),
 
   dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter(t => t.id !== id) })),
 
-  clearNotifications: () => set({ notificationCount: 0 }),
+  /** Mark every notification as read. Counter goes to 0, history stays. */
+  clearNotifications: () => set((s) => ({
+    notificationCount: 0,
+    notifications: s.notifications.map((n) => (n.read ? n : { ...n, read: true })),
+  })),
+
+  dismissAllNotifications: () => set({ notificationCount: 0, notifications: [] }),
+
+  dismissNotification: (id) => set((s) => {
+    const target = s.notifications.find((n) => n.id === id);
+    const wasUnread = target && !target.read;
+    return {
+      notifications: s.notifications.filter((n) => n.id !== id),
+      notificationCount: wasUnread ? Math.max(0, s.notificationCount - 1) : s.notificationCount,
+    };
+  }),
 
   saveLayout: () => {
     const { windows } = get();
