@@ -92,7 +92,12 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
 
           <div className="lg:col-span-5 rounded-2xl bg-[var(--theme-surface)] border border-[var(--panel-border)] p-5 flex flex-col gap-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--theme-text-dim)]">Ton roster, ce matin</span>
-            <div className="grid grid-cols-3 gap-3">
+            {/* Trois tuiles dans un encart qui occupe 5 colonnes sur 12 : a la
+                taille par defaut de la fenetre (920 px) chacune tombe a ~55 px
+                et le label « sieges actifs » deborde. Les breakpoints Tailwind
+                mesurent la viewport, pas le conteneur, donc `sm:` ne protege de
+                rien ici. Regle du depot : 3 colonnes seulement a partir de 2xl. */}
+            <div className="grid grid-cols-2 2xl:grid-cols-3 gap-3">
               <div className="rounded-xl bg-[var(--theme-bg)] border border-[var(--panel-border-subtle)] p-3 text-center">
                 <div className="text-2xl font-extrabold text-[var(--theme-text)] tabular-nums">180</div>
                 <div className="text-[10px] text-[var(--theme-text-dim)] uppercase">sièges actifs</div>
