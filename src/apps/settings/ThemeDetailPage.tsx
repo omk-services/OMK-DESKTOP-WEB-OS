@@ -42,6 +42,14 @@ export function ThemeDetailPage({ themeId, onBack }: ThemeDetailPageProps) {
     [variant],
   );
 
+  // Index 1-based du variant courant. Auparavant on concaténait `variant + 1`
+  // — mais `variant` est une chaîne ('apple'), donc le rendu montrait
+  // "apple1/5" au lieu de "1/5". On calcule l'index dans DESIGN_VARIANTS.
+  const variantIndex = useMemo(
+    () => Math.max(1, DESIGN_VARIANTS.findIndex((v) => v.id === variant) + 1),
+    [variant],
+  );
+
   const Preview = useMemo(() => {
     switch (variant) {
       case 'apple':     return <AppleStyle themeId={themeId} />;
@@ -102,7 +110,7 @@ export function ThemeDetailPage({ themeId, onBack }: ThemeDetailPageProps) {
             );
           })}
           <div className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-[var(--theme-muted)]">
-            <span>{variant + 1}/{DESIGN_VARIANTS.length}</span>
+            <span>{variantIndex}/{DESIGN_VARIANTS.length}</span>
             <ArrowRight className="h-3 w-3" />
           </div>
         </div>

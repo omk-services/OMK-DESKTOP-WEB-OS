@@ -8,6 +8,8 @@ import { useMemo, useState } from 'react';
 import { Eye, Sliders } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
+import { useCmsStore } from '../../lib/cms/cms.store';
+import { useShellStore } from '../../stores/shell.store';
 
 function readString(item: Record<string, unknown>, ...keys: string[]): string | undefined {
   for (const k of keys) {
@@ -36,6 +38,37 @@ export function SettingsItemDetail(props: ItemDetailProps) {
     }
     return o;
   });
+
+  // Reset defensif: si l'item change en arriere-plan (HMR, re-hydratation),
+  // on resynchronise le brouillon avec les valeurs fraiches, mais seulement
+  // si l'utilisateur n'a pas deja commence a editer. Sinon on perd son
+  // travail.
+  const updateItem = useCmsStore((s) => s.updateItem);
+  const addToast = useShellStore((s) => s.addToast);
+
+  /** Persiste le brouillon dans la collection CMS et confirme par un toast.
+   *  `updateItem` retourne void — le verdict est « la fonction n'a pas
+   *  jete ». La couche CMS est la seule source de verite pour ces fiches. */
+  const handleSave = () => {
+    updateItem(def.id, String(item.id), { ...draft });
+    addToast({
+      source: 'Settings',
+      type: 'success',
+      message: `${title} mis a jour`,
+    });
+  };
+
+  /** Le Reset efface les champs editables du brouillon et le ramene aux
+   *  valeurs de l'item telles qu'elles etaient a l'ouverture. On ne touche
+   *  pas aux champs readonly (title / subtitle / badge). */
+  const handleReset = () => {
+    const fresh: Record<string, string> = {};
+    for (const key of ctrlKeys) {
+      const v = item[key];
+      fresh[key] = typeof v === 'string' ? v : '';
+    }
+    setDraft(fresh);
+  };
 
   return (
     <div
@@ -119,7 +152,7 @@ export function SettingsItemDetail(props: ItemDetailProps) {
           <div className="mt-4 flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setDraft({})}
+              onClick={handleReset}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
               style={{
                 background: 'transparent',
@@ -131,6 +164,7 @@ export function SettingsItemDetail(props: ItemDetailProps) {
             </button>
             <button
               type="button"
+              onClick={handleSave}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
               style={{
                 background: accent,

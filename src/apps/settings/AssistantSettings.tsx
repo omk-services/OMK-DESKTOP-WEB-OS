@@ -20,7 +20,7 @@ import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
 import { useAssistantStore } from '../../stores/assistant.store';
 import { CHARACTERS, getCharacter } from '../../agent/characters';
-import { hasRecognition, hasSynthesis, loadVoicesWithTimeout, type PrivacyMode } from '../../agent/voice';
+import { hasSynthesis, loadVoicesWithTimeout, type PrivacyMode } from '../../agent/voice';
 
 interface RosterResponse {
   agents: Array<{
@@ -65,13 +65,11 @@ export function AssistantSettings() {
   const [busy, setBusy] = useState(false);
   // Disponibilite des APIs navigateur : ce sont des fonctions pures,
   // pas besoin de les lire dans le store. Calculees au mount.
-  const [, setCanListen] = useState(false);
   const [canSpeak, setCanSpeak] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   // Charger les voix apres le mount : getVoices() peut etre vide au boot.
   useEffect(() => {
-    setCanListen(hasRecognition());
     setCanSpeak(hasSynthesis());
     let cancelled = false;
     void loadVoicesWithTimeout().then((v) => {

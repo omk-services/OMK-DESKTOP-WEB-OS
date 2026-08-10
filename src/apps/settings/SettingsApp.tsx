@@ -8,6 +8,7 @@ import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META, CANONICAL_APP_THEMES } from '../../lib/themes/tokens';
 import { getObservabilityConsent, setObservabilityConsent } from '../../lib/observability';
 import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
+import { useShellStore } from '../../stores/shell.store';
 import { ThemeDetailPage } from './ThemeDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { SettingsItemDetail } from './SettingsItemDetail';
@@ -580,15 +581,36 @@ export function SettingsApp() {
     // chargement du module. Plus de valeurs en dur dans le JSX — un
     // futur « ajouter Stripe Connect » passera par `useCmsStore.addItem`.
     const items = useCmsStore((s) => s.items['settings_integrations']) ?? [];
+    const openApp = useShellStore((s) => s.openApp);
 
     return (
       <div className="p-7">
         <SectionHead title="Integrations" subtitle="Connected via the Marketplace" />
         {items.length === 0 ? (
-          <div className="text-[13px] text-[var(--theme-text-dim)] italic px-1 py-4">
-            Aucune integration enregistree. Connectez Stripe, Calendly ou
-            LinkedIn depuis le Marketplace.
-          </div>
+          // Brief §3 — un écran blanc est un bug : phrase + bouton qui
+          // mène à l'endroit où on crée. La collection CMS peut être
+          // vide tant que la graine n'a pas été chargée par HMR ; le
+          // message reste utile en tout cas.
+          <Card>
+            <div className="px-5 py-6 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-[var(--theme-text)]">
+                  Aucune integration enregistree
+                </div>
+                <p className="text-[12px] text-[var(--theme-muted)] mt-0.5 leading-snug">
+                  Connectez Stripe, Calendly ou LinkedIn depuis le Marketplace pour les voir ici.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => openApp('marketplace', 'Marketplace')}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background: 'var(--theme-accent)', color: 'var(--theme-bg)' }}
+              >
+                Ouvrir le Marketplace
+              </button>
+            </div>
+          </Card>
         ) : (
           <div className="flex flex-col gap-3">
             {items.map((it) => {
@@ -733,7 +755,7 @@ export function SettingsApp() {
           <span className="w-3 h-3 rounded-full" style={{ background: t.accent }} />
           {/* Preview exception: name shows on the swatch background for that theme. */}
           <span
-            className={`text-[9px] font-bold uppercase tracking-wider ${t.isDark ? '' : ''}`}
+            className="text-[9px] font-bold uppercase tracking-wider"
             style={{ color: t.isDark ? '#ffffff' : '#1c1917' }}
           >
             {t.name}
@@ -802,7 +824,10 @@ export function SettingsApp() {
           </div>
           <span className="text-xs font-mono text-[var(--theme-muted)]">{THEME_META.find(t => t.id === globalTheme)?.name ?? '—'}</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-5">
+        {/* Brief §4 — une grille a 4 colonnes ne passe a 4 qu'a `xl:`.
+            Avant : on hitait 4 des `lg` (1024px), ce qui etirait les cartes
+            dans la fenetre par defaut 920x600. */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 p-5">
           {THEME_META.map(t => {
             const isActive = t.id === globalTheme;
             return (
@@ -812,7 +837,7 @@ export function SettingsApp() {
                 onDoubleClick={() => setDetailTheme(t.id)}
                 title={`Click to set as global · Double-click to preview ${t.name}`}
                 className={`relative text-left rounded-lg overflow-hidden border-2 transition-all ${
-                  isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--panel-border)]'
+                  isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--theme-text-muted)]'
                 }`}
               >
                 <ThemePreview themeId={t.id} />
@@ -891,7 +916,7 @@ export function SettingsApp() {
                         onClick={() => setAppTheme(app.id, t.id)}
                         title={isActive ? `${t.name} — active` : `Use ${t.name} on the sidebar`}
                         className={`relative text-left rounded-lg overflow-hidden border-2 transition-all ${
-                          isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--panel-border)]'
+                          isActive ? 'border-[var(--theme-text)] ring-2 ring-[var(--theme-text)]/30' : 'border-[var(--panel-border)] hover:border-[var(--theme-text-muted)]'
                         }`}
                       >
                         <ThemePreview themeId={t.id} size="sm" />
