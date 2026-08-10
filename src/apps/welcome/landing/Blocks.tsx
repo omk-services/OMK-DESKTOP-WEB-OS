@@ -45,7 +45,7 @@ export function LandingHero({ brand, tagline, eyebrow, headline, sub, primaryCta
         </h1>
         <p className="text-base sm:text-lg text-[var(--theme-text-muted)] max-w-2xl leading-relaxed">{sub}</p>
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <a href={primaryCta.href} className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98]" style={{ boxShadow: 'var(--theme-shadow-lg)' }}>
+          <a href={primaryCta.href} className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98]" style={{ boxShadow: 'var(--theme-shadow-lg)' }}>
             {primaryCta.label}
             <ArrowRight className="w-4 h-4" />
           </a>
@@ -116,7 +116,7 @@ function FeatureVisual({ kind }: { kind: FeatureBlock['visual'] }) {
           {['Welcome to Elevate Academy!', 'Just joined — feeling inspired already.', 'Anyone else going to the in-person summit?', 'Yes! LA was incredible. See you in November.'].map((m, i) => (
             <div key={i} className={`flex gap-2 ${i % 2 ? 'justify-end' : ''}`}>
               {i % 2 === 0 && <div className="w-7 h-7 rounded-full bg-[var(--theme-surface-hover)] shrink-0" />}
-              <div className={`rounded-2xl px-3 py-2 text-[11px] leading-relaxed max-w-[80%] ${i % 2 ? 'bg-[var(--theme-accent)] text-[color:#fff]' : 'bg-[var(--theme-surface-hover)] text-[var(--theme-text)]'}`}>{m}</div>
+              <div className={`rounded-2xl px-3 py-2 text-[11px] leading-relaxed max-w-[80%] ${i % 2 ? 'bg-[var(--theme-accent)] text-white' : 'bg-[var(--theme-surface-hover)] text-[var(--theme-text)]'}`}>{m}</div>
               {i % 2 && <div className="w-7 h-7 rounded-full bg-[var(--theme-accent-soft)] shrink-0" />}
             </div>
           ))}
@@ -151,7 +151,7 @@ function FeatureVisual({ kind }: { kind: FeatureBlock['visual'] }) {
   if (kind === 'events') {
     return (
       <div
-        className="rounded-2xl p-5 text-[color:#fff] shadow-xl"
+        className="rounded-2xl p-5 text-white shadow-xl"
         style={{ background: 'linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-hover) 100%)' }}
       >
         <div className="flex items-center gap-2 mb-4">
@@ -182,7 +182,7 @@ function FeatureVisual({ kind }: { kind: FeatureBlock['visual'] }) {
     return (
       <div className="rounded-2xl bg-[var(--theme-surface)] border border-[var(--panel-border)] shadow-sm p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-[color:#fff] text-xs font-bold" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>S</div>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>S</div>
           <div>
             <div className="text-sm font-semibold text-[var(--theme-text)]">Scribe agent</div>
             <div className="text-[10px] text-[var(--ok)] flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[var(--ok)]" />Online</div>
@@ -228,7 +228,7 @@ function FeatureVisual({ kind }: { kind: FeatureBlock['visual'] }) {
         { name: 'Dev', role: 'Builder', state: 'Active' },
       ].map(a => (
         <div key={a.name} className="flex items-center gap-3 rounded-xl border border-[var(--panel-border-subtle)] px-3 py-2 hover:bg-[var(--theme-surface-hover)] transition-colors">
-          <div className="w-9 h-9 rounded-xl text-[color:#fff] flex items-center justify-center text-[10px] font-extrabold" style={{ background: 'var(--theme-accent)' }}>{a.name[0]}</div>
+          <div className="w-9 h-9 rounded-xl text-white flex items-center justify-center text-[10px] font-extrabold" style={{ background: 'var(--theme-accent)' }}>{a.name[0]}</div>
           <div className="flex-1">
             <div className="text-sm font-semibold text-[var(--theme-text)]">{a.name}</div>
             <div className="text-[10px] text-[var(--theme-text-muted)]">{a.role}</div>
@@ -331,7 +331,7 @@ export function PricingGrid({ tiers }: { tiers: PricingTier[] }) {
           key={t.name}
           className={`relative flex flex-col gap-4 rounded-2xl p-6 transition-all border ${
             t.highlight
-              ? 'text-[color:#fff] shadow-xl scale-[1.02] border-[var(--theme-accent)]'
+              ? 'text-white shadow-xl scale-[1.02] border-[var(--theme-accent)]'
               : 'bg-[var(--theme-surface)] border-[var(--panel-border)] shadow-sm text-[var(--theme-text)]'
           }`}
           style={t.highlight
@@ -350,7 +350,7 @@ export function PricingGrid({ tiers }: { tiers: PricingTier[] }) {
                   animationDuration: '3s',
                 }}
               />
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-extrabold uppercase tracking-[0.2em] bg-[var(--warn)] text-[color:#1a1a1a] rounded-full px-3 py-1 shadow-md z-10">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-extrabold uppercase tracking-[0.2em] bg-[var(--warn)] text-black rounded-full px-3 py-1 shadow-md z-10">
                 Most popular
               </span>
             </>
@@ -366,7 +366,7 @@ export function PricingGrid({ tiers }: { tiers: PricingTier[] }) {
           <ul className="flex flex-col gap-2 text-sm">
             {t.features.map(f => (
               <li key={f} className="flex items-start gap-2">
-                <span className={`mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full shrink-0 ${t.highlight ? 'bg-[rgba(255,255,255,0.22)] text-[color:#fff]' : 'bg-[var(--ok)]/10 text-[var(--ok)]'}`}>
+                <span className={`mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full shrink-0 ${t.highlight ? 'bg-[rgba(255,255,255,0.22)] text-white' : 'bg-[var(--ok)]/10 text-[var(--ok)]'}`}>
                   <Check className="w-2.5 h-2.5" strokeWidth={3} />
                 </span>
                 <span className={t.highlight ? 'text-[rgba(255,255,255,0.95)]' : 'text-[var(--theme-text)]'}>{f}</span>
@@ -377,7 +377,7 @@ export function PricingGrid({ tiers }: { tiers: PricingTier[] }) {
             className={`mt-auto w-full rounded-full px-4 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
               t.highlight
                 ? 'bg-[color:#fff] hover:bg-[rgba(255,255,255,0.92)] shadow-md'
-                : 'bg-[var(--theme-accent)] text-[color:#fff] hover:bg-[var(--theme-accent-hover)]'
+                : 'bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent-hover)]'
             }`}
             style={!t.highlight ? undefined : { color: 'var(--theme-accent)' }}
           >
@@ -402,7 +402,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
               className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-[var(--theme-surface-hover)] transition-colors"
             >
               <span className="text-sm sm:text-base font-semibold text-[var(--theme-text)]">{item.q}</span>
-              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full transition-all shrink-0 ${open ? 'bg-[var(--theme-accent)] text-[color:#fff] rotate-180' : 'bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]'}`}>
+              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full transition-all shrink-0 ${open ? 'bg-[var(--theme-accent)] text-white rotate-180' : 'bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)]'}`}>
                 {open ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
               </span>
             </button>
@@ -420,7 +420,7 @@ export function ClosingCta({ headline, sub, ctaLabel }: { headline: string; sub:
   return (
     <div
       id="cta"
-      className="relative overflow-hidden rounded-3xl px-10 py-16 sm:px-16 sm:py-20 shadow-2xl text-[color:#fff] text-center"
+      className="relative overflow-hidden rounded-3xl px-10 py-16 sm:px-16 sm:py-20 shadow-2xl text-white text-center"
       style={{ background: 'linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-hover) 100%)' }}
     >
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 50%)' }} />

@@ -70,7 +70,7 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
           </h1>
           <p className="text-base text-[var(--theme-text-muted)] leading-relaxed max-w-2xl">{page.hero.sub}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
+            <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
               <Play className="w-4 h-4 fill-current" /> {page.hero.primaryCta.label}
             </a>
             <span className="text-xs text-[var(--theme-text-muted)]">4 min · 0 signup · 0 PII</span>
@@ -86,7 +86,7 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
           <div className="rounded-2xl bg-[var(--theme-surface)] border border-[var(--panel-border)] divide-y divide-[var(--panel-border-subtle)]">
             {questions.map(q => (
               <div key={q.n} className="p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[color:#fff] text-sm font-extrabold shrink-0" style={{ background: 'var(--theme-accent)' }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-extrabold shrink-0" style={{ background: 'var(--theme-accent)' }}>
                   {q.n}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -131,7 +131,7 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
 
             {/* Center pulse */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="rounded-full px-5 py-2.5 bg-[var(--theme-accent)] text-[color:#fff] text-xs font-bold shadow-2xl">
+              <div className="rounded-full px-5 py-2.5 bg-[var(--theme-accent)] text-white text-xs font-bold shadow-2xl">
                 Coach OS · en cours
               </div>
             </div>
@@ -152,7 +152,7 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
               { Icon: ShieldCheck, title: '0 data dans le training', body: 'Tes inputs restent synthétiques, isolés, jamais réutilisés.' },
             ].map((r, i) => (
               <div key={i} className="rounded-xl bg-[var(--theme-surface)] border border-[var(--panel-border)] p-4 flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-[color:#fff] shrink-0" style={{ background: 'var(--theme-accent)' }}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0" style={{ background: 'var(--theme-accent)' }}>
                   <r.Icon className="w-4 h-4" />
                 </div>
                 <div>
@@ -166,14 +166,14 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
 
         {/* ── CTA · simple, soft ───────────────────────────────────────── */}
         <section data-anchor="cta" className="rounded-3xl px-10 py-14 text-center" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>
-          <Brain className="w-7 h-7 text-[color:#fff] mx-auto mb-3" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[color:#fff] tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
-          <p className="text-[color:#fff] text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
+          <Brain className="w-7 h-7 text-white mx-auto mb-3" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
+          <p className="text-white text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
           <a href="#cta" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
             <Play className="w-4 h-4 fill-current" />
             {page.closing.cta.label} <ArrowRight className="w-4 h-4" />
           </a>
-          <p className="text-[color:#fff] text-[11px] mt-4 opacity-75">Si ça ne parle pas à ton vendredi soir, tu fermes l'onglet. Personne ne te relance.</p>
+          <p className="text-white text-[11px] mt-4 opacity-75">Si ça ne parle pas à ton vendredi soir, tu fermes l'onglet. Personne ne te relance.</p>
         </section>
 
         <BackToTop onClick={() => bodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' })} />

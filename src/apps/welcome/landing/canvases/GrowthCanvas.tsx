@@ -75,7 +75,7 @@ export function GrowthCanvas({ page, activePageId, onSelectPage }: {
           </h1>
           <p className="text-base text-[var(--theme-text-muted)] leading-relaxed max-w-2xl">{page.hero.sub}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
+            <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
               {page.hero.primaryCta.label} <ArrowRight className="w-4 h-4" />
             </a>
             <span className="text-xs text-[var(--theme-text-muted)]">Le SDR que tu n'auras jamais à manager</span>
@@ -134,7 +134,7 @@ export function GrowthCanvas({ page, activePageId, onSelectPage }: {
                 { day: 'J+9', title: 'Sortie propre', body: 'Si pas de réponse, séquence terminée. Aucun mail de relance caché.', gate: 'Auto-stop sur engagement, sous 90s.' },
               ].map((step, i) => (
                 <div key={i} className="rounded-xl border border-[var(--panel-border-subtle)] p-4 flex flex-col gap-2 relative">
-                  <span className="absolute -top-3 left-3 inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--theme-accent)] text-[color:#fff] text-[11px] font-extrabold shadow-md">{i + 1}</span>
+                  <span className="absolute -top-3 left-3 inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--theme-accent)] text-white text-[11px] font-extrabold shadow-md">{i + 1}</span>
                   <div className="flex items-baseline justify-between pt-1">
                     <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--theme-accent)]">{step.day}</span>
                   </div>
@@ -196,7 +196,7 @@ export function GrowthCanvas({ page, activePageId, onSelectPage }: {
                 Helena, voici le lien : [Stripe link]. Pour la facture, je te l'envoie d'ici ce soir 20h — ça te laisse le temps de la passer à ton comptable avant vendredi. On lance l'onboarding lundi 9h ?
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <button className="inline-flex items-center gap-1 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-3 py-1.5 text-xs font-semibold shadow-sm">Approuver &amp; envoyer</button>
+                <button className="inline-flex items-center gap-1 rounded-full bg-[var(--theme-accent)] text-white px-3 py-1.5 text-xs font-semibold shadow-sm">Approuver &amp; envoyer</button>
                 <button className="rounded-full border border-[var(--panel-border)] px-3 py-1.5 text-xs text-[var(--theme-text-muted)]">Éditer</button>
                 <span className="text-[10px] text-[var(--theme-text-dim)] ml-auto">7 mots rapportés · « peux-tu m'envoyer le lien »</span>
               </div>
@@ -258,9 +258,9 @@ export function GrowthCanvas({ page, activePageId, onSelectPage }: {
 
         {/* ── CTA ──────────────────────────────────────────────────────── */}
         <section data-anchor="cta" className="rounded-3xl px-10 py-14 text-center" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>
-          <Target className="w-7 h-7 text-[color:#fff] mx-auto mb-3" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[color:#fff] tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
-          <p className="text-[color:#fff] text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
+          <Target className="w-7 h-7 text-white mx-auto mb-3" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
+          <p className="text-white text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
           <a href="#cta" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
             {page.closing.cta.label} <ArrowRight className="w-4 h-4" />
           </a>

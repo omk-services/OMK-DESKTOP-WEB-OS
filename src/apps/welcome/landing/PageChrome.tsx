@@ -149,7 +149,7 @@ export function PageChrome({
                   onClick={() => onSelectPage(p.id)}
                   className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
                     active
-                      ? 'bg-[var(--theme-accent)] text-[color:#fff] shadow-md'
+                      ? 'bg-[var(--theme-accent)] text-white shadow-md'
                       : 'text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]'
                   }`}
                 >
@@ -188,7 +188,7 @@ export function PageChrome({
         <div className="flex items-center gap-3 px-6 py-3">
           <div className="flex items-center gap-2 shrink-0">
             <span
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[color:#fff] text-[11px] font-extrabold shadow-md"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-[11px] font-extrabold shadow-md"
               style={{ background: `linear-gradient(135deg, ${accent}, var(--theme-accent-hover))` }}
             >
               {brand.split(' ').map(w => w[0]).join('').slice(0, 2)}
@@ -207,7 +207,7 @@ export function PageChrome({
                   onClick={() => scrollTo(s.id)}
                   className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
                     active
-                      ? 'bg-[var(--theme-accent)] text-[color:#fff] shadow-md'
+                      ? 'bg-[var(--theme-accent)] text-white shadow-md'
                       : 'text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]'
                   }`}
                 >
@@ -218,7 +218,7 @@ export function PageChrome({
           </nav>
           <button
             onClick={() => scrollTo('cta')}
-            className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-4 py-1.5 text-xs font-bold shadow-md hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-[var(--theme-accent)] text-white px-4 py-1.5 text-xs font-bold shadow-md hover:bg-[var(--theme-accent-hover)] transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
           >
             Start free
             <ArrowRight className="w-3 h-3" />

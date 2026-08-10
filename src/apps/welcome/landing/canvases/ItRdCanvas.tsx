@@ -69,7 +69,7 @@ export function ItRdCanvas({ page, activePageId, onSelectPage }: {
             </h1>
             <p className="text-base text-[var(--theme-text-muted)] leading-relaxed">{page.hero.sub}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
+              <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
                 {page.hero.primaryCta.label} <ArrowRight className="w-4 h-4" />
               </a>
               <span className="text-xs text-[var(--theme-text-muted)]">BYO Supabase · BYO Coolify · tu tiens les clés</span>
@@ -109,7 +109,7 @@ export function ItRdCanvas({ page, activePageId, onSelectPage }: {
             {layers.map((l, i) => (
               <div key={i} className="flex items-stretch gap-3">
                 <div className="flex flex-col items-center pt-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[color:#fff] shadow-md" style={{ background: l.tone }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md" style={{ background: l.tone }}>
                     <l.icon className="w-4 h-4" />
                   </div>
                   {i < layers.length - 1 && <div className="w-px flex-1 bg-[var(--panel-border)] mt-1" />}
@@ -255,9 +255,9 @@ export function ItRdCanvas({ page, activePageId, onSelectPage }: {
 
         {/* ── CTA ──────────────────────────────────────────────────────── */}
         <section data-anchor="cta" className="rounded-3xl px-10 py-14 text-center" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>
-          <Layers className="w-7 h-7 text-[color:#fff] mx-auto mb-3" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[color:#fff] tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
-          <p className="text-[color:#fff] text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
+          <Layers className="w-7 h-7 text-white mx-auto mb-3" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
+          <p className="text-white text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
           <a href="#cta" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
             {page.closing.cta.label} <ArrowRight className="w-4 h-4" />
           </a>

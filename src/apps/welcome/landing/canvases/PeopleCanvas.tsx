@@ -84,7 +84,7 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
             </h1>
             <p className="text-base text-[var(--theme-text-muted)] leading-relaxed">{page.hero.sub}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-[color:#fff] px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
+              <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
                 {page.hero.primaryCta.label} <ArrowRight className="w-4 h-4" />
               </a>
             </div>
@@ -127,7 +127,7 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
                     S{wk.w}
                   </div>
                   <div
-                    className="rounded-md px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[color:#fff] text-center"
+                    className="rounded-md px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white text-center"
                     style={{ background: wk.tone }}
                   >
                     {wk.label}
@@ -161,7 +161,7 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-[color:#fff] text-[10px] font-extrabold" style={{ background: s.state === 'at-risk' ? 'var(--warn)' : 'var(--theme-accent)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[10px] font-extrabold" style={{ background: s.state === 'at-risk' ? 'var(--warn)' : 'var(--theme-accent)' }}>
                     {s.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -208,7 +208,7 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
             ].map((rung, i) => (
               <div key={i} className="flex items-stretch gap-3">
                 <div className="flex flex-col items-center pt-1">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-[color:#fff] text-[10px] font-extrabold" style={{ background: 'var(--theme-accent)' }}>{i + 1}</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-extrabold" style={{ background: 'var(--theme-accent)' }}>{i + 1}</div>
                   {i < 4 && <div className="w-px flex-1 bg-[var(--panel-border)] mt-1" />}
                 </div>
                 <div className="flex-1 pb-3">
@@ -253,9 +253,9 @@ export function PeopleCanvas({ page, activePageId, onSelectPage }: {
 
         {/* ── CTA ──────────────────────────────────────────────────────── */}
         <section data-anchor="cta" className="rounded-3xl px-10 py-14 text-center" style={{ background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover))' }}>
-          <Users className="w-7 h-7 text-[color:#fff] mx-auto mb-3" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[color:#fff] tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
-          <p className="text-[color:#fff] text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
+          <Users className="w-7 h-7 text-white mx-auto mb-3" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
+          <p className="text-white text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
           <a href="#cta" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
             {page.closing.cta.label} <ArrowRight className="w-4 h-4" />
           </a>
