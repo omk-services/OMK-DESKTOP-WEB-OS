@@ -58,15 +58,58 @@ const SQUAD_META: Record<'green-lanterns' | 'xmen', { label: string; tagline: st
 };
 
 function Culture() {
-  const values = ['Client outcomes first', 'Bias to shipped, not perfect', 'Sober by default', 'Own the mistake, keep the receipt'];
+  const values = [
+    { id: 'client-first',     label: 'Client outcomes first',  body: 'Everything we ship has to move a client needle. If it does not, it is craft for its own sake.' },
+    { id: 'ship-bias',        label: 'Bias to shipped, not perfect', body: 'A shipped thing that is wrong is a fixable thing. A perfect thing in a drawer is a missed quarter.' },
+    { id: 'sober-default',    label: 'Sober by default',       body: 'No breathless copy. No hype. Concrete numbers, plain language, calibrated tone.' },
+    { id: 'own-mistake',      label: 'Own the mistake, keep the receipt', body: 'When a call is wrong, name it, fix it, and write down what we changed so we do not relearn it.' },
+  ];
+  const openMemory = (anchorKind: string) => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent('coach-os:open-app-section', {
+        detail: { appId: 'people', sectionId: 'memory', query: { anchorKind } },
+      }),
+    );
+  };
+
   return (
     <div className="p-7">
-      <SectionHead title="Culture" subtitle="The operating values every agent inherits" />
-      <div className="grid grid-cols-2 gap-3">
-        {values.map((v, i) => (
-          <div key={i} className="bg-[var(--panel-solid)] rounded-xl border border-[var(--panel-border)] shadow-sm p-5 flex items-start gap-3">
-            <Heart className="w-5 h-5 text-[var(--theme-text-muted)] shrink-0 mt-0.5" />
-            <span className="text-sm font-medium text-[var(--theme-text)]">{v}</span>
+      <SectionHead
+        title="Culture"
+        subtitle="The operating values every agent inherits"
+        action={
+          <div className="flex items-center gap-1.5">
+            <Badge tone="accent">{values.length} valeurs</Badge>
+          </div>
+        }
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {values.map((v) => (
+          <div
+            key={v.id}
+            data-culture-value={v.id}
+            className="bg-[var(--panel-solid)] rounded-xl border border-[var(--panel-border)] shadow-sm p-5 flex flex-col gap-2"
+          >
+            <div className="flex items-start gap-3">
+              <Heart className="w-5 h-5 text-[var(--theme-text-muted)] shrink-0 mt-0.5" />
+              <span className="text-sm font-semibold text-[var(--theme-text)]">{v.label}</span>
+            </div>
+            <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+              {v.body}
+            </p>
+            <div className="pt-2 mt-auto border-t border-[var(--panel-border-subtle)]">
+              <button
+                type="button"
+                onClick={() => openMemory(v.id)}
+                className="text-[10.5px] font-semibold uppercase tracking-wider hover:underline"
+                style={{ color: ACCENT }}
+                data-culture-link={v.id}
+                title="Voir les faits liés dans Mémoire"
+              >
+                Voir la mémoire liée →
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -643,10 +686,28 @@ function Schedule() {
   const quietestHour = colSums.indexOf(Math.min(...colSums));
   const weekdayAvg = Math.round(SCHEDULE_GRID.slice(0, 5).flat().reduce((s, v) => s + v, 0) / (5 * 24));
 
+  const [picked, setPicked] = useState<{ day: typeof DAYS[number]; hour: number } | null>(null);
+  const [agentFilter, setAgentFilter] = useState<string>('all');
+
   // T4 — cadence tour. Fires once on first mount of the Cadence section.
   useEffect(() => {
     void launchTour(TOUR_IDS.CADENCE);
   }, []);
+
+  const agentOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of SCHEDULE_TASKS) set.add(t.agent);
+    return ['all', ...Array.from(set).sort()];
+  }, []);
+
+  const filteredTasks = picked
+    ? SCHEDULE_TASKS.filter((t) => {
+        const matchesDay = t.day === picked.day;
+        const matchesHour = picked.hour >= t.startHour && picked.hour < t.endHour;
+        const matchesAgent = agentFilter === 'all' || t.agent === agentFilter;
+        return matchesDay && matchesHour && matchesAgent;
+      })
+    : [];
 
   return (
     <div className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
@@ -661,7 +722,10 @@ function Schedule() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— ACTIVITY HEATMAP · 7d × 24h</div>
-            <div className="text-[12px] text-[var(--theme-text-muted)] mt-0.5">When the squads are busiest, UTC</div>
+            <div className="text-[12px] text-[var(--theme-text-muted)] mt-0.5">
+              Clique une case pour voir les tâches prévues
+              {picked ? ` · ${picked.day} ${String(picked.hour).padStart(2, '0')}:00` : ''}
+            </div>
           </div>
           <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
             <span>quiet</span>
@@ -689,14 +753,29 @@ function Schedule() {
             {DAYS.map((day, dayIdx) => (
               <div key={day} className="grid mt-1" style={{ gridTemplateColumns: '40px repeat(24, 1fr)', gap: '2px' }}>
                 <div className="text-[10px] font-mono uppercase text-[var(--theme-text-muted)] font-semibold pr-2 text-right self-center">{day}</div>
-                {HOURS.map(h => (
-                  <div
-                    key={h}
-                    className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-[var(--theme-accent)] cursor-pointer"
-                    style={{ background: heatColor(SCHEDULE_GRID[dayIdx][h]) }}
-                    title={`${day} ${h}:00 — activity ${SCHEDULE_GRID[dayIdx][h]}`}
-                  />
-                ))}
+                {HOURS.map(h => {
+                  const isPicked = picked?.day === day && picked.hour === h;
+                  const hasTask = SCHEDULE_TASKS.some(
+                    (t) => t.day === day && h >= t.startHour && h < t.endHour,
+                  );
+                  return (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => setPicked({ day, hour: h })}
+                      data-cadence-cell
+                      data-day={day}
+                      data-hour={h}
+                      aria-label={`${day} ${h}:00 — activity ${SCHEDULE_GRID[dayIdx][h]}${hasTask ? ' · a des tâches prévues' : ''}`}
+                      className="h-5 rounded-sm transition-all hover:ring-1 hover:ring-[var(--theme-accent)] focus:outline-none"
+                      style={{
+                        background: heatColor(SCHEDULE_GRID[dayIdx][h]),
+                        boxShadow: isPicked ? '0 0 0 2px var(--theme-accent)' : hasTask ? 'inset 0 0 0 1px rgba(255,255,255,0.18)' : 'none',
+                        cursor: 'pointer',
+                      }}
+                    />
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -718,6 +797,80 @@ function Schedule() {
           </div>
         </div>
       </div>
+
+      {/* Picked cell detail — what runs at this hour/day */}
+      {picked && (
+        <div
+          data-cadence-detail
+          className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">
+              — CASE · {picked.day} {String(picked.hour).padStart(2, '0')}:00 UTC
+            </div>
+            <select
+              value={agentFilter}
+              onChange={(e) => setAgentFilter(e.target.value)}
+              data-cadence-agent-filter
+              className="ml-auto px-2 py-1 rounded-lg text-[10.5px] font-semibold outline-none"
+              style={{
+                background: 'var(--theme-bg)',
+                color: 'var(--theme-text)',
+                border: '1px solid var(--panel-border)',
+              }}
+            >
+              {agentOptions.map((a) => (
+                <option key={a} value={a}>
+                  {a === 'all' ? 'Tous les agents' : a}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => { setPicked(null); setAgentFilter('all'); }}
+              className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] text-[11px] font-semibold"
+              data-cadence-close
+              aria-label="Fermer le détail"
+            >
+              Fermer
+            </button>
+          </div>
+          {filteredTasks.length === 0 ? (
+            <p className="text-[12px] italic" style={{ color: 'var(--theme-muted)' }}>
+              Aucune tâche prévue à ce créneau
+              {agentFilter !== 'all' ? ` pour ${agentFilter}` : ''}.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {filteredTasks.map((t) => {
+                const kindColor = TASK_KIND_COLOR[t.kind];
+                const cadenceLabel = TASK_KIND_LABEL[t.kind];
+                return (
+                  <li
+                    key={t.id}
+                    data-cadence-task={t.id}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                    style={{ background: 'var(--canvas)', border: '1px solid var(--panel-border-subtle)' }}
+                  >
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--theme-text-muted)] w-10 shrink-0">{t.day}</span>
+                    <span className="font-mono text-[11px] text-[var(--theme-text)] tabular-nums w-24 shrink-0">
+                      {String(t.startHour).padStart(2, '0')}:00–{String(t.endHour).padStart(2, '0')}:00
+                    </span>
+                    <span
+                      className="inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                      style={{ color: kindColor, background: `${kindColor}1a` }}
+                    >
+                      {cadenceLabel}
+                    </span>
+                    <span className="text-[12.5px] text-[var(--theme-text)] truncate flex-1">{t.label}</span>
+                    <span className="text-[10px] font-mono text-[var(--theme-text-dim)] shrink-0">@ {t.agent}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* Planned tasks — reframed as Daily Standup / Sprint Review / Retrospective */}
       <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
