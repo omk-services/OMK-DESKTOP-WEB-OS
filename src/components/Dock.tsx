@@ -94,8 +94,12 @@ export function Dock(): import('react').ReactNode {
       }
       style={vertical ? { width: LARGEUR_DOCK } : { height: HAUTEUR_DOCK }}
     >
+      {/* La barre elle-meme ne coupe RIEN : `overflow` est confine au defileur
+          des pastilles, juste en dessous. Le porter ici clippait le panneau de
+          reglages qui se deploie au-dessus — a l'ecran, le panneau paraissait
+          « fondre » dans la barre au lieu de s'ouvrir. */}
       <div
-        className={`pointer-events-auto flex overflow-auto border ${
+        className={`pointer-events-auto flex border ${
           vertical
             ? 'mr-2 max-h-[86vh] flex-col items-center gap-1.5 px-1.5 py-2'
             : 'mb-2 max-w-[92vw] items-end gap-1.5 px-2 py-1.5'
@@ -107,6 +111,13 @@ export function Dock(): import('react').ReactNode {
           borderRadius: skin.radius,
           backdropFilter: skin.backdrop || undefined,
         }}
+      >
+      <div
+        className={`flex min-w-0 ${
+          vertical
+            ? 'max-h-[70vh] flex-col items-center gap-1.5 overflow-y-auto overflow-x-visible'
+            : 'max-w-[78vw] items-end gap-1.5 overflow-x-auto overflow-y-visible'
+        }`}
       >
         {ouvertes.map(win => {
           const app = registre.find(a => a.id === win.id);
@@ -162,8 +173,10 @@ export function Dock(): import('react').ReactNode {
             </div>
           );
         })}
+      </div>
 
-        {/* Separateur puis reglages — toujours en queue de barre. */}
+        {/* Separateur puis reglages — toujours en queue de barre, HORS du
+            defileur pour que le panneau puisse deborder de la barre. */}
         <span
           className="shrink-0 rounded-full"
           style={{
