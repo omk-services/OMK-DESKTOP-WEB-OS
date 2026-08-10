@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type React from 'react';
 import {
   BookOpen, Check, ChevronRight, CircleAlert, CircleCheck, Database,
-  FileArchive, KeyRound, Layers3, Link2, LockKeyhole, Network, ShieldCheck,
-  Sparkles, Users, X,
+  FileArchive, FilePlus, KeyRound, Layers3, Link2, LockKeyhole, Network,
+  ShieldCheck, Sparkles, Upload, Users, X,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../../components/AppFrame';
 import { useShellStore } from '../../../stores/shell.store';
@@ -61,22 +61,150 @@ function Integrations() {
 }
 
 function Knowledge() {
-  const [selected, setSelected] = useState(DOCUMENTS[0]);
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>(DOCUMENTS);
+  const [selected, setSelected] = useState<KnowledgeDocument>(DOCUMENTS[0]);
   const addToast = useShellStore((s) => s.addToast);
-  // Counts derived from DOCUMENTS seed — no hardcoded magic numbers. If a
-  // document has 0 chunks (extrait state), it's still counted in the sum so
-  // the badge matches what's on screen.
-  const chunksTotal = DOCUMENTS.reduce((acc, d) => acc + d.chunks, 0);
-  const vectorised = DOCUMENTS.filter((d) => d.state === 'vectorise' || d.state === 'interrogeable').length;
-  const interrogeable = DOCUMENTS.filter((d) => d.state === 'interrogeable').length;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // The list of accepted extensions matches the formats the page already
+  // announces in the cycle (PDF, DOCX, MD). 10 MB matches the typical
+  // RAG ingest limit and stays well below localStorage quotas.
+  const ACCEPTED_EXTENSIONS = ['pdf', 'docx', 'md'] as const;
+  const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+  const ACCEPT_ATTR = '.pdf,.docx,.md';
+
+  // Counts derived from the live list — no hardcoded magic numbers. A freshly
+  // deposited document has 0 chunks and is in state 'depose', so it bumps
+  // Documents by 1 and leaves the other three counters alone. The lack of
+  // movement is the proof that the counter can move.
+  const chunksTotal = documents.reduce((acc, d) => acc + d.chunks, 0);
+  const vectorised = documents.filter((d) => d.state === 'vectorise' || d.state === 'interrogeable').length;
+  const interrogeable = documents.filter((d) => d.state === 'interrogeable').length;
+
+  const handleOpenPicker = (): void => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePickerChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
+    // Reset the input value so the same file can be picked again later.
+    event.target.value = '';
+    if (!file) {
+      addToast({
+        source: 'Knowledge',
+        type: 'info',
+        message: 'Dépôt annulé.',
+      });
+      return;
+    }
+    const dot = file.name.lastIndexOf('.');
+    const ext = dot === -1 ? '' : file.name.slice(dot + 1).toLowerCase();
+    if (!ext || !(ACCEPTED_EXTENSIONS as readonly string[]).includes(ext)) {
+      addToast({
+        source: 'Knowledge',
+        type: 'error',
+        message: `Format non supporté : .${ext || '?'}. Le dépôt accepte PDF, DOCX et MD.`,
+      });
+      return;
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      addToast({
+        source: 'Knowledge',
+        type: 'error',
+        message: `Fichier trop volumineux (${sizeMb} Mo) — limite 10 Mo. Réduis la taille ou découpe en plusieurs dépôts.`,
+      });
+      return;
+    }
+    const newDoc: KnowledgeDocument = {
+      id: `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      title: file.name,
+      type: ext.toUpperCase(),
+      state: 'depose',
+      chunks: 0,
+      updated: formatToday(),
+      excerpt: `${formatSize(file.size)} · en attente de découpage et vectorisation.`,
+      answer: 'Document fraîchement déposé. Aucune réponse tant que le pipeline RAG ne l\'a pas découpé et vectorisé.',
+      source: 'dépôt local',
+    };
+    setDocuments((prev) => [newDoc, ...prev]);
+    setSelected(newDoc);
+    addToast({
+      source: 'Knowledge',
+      type: 'success',
+      message: `${file.name} déposé · en attente de découpage`,
+    });
+  };
+
   return <div className="p-7" style={{ color: 'var(--theme-text)' }}>
-    <PlatformHeader title="Knowledge" subtitle="Du dépôt à la question, chaque document garde son état et sa source." icon={BookOpen} action={<button type="button" onClick={() => addToast({ source: 'Knowledge', type: 'info', message: 'Draft déposé — en attente de validation humaine avant indexation.' })} className="rounded-lg px-3 py-2 text-xs font-bold" style={{ background: ACCENT, color: 'var(--theme-text)' }}>Déposer un document</button>} />
-    <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4"><StatCard label="Documents" value={DOCUMENTS.length} hint="dans le dépôt" /><StatCard label="Chunks" value={chunksTotal} hint="segments produits" tone="accent" /><StatCard label="Vectorisés" value={vectorised} hint="index en cours" tone="warn" /><StatCard label="Interrogeables" value={interrogeable} hint="prêt pour le chat" tone="ok" /></div>
+    <PlatformHeader title="Knowledge" subtitle="Du dépôt à la question, chaque document garde son état et sa source." icon={BookOpen} action={
+      <div className="flex items-center gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPT_ATTR}
+          onChange={handlePickerChange}
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+        <button
+          type="button"
+          onClick={handleOpenPicker}
+          data-action="deposit-document"
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all hover:brightness-110 active:scale-[0.99]"
+          style={{ background: ACCENT, color: '#ffffff' }}
+        >
+          <Upload className="h-3.5 w-3.5" /> Déposer un document
+        </button>
+      </div>
+    } />
+    <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4"><StatCard label="Documents" value={documents.length} hint="dans le dépôt" /><StatCard label="Chunks" value={chunksTotal} hint="segments produits" tone="accent" /><StatCard label="Vectorisés" value={vectorised} hint="index en cours" tone="warn" /><StatCard label="Interrogeables" value={interrogeable} hint="prêt pour le chat" tone="ok" /></div>
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-      <Panel><div className="border-b border-[var(--panel-border)] px-5 py-4"><div className="flex items-center justify-between"><h3 className="text-sm font-bold">Cycle documentaire</h3><span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>dépôt → RAG</span></div></div><div className="divide-y divide-[var(--panel-border)]">{DOCUMENTS.map((document) => { const state = docState[document.state]; return <button type="button" key={document.id} onClick={() => setSelected(document)} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--theme-surface-hover)]"><div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: `${state.color}18`, color: state.color }}><FileArchive className="h-4 w-4" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="truncate text-sm font-semibold">{document.title}</span><span className="text-[10px]" style={{ color: 'var(--theme-muted)' }}>{document.type}</span></div><p className="mt-0.5 truncate text-xs" style={{ color: 'var(--theme-muted)' }}>{document.excerpt}</p></div><div className="text-right"><div className="text-[10px] font-bold" style={{ color: state.color }}>{state.label}</div><div className="mt-1 text-[10px]" style={{ color: 'var(--theme-muted)' }}>{document.chunks || '—'} chunks</div></div></button>; })}</div></Panel>
+      <Panel><div className="border-b border-[var(--panel-border)] px-5 py-4"><div className="flex items-center justify-between"><h3 className="text-sm font-bold">Cycle documentaire</h3><span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>dépôt → RAG</span></div></div>
+        {documents.length === 0 ? (
+          <EmptyDocuments onPick={handleOpenPicker} />
+        ) : (
+          <div className="divide-y divide-[var(--panel-border)]">{documents.map((document) => { const state = docState[document.state]; return <button type="button" key={document.id} onClick={() => setSelected(document)} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--theme-surface-hover)]"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${state.color}18`, color: state.color }}><FileArchive className="h-4 w-4" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="truncate text-sm font-semibold">{document.title}</span><span className="text-[10px]" style={{ color: 'var(--theme-muted)' }}>{document.type}</span></div><p className="mt-0.5 truncate text-xs" style={{ color: 'var(--theme-muted)' }}>{document.excerpt}</p></div><div className="shrink-0 text-right"><div className="text-[10px] font-bold" style={{ color: state.color }}>{state.label}</div><div className="mt-1 text-[10px]" style={{ color: 'var(--theme-muted)' }}>{document.chunks || '—'} chunks</div></div></button>; })}</div>
+        )}
+      </Panel>
       <DocumentQuestion document={selected} />
     </div>
   </div>;
+}
+
+function formatToday(): string {
+  const d = new Date();
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = d.toLocaleDateString('fr-FR', { month: 'long' });
+  return `${day} ${month} ${d.getFullYear()}`;
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function EmptyDocuments({ onPick }: { onPick: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--theme-surface-hover)' }}>
+        <FilePlus className="h-4 w-4" style={{ color: 'var(--theme-muted)' }} />
+      </div>
+      <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text)' }}>Aucun document dans le dépôt</div>
+      <div className="max-w-sm text-[11.5px]" style={{ color: 'var(--theme-muted)' }}>
+        Dépose un PDF, DOCX ou MD pour démarrer le cycle d'indexation. Le pipeline de découpage et vectorisation n'est pas branché — les documents restent en état « Déposé » en attendant.
+      </div>
+      <button
+        type="button"
+        onClick={onPick}
+        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-bold transition-all hover:brightness-110 active:scale-[0.99]"
+        style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text)', border: '1px solid var(--panel-border)' }}
+      >
+        <Upload className="h-3.5 w-3.5" /> Déposer un document
+      </button>
+    </div>
+  );
 }
 
 function DocumentQuestion({ document }: { document: KnowledgeDocument }) {
