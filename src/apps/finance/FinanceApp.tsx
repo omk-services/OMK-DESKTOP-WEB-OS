@@ -308,7 +308,7 @@ export function FinanceApp() {
               accent: PLANCHER_STATUS_ACCENT[status] ?? ACCENT,
               icon: <Scale className="w-5 h-5" />,
               metricLabel: 'price / floor',
-              metricValue: `$${price} / $${floor}`,
+              metricValue: `$${price.toLocaleString('en-US')} / $${floor.toLocaleString('en-US')}`,
               meta: gap >= 0 ? `marge +$${gap.toLocaleString('en-US')}` : `$${Math.abs(gap).toLocaleString('en-US')} sous le plancher`,
             };
           }}
