@@ -26,7 +26,7 @@ const STATUS_LABEL: Record<RoadmapItem['status'], string> = {
   deferred: 'DEFERRED',
 };
 
-export function ChangelogTabs() {
+export function ChangelogTabs(): import('react').ReactNode {
   const [tab, setTab] = useState<TabId>('milestones');
 
   return (

@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useThemeStore, applyThemeTokens } from './store';
 import { THEMES } from './tokens';
 
-export function ThemeApplier() {
+export function ThemeApplier(): import('react').ReactNode {
   const globalTheme = useThemeStore((s) => s.globalTheme);
 
   useEffect(() => {

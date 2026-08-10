@@ -110,7 +110,7 @@ export function LiquidMetal({
         <circle cx="50" cy="50" r="48" fill={highlightColor} filter="url(#canvasui-liquidmetal-turb)" />
       </svg>
       {children ? (
-        <div className="absolute inset-0 flex items-center justify-center text-white">
+        <div className="absolute inset-0 flex items-center justify-center text-[var(--theme-on-accent)]">
           {children}
         </div>
       ) : null}

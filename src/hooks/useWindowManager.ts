@@ -4,7 +4,17 @@ import { useShellStore } from '../stores/shell.store';
 import type { WindowPosition, WindowSize, ResizeDirection, ResizeStart, SnapZone } from '../types/window.types';
 import { WINDOW_CONSTRAINTS as WC } from '../types/window.types';
 
-export function useWindowManager(windowId: string) {
+interface WindowManagerResult {
+  windowPosition: WindowPosition;
+  windowSize: WindowSize;
+  isDragging: boolean;
+  resizeDir: ResizeDirection;
+  snapZone: SnapZone;
+  handleTitleBarMouseDown: (event: React.MouseEvent) => void;
+  handleResizeStart: (event: React.MouseEvent, direction: ResizeDirection) => void;
+}
+
+export function useWindowManager(windowId: string): WindowManagerResult {
   const windowState = useShellStore(s => s.windows.find(w => w.id === windowId));
   const updateWindowState = useShellStore(s => s.updateWindowState);
 

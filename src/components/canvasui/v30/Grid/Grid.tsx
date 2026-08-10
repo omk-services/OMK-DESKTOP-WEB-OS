@@ -22,7 +22,7 @@ export interface GridProps extends GridOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Grid({ children, className, style, ...options }: GridProps) {
+export function Grid({ children, className, style, ...options }: GridProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

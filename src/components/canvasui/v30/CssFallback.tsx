@@ -103,7 +103,7 @@ const STYLE_BY_EFFECT: Record<CanvasEffectId, CSSProperties> = {
  * of the surface. The keyframes id is unique per effect (defined in
  * `index.css`) so multiple effects can be layered without animation bleed.
  */
-export function CssFallback({ effectId, themeId, className, style }: CssFallbackProps) {
+export function CssFallback({ effectId, themeId, className, style }: CssFallbackProps): import('react').ReactNode {
   const mapping = getCanvasMapping(themeId);
   const accent = mapping.accent;
   const _keyName = EFFECT_KEYFRAMES[effectId];

@@ -26,7 +26,7 @@ const emptySubscribe = () => () => {};
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export function Frost({ children, className, style, ...options }: FrostProps) {
+export function Frost({ children, className, style, ...options }: FrostProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

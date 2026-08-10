@@ -14,7 +14,7 @@ export function BackAffordance({
   label: string;
   onBack: () => void;
   accent?: string;
-}) {
+}): ReactNode {
   return (
     <button
       type="button"
@@ -42,7 +42,7 @@ export function PrevNextFooter({
   prev?: CmsItem;
   next?: CmsItem;
   onNavigate: (itemId: string) => void;
-}) {
+}): ReactNode {
   const labelPrev = prev ? String(prev[def.titleField]) : 'Start';
   const labelNext = next ? String(next[def.titleField]) : 'End';
   return (
@@ -91,7 +91,7 @@ export function PillBadge({
   children: ReactNode;
   accent: string;
   tone?: 'soft' | 'solid';
-}) {
+}): ReactNode {
   const bg = tone === 'solid' ? accent : `${accent}1f`;
   const fg = tone === 'solid' ? '#ffffff' : accent;
   return (

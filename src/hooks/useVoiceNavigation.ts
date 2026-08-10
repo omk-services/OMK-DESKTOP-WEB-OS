@@ -37,7 +37,14 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
-export function useVoiceNavigation() {
+interface VoiceNavigationResult {
+  listening: boolean;
+  toggle: () => void;
+  lastTranscript: string;
+  supported: boolean;
+}
+
+export function useVoiceNavigation(): VoiceNavigationResult {
   const [listening, setListening] = useState(false);
   const [lastTranscript, setLastTranscript] = useState('');
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);

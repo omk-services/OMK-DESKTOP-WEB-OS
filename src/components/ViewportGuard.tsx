@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import React from 'react';
 import { useShellStore } from '../stores/shell.store';
 
-export function ViewportGuard({ children }: { children: React.ReactNode }) {
+export function ViewportGuard({ children }: { children: React.ReactNode }): import('react').ReactNode {
   const windows = useShellStore(s => s.windows);
   const updatePosition = useShellStore(s => s.updatePosition);
 

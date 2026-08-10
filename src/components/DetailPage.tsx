@@ -54,7 +54,7 @@ interface DetailPageProps {
   meta: DetailMeta;
 }
 
-export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: DetailPageProps) {
+export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: DetailPageProps): import('react').ReactNode {
   const Icon = meta.icon;
 
   const handleAction = (): void => {
@@ -70,12 +70,12 @@ export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: Detail
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-stone-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-muted)] transition-colors hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {backLabel}
           </button>
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--theme-text-dim)]">
             {meta.label}
           </span>
         </div>
@@ -83,7 +83,7 @@ export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: Detail
         {/* Title block — icon + status + title + subtitle */}
         <div className="mb-6 flex items-start gap-4">
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-[var(--theme-on-accent)] shadow-sm"
             style={{ background: meta.accent }}
           >
             <Icon className="h-6 w-6" />
@@ -95,29 +95,29 @@ export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: Detail
             >
               {item.status}
             </span>
-            <h1 className="mt-2 text-2xl font-bold leading-tight text-stone-900">
+            <h1 className="mt-2 text-2xl font-bold leading-tight text-[var(--theme-text)]">
               {item.title}
             </h1>
-            <p className="mt-1 text-sm text-stone-500">{item.subtitle}</p>
+            <p className="mt-1 text-sm text-[var(--theme-text-muted)]">{item.subtitle}</p>
           </div>
         </div>
 
         {/* Full context section */}
         <section className="mb-6 rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
             Full context
           </h2>
-          <p className="text-[13.5px] leading-relaxed text-stone-700">{item.summary}</p>
+          <p className="text-[13.5px] leading-relaxed text-[var(--theme-text-muted)]">{item.summary}</p>
         </section>
 
         {/* Fields dl */}
-        <dl className="mb-6 divide-y divide-stone-100 rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-5">
+        <dl className="mb-6 divide-y divide-[var(--panel-border-subtle)] rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] px-5">
           {item.fields.map((field) => (
             <div key={field.label} className="py-4">
-              <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <dt className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-dim)]">
                 {field.label}
               </dt>
-              <dd className="mt-1 text-[13.5px] font-medium leading-snug text-stone-800">
+              <dd className="mt-1 text-[13.5px] font-medium leading-snug text-[var(--theme-text)]">
                 {field.value}
               </dd>
             </div>
@@ -129,7 +129,7 @@ export function DetailPage({ item, backLabel, onBack, onNavigate, meta }: Detail
           <button
             type="button"
             onClick={handleAction}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-95 active:scale-[0.99]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-[var(--theme-on-accent)] shadow-sm transition-all hover:brightness-95 active:scale-[0.99]"
             style={{ background: meta.accent }}
           >
             {meta.action.label}

@@ -84,7 +84,7 @@ function ActiveSection({ section, navigateToSection }: { section: AppSection; na
 // `disableSignatureFx`, `canvasNuance` et `canvasEffect` restent acceptes dans
 // AppFrameProps pour ne pas casser leurs appelants, mais ne sont plus
 // destructures : ils ne pilotent plus rien depuis le retrait du bandeau.
-export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps) {
+export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups, tools }: AppFrameProps): import('react').ReactNode {
   const [activeId, setActiveId] = useState(sections[0]?.id);
   const [isNarrow, setIsNarrow] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
@@ -238,7 +238,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
               style={{ background: `linear-gradient(135deg, ${accent}, ${accent}dd)`, boxShadow: `0 2px 8px ${accent}30` }}
             >
-              <Icon className="w-4.5 h-4.5 text-white" />
+              <Icon className="w-4.5 h-4.5 text-[var(--theme-on-accent)]" />
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
@@ -291,7 +291,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
               }}
             >
               <div
-                className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-white text-[10px] font-extrabold"
+                className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[var(--theme-on-accent)] text-[10px] font-extrabold"
                 style={{ background: tokens.accent }}
               >
                 {themeMeta.name.charAt(0)}
@@ -393,15 +393,15 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
                   <span className="text-base">⚡</span>
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-bold text-stone-800 tracking-tight truncate font-outfit">AI Tools</div>
-                  <div className="text-[10px] text-stone-400 uppercase tracking-wide truncate">{tools.length} assistants</div>
+                  <div className="text-sm font-bold text-[var(--theme-text)] tracking-tight truncate font-outfit">AI Tools</div>
+                  <div className="text-[10px] text-[var(--theme-text-dim)] uppercase tracking-wide truncate">{tools.length} assistants</div>
                 </div>
               </div>
             )}
             <button
               onClick={() => setToolsOpen(!toolsOpen)}
               title={toolsOpen ? 'Collapse tools' : 'Expand tools'}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-white transition-colors shrink-0"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--theme-text-dim)] hover:text-[var(--theme-text-muted)] hover:bg-[var(--theme-surface)] transition-colors shrink-0"
             >
               {toolsOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
             </button>
@@ -412,8 +412,8 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
           </div>
 
           {toolsOpen && (
-            <div className="px-4 py-2.5 border-t border-[var(--panel-border-subtle)] text-[10px] text-stone-400 leading-snug">
-              Powered by OpenRouter · <span className="text-stone-500">free model router</span> on overload
+            <div className="px-4 py-2.5 border-t border-[var(--panel-border-subtle)] text-[10px] text-[var(--theme-text-dim)] leading-snug">
+              Powered by OpenRouter · <span className="text-[var(--theme-text-muted)]">free model router</span> on overload
             </div>
           )}
         </aside>
@@ -423,7 +423,7 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
 }
 
 /** Standard content header inside an app section */
-export function SectionHead({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+export function SectionHead({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }): import('react').ReactNode {
   return (
     <div className="flex items-start justify-between gap-4 mb-5">
       <div>
@@ -457,39 +457,39 @@ function ToolCard({ tool, accent, collapsed }: { tool: ToolDef; accent: string; 
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[var(--panel-border)] shadow-sm p-3 flex flex-col gap-2">
+    <div className="bg-[var(--theme-surface)] rounded-xl border border-[var(--panel-border)] shadow-sm p-3 flex flex-col gap-2">
       <div className="flex items-start gap-2.5">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${accent}1a` }}>
           <TIcon className="w-4.5 h-4.5" style={{ color: accent }} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[12.5px] font-bold text-stone-900 truncate">{tool.name}</span>
+            <span className="text-[12.5px] font-bold text-[var(--theme-text)] truncate">{tool.name}</span>
           </div>
           <div className="flex items-center gap-1 mt-0.5">
             <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: meta.color, background: meta.bg }}>
               <SIcon className="w-2.5 h-2.5" /> {meta.label}
             </span>
             {tool.lastActivity && (
-              <span className="text-[10px] text-stone-400 truncate">{tool.lastActivity}</span>
+              <span className="text-[10px] text-[var(--theme-text-dim)] truncate">{tool.lastActivity}</span>
             )}
           </div>
         </div>
       </div>
-      <p className="text-[11px] text-stone-600 leading-snug">{tool.description}</p>
+      <p className="text-[11px] text-[var(--theme-text-muted)] leading-snug">{tool.description}</p>
       {tool.modelLabel && (
-        <div className="text-[9.5px] font-mono text-stone-400">model · {tool.modelLabel}</div>
+        <div className="text-[9.5px] font-mono text-[var(--theme-text-dim)]">model · {tool.modelLabel}</div>
       )}
       <div className="flex items-center gap-1.5 mt-0.5">
         <button
           disabled={tool.status === 'running'}
           onClick={tool.onRun}
-          className="flex-1 text-[11px] font-semibold text-white rounded-lg py-1 transition-all disabled:opacity-50"
+          className="flex-1 text-[11px] font-semibold text-[var(--theme-on-accent)] rounded-lg py-1 transition-all disabled:opacity-50"
           style={{ background: accent }}
         >
           {tool.status === 'running' ? 'Running…' : 'Run'}
         </button>
-        <button className="text-[11px] font-semibold text-stone-600 hover:text-stone-900 px-2 py-1 rounded-lg hover:bg-stone-50">
+        <button className="text-[11px] font-semibold text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] px-2 py-1 rounded-lg hover:bg-[var(--theme-surface-hover)]">
           Logs
         </button>
       </div>

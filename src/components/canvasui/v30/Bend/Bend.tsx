@@ -23,7 +23,7 @@ export interface BendProps extends BendOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Bend({ children, className, style, ...options }: BendProps) {
+export function Bend({ children, className, style, ...options }: BendProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

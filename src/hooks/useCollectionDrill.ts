@@ -7,7 +7,13 @@ import { useWindowPage } from '../contexts/WindowContext';
 import { useCmsStore } from '../lib/cms/cms.store';
 import { useVoiceIntentStore } from '../lib/voiceIntent';
 
-export function useCollectionDrill(collectionId: string, sectionLabels: string | string[]) {
+interface CollectionDrillResult {
+  openId: string | null;
+  open: (id: string | null) => void;
+  close: () => void;
+}
+
+export function useCollectionDrill(collectionId: string, sectionLabels: string | string[]): CollectionDrillResult {
   const [openId, setOpenId] = useState<string | null>(null);
   const { windowId, activePage, setDetail } = useWindowPage();
   const def = useCmsStore(s => s.collections[collectionId]);

@@ -6,7 +6,7 @@ import { useShellStore } from '../stores/shell.store';
 import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
 
-export function AppDrawer() {
+export function AppDrawer(): import('react').ReactNode {
   const isDrawerOpen = useShellStore(s => s.windows.some(w => w.id === 'drawer' && w.isOpen));
   const closeApp = useShellStore(s => s.closeApp);
   const openApp = useShellStore(s => s.openApp);
@@ -29,23 +29,26 @@ export function AppDrawer() {
       className="fixed inset-0 z-[3000] bg-[var(--canvas)]/85 backdrop-blur-2xl p-12 flex flex-col items-center"
     >
       <button
+        type="button"
         onClick={() => closeApp('drawer')}
-        className="absolute top-8 right-12 p-3 rounded-full bg-white hover:bg-stone-50 text-stone-400 hover:text-stone-700 transition-all border border-[var(--panel-border)] shadow-sm"
+        aria-label="Close launchpad"
+        className="absolute top-8 right-12 p-3 rounded-full bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-muted)] transition-all border border-[var(--panel-border)] shadow-sm"
       >
         <X className="w-6 h-6" />
       </button>
 
       <div className="w-full max-w-xl mb-14 space-y-6 text-center">
-        <h2 className="text-2xl font-bold text-stone-800 tracking-tight font-outfit">Launchpad</h2>
+        <h2 className="text-2xl font-bold text-[var(--theme-text)] tracking-tight font-outfit">Launchpad</h2>
         <div className="relative">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-300" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--theme-text-dim)]" />
           <input
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
             type="text"
             placeholder="Search apps…"
-            className="w-full bg-white border border-[var(--panel-border)] rounded-2xl py-3.5 pl-14 pr-6 text-base text-stone-800 outline-none focus:border-[var(--theme-accent)] transition-all shadow-sm"
+            aria-label="Search apps"
+            className="w-full bg-[var(--theme-surface)] border border-[var(--panel-border)] rounded-2xl py-3.5 pl-14 pr-6 text-base text-[var(--theme-text)] outline-none focus:border-[var(--theme-accent)] transition-all shadow-sm"
           />
         </div>
       </div>
@@ -63,11 +66,11 @@ export function AppDrawer() {
               onClick={() => { openApp(app.id, app.name); closeApp('drawer'); }}
               className="flex flex-col items-center gap-3 group"
             >
-              <div className="w-20 h-20 rounded-[26px] bg-white border border-[var(--panel-border)] flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:border-[var(--theme-accent)] transition-all duration-300">
+              <div className="w-20 h-20 rounded-[26px] bg-[var(--theme-surface)] border border-[var(--panel-border)] flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:border-[var(--theme-accent)] transition-all duration-300">
                 <Icon className="w-9 h-9" style={{ color: accent }} />
               </div>
               <div className="text-center">
-                <div className="text-xs font-semibold text-stone-700 group-hover:text-stone-900 transition-colors">{app.name}</div>
+                <div className="text-xs font-semibold text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text)] transition-colors">{app.name}</div>
               </div>
             </motion.button>
           );

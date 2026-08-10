@@ -16,7 +16,7 @@
  */
 import solarpunk from '../assets/solarpunk-default.jpg';
 
-export function Wallpaper() {
+export function Wallpaper(): import('react').ReactNode {
   return (
     <div
       className="fixed inset-0 z-[-10] overflow-hidden"

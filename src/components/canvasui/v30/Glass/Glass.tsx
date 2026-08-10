@@ -22,7 +22,7 @@ export interface GlassProps extends GlassOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Glass({ children, className, style, ...options }: GlassProps) {
+export function Glass({ children, className, style, ...options }: GlassProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

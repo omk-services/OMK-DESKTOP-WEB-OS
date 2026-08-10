@@ -26,6 +26,6 @@ export const WindowContext = createContext<WindowContextValue>({
   setDetail: () => {},
 });
 
-export function useWindowPage() {
+export function useWindowPage(): WindowContextValue {
   return useContext(WindowContext);
 }

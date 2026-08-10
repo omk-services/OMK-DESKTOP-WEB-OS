@@ -57,11 +57,26 @@ export const useThemeStore = create<ThemeStore>()(
   )
 );
 
+function accentContrast(accent: string): string {
+  const hex = accent.match(/^#([0-9a-f]{6})$/i)?.[1];
+  if (!hex) return '#ffffff';
+  const channels = [0, 2, 4].map((offset) => {
+    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  return luminance > 0.42 ? '#000000' : '#ffffff';
+}
+
 /** Apply theme tokens as CSS variables on a target element (default `:root`).
  *  Called by the useThemeFor hook + the macro-level CSS applier. */
-export function applyThemeTokens(target: HTMLElement, t: ThemeTokens, prefix = '') {
+export function applyThemeTokens(target: HTMLElement, t: ThemeTokens, prefix = ''): void {
   const p = prefix;
   target.style.setProperty(`${p}--theme-accent`, t.accent);
+  target.style.setProperty(`${p}--theme-on-accent`, accentContrast(t.accent));
+  target.style.setProperty(`${p}--theme-control-knob`, '#ffffff');
+  target.style.setProperty(`${p}--theme-overlay`, 'rgba(0, 0, 0, 0.45)');
+  target.style.setProperty(`${p}--theme-danger`, '#dc2626');
   target.style.setProperty(`${p}--theme-accent-rgb`, t.accentRgb);
   target.style.setProperty(`${p}--theme-accent-hover`, t.accentHover);
   target.style.setProperty(`${p}--theme-accent-soft`, t.accentSoft);

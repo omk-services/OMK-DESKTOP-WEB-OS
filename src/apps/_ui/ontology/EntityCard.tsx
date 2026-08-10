@@ -25,7 +25,7 @@ export interface EntityCardProps {
   onOpen: (id: EntityId) => void;
 }
 
-export function EntityCard({ entity, scope, accent, onOpen }: EntityCardProps) {
+export function EntityCard({ entity, scope, accent, onOpen }: EntityCardProps): import('react').ReactNode {
   // Marqueur visuel : badge 'personnel' si l'entite porte au moins un
   // attribut scope 'personal' ET le filtre actif n'exclut pas ces
   // attributs (mode 'all'). En mode 'org' on cache le badge : il
@@ -51,7 +51,7 @@ export function EntityCard({ entity, scope, accent, onOpen }: EntityCardProps) {
     >
       <div className="flex items-center justify-between gap-2">
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white"
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-[var(--theme-on-accent)]"
           style={{ background: accent }}
         >
           <Database className="w-4 h-4" />

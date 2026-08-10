@@ -22,7 +22,7 @@ export interface ContractDetailProps {
   onBack: () => void;
 }
 
-export function ContractDetail({ entityId, accent = '#0f766e', onBack }: ContractDetailProps) {
+export function ContractDetail({ entityId, accent = '#0f766e', onBack }: ContractDetailProps): import('react').ReactNode {
   const entity = getEntity(entityId);
   const contract = contractOf(entityId);
 

@@ -1,11 +1,11 @@
 /** Extra shared widgets for Coach OS apps — used across distinct app layouts */
 import React from 'react';
 
-export function Avatar({ name, accent = 'var(--theme-accent)' }: { name: string; accent?: string }) {
+export function Avatar({ name, accent = 'var(--theme-accent)' }: { name: string; accent?: string }): import('react').ReactNode {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   return (
     <div
-      className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+      className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-[var(--theme-on-accent)] shrink-0"
       style={{ background: accent }}
     >
       {initials}
@@ -13,12 +13,12 @@ export function Avatar({ name, accent = 'var(--theme-accent)' }: { name: string;
   );
 }
 
-export function Dot({ tone = 'ok' }: { tone?: 'ok' | 'warn' | 'danger' | 'idle' }) {
+export function Dot({ tone = 'ok' }: { tone?: 'ok' | 'warn' | 'danger' | 'idle' }): import('react').ReactNode {
   const c = { ok: '#16a34a', warn: '#d97706', danger: '#dc2626', idle: '#a8a29e' }[tone];
   return <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: c }} />;
 }
 
-export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
+export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }): import('react').ReactNode {
   return (
     <button
       type="button"
@@ -28,14 +28,14 @@ export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       aria-checked={on}
       aria-label={on ? 'On' : 'Off'}
     >
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
+      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-[var(--theme-control-knob)] shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
     </button>
   );
 }
 
 export function ProgressRow({ label, value, hint, accent = 'var(--theme-accent)' }: {
   label: string; value: number; hint?: string; accent?: string;
-}) {
+}): import('react').ReactNode {
   const v = Math.max(0, Math.min(100, value));
   return (
     <div>
@@ -50,7 +50,7 @@ export function ProgressRow({ label, value, hint, accent = 'var(--theme-accent)'
   );
 }
 
-export function KanbanBoard({ columns }: { columns: { title: string; accent?: string; items: React.ReactNode[] }[] }) {
+export function KanbanBoard({ columns }: { columns: { title: string; accent?: string; items: React.ReactNode[] }[] }): import('react').ReactNode {
   return (
     <div className="grid gap-3 h-full" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0,1fr))` }}>
       {columns.map((col, i) => (
@@ -69,12 +69,12 @@ export function KanbanBoard({ columns }: { columns: { title: string; accent?: st
   );
 }
 
-export function KanbanCard({ title, meta, accent, onClick }: { title: string; meta?: string; accent?: string; onClick?: () => void }) {
+export function KanbanCard({ title, meta, accent, onClick }: { title: string; meta?: string; accent?: string; onClick?: () => void }): import('react').ReactNode {
   const Comp = onClick ? 'button' : 'div';
   return (
     <Comp
       onClick={onClick}
-      className={`w-full text-left bg-white rounded-lg border border-[var(--panel-border)] p-3 shadow-sm ${onClick ? 'hover:border-[var(--theme-accent)] hover:shadow-md transition-all cursor-pointer' : ''}`}
+      className={`w-full text-left bg-[var(--theme-surface)] rounded-lg border border-[var(--panel-border)] p-3 shadow-sm ${onClick ? 'hover:border-[var(--theme-accent)] hover:shadow-md transition-all cursor-pointer' : ''}`}
     >
       {accent && <span className="block w-8 h-1 rounded-full mb-2" style={{ background: accent }} />}
       <div style={{color: 'var(--theme-text)'}} className="text-sm font-semibold  leading-snug">{title}</div>
@@ -84,7 +84,7 @@ export function KanbanCard({ title, meta, accent, onClick }: { title: string; me
 }
 
 /** Simple data table — rows are optionally clickable (opens a detail page) */
-export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.ReactNode[][]; onRowClick?: (index: number) => void }) {
+export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.ReactNode[][]; onRowClick?: (index: number) => void }): import('react').ReactNode {
   return (
     <div className="overflow-x-auto custom-scrollbar">
       <table className="w-full text-sm">
@@ -98,7 +98,14 @@ export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.
             <tr
               key={i}
               onClick={onRowClick ? () => onRowClick(i) : undefined}
-              className={`border-t border-[var(--hairline)] hover: ${onRowClick ? 'cursor-pointer' : ''}`}
+              onKeyDown={onRowClick ? (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onRowClick(i);
+                }
+              } : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
+              className={`border-t border-[var(--hairline)] ${onRowClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]' : ''}`}
             >
               {r.map((cell, j) => <td key={j} className="px-4 py-3 text-[var(--theme-text)]">{cell}</td>)}
             </tr>
@@ -112,12 +119,12 @@ export function Table({ head, rows, onRowClick }: { head: string[]; rows: React.
 /** Horizontal funnel row */
 export function FunnelStep({ label, value, pct, accent = 'var(--theme-accent)' }: {
   label: string; value: string; pct: number; accent?: string;
-}) {
+}): import('react').ReactNode {
   return (
     <div className="flex items-center gap-3">
       <div style={{color: 'var(--theme-text-muted)'}} className="w-28 text-sm font-medium  shrink-0">{label}</div>
       <div style={{background: 'var(--theme-surface-hover)'}} className="flex-1 h-9 rounded-lg  overflow-hidden relative">
-        <div className="h-full rounded-lg flex items-center px-3 text-xs font-bold text-white transition-all duration-500"
+        <div className="h-full rounded-lg flex items-center px-3 text-xs font-bold text-[var(--theme-on-accent)] transition-all duration-500"
           style={{ width: `${Math.max(12, pct)}%`, background: accent }}>
           {value}
         </div>

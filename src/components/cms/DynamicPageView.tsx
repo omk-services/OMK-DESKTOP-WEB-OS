@@ -189,7 +189,7 @@ function GenericItemDetail({ def, item, index, total, accent, onBack, prev, next
   );
 }
 
-export function DynamicPageView({ collectionId, itemId, onBack, onNavigate }: DynamicPageViewProps) {
+export function DynamicPageView({ collectionId, itemId, onBack, onNavigate }: DynamicPageViewProps): import('react').ReactNode {
   const def = useCmsStore(s => s.collections[collectionId]);
   const items = useCmsStore(s => s.items[collectionId]) ?? [];
   const index = items.findIndex(it => it.id === itemId);

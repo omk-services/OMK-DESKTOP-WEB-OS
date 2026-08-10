@@ -10,7 +10,7 @@ interface BreadcrumbsProps {
   onBackToActivePage?: () => void;
 }
 
-export function Breadcrumbs({ appTitle, activePage = 'Overview', detailLabel = null, onBackToActivePage }: BreadcrumbsProps) {
+export function Breadcrumbs({ appTitle, activePage = 'Overview', detailLabel = null, onBackToActivePage }: BreadcrumbsProps): import('react').ReactNode {
   const path = detailLabel ? [appTitle, activePage, detailLabel] : [appTitle, activePage];
   const sectionIndex = path.length - 2;
 
@@ -19,7 +19,8 @@ export function Breadcrumbs({ appTitle, activePage = 'Overview', detailLabel = n
       <button
         onClick={() => onBackToActivePage?.()}
         disabled={!onBackToActivePage}
-        className="p-1 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition-all active:scale-90 disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
+        aria-label="Back to list"
+        className="p-1 rounded-md text-[var(--theme-text-dim)] hover:bg-[var(--theme-surface-hover)] hover:text-[var(--theme-text-muted)] transition-all active:scale-90 disabled:opacity-30 disabled:cursor-default disabled:hover:bg-transparent"
         title={onBackToActivePage ? 'Back to list' : undefined}
       >
         <ArrowLeft className="w-3.5 h-3.5" />
@@ -33,7 +34,7 @@ export function Breadcrumbs({ appTitle, activePage = 'Overview', detailLabel = n
           const isClickableSection = i === sectionIndex && !!detailLabel && !!onBackToActivePage;
           return (
             <div key={i} className="flex items-center gap-1.5 shrink-0">
-              {i > 0 && <ChevronRight className="w-3 h-3 text-stone-300" />}
+              {i > 0 && <ChevronRight className="w-3 h-3 text-[var(--theme-text-dim)]" />}
               <button
                 onClick={() => { if (isClickableSection) onBackToActivePage?.(); }}
                 disabled={isLast || !isClickableSection}
@@ -41,8 +42,8 @@ export function Breadcrumbs({ appTitle, activePage = 'Overview', detailLabel = n
                   isLast
                     ? 'text-[var(--theme-accent)] cursor-default'
                     : isClickableSection
-                      ? 'text-stone-400 hover:text-stone-700 cursor-pointer hover:bg-stone-100 px-1.5 py-0.5 rounded-md'
-                      : 'text-stone-400 cursor-default'
+                      ? 'text-[var(--theme-text-dim)] hover:text-[var(--theme-text-muted)] cursor-pointer hover:bg-[var(--theme-surface-hover)] px-1.5 py-0.5 rounded-md'
+                      : 'text-[var(--theme-text-dim)] cursor-default'
                 }`}
               >
                 {segment}

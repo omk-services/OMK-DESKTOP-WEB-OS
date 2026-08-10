@@ -22,7 +22,7 @@ export interface RippleProps extends RippleOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Ripple({ children, className, style, ...options }: RippleProps) {
+export function Ripple({ children, className, style, ...options }: RippleProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

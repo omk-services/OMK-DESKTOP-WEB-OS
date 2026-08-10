@@ -22,7 +22,7 @@ export interface VHSProps extends VHSOptions {
 
 const emptySubscribe = () => () => {};
 
-export function VHS({ children, className, style, ...options }: VHSProps) {
+export function VHS({ children, className, style, ...options }: VHSProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

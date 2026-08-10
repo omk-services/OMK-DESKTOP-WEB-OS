@@ -23,7 +23,7 @@ export interface ThemedSectionHeadProps {
   action?: ReactNode;
 }
 
-export function ThemedSectionHead({ title, subtitle, action }: ThemedSectionHeadProps) {
+export function ThemedSectionHead({ title, subtitle, action }: ThemedSectionHeadProps): import('react').ReactNode {
   return (
     <div className="flex items-start justify-between gap-4 mb-5">
       <div>

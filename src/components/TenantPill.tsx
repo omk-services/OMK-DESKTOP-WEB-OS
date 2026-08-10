@@ -15,7 +15,7 @@ import { useTenantStore, TENANT_DEMO_COACH } from '../stores/tenant.store';
 import { useShellStore } from '../stores/shell.store';
 import type { TenantId } from '../lib/tenant/contract';
 
-export function TenantPill() {
+export function TenantPill(): import('react').ReactNode {
   const activeTenantId = useTenantStore((s) => s.activeTenantId);
   const displayName = useTenantStore((s) => s.displayName);
   const knownTenants = useTenantStore((s) => s.knownTenants);

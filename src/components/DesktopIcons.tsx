@@ -42,7 +42,7 @@ function useRangees(): number {
   return rangees;
 }
 
-export function DesktopIcons() {
+export function DesktopIcons(): import('react').ReactNode {
   const openApp = useShellStore(s => s.openApp);
   const [selected, setSelected] = useState<string | null>(null);
   const userHidden = useAppVisibility((s) => s.hidden);
@@ -71,23 +71,23 @@ export function DesktopIcons() {
               onDoubleClick={(e) => { e.stopPropagation(); openApp(app.id, app.name); }}
               title={`${app.name} — click to open`}
               className={`pointer-events-auto w-[86px] flex flex-col items-center gap-1.5 px-1.5 py-2 rounded-xl transition-all group ${
-                isSel ? 'bg-white/55 ring-1 ring-[var(--theme-accent)]/40' : 'hover:bg-white/35'
+                isSel ? 'bg-[var(--theme-surface)] ring-1 ring-[var(--theme-accent)]/40' : 'hover:bg-[var(--theme-surface-hover)]'
               }`}
             >
               <span
-                className="w-12 h-12 rounded-[16px] flex items-center justify-center shadow-[0_6px_16px_-6px_rgba(41,37,36,0.4)] border border-white/60 group-hover:scale-105 transition-transform"
+                className="w-12 h-12 rounded-[16px] flex items-center justify-center shadow-[0_6px_16px_-6px_rgba(41,37,36,0.4)] border border-[var(--theme-border)] group-hover:scale-105 transition-transform"
                 style={{ background: `linear-gradient(160deg, #ffffff, ${accent}22)` }}
               >
                 <Icon className="w-6 h-6" style={{ color: accent }} />
               </span>
               {/* Pastille sous le libelle.
                *
-               *  Le libelle etait en `text-stone-700` avec une ombre blanche :
+               *  Le libelle etait en `text-[var(--theme-text-muted)]` avec une ombre blanche :
                *  lisible sur l'ancienne scene pastel, illisible des que le fond
                *  est devenu une photo. Un texte clair sur un voile sombre tient
                *  sur n'importe quelle image — y compris celle que l'utilisateur
                *  televerse, qu'on ne peut pas connaitre a l'avance. */}
-              <span className="max-w-[76px] rounded-md bg-black/45 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white backdrop-blur-[2px]">
+              <span className="max-w-[76px] rounded-md bg-[var(--theme-overlay)] px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-[var(--theme-on-accent)] backdrop-blur-[2px]">
                 {app.name}
               </span>
             </button>

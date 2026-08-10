@@ -23,7 +23,7 @@ export interface BlazeProps extends BlazeOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Blaze({ children, className, style, ...options }: BlazeProps) {
+export function Blaze({ children, className, style, ...options }: BlazeProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

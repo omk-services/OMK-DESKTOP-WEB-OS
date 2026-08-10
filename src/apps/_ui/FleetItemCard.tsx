@@ -50,7 +50,7 @@ const TONE_META: Record<FleetStatusTone, { color: string; bg: string }> = {
   primary: { color: '#0c0a09', bg: '#fafaf9' },
 };
 
-export function FleetItemCard(props: FleetItemCardProps) {
+export function FleetItemCard(props: FleetItemCardProps): import('react').ReactNode {
   const {
     icon, title, subtitle, description, statusLabel, statusTone = 'neutral',
     accent, metricLabel, metricValue, meta, onClick, trailing, compact = false,
@@ -71,7 +71,7 @@ export function FleetItemCard(props: FleetItemCardProps) {
       {/* Avatar / icon */}
       {icon !== undefined ? (
         <div
-          className={`shrink-0 ${compact ? 'w-9 h-9' : 'w-11 h-11'} rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-white`}
+          className={`shrink-0 ${compact ? 'w-9 h-9' : 'w-11 h-11'} rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-[var(--theme-on-accent)]`}
           style={{ background: accent ?? 'var(--theme-accent)' }}
         >
           {icon}
@@ -161,7 +161,7 @@ export function FleetItemCard(props: FleetItemCardProps) {
       {/* Avatar / icon */}
       {icon !== undefined ? (
         <div
-          className={`shrink-0 ${compact ? 'w-9 h-9' : 'w-11 h-11'} rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-white`}
+          className={`shrink-0 ${compact ? 'w-9 h-9' : 'w-11 h-11'} rounded-xl flex items-center justify-center font-extrabold text-[11px] tracking-wider text-[var(--theme-on-accent)]`}
           style={{ background: accent ?? 'var(--theme-accent)' }}
         >
           {icon}
@@ -244,7 +244,7 @@ export function FleetItemCard(props: FleetItemCardProps) {
 }
 
 /** FleetItemGrid — responsive grid wrapper for FleetItemCard. */
-export function FleetItemGrid({ children, cols = 2 }: { children: React.ReactNode; cols?: 1 | 2 | 3 }) {
+export function FleetItemGrid({ children, cols = 2 }: { children: React.ReactNode; cols?: 1 | 2 | 3 }): import('react').ReactNode {
   // Stay single-column until 2xl (1536px) so cards don't stretch thin when
   // the OSWindow is maximized. At xl they still sit side-by-side at a
   // comfortable 2-up density; 3-up only on truly wide viewports.

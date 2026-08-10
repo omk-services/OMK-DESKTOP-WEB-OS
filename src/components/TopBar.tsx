@@ -20,7 +20,7 @@ import { TenantPill } from './TenantPill';
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
 
-export function TopBar() {
+export function TopBar(): import('react').ReactNode {
   const [time, setTime] = useState(new Date());
   const bootClean = useShellStore((s) => s.bootClean);
   const notificationCount = useShellStore((s) => s.notificationCount);
@@ -76,7 +76,7 @@ export function TopBar() {
           {/* Brand tile */}
           <div className="flex items-center gap-2 pr-2.5">
             <div
-              className="w-7 h-7 rounded-xl flex items-center justify-center text-white shrink-0"
+              className="w-7 h-7 rounded-xl flex items-center justify-center text-[var(--theme-on-accent)] shrink-0"
               style={{
                 background: 'linear-gradient(135deg, #10b981, #0891b2)',
                 boxShadow: '0 2px 6px rgba(16,185,129,0.35)',
@@ -100,7 +100,7 @@ export function TopBar() {
               ariaLabel="Profile menu"
             >
               <div className="flex items-center gap-3 px-2 py-2.5 mb-1 rounded-xl" style={{ background: 'var(--theme-surface-hover)' }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--theme-on-accent)] font-bold" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
                   AK
                 </div>
                 <div className="min-w-0 flex-1">
@@ -168,7 +168,7 @@ export function TopBar() {
                         style={{ background: hidden ? 'var(--theme-border-subtle)' : 'var(--theme-accent)' }}
                       >
                         <span
-                          className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                          className="inline-block h-4 w-4 transform rounded-full bg-[var(--theme-surface)] shadow transition-transform"
                           style={{ transform: hidden ? 'translateX(2px)' : 'translateX(18px)' }}
                         />
                       </button>
@@ -245,10 +245,10 @@ export function TopBar() {
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="w-3 h-3 rounded-full shrink-0" style={{ background: t.accent }} />
-                        <span className={`text-[10px] font-bold uppercase tracking-wider truncate ${t.isDark ? 'text-white' : 'text-stone-900'}`}>{t.name}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider truncate ${t.isDark ? 'text-[var(--theme-on-accent)]' : 'text-[var(--theme-text)]'}`}>{t.name}</span>
                         {isActive && <Check className="w-2.5 h-2.5 ml-auto text-emerald-500 shrink-0" />}
                       </div>
-                      <p className={`text-[9px] mt-0.5 line-clamp-1 ${t.isDark ? 'text-stone-400' : 'text-stone-500'}`}>{t.mood}</p>
+                      <p className={`text-[9px] mt-0.5 line-clamp-1 ${t.isDark ? 'text-[var(--theme-text-dim)]' : 'text-[var(--theme-text-muted)]'}`}>{t.mood}</p>
                     </button>
                   );
                 })}
@@ -324,7 +324,7 @@ export function TopBar() {
                     {[0, 1, 2].map((i) => (
                       <span
                         key={i}
-                        className="block w-[3px] h-[3px] rounded-full bg-white"
+                        className="block w-[3px] h-[3px] rounded-full bg-[var(--theme-surface)]"
                         style={{
                           animation: `topbar-orb-pulse 1.2s ease-in-out ${i * 0.18}s infinite`,
                         }}
@@ -350,7 +350,7 @@ export function TopBar() {
             <Bell className="w-3.5 h-3.5" />
             {notificationCount > 0 && (
               <span
-                className="absolute -top-0.5 -right-0.5 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5"
+                className="absolute -top-0.5 -right-0.5 text-[var(--theme-on-accent)] text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5"
                 style={{ background: 'var(--theme-accent)', boxShadow: '0 0 0 2px white' }}
               >
                 {notificationCount > 9 ? '9+' : notificationCount}

@@ -23,12 +23,12 @@ export function StatCard({ label, value, hint, tone = 'default', icon: Icon, acc
   icon?: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>;
   accent?: string;
 }) {
-  const toneClass = {
-    default: 'text-[var(--theme-text)]',
-    ok: 'text-green-700',
-    warn: 'text-amber-700',
-    danger: 'text-red-600',
-    accent: 'text-[var(--theme-accent)]',
+  const toneColor = {
+    default: 'var(--theme-text)',
+    ok: '#15803d',
+    warn: '#b45309',
+    danger: '#dc2626',
+    accent: 'var(--theme-accent)',
   }[tone];
   return (
     <div className="bg-[var(--theme-surface)] p-4 rounded-xl border border-[var(--panel-border)] shadow-sm">
@@ -42,7 +42,7 @@ export function StatCard({ label, value, hint, tone = 'default', icon: Icon, acc
           />
         )}
       </div>
-      <div className={`text-[26px] leading-none font-extrabold ${toneClass}`}>{value}</div>
+      <div className="text-[26px] leading-none font-extrabold" style={{ color: toneColor }}>{value}</div>
       {hint && <div className="text-xs text-[var(--theme-text-dim)] mt-1.5">{hint}</div>}
     </div>
   );
@@ -64,29 +64,29 @@ export function Card({ title, aside, children, className = '' }: {
   );
 }
 
-export function Badge({ children, tone = 'neutral' }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral' }) {
+export function Badge({ children, tone = 'neutral' }: { children: React.ReactNode; tone?: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral' }): import('react').ReactNode {
   const map = {
-    ok: 'bg-green-100 text-green-800',
-    warn: 'bg-amber-100 text-amber-800',
-    danger: 'bg-red-100 text-red-700',
-    accent: 'bg-orange-100 text-orange-800',
-    neutral: 'bg-[var(--theme-surface-hover)] text-[var(--theme-muted)]',
+    ok: { background: '#dcfce7', color: '#166534' },
+    warn: { background: '#fef3c7', color: '#92400e' },
+    danger: { background: '#fee2e2', color: '#991b1b' },
+    accent: { background: '#ffedd5', color: '#9a3412' },
+    neutral: { background: 'var(--theme-surface-hover)', color: 'var(--theme-muted)' },
   }[tone];
-  return <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${map}`}>{children}</span>;
+  return <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={map}>{children}</span>;
 }
 
-export function PrimaryButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+export function PrimaryButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }): import('react').ReactNode {
   return (
     <button
       onClick={onClick}
-      className={`bg-[var(--theme-accent)] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--theme-accent-hover)] active:scale-[0.98] transition-all ${className}`}
+      className={`bg-[var(--theme-accent)] text-[var(--theme-on-accent)] px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-[var(--theme-accent-hover)] active:scale-[0.98] transition-all ${className}`}
     >
       {children}
     </button>
   );
 }
 
-export function GhostButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+export function GhostButton({ children, onClick, className = '' }: { children: React.ReactNode; onClick?: () => void; className?: string }): import('react').ReactNode {
   return (
     <button
       onClick={onClick}
@@ -98,7 +98,7 @@ export function GhostButton({ children, onClick, className = '' }: { children: R
 }
 
 /** A REAL progress/score bar — value 0..100, never an empty placeholder */
-export function ScoreBar({ value, tone = 'accent' }: { value: number; tone?: 'accent' | 'ok' | 'warn' | 'danger' }) {
+export function ScoreBar({ value, tone = 'accent' }: { value: number; tone?: 'accent' | 'ok' | 'warn' | 'danger' }): import('react').ReactNode {
   const color = {
     accent: 'var(--theme-accent)',
     ok: '#16a34a',

@@ -23,7 +23,7 @@ export interface ClothProps extends ClothOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Cloth({ children, className, style, ...options }: ClothProps) {
+export function Cloth({ children, className, style, ...options }: ClothProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

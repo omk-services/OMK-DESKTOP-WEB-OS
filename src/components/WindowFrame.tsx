@@ -14,7 +14,7 @@ interface WindowFrameProps {
   children: React.ReactNode;
 }
 
-export function WindowFrame({ id, title, icon, children }: WindowFrameProps) {
+export function WindowFrame({ id, title, icon, children }: WindowFrameProps): import('react').ReactNode {
   const windowState = useShellStore(s => s.windows.find(w => w.id === id));
   const closeApp = useShellStore(s => s.closeApp);
   const minimizeApp = useShellStore(s => s.minimizeApp);
@@ -137,15 +137,16 @@ interface TrafficLightProps {
 }
 
 function TrafficLight({ color, onClick, label, icon }: TrafficLightProps) {
-  const themes = { red: 'bg-[#ff5f56]', amber: 'bg-[#ffbd2e]', green: 'bg-[#27c93f]' };
+  const colors = { red: '#ff5f56', amber: '#ffbd2e', green: '#27c93f' };
   return (
     <button
       aria-label={label}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`w-3.5 h-3.5 rounded-full ${themes[color]} flex items-center justify-center group transition-transform active:scale-90 ring-1 ring-black/10`}
+      className="w-3.5 h-3.5 rounded-full flex items-center justify-center group transition-transform active:scale-90 ring-1 ring-black/10"
+      style={{ background: colors[color] }}
     >
-      <span className="text-black/55 opacity-0 group-hover:opacity-100 transition-opacity">{icon}</span>
+      <span className="text-[var(--theme-on-accent)] opacity-0 group-hover:opacity-100 transition-opacity">{icon}</span>
     </button>
   );
 }

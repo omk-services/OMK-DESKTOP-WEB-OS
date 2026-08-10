@@ -23,7 +23,7 @@ export interface EntityDetailProps {
   onBack: () => void;
 }
 
-export function EntityDetail({ entity, scope, onBack }: EntityDetailProps) {
+export function EntityDetail({ entity, scope, onBack }: EntityDetailProps): import('react').ReactNode {
   const attrs: readonly EntityAttribute[] = listAttributesOf(entity.id, { scope });
 
   // En mode 'org', on peut tomber sur une entite qui n'a que des

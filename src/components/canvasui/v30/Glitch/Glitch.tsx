@@ -22,7 +22,7 @@ export interface GlitchProps extends GlitchOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Glitch({ children, className, style, ...options }: GlitchProps) {
+export function Glitch({ children, className, style, ...options }: GlitchProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

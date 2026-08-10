@@ -22,7 +22,7 @@ export interface LaserProps extends LaserOptions {
 
 const emptySubscribe = () => () => {};
 
-export function Laser({ children, className, style, ...options }: LaserProps) {
+export function Laser({ children, className, style, ...options }: LaserProps): import('react').ReactNode {
   const sourceRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const outputRef = useRef<HTMLCanvasElement>(null);

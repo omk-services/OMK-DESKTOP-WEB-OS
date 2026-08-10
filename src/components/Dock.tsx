@@ -18,7 +18,7 @@ import { X } from 'lucide-react';
  *  bas de la barre touchaient le bord de la fenetre. */
 export const HAUTEUR_DOCK = 92;
 
-export function Dock() {
+export function Dock(): import('react').ReactNode {
   // `windows` est une reference stable du magasin : on filtre DANS le composant,
   // jamais dans le selecteur. Un selecteur qui construit un tableau neuf a chaque
   // appel fait boucler React (cf. CLAUDE.md, piege de l'instantane).
@@ -91,7 +91,7 @@ export function Dock() {
                 onClick={(e) => { e.stopPropagation(); closeApp(win.id); }}
                 title={`Fermer ${win.title}`}
                 aria-label={`Fermer ${win.title}`}
-                className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-stone-800 text-white shadow group-hover:flex hover:bg-rose-500"
+                className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-[var(--theme-text)] text-[var(--theme-on-accent)] shadow group-hover:flex hover:bg-[var(--theme-danger)]"
               >
                 <X className="h-2.5 w-2.5" />
               </button>

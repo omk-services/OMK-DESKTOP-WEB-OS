@@ -28,7 +28,7 @@ function isOnboardingPath(): boolean {
   return ONBOARDING_PATHS.has(path) || path.startsWith('/onboarding/') || path.startsWith('/demo/');
 }
 
-export function Desktop() {
+export function Desktop(): import('react').ReactNode {
   const windows = useShellStore(s => s.windows);
   const restoreLayout = useShellStore(s => s.restoreLayout);
   const saveLayout = useShellStore(s => s.saveLayout);
@@ -103,7 +103,7 @@ export function Desktop() {
       <Wallpaper />
       <CustomWallpaperLayer />
 
-      <div className="w-full h-screen overflow-hidden relative text-stone-800 bg-transparent">
+      <div className="w-full h-screen overflow-hidden relative text-[var(--theme-text)] bg-transparent">
         <TopBar />
         <DesktopIcons />
 
