@@ -317,6 +317,16 @@ export const useCmsStore = create<CmsState>((set, get) => ({
 
   /* ── Tenant lifecycle ──────────────────────────────────────────────── */
   setTenant: (tenantId) => {
+    // Une partition inconnue doit être HYDRATÉE, pas seulement créée vide.
+    //
+    // Avant ce correctif, basculer sur un second espace de travail posait
+    // `{}` et s'arrêtait là : les 19 apps affichaient des listes vides, et
+    // le moindre formulaire répondait « Collection inconnue : "alerts" »
+    // puisque aucune définition de collection n'existait dans la partition.
+    // Le contrat (`src/lib/tenant/contract.ts` §66 et §113) prévoyait
+    // pourtant l'appel à `seedFor()` — il était documenté, jamais écrit.
+    const needsSeed = !get().collectionsByTenant[tenantId];
+
     set((s) => {
       const nextCollectionsByTenant = s.collectionsByTenant[tenantId]
         ? s.collectionsByTenant
@@ -333,6 +343,19 @@ export const useCmsStore = create<CmsState>((set, get) => ({
         items: flat.items,
       };
     });
+
+    // `seedFor` est asynchrone (import dynamique pour casser le cycle
+    // seed ↔ store) : on le déclenche après la bascule, et il republiera la
+    // vue plate quand il aura fini. L'échec est signalé mais ne casse pas la
+    // bascule — l'utilisateur se retrouve sur un espace vide plutôt que sur
+    // une application figée.
+    if (needsSeed) {
+      void get()
+        .seedFor(tenantId)
+        .catch((err: unknown) => {
+          console.error(`[cms] hydratation de l'espace "${tenantId}" échouée`, err);
+        });
+    }
   },
 
   seedFor: async (tenantId) => {
