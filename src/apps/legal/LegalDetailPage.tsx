@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import type { DetailField } from '../../components/DetailPage';
 import { useShellStore } from '../../stores/shell.store';
+import { useCmsStore } from '../../lib/cms/cms.store';
 
 /* ── The accent (trust theme) — the only non-theme color, per the brief. */
 const APP_ACCENT = '#0f172a';
@@ -418,6 +419,18 @@ export function LegalDetailPage({
   const timeline = buildTimeline(item);
   const addToast = useShellStore((s) => s.addToast);
 
+  /* « Envoyer pour signature » et « Contre-signature » ne poussaient qu'un
+   * toast — un toast n'est pas une fonctionnalite : il disparait en cinq
+   * secondes et ne laisse aucune trace dans la fiche ni dans la liste. Pire,
+   * le premier calculait un booleen `ok` pour ensuite emettre le meme message
+   * dans les deux branches. Les deux actions ecrivent desormais le statut du
+   * contrat dans le CMS, ce que la fiche et la liste affichent. */
+  const updateItem = useCmsStore((s) => s.updateItem);
+  const setContractStatus = (status: string, message: string) => {
+    updateItem(collection, item.id, { status });
+    addToast({ source: 'Legal', type: 'success', message });
+  };
+
   const currentLevel = SOVEREIGNTY_LEVELS.find((l) => l.isCurrent);
 
   return (
@@ -747,17 +760,10 @@ export function LegalDetailPage({
               <button
                 type="button"
                 data-legal-action="send-for-signature"
-                onClick={() => {
-                  const t = String(item.title ?? '');
-                  const ok = typeof window !== 'undefined' && Boolean(window.print);
-                  addToast({
-                    source: 'Legal',
-                    type: 'success',
-                    message: ok
-                      ? `Brouillon de signature prêt : ${t}`
-                      : `Brouillon de signature prêt : ${t}`,
-                  });
-                }}
+                onClick={() => setContractStatus(
+                  'pending signature',
+                  `Envoyé pour signature : ${String(item.title ?? '')}`,
+                )}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
@@ -802,14 +808,10 @@ export function LegalDetailPage({
               <button
                 type="button"
                 data-legal-action="counter-sign"
-                onClick={() => {
-                  const t = String(item.title ?? '');
-                  addToast({
-                    source: 'Legal',
-                    type: 'success',
-                    message: `Contre-signature demandée : ${t}`,
-                  });
-                }}
+                onClick={() => setContractStatus(
+                  'counter-signature requested',
+                  `Contre-signature demandée : ${String(item.title ?? '')}`,
+                )}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',

@@ -45,6 +45,7 @@ import {
   formatField,
 } from '../../components/cms/itemDetailShared';
 import { useShellStore } from '../../stores/shell.store';
+import { useCmsStore } from '../../lib/cms/cms.store';
 
 /* ── The accent (trust theme) — the one non-theme colour, per the brief. */
 const APP_ACCENT = '#0f172a';
@@ -224,6 +225,15 @@ function SectionHeader({
 export function LegalItemDetail(props: ItemDetailProps) {
   const { def, item, accent, onBack, prev, next, onNavigate, index, total } = props;
   const addToast = useShellStore((s) => s.addToast);
+  /* « Send for signature » et « Counter-sign » ne poussaient qu'un toast.
+   * Un toast disparait en cinq secondes et ne laisse aucune trace dans la
+   * fiche ni dans la liste : ce n'est pas une fonctionnalite. Les deux
+   * ecrivent desormais le statut du document dans le CMS. */
+  const updateItem = useCmsStore((s) => s.updateItem);
+  const setDocStatus = (next: string, message: string) => {
+    updateItem(def.id, String(item.id), { status: next });
+    addToast({ source: 'Legal', type: 'success', message });
+  };
   const title = String(item[def.titleField] ?? '');
   const subtitle = def.subtitleField ? String(item[def.subtitleField] ?? '') : '';
   const collection = def.id;
@@ -521,13 +531,10 @@ export function LegalItemDetail(props: ItemDetailProps) {
               <button
                 type="button"
                 data-legal-action="send-for-signature"
-                onClick={() => {
-                  addToast({
-                    source: 'Legal',
-                    type: 'success',
-                    message: `Brouillon de signature prêt : ${title}`,
-                  });
-                }}
+                onClick={() => setDocStatus(
+                  'pending signature',
+                  `Envoyé pour signature : ${title}`,
+                )}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
@@ -569,13 +576,10 @@ export function LegalItemDetail(props: ItemDetailProps) {
               <button
                 type="button"
                 data-legal-action="counter-sign"
-                onClick={() => {
-                  addToast({
-                    source: 'Legal',
-                    type: 'success',
-                    message: `Contre-signature demandée : ${title}`,
-                  });
-                }}
+                onClick={() => setDocStatus(
+                  'counter-signature requested',
+                  `Contre-signature demandée : ${title}`,
+                )}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
