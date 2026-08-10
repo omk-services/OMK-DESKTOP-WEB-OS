@@ -460,9 +460,13 @@ export const applicateurs: Record<string, Applicator> = {
 };
 
 // DEV-only handle for Playwright capture scripts.
+// La déclaration globale dans `src/lib/coachos-global.d.ts` rend
+// `window.__coachos` directement assignable — plus de double assertion.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  const w = window as unknown as { __coachos?: Record<string, unknown> };
   // On s'assure que le theme store est chargé pour le publier aussi.
   void useThemeStore.getState();
-  w.__coachos = { ...w.__coachos, tools: { applicateurs, applyThemeChange, applyCreerItem, applyModifierItem, creerItem, modifierItem } };
+  window.__coachos = {
+    ...window.__coachos,
+    tools: { applicateurs, applyThemeChange, applyCreerItem, applyModifierItem, creerItem, modifierItem },
+  };
 }

@@ -109,8 +109,6 @@ interface FluxTextStatus {
 
 function useTexteFlux(
   agentId: string,
-  agent: AgentSlot,
-  enabled: boolean,
 ): [FluxTextStatus, (text: string) => void, () => void] {
   const [state, setState] = useState<FluxTextStatus>({ status: 'idle', text: '', error: null, statusText: null });
   const abortRef = useRef<AbortController | null>(null);
@@ -196,10 +194,6 @@ function useTexteFlux(
     return () => abortRef.current?.abort();
   }, []);
 
-  // On revoie la valeur courante + les actions. L'effet ne tourne que si
-  // l'agent change.
-  void enabled;
-  void agent;
   return [state, envoyer, stop];
 }
 
@@ -262,7 +256,12 @@ export function AgentTile(props: AgentTileProps) {
   });
 
   // ─── Flux texte (pour dos != modele) ───
-  const [fluxState, envoyerFlux, stopFlux] = useTexteFlux(agent.id, agent, agent.backend !== 'modele');
+  // Avant : la porte prenait aussi `agent` et `enabled`, lus uniquement
+  // pour eviter un warning TS sur les params inutilises. Le hook n'en
+  // fait rien — l'activation se fait au call site via le `if
+  // (isModele)` plus bas. Suppression des arguments inutiles pour
+  // rendre l'intention explicite.
+  const [fluxState, envoyerFlux, stopFlux] = useTexteFlux(agent.id);
 
   // ─── Voix : reconnaissance et synthese ───
   // La reconnaissance recoit la transcription finale via onFinal, qu'on

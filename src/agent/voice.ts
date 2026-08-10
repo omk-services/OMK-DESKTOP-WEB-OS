@@ -37,69 +37,49 @@
  * facile a reconnaitre, un nom de client ou un montant de transaction ne
  * l'est pas. La regle posee ici est minimale et honnete — voir le rapport
  * pour ce qui reste a faire.
+ *
+ * Types Web Speech API : declares dans `src/lib/voice-types.d.ts` (handle
+ * global). Cela permet de lire `window.SpeechRecognition` sans double
+ * assertion.
  */
 
 // ────────────────────────────────────────────────────────────────────────────
-// Types Web Speech API. Le DOM lib standard ne declare pas SpeechRecognition
-// (ni `webkitSpeechRecognition`) — seulement les evenements. On pose les
-// types utilises ici, juste ce qu'il faut pour piloter la lib sans la
-// deviner. Source : MDN Web Speech API.
+// Types Web Speech API — declares dans `src/lib/voice-types.d.ts` (handle
+// global). Ce fichier les re-exporte pour que les consumers existants
+// (`AgentTile`, `AssistantSettings`, tests) gardent le meme chemin
+// d'import. Les declarations internes sont retirees pour eviter le double
+// cast `window as unknown as {...}` qui en dependait.
 // ────────────────────────────────────────────────────────────────────────────
+
+import type {
+  SpeechRecognition,
+  SpeechRecognitionStatic,
+  SpeechRecognitionEvent,
+  SpeechRecognitionErrorEvent,
+  SpeechRecognitionResultList,
+  SpeechRecognitionResult,
+  SpeechRecognitionAlternative,
+} from '../lib/voice-types';
+
+export type {
+  SpeechRecognition,
+  SpeechRecognitionStatic,
+  SpeechRecognitionEvent,
+  SpeechRecognitionErrorEvent,
+  SpeechRecognitionResultList,
+  SpeechRecognitionResult,
+  SpeechRecognitionAlternative,
+};
 
 export type SpeechState = 'idle' | 'listening' | 'speaking' | 'denied' | 'unavailable';
 
 export type PrivacyMode = 'none' | 'safe' | 'strict';
 
-export interface SpeechRecognition extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  start(): void;
-  stop(): void;
-  abort(): void;
-  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
-  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
-  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
-}
-
-export interface SpeechRecognitionStatic {
-  new(): SpeechRecognition;
-}
-
-export interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-
-export interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-  message?: string;
-}
-
-export interface SpeechRecognitionResultList {
-  length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
-}
-
-export interface SpeechRecognitionResult {
-  isFinal: boolean;
-  length: number;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-export interface SpeechRecognitionAlternative {
-  transcript: string;
-  confidence: number;
-}
-
-/** Detectabilite : Web Speech API est prefixee `webkit` sur Chromium. */
+/** Detectabilite : Web Speech API est prefixee `webkit` sur Chromium.
+ *  Les declarations sur `window` viennent de `src/lib/voice-types.d.ts`. */
 export function getRecognitionCtor(): SpeechRecognitionStatic | null {
   if (typeof window === 'undefined') return null;
-  const w = window as unknown as { SpeechRecognition?: SpeechRecognitionStatic; webkitSpeechRecognition?: SpeechRecognitionStatic };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+  return window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null;
 }
 
 export function hasRecognition(): boolean {
