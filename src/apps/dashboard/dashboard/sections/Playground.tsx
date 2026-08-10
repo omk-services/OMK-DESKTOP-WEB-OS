@@ -25,6 +25,13 @@ export function Playground() {
     [],
   );
 
+  // Slowest model — derived, not hardcoded. If two models tie, the first one
+  // in the seed wins (stable order).
+  const slowest = useMemo(
+    () => PLAYGROUND_MODELS.reduce((a, b) => (b.latencyMs > a.latencyMs ? b : a)),
+    [],
+  );
+
   const vendors = useMemo(() => {
     const set = new Set<string>();
     PLAYGROUND_MODELS.forEach((m) => set.add(m.vendor));
@@ -85,7 +92,7 @@ export function Playground() {
         <KpiTile label="Modèles comparés" value={PLAYGROUND_MODELS.length} tone="accent" />
         <KpiTile label="Coût total" value={`$${totalCost.toFixed(4)}`} tone="ok" hint="par appel, jeu complet" />
         <KpiTile label="Latence médiane" value={`${median(PLAYGROUND_MODELS.map((m) => m.latencyMs))} ms`} tone="info" />
-        <KpiTile label="Plus lent" value={`${Math.max(...PLAYGROUND_MODELS.map((m) => m.latencyMs))} ms`} tone="warn" hint="Opus 4.5" />
+        <KpiTile label="Plus lent" value={`${Math.max(...PLAYGROUND_MODELS.map((m) => m.latencyMs))} ms`} tone="warn" hint={slowest.label} />
       </div>
 
       {/* Provider-grouped grid */}
@@ -184,6 +191,7 @@ function Mini({ label, value, icon }: { label: string; value: string; icon?: Rea
 }
 
 function median(arr: number[]): number {
+  if (arr.length === 0) return 0;
   const sorted = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0 ? Math.round((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid];
