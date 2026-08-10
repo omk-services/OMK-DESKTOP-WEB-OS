@@ -402,6 +402,106 @@ const approvalDecisionsItems: CmsItem[] = [
   },
 ];
 
+/* ═══ PEOPLE AGENTS — AI specialists on the People domain (RH + meta-gouvernance).
+ *  Distinct from the B3 fleet (which is operational). People agents are
+ *  recruiters, onboarding concierges, performance coaches — they handle the
+ *  human-side work that the B3 fleet cannot. */
+
+const peopleAgentsDef: CmsCollectionDef = {
+  id: 'people_agents',
+  name: 'Agents',
+  singular: 'Agent',
+  accent: '#0d9488',
+  titleField: 'name',
+  subtitleField: 'role',
+  badgeField: 'status',
+  fields: [
+    { key: 'codename', label: 'Codename', type: 'text' },
+    { key: 'role', label: 'Role', type: 'text' },
+    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'task', label: 'Current task', type: 'longtext' },
+    { key: 'rank', label: 'E-Myth rank', type: 'text' },
+    { key: 'domain', label: 'Domain', type: 'text' },
+    { key: 'squad', label: 'Squad', type: 'text' },
+    { key: 'cadence', label: 'Cadence', type: 'text' },
+  ],
+};
+
+const peopleAgentsItems: CmsItem[] = [
+  {
+    id: 'pa-talent-sourcer',
+    name: 'Talent Sourcer',
+    codename: 'PA-01',
+    role: 'Recruiter · outbound',
+    status: 'online',
+    task: 'Sourcing 14 senior ops profiles for the Q3 hire sprint · 6 first-round interviews queued.',
+    rank: 'B2',
+    domain: 'Recrutement',
+    squad: 'Phoenix Cell',
+    cadence: 'Daily 9h standup · weekly retro Friday 16h',
+  },
+  {
+    id: 'pa-onboarding-concierge',
+    name: 'Onboarding Concierge',
+    codename: 'PA-02',
+    role: 'Onboarding lead',
+    status: 'online',
+    task: 'Coaching 4 new starters through their first-week sessions · 24h ping loop armed.',
+    rank: 'B2',
+    domain: 'Onboarding RH',
+    squad: 'X-Mansion',
+    cadence: 'Daily · H+2 / H+18 / H+24 pings',
+  },
+  {
+    id: 'pa-performance-coach',
+    name: 'Performance Coach',
+    codename: 'PA-03',
+    role: 'Revue trimestrielle',
+    status: 'busy',
+    task: 'Drafting Q3 review templates · 22 reviews queued, 4 escalated to ethics override.',
+    rank: 'B2',
+    domain: 'Revue de performance',
+    squad: 'X-Mansion',
+    cadence: 'Trimestrielle · sprint review Sunday',
+  },
+  {
+    id: 'pa-compensation-analyst',
+    name: 'Compensation Analyst',
+    codename: 'PA-04',
+    role: 'Paie & equity',
+    status: 'idle',
+    task: 'Awaiting Q3 comp band updates from CFO · last cycle 2h 14m ago.',
+    rank: 'B3',
+    domain: 'Paie / Rémunération',
+    squad: 'B-Factory',
+    cadence: 'Monthly · last day of cycle',
+  },
+  {
+    id: 'pa-learning-curator',
+    name: 'Learning Curator',
+    codename: 'PA-05',
+    role: 'Formation continue',
+    status: 'online',
+    task: 'Curating 6 new modules for the coach certification path · A/B on completion rate.',
+    rank: 'B3',
+    domain: 'Formation',
+    squad: 'X-Mansion',
+    cadence: 'Bi-weekly · cohort-driven',
+  },
+  {
+    id: 'pa-compliance-officer',
+    name: 'Compliance Officer',
+    codename: 'PA-06',
+    role: 'RGPD · conformité RH',
+    status: 'online',
+    task: 'Auditing 17 dossiers for the CNIL 2018-002 check · zero-pii pipeline in scope.',
+    rank: 'B3',
+    domain: 'Compliance',
+    squad: 'B-Factory',
+    cadence: 'Quarterly · audit windows',
+  },
+];
+
 /* ═══ Team — X-Men human squad, anchor that makes the squad work ═══ */
 
 const teamDef: CmsCollectionDef = {
@@ -479,6 +579,7 @@ export function seedPeopleCms(): void {
   store.registerCollection(memoryDef, memoryItems);
   store.registerCollection(codexDef, codexItems);
   store.registerCollection(approvalDecisionsDef, approvalDecisionsItems);
+  store.registerCollection(peopleAgentsDef, peopleAgentsItems);
   store.registerCollection(teamDef, teamItems);
   store.registerCollection(squadsDef, squadsItems);
   store.registerCollection(contentDef, contentItems);
