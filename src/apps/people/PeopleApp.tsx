@@ -172,9 +172,16 @@ function Overview() {
               <button
                 type="button"
                 onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('coach-os:navigate', { detail: { appId: 'people', sectionId: 'approvals' } }));
-                  }
+                  if (typeof window === 'undefined') return;
+                  // `coach-os:open-app-section` est le SEUL événement de navigation
+                  // inter-sections que quelqu'un écoute (cf. AppFrame). Un
+                  // `coach-os:navigate` part dans le vide : le bouton paraît câblé
+                  // et ne fait rien.
+                  window.dispatchEvent(
+                    new CustomEvent('coach-os:open-app-section', {
+                      detail: { appId: 'people', sectionId: 'approvals' },
+                    }),
+                  );
                 }}
                 className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[color:#fff] px-3.5 py-2 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.99]"
                 style={{ background: ACCENT, boxShadow: `0 4px 12px ${ACCENT}30` }}
