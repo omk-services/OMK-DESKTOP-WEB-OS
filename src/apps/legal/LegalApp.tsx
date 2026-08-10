@@ -142,9 +142,8 @@ export function LegalApp() {
         <div>
           <h2 style={{color: 'var(--theme-text)'}} className="text-lg font-bold tracking-tight  font-outfit">AI-Act compliance</h2>
           <p
-            className={`text-sm mt-0.5 inline-flex items-center gap-1.5 ${
-              overdue ? 'text-red-600 font-semibold' : ''
-            }`}
+            className="text-sm mt-0.5 inline-flex items-center gap-1.5"
+            style={overdue ? { color: '#dc2626', fontWeight: 600 } : undefined}
           >
             {overdue && <AlertTriangle className="w-3.5 h-3.5" />}
             <span>{overdueLabel}</span>

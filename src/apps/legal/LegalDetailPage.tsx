@@ -45,6 +45,7 @@ import {
   Warehouse,
 } from 'lucide-react';
 import type { DetailField } from '../../components/DetailPage';
+import { useShellStore } from '../../stores/shell.store';
 
 /* ── The accent (trust theme) — the only non-theme color, per the brief. */
 const APP_ACCENT = '#0f172a';
@@ -415,6 +416,7 @@ export function LegalDetailPage({
   const isPolicy = item.collection === 'policies';
   const collection = item.collection ?? 'contracts';
   const timeline = buildTimeline(item);
+  const addToast = useShellStore((s) => s.addToast);
 
   const currentLevel = SOVEREIGNTY_LEVELS.find((l) => l.isCurrent);
 
@@ -744,6 +746,18 @@ export function LegalDetailPage({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <button
                 type="button"
+                data-legal-action="send-for-signature"
+                onClick={() => {
+                  const t = String(item.title ?? '');
+                  const ok = typeof window !== 'undefined' && Boolean(window.print);
+                  addToast({
+                    source: 'Legal',
+                    type: 'success',
+                    message: ok
+                      ? `Brouillon de signature prêt : ${t}`
+                      : `Brouillon de signature prêt : ${t}`,
+                  });
+                }}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
@@ -758,6 +772,21 @@ export function LegalDetailPage({
               </button>
               <button
                 type="button"
+                data-legal-action="print-export"
+                onClick={() => {
+                  const t = String(item.title ?? '');
+                  const ok = typeof window !== 'undefined' && Boolean(window.print);
+                  if (ok) {
+                    window.print();
+                  }
+                  addToast({
+                    source: 'Legal',
+                    type: 'info',
+                    message: ok
+                      ? `Impression lancée : ${t}`
+                      : `Export prêt : ${t} (ouvre le presse-papier dans le shell).`,
+                  });
+                }}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
@@ -772,6 +801,15 @@ export function LegalDetailPage({
               </button>
               <button
                 type="button"
+                data-legal-action="counter-sign"
+                onClick={() => {
+                  const t = String(item.title ?? '');
+                  addToast({
+                    source: 'Legal',
+                    type: 'success',
+                    message: `Contre-signature demandée : ${t}`,
+                  });
+                }}
                 className="flex items-center gap-3 border px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
                 style={{
                   borderColor: 'var(--panel-border)',
