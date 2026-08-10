@@ -818,6 +818,7 @@ export function ItRdApp() {
             );
           })}
         </div>
+        )}
       </div>
     );
   };
