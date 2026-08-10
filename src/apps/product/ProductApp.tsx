@@ -518,6 +518,9 @@ export function ProductApp() {
         addToast({ source: 'Product', type: 'warning', message: 'Le nombre de semaines doit être > 0.' });
         return;
       }
+      const etaDate = new Date();
+      etaDate.setDate(etaDate.getDate() + Math.round(weeks * 7));
+      const etaIso = etaDate.toISOString().slice(0, 10);
       const result = addItem('product_mvps', {
         name,
         feature,
@@ -525,7 +528,7 @@ export function ProductApp() {
         body: `MVP défini depuis l'UI : ${feature} pour ${client || 'un client non précisé'}.`,
         overflow: 'ok',
         weeksToShip: weeks,
-        eta: 'TBD',
+        eta: etaIso,
         owner: '—',
         successMetric: '—',
         notes: '',
