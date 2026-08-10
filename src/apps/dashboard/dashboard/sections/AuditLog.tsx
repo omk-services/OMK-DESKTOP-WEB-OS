@@ -4,16 +4,47 @@
  *
  * The DLP gate (Enterprise OS blueprint §"9 motifs DLP") is surfaced here as
  * a row count and a "no leak" badge — when an entry appears, it shows up here.
+ *
+ * Export: an "Export CSV" action downloads the current filtered view as a
+ * UTF-8 CSV file. This is the only write side-effect on this page and it
+ * never mutates the audit log itself — the file mirrors what's on screen.
  */
 import { useMemo, useState } from 'react';
-import { Lock, Search } from 'lucide-react';
+import { Download, Lock, Search } from 'lucide-react';
 import { AUDIT_LOG } from '../seed';
 import type { AuditEntry } from '../seed';
+import { useShellStore } from '../../../../stores/shell.store';
 import { ACCENT, IconChip, KpiTile, Panel, Pill, SectionTitle } from '../Primitives';
+
+function exportCsv(entries: AuditEntry[], filename: string): void {
+  const header = ['at', 'actor', 'action', 'entity', 'note'];
+  const escape = (v: string): string => {
+    const needsQuotes = /[",\n]/.test(v);
+    const escaped = v.replace(/"/g, '""');
+    return needsQuotes ? `"${escaped}"` : escaped;
+  };
+  const lines = [
+    header.join(','),
+    ...entries.map((e) =>
+      [e.at, e.actor, e.action, e.entity, e.note ?? ''].map((c) => escape(String(c))).join(','),
+    ),
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // Defer revoke so Firefox finishes the download before we release the URL.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export function AuditLog() {
   const [query, setQuery] = useState('');
   const [actorFilter, setActorFilter] = useState('all');
+  const addToast = useShellStore((s) => s.addToast);
 
   const actors = useMemo(() => {
     const set = new Set<string>();
@@ -44,9 +75,31 @@ export function AuditLog() {
         title="Audit Log"
         subtitle="Journal append-only. Aucune modification possible depuis cette vue."
         action={
-          <span className="inline-flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5" style={{ color: 'var(--theme-text-muted)' }} />
-            <Pill tone="info">append-only · lecture seule</Pill>
+          <span className="inline-flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (filtered.length === 0) return;
+                const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+                exportCsv(filtered, `audit-log-${stamp}.csv`);
+                addToast({ source: 'Audit Log', type: 'success', message: `Exported ${filtered.length} row${filtered.length > 1 ? 's' : ''}.` });
+              }}
+              disabled={filtered.length === 0}
+              data-export-csv
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
+              style={{
+                background: 'var(--theme-surface-hover)',
+                color: 'var(--theme-text)',
+                boxShadow: 'inset 0 0 0 1px var(--panel-border)',
+              }}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export CSV
+            </button>
+            <span className="inline-flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5" style={{ color: 'var(--theme-text-muted)' }} />
+              <Pill tone="info">append-only · lecture seule</Pill>
+            </span>
           </span>
         }
       />
