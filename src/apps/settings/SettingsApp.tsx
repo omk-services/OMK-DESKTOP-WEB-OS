@@ -773,6 +773,23 @@ export function SettingsApp() {
                   : 'Turn on Observability in Privacy to enable UserTour onboarding.'}
               </div>
             </div>
+            {/* Les cinq boutons Replay sont desactives tant que le consentement
+                est off, et le texte disait ou aller sans y mener. Une phrase
+                qui nomme un reglage doit offrir le chemin vers ce reglage. */}
+            {!consentOn && (
+              <button
+                type="button"
+                data-help-goto-privacy
+                onClick={() => {
+                  const btn = document.querySelector('[data-section="Privacy"]');
+                  if (btn instanceof HTMLElement) btn.click();
+                }}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background: 'var(--theme-accent)', color: 'var(--theme-bg)' }}
+              >
+                Ouvrir Privacy
+              </button>
+            )}
           </div>
           <div className="divide-y divide-[var(--hairline)]">
             {REPLAY_TOURS.map(t => (
