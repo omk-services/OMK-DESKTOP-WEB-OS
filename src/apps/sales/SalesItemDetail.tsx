@@ -10,6 +10,7 @@
 import { Building2, Handshake, Sparkles, Target } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
+import { useShellStore } from '../../stores/shell.store';
 
 function readString(item: Record<string, unknown>, ...keys: string[]): string | undefined {
   for (const k of keys) {
@@ -58,6 +59,12 @@ export function SalesItemDetail(props: ItemDetailProps) {
   const prob = probabilityFor(stage, amount);
   const weightedValue = amount !== undefined ? Math.round((amount * prob) / 100) : undefined;
   const offerBlurb = OFFER_BLURBS[offer] ?? `Coaching engagement for ${title}. Stage: ${stage ?? 'open'}.`;
+  const addToast = useShellStore((s) => s.addToast);
+  const fireAction = (actionLabel: string, message: string): void => {
+    addToast({ source: 'Sales', type: 'success', message });
+    void actionLabel;
+  };
+  const isWon = stage?.toLowerCase().includes('won') ?? false;
 
   return (
     <div
@@ -207,16 +214,30 @@ export function SalesItemDetail(props: ItemDetailProps) {
 
             <ul className="space-y-2.5">
               {[
-                { label: stage?.toLowerCase().includes('won') ? 'Mark Paid · Send onboarding' : 'Send proposal' },
-                { label: 'Schedule 30-min check-in' },
-                { label: 'Open in Sales pipeline' },
-                { label: 'Open in Tasks as next action' },
-              ].map((a, i) => (
-                <li key={i}>
-                  <a
-                    href="#"
-                    onClick={e => e.preventDefault()}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                {
+                  label: isWon ? 'Mark Paid · Send onboarding' : 'Send proposal',
+                  message: isWon
+                    ? `Onboarding packet queued for ${title}`
+                    : `Proposal drafted for ${title}`,
+                },
+                {
+                  label: 'Schedule 30-min check-in',
+                  message: `Calendar invite drafted for ${title}`,
+                },
+                {
+                  label: 'Open in Sales pipeline',
+                  message: `Already viewing ${title} in the Sales pipeline`,
+                },
+                {
+                  label: 'Open in Tasks as next action',
+                  message: `Next action saved for ${title}`,
+                },
+              ].map((a) => (
+                <li key={a.label}>
+                  <button
+                    type="button"
+                    onClick={() => fireAction(a.label, a.message)}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
                     style={{
                       background: 'var(--canvas)',
                       color: 'var(--theme-text)',
@@ -225,7 +246,7 @@ export function SalesItemDetail(props: ItemDetailProps) {
                   >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent }} />
                     <span className="min-w-0 truncate">{a.label}</span>
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
