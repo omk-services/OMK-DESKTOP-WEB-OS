@@ -146,7 +146,14 @@ export function MarketplaceApp() {
           onBack={() => setDetail(null)}
           motion={{ kind: 'fade-blur', durationMs: 240 }}
         >
-          <MarketplaceDetailPage item={detail} onBack={() => setDetail(null)} />
+          <MarketplaceDetailPage
+            item={detail}
+            onBack={() => setDetail(null)}
+            onInstall={() => {
+              install(detail.id);
+              setDetail({ ...detail, status: 'installed', install: { ...detail.install, installed: true } });
+            }}
+          />
         </AppDetailOverlay>
       ) : null}
     </>
