@@ -55,7 +55,11 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
   const failedCount = SESSIONS.filter(s => s.outcome === 'failed').length;
   const escalatedCount = SESSIONS.filter(s => s.outcome === 'escalated').length;
   const tokens24h = SESSIONS.reduce((acc, s) => acc + s.tokens, 0) + HISTORICAL_TAIL * 1200;
-  const HEALTH_LINE = `${healthyCount} agent${healthyCount > 1 ? 's' : ''} en bonne santé · ${tokens24h.toLocaleString('fr-FR')} msg / ${failedCount} err (24 h)`;
+  // La valeur agrégée est un volume de JETONS, pas un nombre de messages :
+  // l'afficher sous le libellé « msg » donnait « 380 990 msg / 24 h » pour
+  // cinq agents, un ordre de grandeur qui ne veut rien dire. Le compteur de
+  // messages, lui, c'est `sessionsLast24h`.
+  const HEALTH_LINE = `${healthyCount} agent${healthyCount > 1 ? 's' : ''} en bonne santé · ${tokens24h.toLocaleString('fr-FR')} jetons / ${failedCount} err (24 h)`;
   const spark = sparklineForLast12h();
   const tlrd =
     `La dépense du jour est de $${todayUsd.toFixed(2)}, ` +
