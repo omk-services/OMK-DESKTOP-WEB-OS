@@ -13,6 +13,7 @@ import { AppFrame, SectionHead, type AppSection } from '../../components/AppFram
 import { Badge } from '../_ui/kit';
 import { KanbanBoard, KanbanCard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
@@ -242,6 +243,45 @@ export function ProductApp() {
     });
   };
 
+  const RoadmapCard = ({ item }: { item: ProductItem }) => {
+    const stage = String(item.stage ?? 'now');
+    const nextStage = STAGE_NEXT[stage];
+    const stageAccent = STAGE_ACCENT[stage] ?? ACCENT;
+    return (
+      <div
+        className="rounded-lg border p-3 shadow-sm transition-all"
+        style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+      >
+        <button
+          type="button"
+          onClick={() => openItem(String(item.id))}
+          className="w-full text-left"
+        >
+          <span className="block w-8 h-1 rounded-full mb-2" style={{ background: stageAccent }} />
+          <div className="text-sm font-semibold leading-snug" style={{ color: 'var(--theme-text)' }}>{String(item.title)}</div>
+          <div className="text-xs text-[var(--theme-text-dim)] mt-1">{String(item.meta ?? '')}</div>
+        </button>
+        <div className="mt-2 flex items-center justify-between gap-1 pt-2 border-t" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+          <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">{stage}</span>
+          {nextStage ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); moveStage(String(item.id), stage); }}
+              data-move-stage-kanban={String(item.id)}
+              className="inline-flex items-center gap-1 text-[9.5px] font-semibold text-white px-1.5 py-0.5 rounded transition-all hover:opacity-90"
+              style={{ background: STAGE_ACCENT[nextStage] ?? ACCENT }}
+              title={`Passer de "${stage}" à "${nextStage}"`}
+            >
+              → {nextStage}
+            </button>
+          ) : (
+            <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">shipped</span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const Roadmap = () => {
     return (
       <div className="p-7 h-full flex flex-col">
@@ -249,13 +289,13 @@ export function ProductApp() {
         <div className="flex-1 min-h-0">
           <KanbanBoard columns={[
             { title: 'Now', accent: ACCENT, items: byStage('now').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} accent={ACCENT} onClick={() => openItem(String(i.id))} />
+              <RoadmapCard key={String(i.id)} item={i as unknown as ProductItem} />
             )) },
             { title: 'Next', accent: '#c084fc', items: byStage('next').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => openItem(String(i.id))} />
+              <RoadmapCard key={String(i.id)} item={i as unknown as ProductItem} />
             )) },
             { title: 'Later', accent: '#a8a29e', items: byStage('later').map(i => (
-              <KanbanCard key={String(i.id)} title={String(i.title)} meta={String(i.meta)} onClick={() => openItem(String(i.id))} />
+              <RoadmapCard key={String(i.id)} item={i as unknown as ProductItem} />
             )) },
           ]} />
         </div>
@@ -264,35 +304,14 @@ export function ProductApp() {
   };
 
   const Backlog = () => {
-    const backlogItems = byStage('backlog');
     return (
       <div className="p-7">
-        <SectionHead title="Backlog" subtitle="Groomed, not yet scheduled" action={<Badge tone="neutral">{backlogItems.length}</Badge>} />
-        {backlogItems.length === 0 ? (
-          <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>
-            No backlog items yet.
-          </div>
-        ) : (
-          <FleetItemGrid cols={2}>
-            {backlogItems.map((raw) => {
-              const it = raw as unknown as ProductItem;
-              return (
-                <FleetItemCard
-                  key={String(it.id)}
-                  title={String(it.title)}
-                  subtitle={String(it.meta ?? '')}
-                  description={it.specStatus ? `Spec status: ${it.specStatus}${it.owner ? ` · Owner: ${it.owner}` : ''}` : `Owner: ${it.owner ?? '—'}`}
-                  statusLabel={String(it.stage)}
-                  statusTone={STAGE_TONE[it.stage] ?? 'neutral'}
-                  accent={STAGE_ACCENT[it.stage] ?? ACCENT}
-                  icon={STAGE_ICON[it.stage] ?? <FileCode className="w-5 h-5" />}
-                  meta="backlog · drag to Roadmap to schedule"
-                  onClick={() => openItem(String(it.id))}
-                />
-              );
-            })}
-          </FleetItemGrid>
-        )}
+        <SectionHead title="Backlog" subtitle="Groomed, not yet scheduled" />
+        <CollectionRepeater
+          collectionId="product_items"
+          onOpen={openItem}
+          filter={(it) => String(it.stage ?? '') === 'backlog'}
+        />
       </div>
     );
   };
@@ -301,23 +320,7 @@ export function ProductApp() {
     return (
       <div className="p-7">
         <SectionHead title="Releases" subtitle="Shipped versions + draft notes" />
-        <CMSCardList<ReleaseItem>
-          collectionId="product_releases"
-          onOpen={openRelease}
-          cols={2}
-          render={(r) => ({
-            title: String(r.title ?? r.name ?? 'Untitled release'),
-            subtitle: r.shippedRelative ? `Shipped ${r.shippedRelative}` : (r.shippedAt ?? r.when ?? '—'),
-            description: r.changelog ?? r.notes ?? '',
-            statusLabel: r.status ?? 'shipped',
-            statusTone: r.status === 'archived' ? 'neutral' : r.status === 'draft' ? 'warn' : 'ok',
-            accent: r.status === 'archived' ? '#737373' : '#16a34a',
-            icon: <Package className="w-5 h-5" />,
-            metricLabel: 'version',
-            metricValue: r.version ?? '—',
-            meta: r.shippedRelative ?? r.shippedAt ?? r.when,
-          })}
-        />
+        <CollectionRepeater collectionId="product_releases" onOpen={openRelease} />
       </div>
     );
   };
@@ -453,26 +456,8 @@ export function ProductApp() {
         <SectionHead
           title="Classement"
           subtitle="S / A / B / F — chaque placement porte son critère de justification"
-          action={<Badge tone="warn">placement ≠ opinion</Badge>}
         />
-        <CMSCardList<RankingItem>
-          collectionId="product_rankings"
-          onOpen={rankingsDrill.open}
-          cols={2}
-          render={(it) => ({
-            title: it.name,
-            subtitle: `${it.area} · ${it.owner}`,
-            description: it.body,
-            statusLabel: `tier ${it.tier}`,
-            statusTone: TIER_TONE[it.tier] ?? 'neutral',
-            accent: TIER_ACCENT[it.tier] ?? ACCENT,
-            icon: <Trophy className="w-5 h-5" />,
-            metricLabel: 'score',
-            metricValue: `${it.score}/100`,
-            meta: it.source,
-          })}
-          emptyMessage="Aucun classement pour l'instant."
-        />
+        <CollectionRepeater collectionId="product_rankings" onOpen={rankingsDrill.open} />
       </div>
     );
   };
@@ -484,24 +469,7 @@ export function ProductApp() {
           title="Lancement"
           subtitle="5 étapes canoniques : valider · pré-vendre · lancer · audience · produitiser"
         />
-        <CMSCardList<LaunchItem>
-          collectionId="product_launches"
-          onOpen={launchesDrill.open}
-          cols={2}
-          render={(it) => ({
-            title: it.name,
-            subtitle: `${it.cohort} · ${it.owner}`,
-            description: it.body,
-            statusLabel: it.stage,
-            statusTone: STAGE2_TONE[it.stage] ?? 'neutral',
-            accent: STAGE2_ACCENT[it.stage] ?? ACCENT,
-            icon: <Send className="w-5 h-5" />,
-            metricLabel: it.state === 'done' ? 'état' : 'ETA',
-            metricValue: it.state === 'done' ? '✓' : it.eta,
-            meta: it.metric,
-          })}
-          emptyMessage="Aucun lancement suivi pour l'instant."
-        />
+        <CollectionRepeater collectionId="product_launches" onOpen={launchesDrill.open} />
       </div>
     );
   };
@@ -703,26 +671,8 @@ export function ProductApp() {
         <SectionHead
           title="Idéation"
           subtitle="Idées à l'état brut — 4 angles : tendance, opportunité, demande, taille économique"
-          action={<Badge tone="neutral">triage = lire la table</Badge>}
         />
-        <CMSCardList<IdeaItem>
-          collectionId="product_ideas"
-          onOpen={ideasDrill.open}
-          cols={2}
-          render={(it) => ({
-            title: it.name,
-            subtitle: it.summary,
-            description: it.source,
-            statusLabel: `tendance · ${it.trend}`,
-            statusTone: TREND_TONE[it.trend] ?? 'neutral',
-            accent: TREND_ACCENT[it.trend] ?? ACCENT,
-            icon: <Sparkles className="w-5 h-5" />,
-            metricLabel: 'économie',
-            metricValue: it.economicSize,
-            meta: `demande ${it.demand} · opp ${it.opportunity}`,
-          })}
-          emptyMessage="Aucune idée en idéation pour l'instant."
-        />
+        <CollectionRepeater collectionId="product_ideas" onOpen={ideasDrill.open} />
       </div>
     );
   };

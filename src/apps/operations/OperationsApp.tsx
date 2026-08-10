@@ -3,6 +3,7 @@ import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWar
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
@@ -45,55 +46,6 @@ const CATEGORY_ACCENT: Record<string, string> = {
   Knowledge: '#4f46e5',
   Sales: '#ea580c',
 };
-
-interface RunbookItem extends Record<string, unknown> {
-  id: string;
-  title: string;
-  category: string;
-  updated: string;
-  steps: string;
-}
-
-interface ArticleItem extends Record<string, unknown> {
-  id: string;
-  title: string;
-  topic?: string;
-  category?: string;
-  reads: number;
-  updated: string;
-  body: string;
-}
-
-interface IncidentItem extends Record<string, unknown> {
-  id: string;
-  title: string;
-  when: string;
-  severity: 'ok' | 'warn' | 'danger';
-  resolution: string;
-}
-
-interface ProcessItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  category: string;
-  status: string;
-  owner: string;
-  inputs: string;
-  outputs: string;
-  dependsOn: string;
-  cadence: string;
-}
-
-interface BenchmarkItem extends Record<string, unknown> {
-  id: string;
-  title: string;
-  target: string;
-  difficulty: string;
-  passRate: number;
-  lastRun: string;
-  status: 'passed' | 'failed' | 'flaky';
-  failureMode: string;
-}
 
 interface ChangeItem extends Record<string, unknown> {
   id: string;
@@ -195,6 +147,51 @@ export function OperationsApp() {
   const [composerTitle, setComposerTitle] = useState('');
   const [composerSeverity, setComposerSeverity] = useState<'ok' | 'warn' | 'danger'>('warn');
   const [composerSource, setComposerSource] = useState('');
+
+  const [changeComposerOpen, setChangeComposerOpen] = useState(false);
+  const [changeTitle, setChangeTitle] = useState('');
+  const [changeSummary, setChangeSummary] = useState('');
+  const [changeWhy, setChangeWhy] = useState('');
+  const [changeRisk, setChangeRisk] = useState<'low' | 'med' | 'high'>('low');
+  const [changePolicy, setChangePolicy] = useState('');
+  const [changeProposedBy, setChangeProposedBy] = useState('human:ops');
+
+  const submitNewChange = (): void => {
+    const title = changeTitle.trim();
+    if (title.length === 0) {
+      addToast({ source: 'Operations', type: 'warning', message: 'Le titre est obligatoire.' });
+      return;
+    }
+    const result = addItem('changes', {
+      title,
+      summary: changeSummary.trim() || title,
+      why: changeWhy.trim() || '—',
+      risk: changeRisk,
+      policy: changePolicy.trim() || '—',
+      status: 'proposed',
+      proposedBy: changeProposedBy.trim() || 'human:ops',
+    });
+    if (result.ok) {
+      addToast({ source: 'Operations', type: 'success', message: `Changement proposé : ${title}` });
+      setChangeTitle('');
+      setChangeSummary('');
+      setChangeWhy('');
+      setChangeRisk('low');
+      setChangePolicy('');
+      setChangeComposerOpen(false);
+    } else {
+      addToast({ source: 'Operations', type: 'warning', message: result.error ?? 'Création impossible.' });
+    }
+  };
+
+  const cancelChangeComposer = (): void => {
+    setChangeTitle('');
+    setChangeSummary('');
+    setChangeWhy('');
+    setChangeRisk('low');
+    setChangePolicy('');
+    setChangeComposerOpen(false);
+  };
 
   const submitNewAlert = (): void => {
     const title = composerTitle.trim();
@@ -310,23 +307,7 @@ export function OperationsApp() {
     return (
       <div className="p-7">
         <SectionHead title="Runbooks" subtitle="The operating procedures your agents follow" />
-        <CMSCardList<RunbookItem>
-          collectionId="runbooks"
-          onOpen={openRunbook}
-          cols={2}
-          render={(r) => ({
-            title: r.title,
-            subtitle: `${r.steps.split('→').length} steps · ${r.category}`,
-            description: r.steps.split('→').slice(0, 3).join(' → '),
-            statusLabel: r.category,
-            statusTone: CATEGORY_TONE[r.category] ?? 'neutral',
-            accent: CATEGORY_ACCENT[r.category] ?? ACCENT,
-            icon: CATEGORY_ICON[r.category] ?? <BookText className="w-5 h-5" />,
-            metricLabel: 'updated',
-            metricValue: r.updated,
-            meta: r.steps.split('→').length + ' steps',
-          })}
-        />
+        <CollectionRepeater collectionId="runbooks" onOpen={openRunbook} />
       </div>
     );
   };
@@ -335,23 +316,7 @@ export function OperationsApp() {
     return (
       <div className="p-7">
         <SectionHead title="Knowledge base" subtitle="Answers your agents cite — one shared page template (CMS-driven)" />
-        <CMSCardList<ArticleItem>
-          collectionId="articles"
-          onOpen={openArticle}
-          cols={2}
-          render={(a) => ({
-            title: a.title,
-            subtitle: a.category ?? a.topic ?? '',
-            description: a.body.split('\n').find(l => l.trim() && !l.startsWith('#'))?.slice(0, 160),
-            statusLabel: a.category ?? a.topic ?? '',
-            statusTone: 'accent',
-            accent: ACCENT,
-            icon: <BookOpen className="w-5 h-5" />,
-            metricLabel: 'citations',
-            metricValue: `${a.reads} this month`,
-            meta: `updated ${a.updated}`,
-          })}
-        />
+        <CollectionRepeater collectionId="articles" onOpen={openArticle} />
       </div>
     );
   };
@@ -360,21 +325,7 @@ export function OperationsApp() {
     return (
       <div className="p-7">
         <SectionHead title="Incidents" subtitle="What the ops watchdog caught" />
-        <CMSCardList<IncidentItem>
-          collectionId="incidents"
-          onOpen={openIncident}
-          cols={2}
-          render={(i) => ({
-            title: i.title,
-            subtitle: i.when,
-            description: i.resolution,
-            statusLabel: i.severity,
-            statusTone: i.severity === 'danger' ? 'danger' : i.severity === 'warn' ? 'warn' : 'ok',
-            accent: i.severity === 'danger' ? '#dc2626' : i.severity === 'warn' ? '#f59e0b' : '#16a34a',
-            icon: <AlertOctagon className="w-5 h-5" />,
-            meta: i.severity === 'danger' ? 'auto-resolved' : i.severity === 'warn' ? 'monitored' : 'verified',
-          })}
-        />
+        <CollectionRepeater collectionId="incidents" onOpen={openIncident} />
       </div>
     );
   };
@@ -386,22 +337,7 @@ export function OperationsApp() {
           title="Processus"
           subtitle="Cartographie des processus de l'organisation — qui depend de quoi, et quoi faire quand ca casse"
         />
-        <CMSCardList<ProcessItem>
-          collectionId="processes"
-          cols={2}
-          render={(p) => ({
-            title: p.name,
-            subtitle: `${p.cadence} · owner ${p.owner}`,
-            description: `Inputs: ${p.inputs}`,
-            statusLabel: p.category,
-            statusTone: CATEGORY_TONE[p.category] ?? 'neutral',
-            accent: CATEGORY_ACCENT[p.category] ?? ACCENT,
-            icon: CATEGORY_ICON[p.category] ?? <Workflow className="w-5 h-5" />,
-            metricLabel: 'depends on',
-            metricValue: `${p.dependsOn.split('·').length} upstream`,
-            meta: `outputs · ${p.outputs.split('·').length}`,
-          })}
-        />
+        <CollectionRepeater collectionId="processes" onOpen={processesDrill.open} />
       </div>
     );
   };
@@ -413,22 +349,7 @@ export function OperationsApp() {
           title="Benchmarks"
           subtitle="Les tests qui savent dire non — passe, echoue, instable"
         />
-        <CMSCardList<BenchmarkItem>
-          collectionId="benchmarks"
-          cols={2}
-          render={(b) => ({
-            title: b.title,
-            subtitle: `${b.difficulty} · last run ${b.lastRun}`,
-            description: b.target,
-            statusLabel: b.status,
-            statusTone: BENCHMARK_TONE[b.status],
-            accent: BENCHMARK_ACCENT[b.status],
-            icon: <Gauge className="w-5 h-5" />,
-            metricLabel: 'pass rate',
-            metricValue: `${b.passRate}%`,
-            meta: b.failureMode.split('.')[0] ?? '',
-          })}
-        />
+        <CollectionRepeater collectionId="benchmarks" onOpen={benchmarksDrill.open} />
       </div>
     );
   };
@@ -441,16 +362,195 @@ export function OperationsApp() {
           title="Changements"
           subtitle="File des modifications proposees par les agents, en attente de decision humaine"
           action={
-            <span
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.16em]"
-              style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)', color: 'var(--theme-text-dim)' }}
-            >
-              <GitMerge className="w-3 h-3" /> {proposedCount} en attente
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.16em]"
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--panel-border)', color: 'var(--theme-text-dim)' }}
+              >
+                <GitMerge className="w-3 h-3" /> {proposedCount} en attente
+              </span>
+              {!changeComposerOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setChangeComposerOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: ACCENT, color: '#ffffff' }}
+                  aria-label="Proposer un changement"
+                  data-propose-change
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Proposer
+                </button>
+              ) : null}
+            </div>
           }
         />
+        {changeComposerOpen ? (
+          <div
+            className="mb-5 rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <label
+              className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="ops-change-title"
+            >
+              Titre du changement
+            </label>
+            <input
+              id="ops-change-title"
+              autoFocus
+              value={changeTitle}
+              onChange={(e) => setChangeTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewChange();
+                if (e.key === 'Escape') cancelChangeComposer();
+              }}
+              placeholder="ex. Add tag-based search to the vault"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            />
+            <label
+              className="mt-3 block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="ops-change-summary"
+            >
+              Résumé (court)
+            </label>
+            <input
+              id="ops-change-summary"
+              value={changeSummary}
+              onChange={(e) => setChangeSummary(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewChange();
+                if (e.key === 'Escape') cancelChangeComposer();
+              }}
+              placeholder="Une phrase qui dit le quoi"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            />
+            <label
+              className="mt-3 block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="ops-change-why"
+            >
+              Pourquoi (1-3 phrases)
+            </label>
+            <textarea
+              id="ops-change-why"
+              value={changeWhy}
+              onChange={(e) => setChangeWhy(e.target.value)}
+              rows={3}
+              placeholder="Contexte, signal déclencheur, gain attendu"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 resize-y"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            />
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label
+                  className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="ops-change-risk"
+                >
+                  Risque
+                </label>
+                <select
+                  id="ops-change-risk"
+                  value={changeRisk}
+                  onChange={(e) => setChangeRisk(e.target.value as 'low' | 'med' | 'high')}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+                >
+                  <option value="low">low</option>
+                  <option value="med">med</option>
+                  <option value="high">high</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="ops-change-policy"
+                >
+                  Policy ADR
+                </label>
+                <input
+                  id="ops-change-policy"
+                  value={changePolicy}
+                  onChange={(e) => setChangePolicy(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewChange();
+                    if (e.key === 'Escape') cancelChangeComposer();
+                  }}
+                  placeholder="ex. ADR-OPS-013"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="ops-change-proposedby"
+                >
+                  Proposed by
+                </label>
+                <input
+                  id="ops-change-proposedby"
+                  value={changeProposedBy}
+                  onChange={(e) => setChangeProposedBy(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewChange();
+                    if (e.key === 'Escape') cancelChangeComposer();
+                  }}
+                  placeholder="ex. human:ops"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelChangeComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90"
+                style={{ background: 'transparent', color: 'var(--theme-text-dim)', border: '1px solid var(--panel-border)' }}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={submitNewChange}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+              >
+                Soumettre le changement
+              </button>
+            </div>
+          </div>
+        ) : null}
         {changes.length === 0 ? (
-          <div className="text-center text-[12px] py-8" style={{ color: 'var(--theme-text-dim)' }}>No items yet.</div>
+          <div
+            className="flex flex-col items-center gap-3 rounded-2xl border border-dashed py-10 px-5 text-center"
+            style={{ borderColor: 'var(--panel-border)', color: 'var(--theme-text-muted)' }}
+          >
+            <div className="text-[13px]">Aucun changement proposé pour l'instant.</div>
+            <div className="text-[11px]" style={{ color: 'var(--theme-text-dim)' }}>
+              Quand un agent propose un changement, il atterrit ici pour décision humaine.
+            </div>
+            {!changeComposerOpen ? (
+              <button
+                type="button"
+                onClick={() => setChangeComposerOpen(true)}
+                className="mt-1 inline-flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+                data-propose-change-empty
+              >
+                <Plus className="w-3 h-3" />
+                Proposer le premier changement
+              </button>
+            ) : null}
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(changes as ChangeItem[]).map((c) => {

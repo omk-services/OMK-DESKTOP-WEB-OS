@@ -4,13 +4,13 @@ import { AppFrame, SectionHead, type AppSection } from '../../components/AppFram
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
+import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { TasksDetailPage, type TasksDetailItem } from './TasksDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { TasksItemDetail } from './TasksItemDetail';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { seedTasksCms } from './seed';
 
 seedTasksCms();
@@ -462,35 +462,7 @@ export function TasksApp() {
           <SummaryCell label="implicit" value={implicit} tone="#d97706" />
           <SummaryCell label="explicit" value={explicit} tone="#16a34a" />
         </div>
-        <CMSCardList
-          collectionId="dods"
-          onOpen={dodsDrill.open}
-          cols={2}
-          render={(d: Record<string, unknown>) => {
-            const status = String(d.status ?? 'explicit');
-            const tone =
-              status === 'missing' ? 'danger' :
-              status === 'implicit' ? 'warn' : 'ok';
-            const accent =
-              status === 'missing' ? '#dc2626' :
-              status === 'implicit' ? '#d97706' : '#16a34a';
-            const dod = String(d.dod ?? '');
-            return {
-              title: String(d.name),
-              subtitle: `${String(d.context ?? '')} · ${String(d.owner ?? '—')}`,
-              description: dod.length > 0
-                ? dod
-                : String(d.signal ?? 'No DoD written — this task can drift silently.'),
-              statusLabel: status,
-              statusTone: tone,
-              accent,
-              icon: <ShieldCheck className="w-5 h-5" />,
-              metricLabel: 'edited',
-              metricValue: String(d.lastEdited ?? '—'),
-              meta: dod.length > 0 ? 'DoD written' : 'DoD blank — write one',
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="dods" onOpen={dodsDrill.open} />
       </div>
     );
   };
@@ -517,32 +489,7 @@ export function TasksApp() {
           <SummaryCell label="drift" value={drift} tone="#d97706" />
           <SummaryCell label="fail" value={fail} tone="#dc2626" />
         </div>
-        <CMSCardList
-          collectionId="comparators"
-          onOpen={comparatorsDrill.open}
-          cols={2}
-          render={(c: Record<string, unknown>) => {
-            const verdict = String(c.verdict ?? 'match');
-            const tone =
-              verdict === 'match' ? 'ok' :
-              verdict === 'drift' ? 'warn' : 'danger';
-            const accent =
-              verdict === 'match' ? '#16a34a' :
-              verdict === 'drift' ? '#d97706' : '#dc2626';
-            return {
-              title: String(c.name),
-              subtitle: `${String(c.compared ?? '')} vs. ${String(c.against ?? '')}`,
-              description: String(c.delta ?? ''),
-              statusLabel: verdict,
-              statusTone: tone,
-              accent,
-              icon: <GitCompareArrows className="w-5 h-5" />,
-              metricLabel: 'reviewed',
-              metricValue: String(c.reviewed ?? '—'),
-              meta: `${String(c.reviewer ?? '—')}`,
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="comparators" onOpen={comparatorsDrill.open} />
       </div>
     );
   };
@@ -562,31 +509,7 @@ export function TasksApp() {
         <div className="mb-5">
           <Sparkline buckets={buckets} accent={ACCENT} />
         </div>
-        <CMSCardList
-          collectionId="exposed_actions"
-          onOpen={exposedActionsDrill.open}
-          cols={2}
-          render={(a: Record<string, unknown>) => {
-            const channel = String(a.channel ?? 'ship');
-            const tone =
-              channel === 'email' ? 'accent' :
-              channel === 'release' ? 'ok' :
-              channel === 'social' ? 'warn' :
-              channel === 'ship' ? 'ok' : 'neutral';
-            return {
-              title: String(a.name),
-              subtitle: `${String(a.audience ?? '—')} · ${String(a.shippedAt ?? '—')}`,
-              description: String(a.summary ?? ''),
-              statusLabel: channel,
-              statusTone: tone,
-              accent: ACCENT,
-              icon: <Megaphone className="w-5 h-5" />,
-              metricLabel: 'metric',
-              metricValue: String(a.metric ?? '—'),
-              meta: `owner · ${String(a.owner ?? '—')}`,
-            };
-          }}
-        />
+        <CollectionRepeater collectionId="exposed_actions" onOpen={exposedActionsDrill.open} />
       </div>
     );
   };

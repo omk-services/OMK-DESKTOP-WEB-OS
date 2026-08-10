@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch, Plus, CheckCircle2 } from 'lucide-react';
+import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch, Plus, CheckCircle2, ChevronRight } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { ThemedSectionHead } from './ThemedSectionHead';
@@ -95,6 +95,27 @@ export function ItRdApp() {
     }
     updateItem('it_drift', id, { severity: 'ok' });
     addToast({ source: 'IT/R&D', type: 'success', message: 'Drift acquitté — marqué ok.' });
+  };
+
+  /* Experiments kanban — order declared once so the loop terminates cleanly. */
+  const EXP_STAGE_NEXT: Record<string, string | null> = {
+    idea: 'building',
+    building: 'shipped',
+    shipped: null,
+  };
+  const EXP_STAGE_ACCENT: Record<string, string> = {
+    idea: '#a78bfa',
+    building: '#7c3aed',
+    shipped: '#16a34a',
+  };
+  const moveExpStage = (id: string, fromStage: string): void => {
+    const next = EXP_STAGE_NEXT[fromStage];
+    if (!next) {
+      addToast({ source: 'IT/R&D', type: 'info', message: 'Déjà shipped — fin de la chaîne.' });
+      return;
+    }
+    updateItem('it_experiments', id, { stage: next });
+    addToast({ source: 'IT/R&D', type: 'success', message: `Expérience déplacée vers "${next}"` });
   };
 
   const [composerOpen, setComposerOpen] = useState(false);
@@ -232,15 +253,54 @@ export function ItRdApp() {
         <div className="flex-1 min-h-0">
           <KanbanBoard columns={[
             { title: 'Idea', accent: '#a78bfa', items: byStage('idea').map(e => (
-              <KanbanCard key={e.id} title={String(e.title)} meta={String(e.meta)} onClick={() => openExperiment(e.id)} />
+              <ExperimentCard key={String(e.id)} item={e} borderAccent="#a78bfa" />
             )) },
             { title: 'Building', accent: ACCENT, items: byStage('building').map(e => (
-              <KanbanCard key={e.id} title={String(e.title)} meta={String(e.meta)} accent={ACCENT} onClick={() => openExperiment(e.id)} />
+              <ExperimentCard key={String(e.id)} item={e} borderAccent={ACCENT} />
             )) },
             { title: 'Shipped', accent: '#16a34a', items: byStage('shipped').map(e => (
-              <KanbanCard key={e.id} title={String(e.title)} meta={String(e.meta)} accent="#16a34a" onClick={() => openExperiment(e.id)} />
+              <ExperimentCard key={String(e.id)} item={e} borderAccent="#16a34a" />
             )) },
           ]} />
+        </div>
+      </div>
+    );
+  };
+
+  const ExperimentCard = ({ item, borderAccent }: { item: Record<string, unknown>; borderAccent: string }) => {
+    const stage = String(item.stage ?? 'idea');
+    const nextStage = EXP_STAGE_NEXT[stage];
+    const nextAccent = nextStage ? EXP_STAGE_ACCENT[nextStage] : borderAccent;
+    return (
+      <div
+        className="rounded-lg border p-3 shadow-sm transition-all"
+        style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+      >
+        <button
+          type="button"
+          onClick={() => openExperiment(String(item.id))}
+          className="w-full text-left"
+        >
+          <span className="block w-8 h-1 rounded-full mb-2" style={{ background: borderAccent }} />
+          <div className="text-sm font-semibold leading-snug" style={{ color: 'var(--theme-text)' }}>{String(item.title ?? '')}</div>
+          <div className="text-xs text-[var(--theme-text-dim)] mt-1">{String(item.meta ?? '')}</div>
+        </button>
+        <div className="mt-2 flex items-center justify-between gap-1 pt-2 border-t" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+          <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">{stage}</span>
+          {nextStage ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); moveExpStage(String(item.id), stage); }}
+              data-move-exp-stage={String(item.id)}
+              className="inline-flex items-center gap-1 text-[9.5px] font-semibold text-white px-1.5 py-0.5 rounded transition-all hover:opacity-90"
+              style={{ background: nextAccent }}
+              title={`Passer de "${stage}" à "${nextStage}"`}
+            >
+              <ChevronRight className="w-2.5 h-2.5" /> {nextStage}
+            </button>
+          ) : (
+            <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">shipped</span>
+          )}
         </div>
       </div>
     );
@@ -480,69 +540,59 @@ export function ItRdApp() {
             </div>
           }
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {loops.map(loop => {
-            const state = String(loop.state ?? 'stable');
-            const tone = STATE_TONE[state] ?? 'neutral';
-            const toneBg: Record<string, string> = { ok: '#dcfce7', warn: '#fef3c7', danger: '#fee2e2', neutral: '#f5f5f4' };
-            const toneFg: Record<string, string> = { ok: '#15803d', warn: '#b45309', danger: '#b91c1c', neutral: '#57534e' };
-            const stateDot: Record<string, string> = { ok: '#16a34a', warn: '#d97706', danger: '#dc2626', neutral: '#a8a29e' };
-            return (
-              <button
-                key={String(loop.id)}
-                type="button"
-                onClick={() => loopsDrill.open(String(loop.id))}
-                className="text-left rounded-2xl border bg-[var(--theme-surface)] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-[var(--theme-accent)]"
-                style={{ borderColor: 'var(--panel-border)' }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stateDot[tone] ?? stateDot.neutral }} />
-                    <span className="text-[14px] font-bold text-[var(--theme-text)] truncate">
-                      {String(loop.name ?? '—')}
-                    </span>
-                  </div>
-                  <span
-                    className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
-                    style={{ background: toneBg[tone], color: toneFg[tone] }}
-                  >
-                    {state}
-                  </span>
-                </div>
-                <div className="mt-1.5 text-[11.5px] text-[var(--theme-muted)]">
-                  regulates <span className="font-mono">{String(loop.metric ?? '—')}</span>
-                </div>
-                <div className="mt-3 grid grid-cols-4 gap-1.5">
-                  {[
-                    { label: 'Capteur', value: String(loop.capteur ?? '') },
-                    { label: 'Consigne', value: String(loop.consigne ?? '') },
-                    { label: 'Contrôleur', value: String(loop.controleur ?? '') },
-                    { label: 'Actionneur', value: String(loop.actionneur ?? '') },
-                  ].map((organ) => (
-                    <div
-                      key={organ.label}
-                      className="rounded-md px-1.5 py-1.5"
-                      style={{ background: 'var(--theme-surface)' }}
-                    >
-                      <div className="text-[9px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>
-                        {organ.label}
-                      </div>
-                      <div className="mt-0.5 text-[10.5px] leading-snug line-clamp-3" style={{ color: 'var(--theme-text)' }}>
-                        {organ.value || '—'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 pt-2.5 border-t border-[var(--panel-border-subtle)] flex items-center justify-between text-[10.5px] font-mono text-[var(--theme-text-dim)]">
-                  <span>setpoint {String(loop.target ?? '—')}</span>
-                  <span>last action {String(loop.lastActionAt ?? '—')}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        <CollectionRepeater collectionId="it_loops" onOpen={loopsDrill.open} />
       </div>
     );
+  };
+
+  const [driftComposerOpen, setDriftComposerOpen] = useState(false);
+  const [driftName, setDriftName] = useState('');
+  const [driftMetric, setDriftMetric] = useState('');
+  const [driftReference, setDriftReference] = useState('');
+  const [driftCurrent, setDriftCurrent] = useState('');
+  const [driftThreshold, setDriftThreshold] = useState('');
+  const [driftSeverity, setDriftSeverity] = useState<'ok' | 'watch' | 'drift' | 'alert'>('drift');
+
+  const submitNewDrift = (): void => {
+    const name = driftName.trim();
+    if (name.length === 0) {
+      addToast({ source: 'IT/R&D', type: 'warning', message: 'Le nom est obligatoire.' });
+      return;
+    }
+    const result = addItem('it_drift', {
+      name,
+      metric: driftMetric.trim() || '—',
+      reference: driftReference.trim() || '0',
+      current: driftCurrent.trim() || '0',
+      threshold: driftThreshold.trim() || '—',
+      severity: driftSeverity,
+      unit: '',
+      method: 'manual',
+      note: '',
+      detected: new Date().toISOString().slice(0, 10),
+    });
+    if (result.ok) {
+      addToast({ source: 'IT/R&D', type: 'success', message: `Drift ajouté : ${name}` });
+      setDriftName('');
+      setDriftMetric('');
+      setDriftReference('');
+      setDriftCurrent('');
+      setDriftThreshold('');
+      setDriftSeverity('drift');
+      setDriftComposerOpen(false);
+    } else {
+      addToast({ source: 'IT/R&D', type: 'warning', message: result.error ?? 'Création impossible.' });
+    }
+  };
+
+  const cancelDriftComposer = (): void => {
+    setDriftName('');
+    setDriftMetric('');
+    setDriftReference('');
+    setDriftCurrent('');
+    setDriftThreshold('');
+    setDriftSeverity('drift');
+    setDriftComposerOpen(false);
   };
 
   const Drift = () => {
@@ -552,11 +602,156 @@ export function ItRdApp() {
         <ThemedSectionHead
           title="Drift"
           subtitle="Gap between the model spec and the actual behavior. Cross the threshold, get alerted."
-          action={<Badge tone={driftCount > 0 ? 'warn' : 'ok'}>{driftCount} above threshold</Badge>}
+          action={
+            <div className="flex items-center gap-2">
+              <Badge tone={driftCount > 0 ? 'warn' : 'ok'}>{driftCount} above threshold</Badge>
+              {!driftComposerOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setDriftComposerOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.16em] transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: ACCENT, color: '#ffffff' }}
+                  aria-label="Ajouter un drift"
+                  data-add-drift
+                >
+                  <Plus className="w-3 h-3" />
+                  Ajouter
+                </button>
+              ) : null}
+            </div>
+          }
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {drift.map(entry => {
-            const severity = String(entry.severity ?? 'ok');
+        {driftComposerOpen ? (
+          <div
+            className="mb-5 rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <label
+              className="block text-[10.5px] font-extrabold uppercase tracking-[0.16em] mb-1.5"
+              style={{ color: 'var(--theme-text-dim)' }}
+              htmlFor="it-drift-name"
+            >
+              Nom du drift
+            </label>
+            <input
+              id="it-drift-name"
+              autoFocus
+              value={driftName}
+              onChange={(e) => setDriftName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewDrift();
+                if (e.key === 'Escape') cancelDriftComposer();
+              }}
+              placeholder="ex. quiz latency"
+              className="w-full rounded-lg px-3 py-2 text-sm font-mono outline-none focus:ring-2"
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--panel-border)', color: 'var(--theme-text)' }}
+            />
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Métrique</span>
+                <input
+                  value={driftMetric}
+                  onChange={(e) => setDriftMetric(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewDrift(); if (e.key === 'Escape') cancelDriftComposer(); }}
+                  placeholder="ex. p95 latency (ms)"
+                  className="text-[12px] font-mono rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Severité</span>
+                <select
+                  value={driftSeverity}
+                  onChange={(e) => setDriftSeverity(e.target.value as 'ok' | 'watch' | 'drift' | 'alert')}
+                  className="text-[12px] font-mono rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                >
+                  <option value="ok">ok</option>
+                  <option value="watch">watch</option>
+                  <option value="drift">drift</option>
+                  <option value="alert">alert</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Reference</span>
+                <input
+                  value={driftReference}
+                  onChange={(e) => setDriftReference(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewDrift(); if (e.key === 'Escape') cancelDriftComposer(); }}
+                  placeholder="ex. 800"
+                  className="text-[12px] font-mono rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Current</span>
+                <input
+                  value={driftCurrent}
+                  onChange={(e) => setDriftCurrent(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewDrift(); if (e.key === 'Escape') cancelDriftComposer(); }}
+                  placeholder="ex. 1200"
+                  className="text-[12px] font-mono rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </label>
+              <label className="flex flex-col gap-1 sm:col-span-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>Threshold</span>
+                <input
+                  value={driftThreshold}
+                  onChange={(e) => setDriftThreshold(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitNewDrift(); if (e.key === 'Escape') cancelDriftComposer(); }}
+                  placeholder="ex. 1000"
+                  className="text-[12px] font-mono rounded-lg border px-2.5 py-1.5 outline-none"
+                  style={{ background: 'var(--theme-bg)', borderColor: 'var(--panel-border)', color: 'var(--theme-text)' }}
+                />
+              </label>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelDriftComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90"
+                style={{ background: 'transparent', color: 'var(--theme-text-dim)', border: '1px solid var(--panel-border)' }}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={submitNewDrift}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+              >
+                Ajouter le drift
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {drift.length === 0 ? (
+          <div
+            className="flex flex-col items-center gap-3 rounded-2xl border border-dashed py-10 px-5 text-center"
+            style={{ borderColor: 'var(--panel-border)', color: 'var(--theme-text-muted)' }}
+          >
+            <div className="text-[13px]">Aucun drift enregistré.</div>
+            <div className="text-[11px]" style={{ color: 'var(--theme-text-dim)' }}>
+              Quand une métrique dépasse la spec, elle apparaît ici pour acquittement.
+            </div>
+            {!driftComposerOpen ? (
+              <button
+                type="button"
+                onClick={() => setDriftComposerOpen(true)}
+                className="mt-1 inline-flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background: ACCENT, color: '#ffffff' }}
+                data-add-drift-empty
+              >
+                <Plus className="w-3 h-3" />
+                Ajouter le premier drift
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {drift.map(entry => {
+              const severity = String(entry.severity ?? 'ok');
             const tone = DRIFT_TONE[severity] ?? 'neutral';
             const toneBg: Record<string, string> = { ok: '#dcfce7', warn: '#fef3c7', danger: '#fee2e2', neutral: '#f5f5f4' };
             const toneFg: Record<string, string> = { ok: '#15803d', warn: '#b45309', danger: '#b91c1c', neutral: '#57534e' };
@@ -642,59 +837,7 @@ export function ItRdApp() {
             </div>
           }
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {evals.map(evalEntry => {
-            const evalType = String(evalEntry.evalType ?? 'auto');
-            const tone = EVAL_TYPE_TONE[evalType] ?? 'neutral';
-            const toneBg: Record<string, string> = { ok: '#dcfce7', warn: '#fef3c7', accent: '#ede9fe', neutral: '#f5f5f4' };
-            const toneFg: Record<string, string> = { ok: '#15803d', warn: '#b45309', accent: '#6d28d9', neutral: '#57534e' };
-            const trials = Number(evalEntry.trials ?? 0);
-            const dist = String(evalEntry.distribution ?? '— / — / —');
-            const parts = dist.split('/').map(p => Number(p.trim()));
-            const pass = parts[0] ?? 0;
-            const pct = trials > 0 ? (pass / trials) * 100 : 0;
-            const barPct = Math.max(8, Math.min(100, pct));
-            return (
-              <button
-                key={String(evalEntry.id)}
-                type="button"
-                onClick={() => evalsDrill.open(String(evalEntry.id))}
-                className="text-left rounded-2xl border bg-[var(--theme-surface)] p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-[var(--theme-accent)]"
-                style={{ borderColor: 'var(--panel-border)' }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-[14px] font-bold text-[var(--theme-text)] leading-snug min-w-0 flex-1">
-                    {String(evalEntry.name ?? '—')}
-                  </span>
-                  <span
-                    className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
-                    style={{ background: toneBg[tone], color: toneFg[tone] }}
-                  >
-                    {evalType}
-                  </span>
-                </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-[22px] font-extrabold tabular-nums leading-none" style={{ color: 'var(--theme-text)' }}>
-                    {String(evalEntry.rate ?? '—')}
-                  </span>
-                  <span className="text-[10.5px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-muted)' }}>
-                    pass rate
-                  </span>
-                </div>
-                <div className="mt-2.5 h-2 w-full rounded-full overflow-hidden" style={{ background: 'var(--theme-surface)' }}>
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${barPct}%`, background: evalType === 'review' ? '#f59e0b' : '#7c3aed' }}
-                  />
-                </div>
-                <div className="mt-2 pt-2 border-t border-[var(--panel-border-subtle)] flex items-center justify-between text-[10.5px] font-mono text-[var(--theme-text-dim)]">
-                  <span>distribution {dist}</span>
-                  <span>{trials} trials</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        <CollectionRepeater collectionId="it_evals" onOpen={evalsDrill.open} />
       </div>
     );
   };
