@@ -105,11 +105,19 @@ interface CollectionDrill {
 }
 
 export function AuditApp() {
+  /* Le 2e argument de useCollectionDrill est le LABEL DE SECTION, pas le nom
+   * de la collection. Le hook compare ce label a `activePage` (qu'AppFrame
+   * alimente avec `active.label`) pour savoir s'il est visible ; quand il ne
+   * l'est pas, il referme toute fiche ouverte. Un label qui ne correspond a
+   * aucune section rend donc les cartes de cette grille definitivement
+   * inertes — c'etait le cas de ROI, declaree ici « Arbitrage & ROI » (le
+   * nom de la collection dans le seed) alors que sa section s'appelle « ROI ».
+   * Les quatre autres grilles ouvraient leur fiche, la cinquieme non. */
   const arbitrageDrill = useCollectionDrill('audit_arbitrage', 'Arbitrage');
   const contexteDrill = useCollectionDrill('audit_contexte', 'Contexte');
   const donneesDrill = useCollectionDrill('audit_donnees', 'Données');
   const automatabiliteDrill = useCollectionDrill('audit_automatabilite', 'Automatabilité');
-  const roiDrill = useCollectionDrill('audit_arbitrage_roi', 'Arbitrage & ROI');
+  const roiDrill = useCollectionDrill('audit_arbitrage_roi', 'ROI');
 
   /* Brief-F — couche d'écriture. Le manuel est D4 append-only sur le fond,
    * mais une fiche par critère gagne un état "relue" (signé humain). C'est
@@ -241,8 +249,8 @@ export function AuditApp() {
   return (
     <>
       <AppFrame
-        title="Manuel de Diagnostic IA"
-        subtitle="6 grilles canon · source audit.pdf"
+        title="Audit Diagnostic IA"
+        subtitle="Manuel · 6 grilles canon · source audit.pdf"
         accent={ACCENT}
         icon={Shield}
         sections={sections}
