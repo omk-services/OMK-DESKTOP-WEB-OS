@@ -151,7 +151,10 @@ function ProposalRow({
             <button
               type="button"
               onClick={() => onRemove(proposal.id)}
-              className="text-[#dc2626] hover:bg-red-50 px-2 py-1 rounded"
+              className="px-2 py-1 rounded transition-colors"
+              style={{ color: '#dc2626' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.10)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               title="Retirer la proposition"
               data-remove-proposal
               aria-label="Retirer la proposition"
@@ -222,12 +225,13 @@ function MergeResultBanner({ scenario }: { scenario: Scenario }) {
     return (
       <div
         data-merge-result="success"
-        className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 flex items-start gap-2"
+        className="rounded-xl border p-3 flex items-start gap-2"
+        style={{ borderColor: '#86efac', background: 'rgba(22,163,74,0.10)' }}
       >
-        <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#15803d' }} />
         <div>
-          <div className="text-[12.5px] font-bold text-emerald-900">Fusion atomique réussie</div>
-          <div className="text-[11px] text-emerald-800/80 mt-0.5">
+          <div className="text-[12.5px] font-bold" style={{ color: '#166534' }}>Fusion atomique réussie</div>
+          <div className="text-[11px] mt-0.5" style={{ color: '#15803d' }}>
             Toutes les propositions ont été appliquées. {shortDate(scenario.merge.at)}.
           </div>
         </div>
@@ -237,12 +241,13 @@ function MergeResultBanner({ scenario }: { scenario: Scenario }) {
   return (
     <div
       data-merge-result="failure"
-      className="rounded-xl border border-red-200 bg-red-50 p-3 flex items-start gap-2"
+      className="rounded-xl border p-3 flex items-start gap-2"
+      style={{ borderColor: '#fca5a5', background: 'rgba(220,38,38,0.10)' }}
     >
-      <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#b91c1c' }} />
       <div className="flex-1 min-w-0">
-        <div className="text-[12.5px] font-bold text-red-900">Fusion atomique annulée</div>
-        <div className="text-[11px] text-red-800/80 mt-0.5">
+        <div className="text-[12.5px] font-bold" style={{ color: '#991b1b' }}>Fusion atomique annulée</div>
+        <div className="text-[11px] mt-0.5" style={{ color: '#b91c1c' }}>
           Étape <span className="font-mono">{scenario.merge.failedProposalId}</span> : {scenario.merge.failureReason}.
           Aucune modification n'a été appliquée — toutes les propositions précédentes ont été revertées.
         </div>
@@ -528,7 +533,10 @@ function ScenarioDetail({
               <button
                 type="button"
                 onClick={handleReject}
-                className="text-[12px] font-bold text-[#dc2626] hover:bg-red-50 px-3.5 py-2 rounded-xl"
+                className="text-[12px] font-bold px-3.5 py-2 rounded-xl transition-colors"
+                style={{ color: '#dc2626' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.10)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                 data-reject-scenario
                 title="Rejeter ce scénario — aucune modification ne sera appliquée"
               >

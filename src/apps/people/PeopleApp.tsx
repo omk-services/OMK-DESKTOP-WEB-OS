@@ -158,7 +158,12 @@ function Overview() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-[15px] font-bold text-[var(--theme-text)]">B1 Gatekeeper standing by</span>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">You</span>
+                  <span
+                    className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                    style={{ color: '#15803d', background: 'rgba(22,163,74,0.12)', border: '1px solid #86efac' }}
+                  >
+                    You
+                  </span>
                 </div>
                 <p className="text-[12.5px] text-[var(--theme-text-muted)] mt-1 leading-snug">
                   {active.length} of {FLEET_AGENTS.length} agents ran overnight. {blocked.length > 0 ? `${blocked.length} need your call.` : 'No blockers.'}
@@ -166,6 +171,11 @@ function Overview() {
               </div>
               <button
                 type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('coach-os:navigate', { detail: { appId: 'people', sectionId: 'approvals' } }));
+                  }
+                }}
                 className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[color:#fff] px-3.5 py-2 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.99]"
                 style={{ background: ACCENT, boxShadow: `0 4px 12px ${ACCENT}30` }}
               >
@@ -175,13 +185,16 @@ function Overview() {
 
             {/* Standup metrics — act / idle / blocked */}
             <div className="grid grid-cols-3 gap-3 mt-5">
-              <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3.5">
+              <div
+                className="rounded-xl p-3.5"
+                style={{ background: 'rgba(22,163,74,0.10)', border: '1px solid #86efac' }}
+              >
                 <div className="flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-emerald-700" />
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-emerald-700">Active</span>
+                  <Activity className="w-3.5 h-3.5" style={{ color: '#15803d' }} />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider" style={{ color: '#15803d' }}>Active</span>
                 </div>
-                <div className="text-[24px] font-bold text-emerald-900 mt-1 tabular-nums">{active.length}</div>
-                <div className="text-[10.5px] text-emerald-700/80 mt-0.5 truncate">
+                <div className="text-[24px] font-bold mt-1 tabular-nums" style={{ color: '#166534' }}>{active.length}</div>
+                <div className="text-[10.5px] mt-0.5 truncate" style={{ color: '#15803d' }}>
                   {active.map(a => a.name).join(', ') || 'none'}
                 </div>
               </div>
@@ -195,13 +208,16 @@ function Overview() {
                   {idle.map(a => a.name).join(', ') || 'none'}
                 </div>
               </div>
-              <div className="rounded-xl bg-amber-50 border border-amber-100 p-3.5">
+              <div
+                className="rounded-xl p-3.5"
+                style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid #fcd34d' }}
+              >
                 <div className="flex items-center gap-1.5">
-                  <Heart className="w-3.5 h-3.5 text-amber-700" />
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-amber-700">Blocked</span>
+                  <Heart className="w-3.5 h-3.5" style={{ color: '#b45309' }} />
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider" style={{ color: '#b45309' }}>Blocked</span>
                 </div>
-                <div className="text-[24px] font-bold text-amber-900 mt-1 tabular-nums">{blocked.length}</div>
-                <div className="text-[10.5px] text-amber-800/80 mt-0.5 truncate">
+                <div className="text-[24px] font-bold mt-1 tabular-nums" style={{ color: '#92400e' }}>{blocked.length}</div>
+                <div className="text-[10.5px] mt-0.5 truncate" style={{ color: '#b45309' }}>
                   {blocked.map(a => a.name).join(', ') || 'none'}
                 </div>
               </div>
@@ -260,8 +276,11 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
           >
             {isProcessing ? (
               <span className="relative inline-flex w-2.5 h-2.5">
-                <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative rounded-full w-2.5 h-2.5 bg-emerald-500 ring-2 ring-white" />
+                <span className="absolute inset-0 rounded-full opacity-75 animate-ping" style={{ background: '#16a34a' }} />
+                <span
+                  className="relative rounded-full w-2.5 h-2.5"
+                  style={{ background: '#16a34a', boxShadow: '0 0 0 2px var(--theme-surface)' }}
+                />
               </span>
             ) : (
               <span className="relative inline-flex w-2.5 h-2.5">
@@ -523,7 +542,7 @@ function Fleet() {
           <div className="flex items-center gap-2">
             <Badge tone="accent">{FLEET_AGENTS.length} agents</Badge>
             <Badge tone="ok">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+              <span className="w-1.5 h-1.5 rounded-full mr-1" style={{ background: '#16a34a' }} />
               {FLEET_AGENTS.filter(a => a.state === 'EXECUTING').length} executing
             </Badge>
           </div>
@@ -748,7 +767,7 @@ function Schedule() {
           </div>
           <div>
             <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Weekday avg</div>
-            <div className="text-[20px] font-bold text-emerald-700 mt-0.5">{weekdayAvg}%</div>
+            <div className="text-[20px] font-bold mt-0.5" style={{ color: '#15803d' }}>{weekdayAvg}%</div>
           </div>
         </div>
       </div>
@@ -756,7 +775,7 @@ function Schedule() {
       {/* Planned tasks — reframed as Daily Standup / Sprint Review / Retrospective */}
       <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4 text-emerald-700" />
+          <Zap className="w-4 h-4" style={{ color: '#15803d' }} />
           <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">— SPRINT CADENCE · THIS WEEK</div>
         </div>
         <div className="flex flex-col gap-2">
