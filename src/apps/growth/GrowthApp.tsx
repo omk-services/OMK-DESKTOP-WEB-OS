@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Sprout, Filter, Radio, FlaskConical, TrendingUp, Map, Handshake, Sparkles, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { Sprout, Filter, Radio, FlaskConical, TrendingUp, Map, Handshake, Sparkles, ArrowUp, ArrowDown, Minus, Plus } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { StatCard } from '../_ui/kit';
 import { FunnelStep } from '../_ui/widgets';
@@ -281,12 +281,163 @@ export function GrowthApp() {
   };
 
   const Acquisition = () => {
+    // Composeur minimal pour ajouter un canal. On garde le cycling du verdict
+    // sur les cartes (mutation orthogonale à la création) — c'est le seul
+    // chemin qui marche quand les cartes portent déjà une action de cycle
+    // et que CollectionRepeater ne supporte pas les actions custom par carte.
+    const [composerOpen, setComposerOpen] = useState(false);
+    const [composerName, setComposerName] = useState('');
+    const [composerCategory, setComposerCategory] = useState('Marketplace');
+    const addItem = useCmsStore(s => s.addItem);
+    const submitNewChannel = (): void => {
+      const name = composerName.trim();
+      if (name.length === 0) {
+        addToast({ source: 'Growth', type: 'warning', message: 'Channel name is required.' });
+        return;
+      }
+      // Vérifier l'absence de doublon (côté UI, le store ne le fait pas sur
+      // les titres arbitraires comme les canaux ; on garde le même niveau
+      // de garde-fou que les composeurs Sales/Clients).
+      const exists = acquisition.some((a) => String(a.name).toLowerCase() === name.toLowerCase());
+      if (exists) {
+        addToast({ source: 'Growth', type: 'warning', message: `"${name}" is already in Acquisition.` });
+        return;
+      }
+      const result = addItem('growth_acquisition', {
+        name,
+        category: composerCategory.trim() || 'Marketplace',
+        virality: 0,
+        conversion: 0,
+        cost: 0,
+        ease: 0,
+        global: 0,
+        verdict: 'hold steady · 0/100',
+        whatWorks: '',
+        whatFailed: '',
+      });
+      if (result.ok) {
+        addToast({ source: 'Growth', type: 'success', message: `Channel added: ${name}` });
+        setComposerName('');
+        setComposerCategory('Marketplace');
+        setComposerOpen(false);
+      } else {
+        addToast({ source: 'Growth', type: 'warning', message: result.error ?? 'Could not add channel.' });
+      }
+    };
+    const cancelComposer = (): void => {
+      setComposerName('');
+      setComposerCategory('Marketplace');
+      setComposerOpen(false);
+    };
     return (
       <div className="p-7">
         <SectionHead
           title="Acquisition"
           subtitle="Every channel scored on virality, conversion, cost, ease of execution — the global score drives the verdict"
+          action={
+            !composerOpen ? (
+              <button
+                type="button"
+                onClick={() => setComposerOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'var(--theme-surface)',
+                  border: '1px solid var(--panel-border)',
+                  color: 'var(--theme-text)',
+                }}
+                aria-label="Add a new acquisition channel"
+              >
+                <Plus className="w-4 h-4" />
+                New channel
+              </button>
+            ) : null
+          }
         />
+        {composerOpen ? (
+          <div
+            className="mb-4 rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="acq-composer-name"
+                >
+                  Channel name
+                </label>
+                <input
+                  id="acq-composer-name"
+                  autoFocus
+                  value={composerName}
+                  onChange={(e) => setComposerName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewChannel();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Podcast guest appearances"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="acq-composer-category"
+                >
+                  Category
+                </label>
+                <input
+                  id="acq-composer-category"
+                  value={composerCategory}
+                  onChange={(e) => setComposerCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewChannel();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Marketplace / Owned / Earned / Paid / Events"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--theme-text-dim)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitNewChannel}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: ACCENT,
+                  color: '#ffffff',
+                }}
+              >
+                Add channel
+              </button>
+            </div>
+          </div>
+        ) : null}
         <FleetItemGrid cols={2}>
           {acquisition.map((a) => {
             const verdictKey = String(a.verdict).split(' ·')[0];
@@ -388,26 +539,9 @@ export function GrowthApp() {
           title="Strategie"
           subtitle="Phasage d'une offre — lancement, montee en charge, optimisation — chaque phase tient sur des criteres de passage"
         />
-        <CMSCardList<StrategieItem>
+        <CollectionRepeater
           collectionId="growth_strategie"
           onOpen={strategieDrill.open}
-          cols={2}
-          render={(p) => {
-            const tone = STRAT_PHASE_TONE[p.phase] ?? 'neutral';
-            const accent = STRAT_PHASE_ACCENT[p.phase] ?? ACCENT;
-            return {
-              title: p.name,
-              subtitle: `${p.duration} · ${p.focus}`,
-              description: p.objective.split('.')[0] ?? p.objective,
-              statusLabel: p.phase,
-              statusTone: tone,
-              accent,
-              icon: <Map className="w-5 h-5" />,
-              metricLabel: 'state',
-              metricValue: p.state,
-              meta: p.criteria.split('.')[0] ?? p.criteria,
-            };
-          }}
         />
       </div>
     );
@@ -427,12 +561,155 @@ export function GrowthApp() {
         addToast({ source: 'Growth', type: 'success', message: `${String(item.name)} → ${next}` });
       }
     };
+    // Composeur inline pour ajouter un partenaire. Comme pour Acquisition,
+    // on garde le cycle du state sur les cartes (mutation orthogonale).
+    const [composerOpen, setComposerOpen] = useState(false);
+    const [composerName, setComposerName] = useState('');
+    const [composerType, setComposerType] = useState('Media');
+    const addItem = useCmsStore(s => s.addItem);
+    const submitNewPartner = (): void => {
+      const name = composerName.trim();
+      if (name.length === 0) {
+        addToast({ source: 'Growth', type: 'warning', message: 'Partner name is required.' });
+        return;
+      }
+      const exists = partenariats.some((p) => String(p.name).toLowerCase() === name.toLowerCase());
+      if (exists) {
+        addToast({ source: 'Growth', type: 'warning', message: `"${name}" is already in Partenariats.` });
+        return;
+      }
+      const result = addItem('growth_partenariats', {
+        name,
+        type: composerType.trim() || 'Media',
+        brings: '',
+        expects: '',
+        state: 'prospect',
+        contact: '',
+        touched: 'never',
+      });
+      if (result.ok) {
+        addToast({ source: 'Growth', type: 'success', message: `Partner added: ${name}` });
+        setComposerName('');
+        setComposerType('Media');
+        setComposerOpen(false);
+      } else {
+        addToast({ source: 'Growth', type: 'warning', message: result.error ?? 'Could not add partner.' });
+      }
+    };
+    const cancelComposer = (): void => {
+      setComposerName('');
+      setComposerType('Media');
+      setComposerOpen(false);
+    };
     return (
       <div className="p-7">
         <SectionHead
           title="Partenariats"
           subtitle="Ce qu'ils apportent, ce qu'ils attendent, etat de la relation"
+          action={
+            !composerOpen ? (
+              <button
+                type="button"
+                onClick={() => setComposerOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'var(--theme-surface)',
+                  border: '1px solid var(--panel-border)',
+                  color: 'var(--theme-text)',
+                }}
+                aria-label="Add a new partner"
+              >
+                <Plus className="w-4 h-4" />
+                New partner
+              </button>
+            ) : null
+          }
         />
+        {composerOpen ? (
+          <div
+            className="mb-4 rounded-xl border p-4"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="partner-composer-name"
+                >
+                  Partner name
+                </label>
+                <input
+                  id="partner-composer-name"
+                  autoFocus
+                  value={composerName}
+                  onChange={(e) => setComposerName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewPartner();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Indie Hackers"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10.5px] font-semibold uppercase tracking-[0.18em] mb-1.5"
+                  style={{ color: 'var(--theme-text-dim)' }}
+                  htmlFor="partner-composer-type"
+                >
+                  Type
+                </label>
+                <input
+                  id="partner-composer-type"
+                  value={composerType}
+                  onChange={(e) => setComposerType(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitNewPartner();
+                    if (e.key === 'Escape') cancelComposer();
+                  }}
+                  placeholder="Media / Platform / School / Community / Referral"
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
+                  style={{
+                    background: 'var(--theme-bg)',
+                    border: '1px solid var(--panel-border)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelComposer}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--theme-text-dim)',
+                  border: '1px solid var(--panel-border)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitNewPartner}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                  background: ACCENT,
+                  color: '#ffffff',
+                }}
+              >
+                Add partner
+              </button>
+            </div>
+          </div>
+        ) : null}
         <FleetItemGrid cols={2}>
           {partenariats.map((p) => {
             const tone = PARTNER_STATE_TONE[String(p.state)] ?? 'neutral';
@@ -531,26 +808,9 @@ export function GrowthApp() {
           title="AEO"
           subtitle="Visibilite dans les reponses des modeles de langage — requetes qui citent la marque, celles qui citent un concurrent"
         />
-        <CMSCardList<AeoItem>
+        <CollectionRepeater
           collectionId="growth_aeo"
           onOpen={aeoDrill.open}
-          cols={2}
-          render={(a) => {
-            const tone = AEO_POSITION_TONE[a.position] ?? 'neutral';
-            const accent = AEO_POSITION_ACCENT[a.position] ?? ACCENT;
-            return {
-              title: a.query,
-              subtitle: `${a.intent} · tracked since ${a.trackedSince}`,
-              description: a.history.split('.')[0] ?? a.history,
-              statusLabel: a.position,
-              statusTone: tone,
-              accent,
-              icon: <Sparkles className="w-5 h-5" />,
-              metricLabel: 'cited by',
-              metricValue: a.cited === '—' ? '—' : `${a.cited.split(',').length} models`,
-              meta: a.competitor === '—' ? 'no close competitor' : `closest: ${a.competitor}`,
-            };
-          }}
         />
       </div>
     );
