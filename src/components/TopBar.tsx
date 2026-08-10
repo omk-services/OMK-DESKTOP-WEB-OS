@@ -20,7 +20,7 @@ import { useAppVisibility } from '../stores/appVisibility.store';
 import { TopBarMenu } from './TopBarMenu';
 import { ChangelogTabs } from './ChangelogTabs';
 import { CharacterMenu } from '../agent/CharacterMenu';
-import { TenantPill } from './TenantPill';
+import { ProfileWorkspaceSection } from './ProfileWorkspaceSection';
 import { NotificationsDropdown } from './NotificationsDropdown';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
@@ -121,6 +121,8 @@ export function TopBar(): import('react').ReactNode {
               <button onClick={() => { openApp('sales', 'Sales'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>
                 <Sparkles className="w-3.5 h-3.5" /> AI preferences
               </button>
+              <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />
+              <ProfileWorkspaceSection />
               <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />
               <button
                 onClick={() => {
@@ -300,10 +302,9 @@ export function TopBar(): import('react').ReactNode {
             </span>
           </div>
 
-          {/* Tenant pill — multi-tenant selector (Phase 3). Today there is
-              only one tenant; the dropdown still works and persists via
-              useTenantStore.switchTenant(). */}
-          <TenantPill />
+          {/* Workspace selector moved into the Profile menu (S_SOCLE
+              chantier 3, 2026-08-10) — it is account-scoped, not a
+              status indicator, so it does not belong next to the clock. */}
 
           {voice.supported && (
             <button
