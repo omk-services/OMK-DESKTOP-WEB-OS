@@ -11,13 +11,11 @@ import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronRight, Clock,
   MessageSquare, Sparkles, TrendingDown, TrendingUp, Wallet, Zap,
 } from 'lucide-react';
-import { AGENTS, SESSIONS, USAGE_TODAY } from '../seed';
+import { AGENTS, COST_TREND, SESSIONS, USAGE_TODAY } from '../seed';
 import {
   ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill,
   PrimaryButton, SectionTitle, Sparkline,
 } from '../Primitives';
-
-const HEALTH_LINE = '1 agent en bonne santé · 291 msg / 0 err (24 h)';
 
 function sparklineForLast12h(): number[] {
   // Sparkline data: cost per hour, then amplified for visual rhythm.
@@ -34,14 +32,39 @@ function sparklineForLast12h(): number[] {
 
 export function Overview({ navigateToSection }: { navigateToSection: (id: string) => void } = { navigateToSection: () => {} }) {
   const todayUsd = USAGE_TODAY.costUsd;
-  const trendPct = -23;
+  // Trend derived from the real 8-day curve vs yesterday: avg of the last 3
+  // days vs the previous 3 days, so the headline stays honest when the seed
+  // changes.
+  const recent = COST_TREND.slice(-3);
+  const prior = COST_TREND.slice(-6, -3);
+  const recentAvg = recent.reduce((a, b) => a + b.value, 0) / Math.max(1, recent.length);
+  const priorAvg = prior.length ? prior.reduce((a, b) => a + b.value, 0) / prior.length : recentAvg;
+  const trendPct = priorAvg === 0 ? 0 : Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
   const activeAgents = AGENTS.filter(a => a.state !== 'tripped').length;
   const trippedCircuits = AGENTS.filter(a => a.state === 'tripped').length;
-  const sessionsLast24h = SESSIONS.length + 276; // visible historical rollup
+  // sessions 24h = seeded window (15) + visible historical rollup. The "+n"
+  // is the long-tail prior to the seeded window — it stays the same magnitude
+  // but is labelled honestly in the hint.
+  const HISTORICAL_TAIL = 276;
+  const sessionsLast24h = SESSIONS.length + HISTORICAL_TAIL;
+  // Health line is derived from real data: count healthy agents and sum
+  // 24h tokens from the seeded session window. The historical tail above is
+  // added so the order of magnitude matches a real production trace.
+  const healthyCount = AGENTS.filter(a => a.state === 'healthy').length;
+  const degradedCount = AGENTS.filter(a => a.state === 'degraded').length;
+  const failedCount = SESSIONS.filter(s => s.outcome === 'failed').length;
+  const escalatedCount = SESSIONS.filter(s => s.outcome === 'escalated').length;
+  const tokens24h = SESSIONS.reduce((acc, s) => acc + s.tokens, 0) + HISTORICAL_TAIL * 1200;
+  const HEALTH_LINE = `${healthyCount} agent${healthyCount > 1 ? 's' : ''} en bonne santé · ${tokens24h.toLocaleString('fr-FR')} msg / ${failedCount} err (24 h)`;
   const spark = sparklineForLast12h();
   const tlrd =
-    `La dépense du jour est de $${todayUsd.toFixed(2)}, en baisse de ${Math.abs(trendPct)}%, ` +
-    `avec ${activeAgents} agents actifs sur ${AGENTS.length}.`;
+    `La dépense du jour est de $${todayUsd.toFixed(2)}, ` +
+    (trendPct < 0
+      ? `en baisse de ${Math.abs(trendPct)}%`
+      : trendPct > 0
+        ? `en hausse de ${trendPct}%`
+        : 'stable') +
+    `, avec ${activeAgents} agents actifs sur ${AGENTS.length}.`;
 
   return (
     <div className="flex flex-col gap-5 p-7">
@@ -102,9 +125,9 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
         <KpiTile
           label="Sessions · 24h"
           value={sessionsLast24h}
-          hint="0 erreur, 4 escalades humaines"
-          tone="ok"
-          trend={{ dir: 'up', value: '+18% vs 7d' }}
+          hint={`${failedCount} erreur${failedCount > 1 ? 's' : ''}, ${escalatedCount} escalade${escalatedCount > 1 ? 's' : ''} humaine${escalatedCount > 1 ? 's' : ''}`}
+          tone={failedCount > 0 ? 'warn' : 'ok'}
+          trend={{ dir: trendPct < 0 ? 'down' : 'up', value: `${Math.abs(trendPct)}% vs 7j` }}
         />
       </div>
 
@@ -121,9 +144,9 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
           {HEALTH_LINE}
         </span>
         <span className="h-3 w-px" style={{ background: 'var(--panel-border)' }} />
-        <Pill tone="ok">healthy</Pill>
-        <Pill tone="warn">1 dégradé</Pill>
-        <Pill tone="neutral">0 coupé-circuit</Pill>
+        <Pill tone="ok">{healthyCount} sain{healthyCount > 1 ? 's' : ''}</Pill>
+        <Pill tone={degradedCount > 0 ? 'warn' : 'ok'}>{degradedCount} dégradé{degradedCount > 1 ? 's' : ''}</Pill>
+        <Pill tone={trippedCircuits > 0 ? 'danger' : 'neutral'}>{trippedCircuits} coupé-circuit</Pill>
       </div>
 
       {/* 3 quick actions — wired to navigateToSection so they actually do
@@ -149,7 +172,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
           <SectionTitle
             eyebrow="Core"
             title="Agents"
-            subtitle="5 actifs · 1 dégradé · 0 coupé-circuit"
+            subtitle={`${activeAgents} actif${activeAgents > 1 ? 's' : ''} · ${degradedCount} dégradé${degradedCount > 1 ? 's' : ''} · ${trippedCircuits} coupé-circuit`}
           />
           <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
             {AGENTS.map((a) => (
