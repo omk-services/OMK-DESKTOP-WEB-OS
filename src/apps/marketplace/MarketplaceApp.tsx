@@ -86,12 +86,52 @@ export function MarketplaceApp() {
     });
   };
 
-  const grid = (filter: (l: typeof items[number]) => boolean, title: string) => {
+  /* `emptyHint` : la phrase qui explique ce qui manque, et le bouton qui mene
+   * a l'endroit ou on le cree. Sans ca, desinstaller la derniere integration
+   * laissait Installed sur un ecran blanc — un cul-de-sac : rien n'indiquait
+   * ni pourquoi c'etait vide, ni ou aller.
+   *
+   * La grille passe de `grid-cols-2` fixe a 1 / 2 / 3 colonnes : a 920 px
+   * (taille par defaut de la fenetre) deux colonnes tiennent, mais la fenetre
+   * se maximise a 100vw et deux cartes etirees sur 1920 px sont illisibles.
+   * Regle du depot : une grille a 3 colonnes ne passe a 3 qu'a `2xl:`. */
+  const grid = (
+    filter: (l: typeof items[number]) => boolean,
+    title: string,
+    emptyHint?: { message: string; actionLabel: string; sectionLabel: string },
+  ) => {
     const list = items.filter(filter);
     return (
       <div className="p-7">
         <SectionHead title={title} subtitle="Extend your Citadelle — every integration is sandboxed" />
-        <div className="grid grid-cols-2 gap-3">
+        {list.length === 0 && emptyHint ? (
+          <div
+            className="rounded-xl border p-6 flex flex-col items-start gap-3"
+            style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+          >
+            <div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--theme-text)' }}>
+                {title} — rien ici pour l’instant
+              </div>
+              <p className="text-[12px] mt-0.5 leading-snug" style={{ color: 'var(--theme-text-muted)' }}>
+                {emptyHint.message}
+              </p>
+            </div>
+            <button
+              type="button"
+              data-marketplace-empty-cta={emptyHint.sectionLabel}
+              onClick={() => {
+                const target = document.querySelector(`[data-section="${emptyHint.sectionLabel}"]`);
+                if (target instanceof HTMLElement) target.click();
+              }}
+              className="text-xs font-semibold text-white px-3 py-1.5 rounded-lg shadow-sm active:scale-95 transition-transform"
+              style={{ background: ACCENT }}
+            >
+              {emptyHint.actionLabel}
+            </button>
+          </div>
+        ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3">
           {list.map(l => (
             <div key={String(l.id)} className="rounded-xl border shadow-sm p-4 flex flex-col" style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}>
               <div className="flex items-center justify-between mb-2">
@@ -122,13 +162,26 @@ export function MarketplaceApp() {
             </div>
           ))}
         </div>
+        )}
       </div>
     );
   };
 
-  const Browse = () => grid(() => true, 'Marketplace');
-  const Installed = () => grid(l => l.installed === 'Yes', 'Installed');
-  const Featured = () => grid(l => !!l.featured, 'Featured');
+  const Browse = () => grid(() => true, 'Marketplace', {
+    message: 'Aucune intégration au catalogue. Le catalogue est semé au chargement — si vous voyez ceci, rechargez la fenêtre.',
+    actionLabel: 'Voir les intégrations installées',
+    sectionLabel: 'Installed',
+  });
+  const Installed = () => grid(l => l.installed === 'Yes', 'Installed', {
+    message: 'Vous n’avez installé aucune intégration. Le catalogue en propose plusieurs, toutes en bac à sable.',
+    actionLabel: 'Parcourir le catalogue',
+    sectionLabel: 'Browse',
+  });
+  const Featured = () => grid(l => !!l.featured, 'Featured', {
+    message: 'Aucune intégration mise en avant ce mois-ci. Le catalogue complet reste accessible.',
+    actionLabel: 'Parcourir le catalogue',
+    sectionLabel: 'Browse',
+  });
 
   const sections: AppSection[] = [
     { id: 'browse', label: 'Browse', icon: Store, render: Browse },
