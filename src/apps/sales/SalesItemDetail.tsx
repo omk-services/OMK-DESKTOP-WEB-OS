@@ -84,11 +84,8 @@ export function SalesItemDetail(props: ItemDetailProps) {
     const clientName = String(item['client'] ?? title).trim() || title;
 
     // Client — ensure one exists, match case-insensitive on the name.
-    let clientId: string | undefined;
     const existingClient = clientsItems.find((c) => String(c.name ?? '').trim().toLowerCase() === clientName.toLowerCase());
-    if (existingClient) {
-      clientId = String(existingClient.id);
-    } else {
+    if (!existingClient) {
       const clientResult = addItem('clients', {
         name: clientName,
         segment: `${offer || 'Coaching'} — ${offer ? 'Citadelle high ticket' : 'coaching'}`,
@@ -99,8 +96,7 @@ export function SalesItemDetail(props: ItemDetailProps) {
         onboardingStep: '1 / 7',
         status: 'Onboarding',
       });
-      if (clientResult.ok && clientResult.item) {
-        clientId = String(clientResult.item.id);
+      if (clientResult.ok) {
         addToast({ source: 'Sales', type: 'success', message: `Client « ${clientName} » créé.` });
       } else {
         addToast({ source: 'Sales', type: 'warning', message: `Client non créé : ${clientResult.error ?? 'erreur inconnue'}.` });

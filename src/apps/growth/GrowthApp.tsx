@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Sprout, Filter, Radio, FlaskConical, TrendingUp, Map, Handshake, Sparkles, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
-import { Badge, StatCard } from '../_ui/kit';
-import { FunnelStep, Table } from '../_ui/widgets';
+import { StatCard } from '../_ui/kit';
+import { FunnelStep } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';

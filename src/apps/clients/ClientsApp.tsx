@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, BookText, GraduationCap, Plus } from 'lucide-react';
+import { Contact, UserPlus, TrendingDown, Building2, Users, Vault as VaultIcon, GraduationCap, Plus } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';

@@ -1106,7 +1106,7 @@ function ContextPanel({ onSelect, navigateToSection }: { onSelect: (item: Detail
 
 // ─── Section: Capabilities ───
 
-function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState; onSelect: (item: DetailItem) => void }) {
+function CapabilitiesPanel({ cognition, onSelect, navigateToSection }: { cognition: CognitionState; onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   // Read the formerly in-memory SKILLS + ROUTINES from the CMS store. Icon
   // is stored as a string identifier; the renderer maps it to a Lucide
   // component. Routines' `kind` is also a string enum.
@@ -1295,7 +1295,7 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
 
 // ─── Section: Stack ───
 
-function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+function StackPanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   // Read the formerly in-memory STACK from the CMS store. Tools are
   // JSON-serialized in a longtext field; parsed here. Falls back to the
   // legacy STACK constant if the collection isn't registered yet (HMR).
@@ -1858,6 +1858,18 @@ export function SalesApp() {
     setDetail(null);
   };
 
+  /** Section-to-section nav inside Sales. The AppFrame listens to
+   *  `coach-os:open-app-section` (DOM custom event, see AppFrame.tsx) and
+   *  switches activeId when the requested sectionId matches. Dispatching
+   *  with no appId bypasses the cross-app filter — the single AppFrame
+   *  mounted in this window always handles it. */
+  const navigateToSection = (sectionId: string): void => {
+    window.dispatchEvent(new CustomEvent('coach-os:open-app-section', {
+      detail: { sectionId },
+    }));
+    setDetail(null);
+  };
+
   useEffect(() => {
     if (detail) {
       setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
@@ -1868,11 +1880,11 @@ export function SalesApp() {
 
   const sections: AppSection[] = useMemo(() => [
     { id: 'today', label: 'Today', icon: Sun, render: () => <TodayPanel onSelect={setDetail} /> },
-    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} /> },
+    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
     { id: 'kanban', label: 'Kanban', icon: ClipboardList, render: () => <KanbanPanel onSelect={setDetail} /> },
-    { id: 'context', label: 'Context', icon: BookOpen, render: () => <ContextPanel onSelect={setDetail} /> },
-    { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel cognition={cognition} onSelect={setDetail} /> },
-    { id: 'stack', label: 'Stack', icon: Cpu, render: () => <StackPanel onSelect={setDetail} /> },
+    { id: 'context', label: 'Context', icon: BookOpen, render: () => <ContextPanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
+    { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel cognition={cognition} onSelect={setDetail} navigateToSection={navigateToSection} /> },
+    { id: 'stack', label: 'Stack', icon: Cpu, render: () => <StackPanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
     { id: 'cognition', label: 'Cognition', icon: BrainCircuit, render: () => <CognitionPanel cognition={cognition} /> },
   ], [cognition]);
 
