@@ -6,11 +6,18 @@
  * Real data shape (seed: deals): client, offer, value, stage.
  * We branch on the offer (Citadelle vs Programme) and on the stage to
  * give each deal a distinct surface — they're not interchangeable.
+ *
+ * Cause D — chaînage deal Won : sur un deal au stade 'Won', le bouton
+ * « Mark Paid · Send onboarding » crée réellement un client (s'il
+ * n'existe pas) ET une facture miroir du montant/deal/client, puis
+ * confirme par un toast. Avant, c'était un toast vide — la
+ * fonctionnalité la plus attendue de cette famille d'app.
  */
 import { Building2, Handshake, Sparkles, Target } from 'lucide-react';
 import type { ItemDetailProps } from '../../components/cms/itemDetailRegistry';
 import { BackAffordance, PrevNextFooter, PillBadge, formatField } from '../../components/cms/itemDetailShared';
 import { useShellStore } from '../../stores/shell.store';
+import { useCmsStore } from '../../lib/cms/cms.store';
 
 function readString(item: Record<string, unknown>, ...keys: string[]): string | undefined {
   for (const k of keys) {
@@ -60,7 +67,67 @@ export function SalesItemDetail(props: ItemDetailProps) {
   const weightedValue = amount !== undefined ? Math.round((amount * prob) / 100) : undefined;
   const offerBlurb = OFFER_BLURBS[offer] ?? `Coaching engagement for ${title}. Stage: ${stage ?? 'open'}.`;
   const addToast = useShellStore((s) => s.addToast);
-  const fireAction = (actionLabel: string, message: string): void => {
+  const clientsItems = useCmsStore((s) => s.items['clients']) ?? [];
+  const addItem = useCmsStore((s) => s.addItem);
+  /** Mark Paid · Send onboarding — wire the deal to a real invoice + client.
+   *  Before, this button only pushed a toast. Now it derives an invoice number
+   *  from the current ISO month, ensures the client exists (matches by
+   *  case-insensitive name), and confirms each side via its own toast. */
+  const onWonOnboard = (dealId: string): void => {
+    if (amount === undefined || amount <= 0) {
+      addToast({ source: 'Sales', type: 'warning', message: `Deal value is missing — cannot invoice.` });
+      return;
+    }
+    const now = new Date();
+    const due = new Date(now.getTime() + 30 * 86400_000);
+    const isoMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const clientName = String(item['client'] ?? title).trim() || title;
+
+    // Client — ensure one exists, match case-insensitive on the name.
+    let clientId: string | undefined;
+    const existingClient = clientsItems.find((c) => String(c.name ?? '').trim().toLowerCase() === clientName.toLowerCase());
+    if (existingClient) {
+      clientId = String(existingClient.id);
+    } else {
+      const clientResult = addItem('clients', {
+        name: clientName,
+        segment: `${offer || 'Coaching'} — ${offer ? 'Citadelle high ticket' : 'coaching'}`,
+        ticket: amount,
+        openThreads: 0,
+        nextSession: 'Not scheduled',
+        health: 100,
+        onboardingStep: '1 / 7',
+        status: 'Onboarding',
+      });
+      if (clientResult.ok && clientResult.item) {
+        clientId = String(clientResult.item.id);
+        addToast({ source: 'Sales', type: 'success', message: `Client « ${clientName} » créé.` });
+      } else {
+        addToast({ source: 'Sales', type: 'warning', message: `Client non créé : ${clientResult.error ?? 'erreur inconnue'}.` });
+      }
+    }
+
+    const invoiceResult = addItem('invoices', {
+      client: clientName,
+      number: `INV-${isoMonth}-${dealId.slice(-4)}`,
+      amount,
+      status: 'Sent',
+      due: due.toISOString().slice(0, 10),
+      issued: now.toISOString().slice(0, 10),
+      description: `Invoice line · ${offer || 'coaching engagement'} — deal ${dealId}`,
+    });
+    if (invoiceResult.ok) {
+      addToast({
+        source: 'Sales',
+        type: 'success',
+        message: `Facture créée pour ${clientName} ($${amount.toLocaleString('en-US')}).`,
+      });
+    } else {
+      addToast({ source: 'Sales', type: 'warning', message: `Facture non créée : ${invoiceResult.error ?? 'erreur inconnue'}.` });
+    }
+  };
+  const fireAction = (actionLabel: string, message: string, onClick?: () => void): void => {
+    if (onClick) onClick();
     addToast({ source: 'Sales', type: 'success', message });
     void actionLabel;
   };
@@ -219,24 +286,28 @@ export function SalesItemDetail(props: ItemDetailProps) {
                   message: isWon
                     ? `Onboarding packet queued for ${title}`
                     : `Proposal drafted for ${title}`,
+                  onClick: isWon ? () => onWonOnboard(String(item.id)) : undefined,
                 },
                 {
                   label: 'Schedule 30-min check-in',
                   message: `Calendar invite drafted for ${title}`,
+                  onClick: undefined,
                 },
                 {
                   label: 'Open in Sales pipeline',
                   message: `Already viewing ${title} in the Sales pipeline`,
+                  onClick: undefined,
                 },
                 {
                   label: 'Open in Tasks as next action',
                   message: `Next action saved for ${title}`,
+                  onClick: undefined,
                 },
               ].map((a) => (
                 <li key={a.label}>
                   <button
                     type="button"
-                    onClick={() => fireAction(a.label, a.message)}
+                    onClick={() => fireAction(a.label, a.message, a.onClick)}
                     className="flex w-full items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
                     style={{
                       background: 'var(--canvas)',
