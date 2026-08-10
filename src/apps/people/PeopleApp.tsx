@@ -10,7 +10,7 @@
  *    - Cadence   → 7-day × 24-hour standup heatmap + sprint tasks
  *    - Culture   → operating values
  *  2-level subpage nav: section (left sidebar) → item detail (drill via CMS). */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Users, Bot, Heart, Cpu, FileText, Calendar, Zap,
   Atom, LayoutDashboard, Crown, Activity, CheckCircle2, Play,
