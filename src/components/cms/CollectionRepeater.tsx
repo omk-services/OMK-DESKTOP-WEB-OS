@@ -44,6 +44,28 @@ const CONFIRM_TIMEOUT_MS = 4000;
  *  options from items already in the collection (so the dropdown tracks
  *  reality without forcing schema changes); on an empty collection we fall
  *  back to a plain text input so the user can type the first value freely. */
+/** Champs à rendre dans le formulaire de création.
+ *
+ *  `def.fields` décrit les champs SECONDAIRES d'une collection : par convention
+ *  dans ce dépôt, le champ titre n'y figure jamais. Les 23 collections déclarées
+ *  dans `src/lib/cms/seed.ts` ont toutes leur `titleField` absent de `fields`
+ *  (`clients` → `name`, `deploys` → `commit`, `deals` → `client`, etc.).
+ *
+ *  Générer le formulaire depuis `def.fields` seul produisait donc un formulaire
+ *  SANS champ titre, alors que la soumission exige un titre non vide : aucune
+ *  création n'était possible, sur aucune collection. On préfixe donc un champ
+ *  synthétique pour le titre quand il manque.
+ *
+ *  Le libellé retombe sur le nom du champ capitalisé (`commit` → « Commit »)
+ *  puisque `def` n'en fournit aucun pour un champ qu'il ne déclare pas. */
+function formFieldsFor(def: CmsCollectionDef): CmsField[] {
+  const hasTitle = def.fields.some((f) => f.key === def.titleField);
+  if (hasTitle) return def.fields;
+  const key = def.titleField;
+  const label = key.charAt(0).toUpperCase() + key.slice(1);
+  return [{ key, label, type: 'text' }, ...def.fields];
+}
+
 function selectOptionsFor(field: CmsField, items: CmsItem[]): string[] | null {
   if (field.type !== 'badge') return null;
   const set = new Set<string>();
@@ -58,7 +80,10 @@ function selectOptionsFor(field: CmsField, items: CmsItem[]): string[] | null {
 
 function emptyValuesFor(def: CmsCollectionDef): Record<string, string> {
   const v: Record<string, string> = {};
-  for (const f of def.fields) v[f.key] = '';
+  // `formFieldsFor` et non `def.fields` : le champ titre est synthétique sur
+  // toutes les collections du dépôt, il doit avoir sa clé dès l'initialisation
+  // pour que l'input soit contrôlé dès le premier rendu.
+  for (const f of formFieldsFor(def)) v[f.key] = '';
   return v;
 }
 
@@ -174,8 +199,12 @@ export function CollectionRepeater({
       setSubmitError(`"${titleRaw}" existe déjà dans ${def!.name}.`);
       return;
     }
+    // `formFieldsFor` et non `def.fields` : sans lui le champ titre était
+    // absent du payload, l'item se créait sans titre et la carte affichait
+    // son sous-titre à la place. Le toast disait pourtant « créé », ce qui
+    // rendait le défaut invisible sans regarder la liste.
     const partial: Record<string, string | number> = {};
-    for (const f of def!.fields) {
+    for (const f of formFieldsFor(def!)) {
       partial[f.key] = parseSubmitValue(f, values[f.key] ?? '');
     }
     const result = addItem(collectionId, partial as Omit<CmsItem, 'id'>);
@@ -274,7 +303,7 @@ export function CollectionRepeater({
             </button>
           </div>
 
-          {def.fields.map((f) => {
+          {formFieldsFor(def).map((f) => {
             const options = selectOptionsFor(f, items);
             const isTitleField = f.key === def.titleField;
             return (
