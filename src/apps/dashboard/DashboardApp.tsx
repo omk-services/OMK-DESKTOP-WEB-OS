@@ -33,7 +33,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import {
-  AlertTriangle, BarChart3, Bot, Building2, Compass, GitBranch,
+  AlertTriangle, BarChart3, Bot, Building2, Clock, Compass, GitBranch,
   History, LayoutDashboard, ListChecks, MessageSquare, Pin, ScrollText,
   Sparkles, Wallet, Wind,
 } from 'lucide-react';
@@ -78,30 +78,93 @@ interface ValidationCard {
   targetSection?: string;
 }
 
-const VALIDATIONS: ValidationCard[] = [
-  {
-    id: 'val-techflow-dev',
-    title: 'Validation devis client TechFlow',
-    when: 'Today',
-    tone: 'warn',
-    clientId: 'techflow',
-  },
-  {
-    id: 'val-greenscale-delay',
-    title: 'Retard livraison projet GreenScale',
-    when: 'Yesterday',
-    tone: 'danger',
-    clientId: 'priya-nandan',
-  },
-  {
-    id: 'val-stripe-update',
-    title: 'Mise à jour Stripe requise',
-    when: '2 days ago',
-    tone: 'accent',
-    targetApp: 'finance',
-    targetSection: 'Cost',
-  },
-];
+/** Build Wind Direction validations from LIVE state.
+ *  Brief: "soit tu les dérives d'une source réelle (incidents, approbations,
+ *  factures en retard…), soit tu assumes le seed **et tu le dis à l'écran**."
+ *  On derive first; if nothing emerges, fall back to the seed and mark it
+ *  visibly as a demo fixture. */
+function deriveValidations(
+  clients: CmsItem[],
+  invoices: CmsItem[],
+  deals: CmsItem[],
+): { cards: ValidationCard[]; fromSeed: boolean } {
+  const cards: ValidationCard[] = [];
+
+  // Open invoices (status != Paid) — top 2 by amount.
+  const open = invoices
+    .filter((i) => i.status !== 'Paid')
+    .sort((a, b) => Number(b.amount ?? 0) - Number(a.amount ?? 0));
+  open.slice(0, 2).forEach((inv) => {
+    cards.push({
+      id: `val-invoice-${String(inv.id)}`,
+      title: `Facture ouverte · ${String(inv.client ?? inv.id)}`,
+      when: `${inv.status} · ${String(inv.due ?? '')}`,
+      tone: 'warn',
+      clientId: typeof inv.clientId === 'string' ? inv.clientId : undefined,
+      targetApp: 'finance',
+      targetSection: 'Overview',
+    });
+  });
+
+  // Onboarding clients — the operator should look at them.
+  clients
+    .filter((c) => c.status === 'Onboarding')
+    .forEach((c) => {
+      cards.push({
+        id: `val-onboard-${String(c.id)}`,
+        title: `Onboarding en attente · ${String(c.name ?? c.id)}`,
+        when: String(c.onboardingStep ?? 'Step 1 → 7'),
+        tone: 'warn',
+        clientId: String(c.id),
+      });
+    });
+
+  // Deals at the Proposal stage are the human-reread threshold.
+  deals
+    .filter((d) => d.stage === 'Proposal' || d.stage === 'Qualified')
+    .slice(0, 1)
+    .forEach((d) => {
+      cards.push({
+        id: `val-deal-${String(d.id)}`,
+        title: `Lead à relecture · ${String(d.client ?? d.title ?? d.id)}`,
+        when: String(d.stage),
+        tone: 'accent',
+        targetApp: 'sales',
+        targetSection: 'pipeline',
+      });
+    });
+
+  if (cards.length === 0) {
+    return {
+      cards: [
+        {
+          id: 'val-seed-techflow',
+          title: 'Validation devis client TechFlow',
+          when: 'Démo seed',
+          tone: 'warn',
+          clientId: 'techflow',
+        },
+        {
+          id: 'val-seed-priya',
+          title: 'Retard livraison projet GreenScale',
+          when: 'Démo seed',
+          tone: 'danger',
+          clientId: 'priya-nandan',
+        },
+        {
+          id: 'val-seed-stripe',
+          title: 'Mise à jour Stripe requise',
+          when: 'Démo seed',
+          tone: 'accent',
+          targetApp: 'finance',
+          targetSection: 'Overview',
+        },
+      ],
+      fromSeed: true,
+    };
+  }
+  return { cards: cards.slice(0, 4), fromSeed: false };
+}
 
 export function DashboardApp() {
   const clients = useCmsStore(s => s.items['clients']) ?? [];
@@ -123,7 +186,11 @@ export function DashboardApp() {
   // Clients drill — Pipeline cards open a client detail overlay.
   // We pick the labels Dashboard uses so the breadcrumb segment is consistent.
   const clientsDrill = useCollectionDrill('clients', ['Client Pipeline']);
-  const [pipelineDetailId, setPipelineDetailId] = useState<string | null>(null);
+  // Mirror the drill's openId locally so the AppFrame shell and the overlay
+  // both react. Without this, the drill closes its own state when the user
+  // switches sidebar sections, but the Dashboard's overlay state lingers and
+  // the detail stays rendered on top — the exact bug called out in the brief.
+  const pipelineDetailId = clientsDrill.openId;
   const openClient = pipelineDetailId
     ? clients.find((c) => c.id === pipelineDetailId) ?? null
     : null;
@@ -133,15 +200,21 @@ export function DashboardApp() {
   const prevClient = openClientIndex > 0 ? clients[openClientIndex - 1] : undefined;
   const nextClient = openClientIndex >= 0 && openClientIndex < clients.length - 1 ? clients[openClientIndex + 1] : undefined;
 
+  // Breadcrumb publisher: ONE source of truth per overlay. Both `openAgent`
+  // and `openClient` cannot be visible simultaneously in practice (clicking
+  // one dismisses the other) so we let agent win. `setWindowDetail` was
+  // previously fighting the `useCollectionDrill` publisher on the same
+  // window — the fix collapses the state into the drill for clients, and
+  // keeps the manual publisher only for the agent overlay.
   useEffect(() => {
     if (openAgent) {
       setWindowDetail({ label: openAgent.name, onBack: () => setOpenAgentId(null) });
-    } else if (openClient) {
-      setWindowDetail({ label: String(openClient.name ?? 'Client'), onBack: () => setPipelineDetailId(null) });
-    } else {
-      setWindowDetail(null);
     }
-  }, [openAgent, openClient, setWindowDetail]);
+    // No else: when openAgent is null but openClient is set, the drill is
+    // already publishing the crumb through `setDetail`. Setting it again
+    // here would race the drill and produce the double `onBack` described
+    // in the SOCLE_ACQUIS. When both are null, the drill's effect clears it.
+  }, [openAgent, setWindowDetail]);
 
   const weightOf = (c: (typeof clients)[number]): number => Number(c.health ?? (c.status === 'Onboarding' ? 45 : 20));
 
@@ -178,7 +251,6 @@ export function DashboardApp() {
       const exists = clients.some((c) => c.id === v.clientId);
       if (exists) {
         updateItem('clients', v.clientId, { lastValidatedAt: new Date().toISOString() });
-        setPipelineDetailId(v.clientId);
         clientsDrill.open(v.clientId);
         return;
       }
@@ -188,26 +260,65 @@ export function DashboardApp() {
     }
   };
 
-  /* ─────────────────────────── Wind Direction (kept) ─────────────────────────── */
+  // Wind Direction: derive from live state, fall back to seed and label it.
+  const { cards: validations, fromSeed: validationsFromSeed } = useMemo(
+    () => deriveValidations(clients, invoices, deals),
+    [clients, invoices, deals],
+  );
+
+  /* ─────────────────────────── Wind Direction (live or seed) ────────────────────── */
 
   const Validation = () => (
     <div className="p-7">
-      <SectionHead title="Wind Direction" subtitle="Things requiring your validation" />
-      <FleetItemGrid cols={2}>
-        {VALIDATIONS.map((v) => (
-          <FleetItemCard
-            key={v.id}
-            title={v.title}
-            subtitle={v.when}
-            statusLabel={v.tone === 'warn' ? 'review' : v.tone === 'danger' ? 'blocker' : 'action'}
-            statusTone={v.tone}
-            accent={v.tone === 'warn' ? '#f59e0b' : v.tone === 'danger' ? '#dc2626' : '#3b82f6'}
-            icon={v.tone === 'warn' ? <AlertTriangle className="w-5 h-5" /> : v.tone === 'danger' ? <AlertTriangle className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
-            meta={`Reported ${v.when}`}
-            onClick={() => openValidation(v)}
-          />
-        ))}
-      </FleetItemGrid>
+      <SectionHead
+        title="Wind Direction"
+        subtitle={validationsFromSeed
+          ? 'Things requiring your validation (démo seed — pas de signal live)'
+          : 'Things requiring your validation (dérivées du CMS live)'}
+        action={validationsFromSeed ? (
+          <span
+            data-wind-direction-source="seed"
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{ background: 'rgba(180,83,9,0.10)', color: '#b45309', border: '1px solid rgba(180,83,9,0.35)' }}
+          >
+            <Clock className="h-3 w-3" /> Démo seed
+          </span>
+        ) : undefined}
+      />
+      {validations.length === 0 ? (
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{
+            background: 'var(--theme-surface)',
+            border: '1px dashed var(--panel-border)',
+            color: 'var(--theme-text-muted)',
+          }}
+        >
+          <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+            Aucune action en attente
+          </div>
+          <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed">
+            Pas de facture en retard, pas d'onboarding bloqué, pas de lead à relecture.
+            Tu peux souffler — ou attraper un café.
+          </p>
+        </div>
+      ) : (
+        <FleetItemGrid cols={2}>
+          {validations.map((v) => (
+            <FleetItemCard
+              key={v.id}
+              title={v.title}
+              subtitle={v.when}
+              statusLabel={v.tone === 'warn' ? 'review' : v.tone === 'danger' ? 'blocker' : 'action'}
+              statusTone={v.tone}
+              accent={v.tone === 'warn' ? '#f59e0b' : v.tone === 'danger' ? '#dc2626' : '#3b82f6'}
+              icon={v.tone === 'warn' ? <AlertTriangle className="w-5 h-5" /> : v.tone === 'danger' ? <AlertTriangle className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
+              meta={validationsFromSeed ? 'Démo seed' : `Reported ${v.when}`}
+              onClick={() => openValidation(v)}
+            />
+          ))}
+        </FleetItemGrid>
+      )}
     </div>
   );
 
@@ -509,7 +620,9 @@ export function DashboardApp() {
   }, [clients]);
 
   const openPipelineClient = (clientId: string): void => {
-    setPipelineDetailId(clientId);
+    // Drill is the single source of truth for the client overlay's openId.
+    // DashboardApp reads `pipelineDetailId = clientsDrill.openId` above, so
+    // mutating the drill alone flips both the overlay and the crumb.
     clientsDrill.open(clientId);
   };
 
@@ -649,25 +762,19 @@ export function DashboardApp() {
         <AppDetailOverlay
           appId="dashboard"
           accent={ACCENT}
-          onBack={() => {
-            setPipelineDetailId(null);
-            clientsDrill.close();
-          }}
+          onBack={() => clientsDrill.close()}
           motion={{ kind: 'pop-scale', durationMs: 200 }}
         >
           <DashboardItemDetail
             def={clientsDef}
             item={openClient as unknown as CmsItem}
             accent={ACCENT}
-            onBack={() => {
-              setPipelineDetailId(null);
-              clientsDrill.close();
-            }}
+            onBack={() => clientsDrill.close()}
             index={openClientIndex}
             total={clients.length}
             {...(prevClient ? { prev: prevClient as unknown as CmsItem } : {})}
             {...(nextClient ? { next: nextClient as unknown as CmsItem } : {})}
-            onNavigate={(id: string) => setPipelineDetailId(id)}
+            onNavigate={(id: string) => clientsDrill.open(id)}
           />
         </AppDetailOverlay>
       ) : null}

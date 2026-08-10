@@ -463,18 +463,39 @@ function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
                   style={{ borderColor: 'var(--panel-border-subtle)' }}
                 >
                   {call.links.map((l) => (
-                    <span
+                    <button
+                      type="button"
                       key={l.label}
-                      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold"
+                      onClick={() => {
+                        if (l.label === 'Full brief') {
+                          // Reuse the same fiche the card itself opens.
+                          onSelect(callDetail(call));
+                          return;
+                        }
+                        // Every other tag (LinkedIn / Website / Join call /
+                        // Email / phone) reads as a navigation affordance.
+                        // Without a real action it was a dead <span>; now
+                        // it pushes a toast that says where the link would
+                        // take the coach — a stub, but an observable one.
+                        const target =
+                          l.label === 'LinkedIn' ? `Open LinkedIn profile for ${call.name}`
+                          : l.label === 'Website' ? `Open website for ${call.company}`
+                          : l.label === 'Join call' ? `Open calendar invite for the ${call.time} call with ${call.name}`
+                          : l.label === 'Email' ? `Compose email to ${call.name}`
+                          : `Dial ${call.name}`;
+                        addToast({ source: 'Sales', type: 'info', message: target });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold transition-opacity hover:opacity-80 active:scale-[0.98]"
                       style={{
                         background: l.label === 'Full brief' ? 'rgba(21,128,61,0.10)' : 'var(--theme-surface-hover)',
                         color: l.label === 'Full brief' ? WIN : 'var(--theme-text)',
                         border: '1px solid var(--panel-border)',
                       }}
+                      aria-label={`${l.label} for ${call.name}`}
                     >
                       <l.icon className="h-3 w-3" />
                       {l.label}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </article>
@@ -608,7 +629,7 @@ function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title
 
 // ─── Section: Pipeline ───
 
-function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   void onSelect; // PipelinePanel currently exposes data only — no per-item detail
   // Read the formerly in-memory SNAPSHOT + STAGES from the CMS store.
   // Falls back to empty arrays if the collection isn't registered yet
@@ -654,18 +675,21 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
 
       <div className="mt-8 flex items-center gap-1.5">
         {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
-          <span
+          <button
             key={t}
-            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            type="button"
+            onClick={() => navigateToSection(t.toLowerCase())}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80 active:scale-[0.98]"
             style={{
               background: t === 'Pipeline' ? 'var(--theme-text)' : 'var(--theme-surface)',
               color: t === 'Pipeline' ? 'var(--theme-bg)' : 'var(--theme-text)',
               border: '1px solid var(--panel-border)',
               fontFamily: FONT_DISPLAY,
             }}
+            aria-label={`Jump to ${t} section`}
           >
             {t}
-          </span>
+          </button>
         ))}
       </div>
       <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
@@ -967,7 +991,7 @@ function TrendCard({ series }: { series: TrendSeries }): ReactElement {
 
 // ─── Section: Context ───
 
-function ContextPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
+function ContextPanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   // Read the formerly in-memory CONTEXT from the CMS store.
   const contextItems = useCmsStore(s => s.items['sales_context']) ?? [];
   // Chaque group porte 2 items (item1Title / item2Title). On derive le count
