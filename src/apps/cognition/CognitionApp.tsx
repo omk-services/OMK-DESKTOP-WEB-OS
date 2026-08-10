@@ -109,7 +109,7 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
         <h2 style={{color: 'var(--theme-text-dim)'}} className="mb-3 text-[11px] font-bold uppercase tracking-wider">
           Schema metadata
         </h2>
-        <dl className="divide-y divide-stone-100">
+        <dl className="divide-y divide-[var(--panel-border-subtle)]">
           <div className="py-2.5">
             <dt style={{color: 'var(--theme-text-dim)'}} className="text-[10px] font-bold uppercase tracking-wider">Supabase schema</dt>
             <dd style={{color: 'var(--theme-text)'}} className="mt-0.5 text-[12.5px] font-mono font-medium">cognition</dd>
@@ -135,11 +135,13 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
         </dl>
       </section>
 
-      {/* Routines list */}
-      {data.routines.length > 0 ? (
-        <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
-          <h2 style={{color: 'var(--theme-text-dim)'}} className="mb-3 text-[11px] font-bold uppercase tracking-wider">Routines</h2>
-          <ul className="divide-y divide-stone-100">
+      {/* Routines — la section disparaissait entierement quand la liste etait
+          vide : rien n'indiquait au coach que des routines existent, ni ou les
+          declarer. Un etat vide honnete vaut mieux qu'une absence silencieuse. */}
+      <section className="rounded-2xl border border-[var(--panel-border)] bg-[var(--theme-surface)] p-5">
+        <h2 style={{color: 'var(--theme-text-dim)'}} className="mb-3 text-[11px] font-bold uppercase tracking-wider">Routines</h2>
+        {data.routines.length > 0 ? (
+          <ul className="divide-y divide-[var(--panel-border-subtle)]">
             {data.routines.map((r) => (
               <li key={r.id} className="flex items-center justify-between py-3">
                 <div>
@@ -160,14 +162,20 @@ export function CognitionOverviewContent({ data = STUB_DATA }: { data?: Cognitio
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
+        ) : (
+          <p style={{color: 'var(--theme-text-muted)'}} className="text-[12.5px] leading-relaxed">
+            Aucune routine dans <span className="font-mono">cognition.routines</span>. Les routines
+            arrivent du schema Supabase : tant qu'aucune n'y est publiee, la SovereignGate reste
+            fermee et cette liste reste vide.
+          </p>
+        )}
+      </section>
     </div>
   );
 }
 
 /** NOTE: CognitionApp (the standalone AppFrame wrapper) was deleted in Phase 39b.
  *  Cognition now lives ONLY as <CognitionOverviewContent> dwelled inside the
- *  Sales Sanctum app. The standalone registerApp() entry was removed from
- *  src/lib/app-discovery.ts. This file now exports only the OverviewContent
- *  (and its data type) for Sales to consume as a sidebar tab. */
+ *  Sales OS app (its name in src/lib/app-discovery.tsx). The standalone
+ *  registerApp() entry was removed from there. This file now exports only the
+ *  OverviewContent (and its data type) for Sales to consume as a sidebar tab. */
