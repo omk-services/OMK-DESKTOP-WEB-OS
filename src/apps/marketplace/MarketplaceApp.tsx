@@ -3,7 +3,6 @@ import { Store, Sparkles, Package, Check, X } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsStore } from '../../lib/cms/cms.store';
-import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { MarketplaceDetailPage, type MarketplaceDetailItem } from './MarketplaceDetailPage';
@@ -28,7 +27,6 @@ export function MarketplaceApp() {
     }
   }, [detail, setWindowDetail]);
   const addToast = useShellStore(s => s.addToast);
-  const drill = useCollectionDrill('marketplace_listings', ['Browse', 'Installed', 'Featured']);
 
   const install = (id: string) => {
     const current = items.find(l => l.id === id);
@@ -51,9 +49,24 @@ export function MarketplaceApp() {
     updateItem('marketplace_listings', id, { installed: 'No' });
   };
 
+  /* Ouverture d'une fiche.
+   *
+   * Le crumb de detail est publie par le seul useEffect ci-dessus, via
+   * useWindowPage().setDetail. C'est ce que AppFrame.navigateToSection lit
+   * pour fermer la fiche quand on change de section :
+   *   detail?.onBack(); setDetail(null);
+   *
+   * Piege deja paye : cette app appelait AUSSI useCollectionDrill sur la
+   * meme collection. Le drill republie le meme crumb partage avec son
+   * propre onBack (close), qui ne ferme que l'etat interne du drill et pas
+   * l'overlay. Comme son effet s'execute apres celui de l'app, c'est lui
+   * qui gagnait : changer de section faisait bien basculer le fil d'Ariane
+   * et la section, mais l'overlay restait ouvert par-dessus — on naviguait
+   * derriere un calque, ce qui se lit a l'ecran comme un clic sans effet.
+   * Le drill etait par ailleurs mort ici (son openId n'etait jamais lu). */
   const openListing = (id: string): void => {
     const item = items.find(c => c.id === id);
-    if (!item) { drill.open(id); return; }
+    if (!item) return;
     setDetail({
       id: String(item.id),
       title: String(item.name ?? 'Untitled'),
@@ -71,7 +84,6 @@ export function MarketplaceApp() {
       ],
       fields: [],
     });
-    drill.open(id);
   };
 
   const grid = (filter: (l: typeof items[number]) => boolean, title: string) => {
