@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useShellStore } from '../stores/shell.store';
 import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
-import { HAUTEUR_DOCK } from './Dock';
+import { useDockStore } from '../stores/dock.store';
+import { HAUTEUR_DOCK, LARGEUR_DOCK } from './Dock';
 
 /** Hauteur d'une case, calee sur la PLUS HAUTE : pastille 48 + libelle sur deux
  *  lignes + gouttieres. « People / Agents » et « Sales OS » passent a la
@@ -13,8 +14,12 @@ import { HAUTEUR_DOCK } from './Dock';
 const HAUTEUR_CASE = 104;
 /** Barre du haut. */
 const HAUTEUR_BARRE = 44;
-/** Dock + respiration au-dessus. */
+/** Dock horizontal + respiration au-dessus. */
 const MARGE_BASSE = HAUTEUR_DOCK + 12;
+/** Dock vertical + respiration a gauche de la barre. */
+const MARGE_DROITE = LARGEUR_DOCK + 12;
+/** Respiration minimale quand le dock n'occupe pas ce bord. */
+const MARGE_LIBRE = 12;
 
 /** Nombre de rangees qui tiennent reellement dans la fenetre.
  *
@@ -26,19 +31,23 @@ const MARGE_BASSE = HAUTEUR_DOCK + 12;
  *
  *  Les icones debordent maintenant en COLONNES, comme sur un bureau classique.
  */
-function calculeRangees(): number {
+function calculeRangees(margeBasse: number): number {
   if (typeof window === 'undefined') return 7;
-  const utile = window.innerHeight - HAUTEUR_BARRE - MARGE_BASSE;
+  const utile = window.innerHeight - HAUTEUR_BARRE - margeBasse;
   return Math.max(1, Math.floor(utile / HAUTEUR_CASE));
 }
 
-function useRangees(): number {
-  const [rangees, setRangees] = useState(calculeRangees);
+function useRangees(margeBasse: number): number {
+  const [rangees, setRangees] = useState(() => calculeRangees(margeBasse));
   useEffect(() => {
-    const surRedimensionnement = () => setRangees(calculeRangees());
+    // La marge fait partie des dependances : basculer le dock du bas vers la
+    // droite rend une bande de 46 px au bureau, et une rangee d'icones de plus
+    // peut alors tenir. Sans elle, la grille gardait le compte d'avant.
+    const surRedimensionnement = (): void => setRangees(calculeRangees(margeBasse));
+    surRedimensionnement();
     window.addEventListener('resize', surRedimensionnement);
     return () => window.removeEventListener('resize', surRedimensionnement);
-  }, []);
+  }, [margeBasse]);
   return rangees;
 }
 
@@ -46,14 +55,19 @@ export function DesktopIcons(): import('react').ReactNode {
   const openApp = useShellStore(s => s.openApp);
   const [selected, setSelected] = useState<string | null>(null);
   const userHidden = useAppVisibility((s) => s.hidden);
-  const rangees = useRangees();
+  // Le dock libere le bord qu'il n'occupe pas : en position droite, le bas du
+  // bureau redevient disponible pour une rangee d'icones supplementaire.
+  const dockPosition = useDockStore((s) => s.position);
+  const margeBasse = dockPosition === 'bottom' ? MARGE_BASSE : MARGE_LIBRE;
+  const margeDroite = dockPosition === 'right' ? MARGE_DROITE : MARGE_LIBRE;
+  const rangees = useRangees(margeBasse);
   // Hide apps flagged with hidden: true (sister Drawbridge Task 1 2026-07-28) OR toggled off by the user.
   const apps = getAllApps().filter(a => !a.hidden && userHidden[a.id] !== true);
 
   return (
     <div
       className="absolute left-0 top-11 z-0 p-4 pointer-events-none"
-      style={{ bottom: MARGE_BASSE }}
+      style={{ bottom: margeBasse, right: margeDroite }}
       onClick={() => setSelected(null)}
     >
       <div

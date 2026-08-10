@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CheckSquare, Sun, CalendarClock, CheckCheck, Check, ShieldCheck, GitCompareArrows, Megaphone, Plus, Trash2 } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useShellStore } from '../../stores/shell.store';
@@ -266,7 +266,7 @@ export function TasksApp() {
     });
   };
 
-  const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string, withComposer = false) => {
+  const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string, withComposer = false, emptyAction?: ReactNode) => {
     const items = tasks.filter(filter);
     return (
       <div className="p-7">
@@ -373,10 +373,11 @@ export function TasksApp() {
         ) : null}
         {items.length === 0 ? (
           <div
-            className="text-sm py-10 text-center"
+            className="flex flex-col items-center gap-2 py-10 text-center"
             style={{ color: 'var(--theme-text-dim)' }}
           >
-            {empty}
+            <div className="text-sm">{empty}</div>
+            {emptyAction}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -437,7 +438,31 @@ export function TasksApp() {
 
   const Today = () => list(isToday, 'Today', 'Nothing left today — nicely done.', true);
   const Upcoming = () => list(isUpcoming, 'Upcoming', 'Nothing on the horizon.');
-  const Done = () => list(t => !!t.done, 'Done', 'No completed tasks yet.');
+  const Done = () => list(
+    t => !!t.done,
+    'Done',
+    'Aucune tâche terminée — les tâches cochées apparaissent ici.',
+    false,
+    (
+      <button
+        type="button"
+        onClick={() => {
+          if (typeof window === 'undefined') return;
+          window.dispatchEvent(new CustomEvent('coach-os:open-app-section', {
+            detail: { appId: 'tasks', sectionId: 'today' },
+          }));
+        }}
+        className="mt-1 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all hover:opacity-90 active:scale-[0.98]"
+        style={{
+          background: ACCENT,
+          color: '#ffffff',
+        }}
+        data-tasks-done-go-today
+      >
+        Aller à Today →
+      </button>
+    ),
+  );
 
   /* ── Definition of Done ──────────────────────────────────────────────── */
   const DefinitionOfDone = () => {

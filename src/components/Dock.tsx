@@ -1,22 +1,42 @@
-/** Dock — les apps OUVERTES, en bas de l'ecran.
+/** Dock — les apps OUVERTES, en bas de l'ecran ou sur le bord droit.
  *
  *  A ne pas confondre avec `DesktopIcons`, qui pose sur le fond d'ecran les
  *  icones de TOUTES les apps installees. Le dock ne montre que ce qui tourne :
  *  c'est le seul endroit d'ou l'on retrouve une fenetre reduite, qui autrement
  *  disparait sans laisser de trace.
  *
- *  `ViewportGuard` reserve deja 96 px en bas pour un dock — la constante lui
- *  preexistait, le dock avait ete retire. `HAUTEUR_DOCK` est exportee pour que
- *  `DesktopIcons` s'arrete au-dessus plutot que de glisser dessous.
+ *  Deux reglages, portes par `useDockStore` et persistes :
+ *   - la POSITION : barre horizontale en bas, ou colonne verticale a droite,
+ *     comme les moniteurs flottants qu'on epingle au bord d'un bureau ;
+ *   - l'HABILLAGE : les vingt styles du catalogue UI UX Pro Max, declares dans
+ *     `src/lib/dockSkins.ts`.
+ *
+ *  Le bouton de reglages vit DANS la barre, donc il apparait avec elle des la
+ *  premiere app ouverte et reste tant qu'il en reste une. Le poser ailleurs
+ *  l'aurait laisse visible sur un bureau vide, a regler une barre absente.
  */
+import { useEffect, useRef, useState } from 'react';
 import { useShellStore } from '../stores/shell.store';
+import { useDockStore } from '../stores/dock.store';
+import { DOCK_SKINS, dockSkinById } from '../lib/dockSkins';
 import { getAllApps } from '../lib/app-registry';
-import { X } from 'lucide-react';
+import { X, Settings2, PanelBottom, PanelRight, Check } from 'lucide-react';
 
-/** Hauteur reservee au dock, marge du bas comprise.
- *  92 et non 84 : la pastille d'etat depasse sous le bouton, et a 84 les coins
- *  bas de la barre touchaient le bord de la fenetre. */
-export const HAUTEUR_DOCK = 92;
+/** Encombrement du dock horizontal, marge comprise.
+ *
+ *  46 et non 92 : la barre a ete reduite de moitie a la demande. Les pastilles
+ *  passent de 48 a 28 px et les icones de 24 a 16 — assez pour rester
+ *  cliquables a la souris, sans manger le bas du bureau.
+ *
+ *  `DesktopIcons` l'importe pour s'arreter au-dessus de la barre. En position
+ *  droite, cette reserve du bas n'a plus lieu d'etre : voir `LARGEUR_DOCK`. */
+export const HAUTEUR_DOCK = 46;
+
+/** Encombrement du dock vertical, marge comprise. */
+export const LARGEUR_DOCK = 52;
+
+const TAILLE_PASTILLE = 28;
+const TAILLE_ICONE = 16;
 
 export function Dock(): import('react').ReactNode {
   // `windows` est une reference stable du magasin : on filtre DANS le composant,
@@ -28,31 +48,64 @@ export function Dock(): import('react').ReactNode {
   const minimizeApp = useShellStore(s => s.minimizeApp);
   const closeApp = useShellStore(s => s.closeApp);
 
+  const position = useDockStore(s => s.position);
+  const skinId = useDockStore(s => s.skinId);
+  const setPosition = useDockStore(s => s.setPosition);
+  const setSkin = useDockStore(s => s.setSkin);
+
+  const [reglagesOuverts, setReglagesOuverts] = useState(false);
+  const panneauRef = useRef<HTMLDivElement>(null);
+
+  // Fermeture au clic exterieur et a Echap — meme geste que les menus de la
+  // barre du haut, pour que le bureau reponde partout de la meme facon.
+  useEffect(() => {
+    if (!reglagesOuverts) return;
+    const surClic = (e: MouseEvent): void => {
+      if (panneauRef.current && !panneauRef.current.contains(e.target as Node)) {
+        setReglagesOuverts(false);
+      }
+    };
+    const surTouche = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setReglagesOuverts(false);
+    };
+    document.addEventListener('mousedown', surClic);
+    document.addEventListener('keydown', surTouche);
+    return () => {
+      document.removeEventListener('mousedown', surClic);
+      document.removeEventListener('keydown', surTouche);
+    };
+  }, [reglagesOuverts]);
+
   const ouvertes = windows.filter(w => w.isOpen);
   if (ouvertes.length === 0) return null;
 
   const registre = getAllApps();
+  const skin = dockSkinById(skinId);
+  const vertical = position === 'right';
 
   return (
     <div
-      // `items-end` sur le CONTENEUR, pas seulement sur la barre. Sans lui,
-      // l'alignement par defaut (`stretch`) etire la barre sur les 92 px
-      // reserves : elle touchait le bord bas de la fenetre et ses coins arrondis
-      // disparaissaient.
-      className="fixed inset-x-0 bottom-0 z-30 flex items-end justify-center pointer-events-none"
-      style={{ height: HAUTEUR_DOCK }}
+      data-dock
+      data-dock-position={position}
+      className={
+        vertical
+          ? 'fixed inset-y-0 right-0 z-30 flex items-center justify-end pointer-events-none'
+          : 'fixed inset-x-0 bottom-0 z-30 flex items-end justify-center pointer-events-none'
+      }
+      style={vertical ? { width: LARGEUR_DOCK } : { height: HAUTEUR_DOCK }}
     >
       <div
-        className="pointer-events-auto mb-4 flex max-w-[92vw] items-end gap-2 overflow-x-auto rounded-2xl border px-3 py-2.5 backdrop-blur-xl"
+        className={`pointer-events-auto flex overflow-auto border ${
+          vertical
+            ? 'mr-2 max-h-[86vh] flex-col items-center gap-1.5 px-1.5 py-2'
+            : 'mb-2 max-w-[92vw] items-end gap-1.5 px-2 py-1.5'
+        }`}
         style={{
-          // 92 % et non 78 % : a 78 %, la barre posee sur une fenetre d'app
-          // blanche disparaissait dans le fond. Le liesere sombre en `ring`
-          // la detache aussi bien d'un mur blanc que d'un fond d'ecran charge —
-          // on ne sait pas sur quoi elle se posera.
-          background: 'color-mix(in srgb, var(--theme-surface) 92%, transparent)',
-          borderColor: 'var(--panel-border)',
-          boxShadow:
-            '0 0 0 1px rgba(0,0,0,0.14), 0 12px 34px -12px rgba(0,0,0,0.55)',
+          background: skin.background,
+          borderColor: skin.border,
+          boxShadow: skin.shadow,
+          borderRadius: skin.radius,
+          backdropFilter: skin.backdrop || undefined,
         }}
       >
         {ouvertes.map(win => {
@@ -62,7 +115,7 @@ export function Dock(): import('react').ReactNode {
           const actif = activeWindowId === win.id && !win.isMinimized;
 
           return (
-            <div key={win.id} className="group relative">
+            <div key={win.id} className="group relative shrink-0">
               <button
                 onClick={() => {
                   // Un clic sur la fenetre deja au premier plan la range — c'est
@@ -73,16 +126,19 @@ export function Dock(): import('react').ReactNode {
                 }}
                 title={win.isMinimized ? `${win.title} — réduite, cliquer pour rouvrir` : win.title}
                 aria-label={win.title}
-                className={`flex h-12 w-12 items-center justify-center rounded-[15px] border transition-all hover:scale-110 active:scale-95 ${
+                className={`flex items-center justify-center border transition-all hover:scale-110 active:scale-95 ${
                   win.isMinimized ? 'opacity-55' : ''
                 }`}
                 style={{
+                  width: TAILLE_PASTILLE,
+                  height: TAILLE_PASTILLE,
+                  borderRadius: skin.tileRadius,
                   background: `linear-gradient(160deg, #ffffff, ${accent}22)`,
                   borderColor: actif ? accent : 'rgba(255,255,255,0.6)',
-                  boxShadow: actif ? `0 0 0 2px ${accent}55` : '0 6px 16px -6px rgba(41,37,36,0.4)',
+                  boxShadow: actif ? `0 0 0 2px ${accent}55` : '0 4px 10px -6px rgba(41,37,36,0.4)',
                 }}
               >
-                {Icon ? <Icon className="h-6 w-6" style={{ color: accent }} /> : null}
+                {Icon ? <Icon style={{ width: TAILLE_ICONE, height: TAILLE_ICONE, color: accent }} /> : null}
               </button>
 
               {/* Fermer — apparait au survol. Sans lui, le dock permettrait
@@ -91,19 +147,130 @@ export function Dock(): import('react').ReactNode {
                 onClick={(e) => { e.stopPropagation(); closeApp(win.id); }}
                 title={`Fermer ${win.title}`}
                 aria-label={`Fermer ${win.title}`}
-                className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-[var(--theme-text)] text-[var(--theme-on-accent)] shadow group-hover:flex hover:bg-[var(--theme-danger)]"
+                className="absolute -right-1 -top-1 hidden h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--theme-text)] text-[var(--theme-on-accent)] shadow group-hover:flex hover:bg-[var(--theme-danger)]"
               >
-                <X className="h-2.5 w-2.5" />
+                <X className="h-2 w-2" />
               </button>
 
               {/* Pastille d'etat : une fenetre ouverte se distingue d'une reduite. */}
               <span
-                className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
+                className={`absolute h-1 w-1 rounded-full ${
+                  vertical ? '-left-1 top-1/2 -translate-y-1/2' : '-bottom-1 left-1/2 -translate-x-1/2'
+                }`}
                 style={{ background: win.isMinimized ? 'transparent' : accent }}
               />
             </div>
           );
         })}
+
+        {/* Separateur puis reglages — toujours en queue de barre. */}
+        <span
+          className="shrink-0 rounded-full"
+          style={{
+            background: skin.dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.18)',
+            width: vertical ? 18 : 1,
+            height: vertical ? 1 : 18,
+            margin: vertical ? '2px 0' : '0 2px',
+          }}
+        />
+
+        <div className="relative shrink-0" ref={panneauRef}>
+          <button
+            onClick={() => setReglagesOuverts(v => !v)}
+            title="Réglages du dock — position et habillage"
+            aria-label="Réglages du dock"
+            aria-expanded={reglagesOuverts}
+            data-dock-settings
+            className="flex items-center justify-center border transition-all hover:scale-110 active:scale-95"
+            style={{
+              width: TAILLE_PASTILLE,
+              height: TAILLE_PASTILLE,
+              borderRadius: skin.tileRadius,
+              background: skin.dark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.7)',
+              borderColor: skin.dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.12)',
+              color: skin.dark ? '#ffffff' : 'var(--theme-text)',
+            }}
+          >
+            <Settings2 style={{ width: TAILLE_ICONE, height: TAILLE_ICONE }} />
+          </button>
+
+          {reglagesOuverts && (
+            <div
+              className={`absolute z-40 w-60 rounded-xl border p-3 shadow-2xl ${
+                vertical ? 'right-full top-0 mr-2' : 'bottom-full right-0 mb-2'
+              }`}
+              style={{
+                background: 'var(--theme-surface)',
+                borderColor: 'var(--panel-border)',
+                boxShadow: '0 18px 44px -18px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div
+                className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em]"
+                style={{ color: 'var(--theme-text-dim)' }}
+              >
+                Position
+              </div>
+              <div className="mb-3 grid grid-cols-2 gap-1.5">
+                {([
+                  { id: 'bottom' as const, label: 'Bas', Icone: PanelBottom },
+                  { id: 'right' as const, label: 'Droite', Icone: PanelRight },
+                ]).map(({ id, label, Icone }) => {
+                  const on = position === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setPosition(id)}
+                      data-dock-position-choice={id}
+                      className="flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-colors"
+                      style={{
+                        background: on ? 'var(--theme-surface-hover)' : 'transparent',
+                        borderColor: on ? 'var(--theme-accent)' : 'var(--panel-border)',
+                        color: 'var(--theme-text)',
+                      }}
+                    >
+                      <Icone className="h-3.5 w-3.5" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em]"
+                style={{ color: 'var(--theme-text-dim)' }}
+              >
+                Habillage · {DOCK_SKINS.length} styles
+              </div>
+              <div className="flex max-h-52 flex-col gap-0.5 overflow-y-auto custom-scrollbar">
+                {DOCK_SKINS.map((s) => {
+                  const on = s.id === skinId;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSkin(s.id)}
+                      data-dock-skin={s.id}
+                      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[11.5px] transition-colors hover:bg-[var(--theme-surface-hover)]"
+                      style={{ color: 'var(--theme-text)' }}
+                    >
+                      {/* Vignette : l'habillage réel, en miniature. */}
+                      <span
+                        className="h-4 w-6 shrink-0 border"
+                        style={{
+                          background: s.background,
+                          borderColor: s.border,
+                          borderRadius: Math.min(6, s.radius),
+                        }}
+                      />
+                      <span className="flex-1 truncate">{s.label}</span>
+                      {on ? <Check className="h-3.5 w-3.5" style={{ color: 'var(--theme-accent)' }} /> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
