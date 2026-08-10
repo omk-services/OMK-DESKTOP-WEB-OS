@@ -123,10 +123,12 @@ const CALENDAR: CalendarRecord[] = [
   { id: 'cal-booked', label: 'Booked ahead · 07-04', detail: 'Tim De La Salle onboarding follow-up.' },
 ];
 
-// SNAPSHOT + STAGES data now live in src/apps/sales/seed.ts as CMS collections
-// (`sales_snapshot`, `sales_stages`). The local arrays are kept as
-// type-only stubs so the legacy `SnapshotStat` / `DealStage` types remain
-// imported — they will be removed once the remaining call sites migrate.
+// SNAPSHOT + STAGES values are derived from the live `deals` collection
+// inside PipelinePanel (see formatMoney / summarizeDeals / STAGE_DEFS).
+// The legacy `sales_snapshot` and `sales_stages` CMS collections were
+// retired on 2026-08-10 — see src/apps/sales/seed.ts for the rationale.
+// `SnapshotStat` and `DealStage` remain as types so the editor views
+// keep their shape without re-deriving everything at render time.
 
 /** Une carte du Snapshot. Le chiffre doit rester grand — c'est la signature de la
  *  reference — mais 40px fixes debordaient : « $486k » etait coupe net par le
@@ -627,17 +629,118 @@ function PageHeader({ eyebrow, title, subtitle, meta }: { eyebrow: string; title
   );
 }
 
-// ─── Section: Pipeline ───
+// ─── Pipeline: derive snapshot + stage tiles from the live `deals` collection.
+//     The legacy `sales_snapshot` and `sales_stages` CMS collections were
+//     retired by the 2026-08-10 debt pass: their values were editorial
+//     numbers disconnected from the deal data. Numbers below now come from
+//     the same `deals` collection the kanban reads from, so a new deal
+//     added through the kanban updates the pipeline value immediately. ───
+
+function formatMoney(n: number): string {
+  if (!Number.isFinite(n)) return '$0';
+  const abs = Math.abs(n);
+  if (abs < 1000) return `$${Math.round(n).toLocaleString('en-US')}`;
+  if (abs < 10000) return `$${(n / 1000).toFixed(1)}k`;
+  return `$${Math.round(n / 1000).toLocaleString('en-US')}k`;
+}
+
+interface PipelineSummary {
+  pipelineSum: number;
+  pipelineCount: number;
+  wonSum: number;
+  wonCount: number;
+  lostCount: number;
+  avg: number;
+  min: number;
+  max: number;
+  closed: number;
+  winRate: number | null;
+}
+
+function summarizeDeals(deals: CmsItem[]): PipelineSummary {
+  const valueOf = (d: CmsItem): number => (typeof d['value'] === 'number' ? d['value'] : 0);
+  const stageOf = (d: CmsItem): string => String(d['stage'] ?? '');
+  const open = deals.filter((d) => stageOf(d) !== 'Won' && stageOf(d) !== 'Lost');
+  const won = deals.filter((d) => stageOf(d) === 'Won');
+  const lost = deals.filter((d) => stageOf(d) === 'Lost');
+  const pipelineSum = open.reduce((acc, d) => acc + valueOf(d), 0);
+  const wonSum = won.reduce((acc, d) => acc + valueOf(d), 0);
+  const allValues = deals.map(valueOf);
+  const avg = allValues.length === 0 ? 0 : allValues.reduce((acc, n) => acc + n, 0) / allValues.length;
+  const min = allValues.length === 0 ? 0 : Math.min(...allValues);
+  const max = allValues.length === 0 ? 0 : Math.max(...allValues);
+  const closed = won.length + lost.length;
+  const winRate = closed === 0 ? null : won.length / closed;
+  return { pipelineSum, pipelineCount: open.length, wonSum, wonCount: won.length, lostCount: lost.length, avg, min, max, closed, winRate };
+}
+
+const STAGE_DEFS: { id: string; label: string; tone: 'ok' | 'warn' | 'danger' | 'accent' | 'neutral' }[] = [
+  { id: 'Qualified', label: 'Qualified', tone: 'accent' },
+  { id: 'Proposal', label: 'Proposal', tone: 'warn' },
+  { id: 'Won', label: 'Won, this quarter', tone: 'ok' },
+  { id: 'Lost', label: 'Lost or cold', tone: 'danger' },
+];
 
 function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   void onSelect; // PipelinePanel currently exposes data only — no per-item detail
-  // Read the formerly in-memory SNAPSHOT + STAGES from the CMS store.
-  // Falls back to empty arrays if the collection isn't registered yet
+  // Read the live `deals` collection (registered in src/lib/cms/seed.ts).
+  // Falls back to an empty array if the collection isn't registered yet
   // (HMR can mount before the global seed runs).
-  const snapshotItems = useCmsStore(s => s.items['sales_snapshot']) ?? [];
-  const stageItems = useCmsStore(s => s.items['sales_stages']) ?? [];
+  const deals = useCmsStore((s) => s.items['deals']) ?? [];
   const scoreItems = useCmsStore(s => s.items['sales_scores']) ?? [];
   const trendItems = useCmsStore(s => s.items['sales_trends']) ?? [];
+
+  const summary = useMemo(() => summarizeDeals(deals), [deals]);
+
+  // Snapshot tiles — 5 cards. The 6th tile (Meetings/week) was retired
+  // because no source exists in the CMS; literal values cannot stand.
+  // Rep score stays as a literal (its source is `sales_scores`, a separate
+  // collection; deriving it from sales_scores would change semantics).
+  const snapshotItems: SnapshotStat[] = useMemo(() => {
+    const pipelineAccent: SnapshotStat['accent'] = summary.pipelineSum > 0 ? 'ok' : 'neutral';
+    const wonAccent: SnapshotStat['accent'] = summary.wonSum > 0 ? 'ok' : 'neutral';
+    const winRateAccent: SnapshotStat['accent'] =
+      summary.winRate === null
+        ? 'neutral'
+        : summary.winRate >= 0.5
+          ? 'ok'
+          : summary.winRate >= 0.25
+            ? 'warn'
+            : 'danger';
+    return [
+      { id: 'snap-pipeline', label: 'Pipeline value', value: formatMoney(summary.pipelineSum), sub: `${summary.pipelineCount} open deals`, accent: pipelineAccent },
+      { id: 'snap-won', label: 'Won this quarter', value: formatMoney(summary.wonSum), sub: `${summary.wonCount} deals closed`, accent: wonAccent },
+      { id: 'snap-winrate', label: 'Win rate', value: summary.winRate === null ? '—' : `${Math.round(summary.winRate * 100)}%`, sub: summary.closed > 0 ? `of ${summary.closed} closed deals` : 'no closed deals yet', accent: winRateAccent },
+      { id: 'snap-avg', label: 'Avg deal size', value: formatMoney(summary.avg), sub: deals.length === 0 ? 'no deals yet' : `min ${formatMoney(summary.min)} · max ${formatMoney(summary.max)}`, accent: 'neutral' },
+      { id: 'snap-rep', label: 'Rep score', value: '7.5', sub: 'demo strong, close the gap', accent: 'danger' },
+    ];
+  }, [summary, deals.length]);
+
+  // Stage tiles — derived from the live `deals` collection. Each stage's
+  // count and value are recomputed when deals change. A trailing "Other"
+  // bucket captures any deals with an unrecognised stage (forward-safe).
+  const stageItems: DealStage[] = useMemo(() => {
+    const valueOf = (d: CmsItem): number => (typeof d['value'] === 'number' ? d['value'] : 0);
+    const stageOf = (d: CmsItem): string => String(d['stage'] ?? '');
+    const knownStageIds = new Set(STAGE_DEFS.map((sd) => sd.id));
+    const items: DealStage[] = STAGE_DEFS.map((sd) => {
+      const inStage = deals.filter((d) => stageOf(d) === sd.id);
+      const sum = inStage.reduce((acc, d) => acc + valueOf(d), 0);
+      const weighted =
+        sd.id === 'Won'
+          ? `${formatMoney(sum)} closed`
+          : sd.id === 'Lost'
+            ? 're-engagement targets'
+            : `${formatMoney(sum)} in stage`;
+      return { id: sd.id, label: sd.label, count: inStage.length, weighted, tone: sd.tone };
+    });
+    const other = deals.filter((d) => !knownStageIds.has(stageOf(d)));
+    if (other.length > 0) {
+      const sum = other.reduce((acc, d) => acc + valueOf(d), 0);
+      items.push({ id: 'stage-other', label: 'Other stages', count: other.length, weighted: `${formatMoney(sum)} in stage`, tone: 'neutral' });
+    }
+    return items;
+  }, [deals]);
   const txt = (item: CmsItem | undefined, key: string): string => {
     if (!item) return '';
     const v = item[key];
@@ -713,32 +816,18 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {snapshotItems.slice(0, 5).map((it) => (
+          {snapshotItems.map((it) => (
             <SnapshotCard
               key={it.id}
               stat={{
                 id: String(it.id),
-                label: txt(it, 'label') || '—',
-                value: txt(it, 'value') || '—',
-                sub: txt(it, 'sub'),
-                accent: (txt(it, 'accent') || 'ok') as SnapshotStat['accent'],
+                label: it.label || '—',
+                value: it.value || '—',
+                sub: it.sub,
+                accent: (it.accent || 'ok') as SnapshotStat['accent'],
               }}
             />
           ))}
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {snapshotItems[5] ? (
-            <SnapshotCard
-              stat={{
-                id: String(snapshotItems[5].id),
-                label: txt(snapshotItems[5], 'label') || '—',
-                value: txt(snapshotItems[5], 'value') || '—',
-                sub: txt(snapshotItems[5], 'sub'),
-                accent: (txt(snapshotItems[5], 'accent') || 'ok') as SnapshotStat['accent'],
-              }}
-            />
-          ) : null}
         </div>
       </section>
 
@@ -767,7 +856,7 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
         >
           <ul>
             {stageItems.map((it, i) => {
-              const stageTone = txt(it, 'tone') || 'accent';
+              const stageTone = it.tone;
               return (
               <li
                 key={it.id}
@@ -785,13 +874,15 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
                             ? 'rgba(180,83,9,0.10)'
                             : stageTone === 'danger'
                               ? 'rgba(185,28,28,0.10)'
-                              : 'rgba(234,88,12,0.10)',
+                              : stageTone === 'neutral'
+                                ? 'rgba(100,116,139,0.10)'
+                                : 'rgba(234,88,12,0.10)',
                       color:
-                        stageTone === 'ok' ? WIN : stageTone === 'warn' ? RELANCE : stageTone === 'danger' ? LOSE : ACCENT,
+                        stageTone === 'ok' ? WIN : stageTone === 'warn' ? RELANCE : stageTone === 'danger' ? LOSE : stageTone === 'neutral' ? 'var(--theme-text-muted)' : ACCENT,
                       border: '1px solid var(--panel-border)',
                     }}
                   >
-                    {txt(it, 'label') || '—'}
+                    {it.label || '—'}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-3 text-right">
@@ -799,7 +890,7 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
                     className="text-[18px] font-extrabold tabular-nums"
                     style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
                   >
-                    {num(it, 'count')}
+                    {it.count}
                   </span>
                   <span className="text-[10.5px] font-bold uppercase" style={{ letterSpacing: '0.16em', color: 'var(--theme-text-dim)', fontFamily: FONT_MONO }}>
                     deals
@@ -808,7 +899,7 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
                     className="ml-4 w-40 text-right text-[12.5px]"
                     style={{ color: 'var(--theme-text-muted)' }}
                   >
-                    {txt(it, 'weighted') || '—'}
+                    {it.weighted || '—'}
                   </span>
                 </div>
               </li>
