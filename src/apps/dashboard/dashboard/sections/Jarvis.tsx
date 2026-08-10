@@ -16,10 +16,12 @@ import { Bot, Lock, Mic, MicOff, Sparkles } from 'lucide-react';
 import { AGENTS, JARVIS_ROUTINES, JARVIS_SUGGESTIONS, USAGE_TODAY, MONTH_SUMMARY } from '../seed';
 import { ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill, SectionTitle } from '../Primitives';
 import { useVoiceNavigation } from '../../../../hooks/useVoiceNavigation';
+import { useShellStore } from '../../../../stores/shell.store';
 
 export function Jarvis() {
   const { listening, toggle, supported, lastTranscript } = useVoiceNavigation();
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const addToast = useShellStore((s) => s.addToast);
 
   useEffect(() => {
     const el = transcriptRef.current;
@@ -30,6 +32,7 @@ export function Jarvis() {
 
   const today = new Date();
   const dateStr = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const agentCount = AGENTS.length;
 
   return (
     <div className="flex flex-col gap-5 p-7">
@@ -86,7 +89,7 @@ export function Jarvis() {
             {dateStr}
           </div>
           <h3 className="mt-1 text-[18px] font-bold tracking-tight" style={{ color: 'var(--theme-text)', fontFamily: 'var(--theme-font-display)' }}>
-            Bonjour. L'OS est en place, 5 agents tournent.
+            Bonjour. L'OS est en place, {agentCount} agents tournent.
           </h3>
           <p className="mt-1 text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
             Demande à Jarvis d'ouvrir une app, de décrire la dépense du jour, ou de suggérer une routine.
@@ -107,7 +110,7 @@ export function Jarvis() {
             {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
             {listening ? 'Arrêter l\'écoute' : supported ? 'Activer le micro' : 'Micro non supporté'}
           </button>
-          <GhostButton size="sm">
+          <GhostButton size="sm" onClick={() => addToast({ source: 'Jarvis', type: 'info', message: 'Routine suggérée — en attente de validation humaine (read-only par conception).' })}>
             <Sparkles className="h-3.5 w-3.5" /> Suggérer une routine
           </GhostButton>
         </div>
@@ -176,7 +179,7 @@ export function Jarvis() {
       {/* Routines + état */}
       <div className="grid gap-3 lg:grid-cols-2">
         <Panel pad="p-5">
-          <SectionTitle eyebrow="Routines" title="4 routines exécutées" />
+          <SectionTitle eyebrow="Routines" title={`${JARVIS_ROUTINES.length} routines exécutées`} />
           <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
             {JARVIS_ROUTINES.map((r) => (
               <li key={r.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">

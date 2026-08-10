@@ -17,6 +17,7 @@ import {
   ACCENT, GhostButton, IconChip, KV, Panel, Pill, PrimaryButton,
   ProgressBar, SectionTitle,
 } from '../Primitives';
+import { useShellStore } from '../../../../stores/shell.store';
 
 type TabId = 'system' | 'conversation' | 'sessions' | 'memories' | 'connections' | 'settings';
 
@@ -37,6 +38,7 @@ export function AgentDetailPage({
   onBack: () => void;
 }) {
   const [tab, setTab] = useState<TabId>('system');
+  const addToast = useShellStore((s) => s.addToast);
 
   return (
     <div className="min-h-full" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
@@ -101,10 +103,10 @@ export function AgentDetailPage({
               </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-2">
-              <PrimaryButton size="sm">
+              <PrimaryButton size="sm" onClick={() => { setTab('conversation'); addToast({ source: 'Agents', type: 'info', message: `Conversation ouverte avec ${agent.name} — brouillons à valider avant envoi.` }); }}>
                 <MessageSquare className="h-3.5 w-3.5" /> Discuter
               </PrimaryButton>
-              <GhostButton size="sm">
+              <GhostButton size="sm" onClick={() => { setTab('settings'); addToast({ source: 'Agents', type: 'info', message: `Réglages de ${agent.name} — toute modification est tracée dans l'audit log.` }); }}>
                 <Wrench className="h-3.5 w-3.5" /> Réglages
               </GhostButton>
             </div>
