@@ -23,20 +23,71 @@ registerItemDetail('growth', GrowthItemDetail);
 const ACCENT = '#16a34a';
 
 function Funnel() {
+  // Données honnêtes : on ne montre que ce qu'on peut dériver du CMS. Les
+  // étapes intermédiaires (quiz, demo booked) ne sont pas trackées en
+  // l'état — on les omet plutôt que d'inventer un chiffre. Si la collection
+  // est vide, on affiche un état vide explicite (jamais "0 leads" muet).
+  const channels = useCmsStore((s) => s.items['growth_channels']) ?? [];
+  const deals = useCmsStore((s) => s.items['deals']) ?? [];
+  const totalLeads = channels.reduce((sum, c) => sum + Number(c.leads ?? 0), 0);
+  const wonDeals = deals.filter((d) => String(d.stage) === 'Won').length;
+  const hasData = channels.length > 0 || deals.length > 0;
+
+  if (!hasData) {
+    return (
+      <div className="p-7">
+        <SectionHead title="Acquisition funnel" subtitle="Marketplace coach → paying client" />
+        <div
+          className="rounded-2xl border p-6 text-center"
+          style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
+            No funnel data yet — register the <code>growth_channels</code> collection
+            and the deals will flow in.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only the two stages we can honestly derive. Lead counts come from the
+  // channels collection (sum of `leads`); won deals come from the unified
+  // `deals` CMS collection.
+  const stages: { label: string; value: number; pct: number; hint?: string }[] = [
+    { label: 'Leads (channels)', value: totalLeads, pct: 100, hint: `${channels.length} channel${channels.length > 1 ? 's' : ''}` },
+  ];
+  if (wonDeals > 0 || deals.length > 0) {
+    stages.push({
+      label: 'Closed won',
+      value: wonDeals,
+      pct: totalLeads > 0 ? Math.round((wonDeals / totalLeads) * 100) : 0,
+      hint: `${wonDeals} of ${totalLeads} leads → ${totalLeads > 0 ? Math.round((wonDeals / totalLeads) * 100) : 0}%`,
+    });
+  }
+
   return (
     <div className="p-7">
       <SectionHead title="Acquisition funnel" subtitle="Marketplace coach → paying client" />
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label="Visitors" value="1,240" hint="this month" />
-        <StatCard label="Diagnosed" value="86" tone="accent" />
-        <StatCard label="Won" value="6" tone="ok" hint="33% of demos" />
+        <StatCard label="Leads" value={totalLeads.toLocaleString('en-US')} hint={`${channels.length} channels`} />
+        <StatCard
+          label="Won"
+          value={wonDeals.toLocaleString('en-US')}
+          tone={wonDeals > 0 ? 'ok' : 'default'}
+          hint={totalLeads > 0 ? `${Math.round((wonDeals / totalLeads) * 100)}% conversion` : 'no leads yet'}
+        />
+        <StatCard
+          label="Conversion"
+          value={totalLeads > 0 ? `${Math.round((wonDeals / totalLeads) * 100)}%` : '—'}
+          tone="accent"
+          hint="leads → won"
+        />
       </div>
       <div className="rounded-2xl border p-5" style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}>
         <div className="flex flex-col gap-3">
-          <FunnelStep label="Visited landing" value="1,240" pct={100} accent={ACCENT} />
-          <FunnelStep label="Took the quiz" value="312" pct={25} accent={ACCENT} />
-          <FunnelStep label="Booked demo" value="86" pct={7} accent={ACCENT} />
-          <FunnelStep label="Closed won" value="6" pct={2} accent={ACCENT} />
+          {stages.map((s) => (
+            <FunnelStep key={s.label} label={s.label} value={s.value.toLocaleString('en-US')} pct={s.pct} accent={ACCENT} />
+          ))}
         </div>
       </div>
     </div>
