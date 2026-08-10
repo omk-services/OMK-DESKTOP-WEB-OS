@@ -6,6 +6,7 @@ import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { ClientsDetailPage, type ClientsDetailItem } from './ClientsDetailPage';
 import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
 import { CMSCardList } from '../_ui/CMSCardList';
@@ -400,22 +401,9 @@ export function ClientsApp() {
     return (
       <div className="p-7">
         <SectionHead title="IP Vault" subtitle="Every session, captured — the coach's knowledge, sanctuarized" />
-        <CMSCardList
+        <CollectionRepeater
           collectionId="session_notes"
           onOpen={openNote}
-          cols={2}
-          render={(n: Record<string, unknown>) => ({
-            title: String(n.title ?? n.topic ?? 'Untitled'),
-            subtitle: `${String(n.clientName ?? '—')} · ${String(n.date ?? '')}`,
-            description: String(n.body ?? '').slice(0, 160),
-            statusLabel: String(n.sentiment ?? 'note'),
-            statusTone: 'accent',
-            accent: '#8b5cf6',
-            icon: <BookText className="w-5 h-5" />,
-            metricLabel: 'duration',
-            metricValue: String(n.duration ?? '—'),
-            meta: String(n.sentiment ?? 'session note'),
-          })}
         />
       </div>
     );
