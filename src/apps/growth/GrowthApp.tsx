@@ -259,21 +259,14 @@ export function GrowthApp() {
   };
 
   const Channels = () => {
+    // Cause C — composer pour growth_channels. Avant : Table figée sans moyen
+    // d'ajouter un canal. On branche CollectionRepeater : CRUD complet
+    // (création + suppression à deux temps), validation (titre obligatoire,
+    // anti-doublon), et chaque carte reste cliquable pour ouvrir la fiche.
     return (
       <div className="p-7">
         <SectionHead title="Channels" subtitle="Where diagnosed leads come from" />
-        <div className="rounded-2xl border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--panel-border)' }}>
-          <Table
-            head={['Channel', 'Leads', 'CAC', 'Trend']}
-            onRowClick={(i) => openChannel(String(channels[i].id))}
-            rows={channels.map(c => [
-              String(c.name),
-              String(c.leads),
-              c.cac ? `$${c.cac}` : '$0',
-              <Badge tone={String(c.trend).startsWith('↑') ? 'ok' : String(c.trend).startsWith('↓') ? 'danger' : 'neutral'}>{String(c.trend)}</Badge>,
-            ])}
-          />
-        </div>
+        <CollectionRepeater collectionId="growth_channels" onOpen={openChannel} />
       </div>
     );
   };
