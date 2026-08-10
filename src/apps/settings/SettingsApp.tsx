@@ -578,10 +578,26 @@ export function SettingsApp() {
   const Integrations = () => {
     // Phase-D2 : les intégrations vivent dans la collection CMS
     // `settings_integrations`, enregistrée par `seedSettingsCms()` au
-    // chargement du module. Plus de valeurs en dur dans le JSX — un
-    // futur « ajouter Stripe Connect » passera par `useCmsStore.addItem`.
+    // chargement du module. Plus de valeurs en dur dans le JSX.
     const items = useCmsStore((s) => s.items['settings_integrations']) ?? [];
+    const updateItem = useCmsStore((s) => s.updateItem);
     const openApp = useShellStore((s) => s.openApp);
+    const addToast = useShellStore((s) => s.addToast);
+
+    // La liste était en lecture seule : trois cartes, un badge, aucune
+    // action. Connecter/Déconnecter est la seule mutation qui a du sens
+    // ici — l'ajout d'une intégration passe par le Marketplace, ce que
+    // dit déjà l'état vide plus bas. Même chemin d'écriture que la grille
+    // du Marketplace : updateItem + toast, pour que l'effet soit visible
+    // au-delà de la carte.
+    const toggleConnection = (id: string, name: string, connected: boolean) => {
+      updateItem('settings_integrations', id, { status: connected ? 'not connected' : 'connected' });
+      addToast({
+        source: 'Settings',
+        type: connected ? 'info' : 'success',
+        message: connected ? `${name} déconnecté.` : `${name} connecté.`,
+      });
+    };
 
     return (
       <div className="p-7">
@@ -616,10 +632,11 @@ export function SettingsApp() {
             {items.map((it) => {
               const name = String(it.name ?? '—');
               const status = String(it.status ?? 'not connected');
+              const connected = status === 'connected';
               return (
-                <Card key={String(it.id)} className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
+                <Card key={String(it.id)} className="p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center shrink-0"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-[var(--theme-text)]">{name}</div>
                       {it.description ? (
@@ -629,7 +646,23 @@ export function SettingsApp() {
                       ) : null}
                     </div>
                   </div>
-                  <Badge tone={status === 'connected' ? 'ok' : 'neutral'}>{status}</Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge tone={connected ? 'ok' : 'neutral'}>{status}</Badge>
+                    <button
+                      type="button"
+                      onClick={() => toggleConnection(String(it.id), name, connected)}
+                      data-integration-toggle={String(it.id)}
+                      aria-label={`${connected ? 'Déconnecter' : 'Connecter'} ${name}`}
+                      className="rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      style={
+                        connected
+                          ? { color: 'var(--theme-muted)', border: '1px solid var(--panel-border)' }
+                          : { background: 'var(--theme-accent)', color: 'var(--theme-bg)' }
+                      }
+                    >
+                      {connected ? 'Déconnecter' : 'Connecter'}
+                    </button>
+                  </div>
                 </Card>
               );
             })}
