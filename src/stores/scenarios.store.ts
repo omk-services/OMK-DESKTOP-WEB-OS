@@ -309,7 +309,7 @@ export const useScenariosStore = create<ScenariosState>()(
 
       approveAndMerge: (scenarioId, applicateurs) => {
         const before = get().scenarios[scenarioId];
-        if (!before) return before as unknown as Scenario;
+        if (!before) throw new Error(`Scénario introuvable : ${scenarioId}`);
 
         // Détermine la liste de propositions à fusionner.
         // Si une comparaison a une recommandation, on ne garde que les
@@ -417,6 +417,5 @@ export const useScenariosStore = create<ScenariosState>()(
 
 /** DEV-only handle for Playwright capture scripts. */
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  const w = window as unknown as { __coachos?: Record<string, unknown> };
-  w.__coachos = { ...w.__coachos, scenarios: useScenariosStore };
+  window.__coachos = { ...window.__coachos, scenarios: useScenariosStore };
 }

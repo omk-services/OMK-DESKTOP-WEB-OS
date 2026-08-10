@@ -30,7 +30,7 @@ interface MinimalSpeechRecognition extends EventTarget {
 type SpeechRecognitionCtor = new () => MinimalSpeechRecognition;
 
 function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
-  const w = window as unknown as {
+  const w = window as Window & {
     SpeechRecognition?: SpeechRecognitionCtor;
     webkitSpeechRecognition?: SpeechRecognitionCtor;
   };

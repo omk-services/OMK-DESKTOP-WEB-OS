@@ -23,6 +23,21 @@ export interface Toast {
   timestamp: number;
 }
 
+function isAppWindow(value: unknown): value is AppWindow {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Partial<AppWindow>;
+  return typeof candidate.id === 'string'
+    && typeof candidate.title === 'string'
+    && typeof candidate.isOpen === 'boolean'
+    && typeof candidate.isMinimized === 'boolean'
+    && typeof candidate.isMaximized === 'boolean'
+    && typeof candidate.zIndex === 'number'
+    && typeof candidate.position?.x === 'number'
+    && typeof candidate.position?.y === 'number'
+    && typeof candidate.size?.width === 'number'
+    && typeof candidate.size?.height === 'number';
+}
+
 interface ShellState {
   windows: AppWindow[];
   activeWindowId: string | null;
@@ -141,7 +156,11 @@ export const useShellStore = create<ShellState>((set, get) => ({
   })),
 
   bootClean: () => {
-    localStorage.removeItem(LAYOUT_KEY);
+    try {
+      localStorage.removeItem(LAYOUT_KEY);
+    } catch {
+      // The in-memory reset must still work when storage is unavailable.
+    }
     set({ windows: [], activeWindowId: null, notificationCount: 0, toasts: [] });
     window.location.reload();
   },
@@ -161,24 +180,41 @@ export const useShellStore = create<ShellState>((set, get) => ({
     // we don't want subsequent reloads to rehydrate that state and skip the
     // demo seed. The citadel-only state is transient.
     const citadelOnly = windows.length === 1 && windows[0].id === 'onboarding' && windows[0].isOpen;
-    if (citadelOnly) {
-      localStorage.removeItem(LAYOUT_KEY);
-      return;
+    try {
+      if (citadelOnly) {
+        localStorage.removeItem(LAYOUT_KEY);
+        return;
+      }
+      localStorage.setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
+    } catch {
+      // The live layout remains usable when persistence is unavailable.
     }
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
   },
 
   restoreLayout: () => {
-    const raw = localStorage.getItem(LAYOUT_KEY);
-    if (!raw) return;
     try {
-      const data = JSON.parse(raw);
-      if (data.version === SCHEMA_VERSION) {
-        set({ windows: data.state.windows || [] });
+      const raw = localStorage.getItem(LAYOUT_KEY);
+      if (!raw) return;
+      const data: unknown = JSON.parse(raw);
+      if (
+        typeof data === 'object'
+        && data !== null
+        && 'version' in data
+        && data.version === SCHEMA_VERSION
+        && 'state' in data
+        && typeof data.state === 'object'
+        && data.state !== null
+        && 'windows' in data.state
+        && Array.isArray(data.state.windows)
+        && data.state.windows.every(isAppWindow)
+      ) {
+        set({ windows: data.state.windows });
       } else {
         localStorage.removeItem(LAYOUT_KEY);
       }
-    } catch { /* corrupted layout, ignore */ }
+    } catch {
+      // Corrupted or unavailable storage is ignored.
+    }
   },
 }));
 
@@ -196,6 +232,5 @@ export const useShellStore = create<ShellState>((set, get) => ({
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   // Preserve any pre-existing handles (themes, scenarios, tools, assistant…)
   // — un reset ici écraserait les handles posés par d'autres stores au boot.
-  const w = window as unknown as { __coachos?: Record<string, unknown> };
-  w.__coachos = { ...w.__coachos, shell: useShellStore };
+  window.__coachos = { ...window.__coachos, shell: useShellStore };
 }

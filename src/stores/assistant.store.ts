@@ -385,6 +385,5 @@ export const useAssistantStore = create<AssistantState>()(
 
 // DEV-only handle for Playwright capture scripts.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  const w = window as unknown as { __coachos?: Record<string, unknown> };
-  w.__coachos = { ...w.__coachos, assistant: useAssistantStore };
+  window.__coachos = { ...window.__coachos, assistant: useAssistantStore };
 }

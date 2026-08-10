@@ -4,7 +4,10 @@
 
 import React from 'react';
 import { useCmsStore } from '../../lib/cms/cms.store';
+import type { CmsItemTenant } from '../../lib/tenant/contract';
 import { FleetItemCard, FleetItemGrid, type FleetStatusTone } from './FleetItemCard';
+
+const EMPTY_ITEMS: CmsItemTenant[] = [];
 
 export interface CMSCardListProps<T = Record<string, unknown>> {
   collectionId: string;
@@ -29,7 +32,8 @@ export interface CMSCardListProps<T = Record<string, unknown>> {
 export function CMSCardList<T extends { id: unknown }>({
   collectionId, render, onOpen, cols = 2, emptyMessage = 'No items yet.',
 }: CMSCardListProps<T>) {
-  const items = (useCmsStore(s => s.items[collectionId] ?? []) as unknown as T[]);
+  const collectionItems = useCmsStore(s => s.items[collectionId]);
+  const items = (collectionItems ?? EMPTY_ITEMS) as T[];
   if (items.length === 0) {
     return (
       <div

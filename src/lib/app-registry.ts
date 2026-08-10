@@ -18,8 +18,11 @@ const GLOBAL_KEY = '__CITADELLE_APP_REGISTRY__';
 
 const getRegistry = (): Map<string, AppManifest> => {
   if (typeof window !== 'undefined') {
-    if (!(window as any)[GLOBAL_KEY]) (window as any)[GLOBAL_KEY] = new Map<string, AppManifest>();
-    return (window as any)[GLOBAL_KEY];
+    const registryWindow = window as Window & {
+      __CITADELLE_APP_REGISTRY__?: Map<string, AppManifest>;
+    };
+    registryWindow[GLOBAL_KEY] ??= new Map<string, AppManifest>();
+    return registryWindow[GLOBAL_KEY];
   }
   return new Map<string, AppManifest>();
 };
