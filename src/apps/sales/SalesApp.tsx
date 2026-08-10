@@ -338,28 +338,8 @@ function TodayPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
         eyebrow="Sales OS · live operating layer · Coach OS"
         title="Sales OS"
         subtitle="The stateful operating layer behind the coaching offer. It always knows the calls, the pipeline, and the changes — and keeps itself current."
-        meta={{ label: 'Updated', value: 'Thu 6 Aug 2026', sub: 'Regenerated daily after the morning routines' }}
+        meta={{ label: 'Updated', value: new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }), sub: 'Regenerated daily after the morning routines' }}
       />
-
-      {/* Tabs strip — visual mirror of the reference, NOT a control. */}
-      <div className="mt-8 flex items-center gap-1.5">
-        {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
-          <span
-            key={t}
-            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
-            style={{
-              background: t === 'Today' ? 'var(--theme-text)' : 'var(--theme-surface)',
-              color: t === 'Today' ? 'var(--theme-bg)' : 'var(--theme-text)',
-              border: '1px solid var(--panel-border)',
-              fontFamily: FONT_DISPLAY,
-            }}
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
 
       {/* The one thing to act on today — black band */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
@@ -670,7 +650,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
         eyebrow="Sales OS · live operating layer · Pipeline"
         title="Sales OS"
         subtitle="The stateful operating layer behind the coaching offer — knows the deals, keeps itself current, and acts across the stack."
-        meta={{ label: 'Updated', value: 'Thu 6 Aug 2026', sub: 'Regenerated daily after the morning routines' }}
+        meta={{ label: 'Updated', value: new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }), sub: 'Regenerated daily after the morning routines' }}
       />
 
       <div className="mt-8 flex items-center gap-1.5">
@@ -706,7 +686,7 @@ function PipelinePanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
               Snapshot
             </h2>
           </div>
-          <Eyebrow>CRM reconciled 08:46</Eyebrow>
+          <Eyebrow>CRM reconciled {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</Eyebrow>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -1319,7 +1299,7 @@ function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
         eyebrow="Sales OS · live operating layer · Stack"
         title="Sales OS"
         subtitle="The tools the OS reads from and acts through, grouped by the job they do. Attio is the system of record, everything else feeds it or runs off it."
-        meta={{ label: 'Status', value: 'Synced 09:55', sub: 'Live, connected, pending, dormant' }}
+        meta={{ label: 'Status', value: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }), sub: 'Live, connected, pending, dormant' }}
       />
 
       <div className="mt-8 flex items-center gap-1.5">
