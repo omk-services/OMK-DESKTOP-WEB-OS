@@ -89,7 +89,7 @@ export function SalesItemDetail(props: ItemDetailProps) {
       />
 
       <div className="relative">
-        <BackAffordance label="Back to sales sanctum" onBack={onBack} accent={accent} />
+        <BackAffordance label="Back to Sales OS" onBack={onBack} accent={accent} />
 
         {/* Hero — OPAQUE plate (fix 5b8fc74) */}
         <div
