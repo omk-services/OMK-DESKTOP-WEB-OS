@@ -139,7 +139,7 @@ function GlassHero() {
 
       <footer className="absolute bottom-6 left-10 right-10 z-10 flex items-center justify-between text-[10px] font-mono text-indigo-900/50">
         <span>// stack: backdrop-blur-x2, multi-stop gradient, grain overlay</span>
-        <span>case 01 / 06</span>
+        <span>case 01 / 20</span>
       </footer>
     </div>
   );
@@ -218,7 +218,7 @@ function ClayHero() {
 
       <footer className="absolute bottom-6 left-10 right-10 z-10 flex items-center justify-between text-[10px] font-mono text-rose-900/50">
         <span>// stack: inset highlight + chromatic shadow, 2-stop gradients</span>
-        <span>case 02 / 06</span>
+        <span>case 02 / 20</span>
       </footer>
     </div>
   );
@@ -300,7 +300,7 @@ function BrutalismHero() {
 
       <footer className="absolute bottom-6 left-10 right-10 z-10 flex items-center justify-between border-t-4 border-black pt-2 font-mono text-[10px] uppercase text-black">
         <span>// STACK: IMPACT + MONO + 6PX BORDER + 16PX OFFSET</span>
-        <span>case 03 / 06</span>
+        <span>case 03 / 20</span>
       </footer>
     </div>
   );
@@ -412,7 +412,7 @@ function CyberHero() {
 
       <footer className="absolute bottom-4 left-6 right-6 z-10 flex items-center justify-between font-mono text-[10px] uppercase text-cyan-300/60">
         <span>// STACK: TW GRID + DUAL GLOW + CRT SCANLINES</span>
-        <span>case 04 / 06</span>
+        <span>case 04 / 20</span>
       </footer>
     </div>
   );
@@ -517,7 +517,7 @@ function SoftUiHero() {
 
       <footer className="absolute bottom-6 left-10 right-10 z-10 flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-400">
         <span>// stack: dual-shadow + single-hue + inset/outset toggle</span>
-        <span>case 05 / 06</span>
+        <span>case 05 / 20</span>
       </footer>
     </div>
   );
@@ -601,7 +601,7 @@ function EditorialHero() {
 
       <footer className="absolute bottom-6 left-10 right-10 z-10 flex items-center justify-between border-t border-stone-300 pt-2 font-mono text-[10px] uppercase tracking-widest text-stone-500">
         <span>// stack: fraunces serif + drop-cap + pull-quote + fine rule</span>
-        <span>case 06 / 06</span>
+        <span>case 06 / 20</span>
       </footer>
     </div>
   );
@@ -614,9 +614,9 @@ function StylePickerPanel({ active, onPick }: { active: string; onPick: (id: str
     <div className="space-y-3 p-6">
       <div>
         <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-stone-500">Front-end aesthetic roster</div>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-stone-900">Six front-ends. One sidebar.</h1>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-stone-900">Twenty front-ends. One sidebar.</h1>
         <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-stone-600">
-          This app exists to <strong>demonstrate</strong> — six different design languages rendered live
+          This app exists to <strong>demonstrate</strong> — twenty different design languages rendered live
           inside the same Coach OS window. Pick a style in the sidebar to re-skin the canvas.
           No template-library defaults. No two pages share a font.
         </p>
@@ -1856,7 +1856,7 @@ export function DesignApp() {
   return (
     <AppFrame
       title="Design"
-      subtitle="Six front-ends · one app"
+      subtitle="Twenty front-ends · one app"
       accent={ACCENT}
       icon={Wand2}
       sections={sections}
