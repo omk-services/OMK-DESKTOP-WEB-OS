@@ -5,14 +5,18 @@
  */
 import { useMemo, useState } from 'react';
 import { Filter, History } from 'lucide-react';
-import { AGENTS, SESSIONS } from '../seed';
+import { SESSIONS } from '../seed';
 import type { DashboardSession } from '../seed';
+import { useDashboardAgents } from '../cmsAgents';
 import { ACCENT, IconChip, Panel, Pill, SectionTitle } from '../Primitives';
 
 type OutcomeFilter = 'all' | 'completed' | 'escalated' | 'failed' | 'flagged';
 type ChannelFilter = 'all' | 'in-app' | 'email' | 'slack' | 'telegram' | 'webhook';
 
 export function Sessions() {
+  // Sessions themselves are system-side and stay on the seed; the agent
+  // dropdown tracks the CMS list so a newly-created agent is filterable.
+  const agents = useDashboardAgents();
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>('all');
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>('all');
@@ -50,7 +54,7 @@ export function Sessions() {
           </span>
           <Select label="Agent" value={agentFilter} onChange={setAgentFilter} options={[
             { id: 'all', label: 'Tous' },
-            ...AGENTS.map((a) => ({ id: a.id, label: a.name })),
+            ...agents.map((a) => ({ id: a.id, label: a.name })),
           ]} />
           <Select label="Canal" value={channelFilter} onChange={(v) => setChannelFilter(v as ChannelFilter)} options={[
             { id: 'all',     label: 'Tous' },
@@ -118,7 +122,10 @@ export function Sessions() {
 }
 
 function SessionRow({ session }: { session: DashboardSession }) {
-  const agent = AGENTS.find((a) => a.id === session.agentId);
+  // The agent list is from CMS via the parent hook; here we re-resolve by id
+  // so newly-created agents render in the row label.
+  const agents = useDashboardAgents();
+  const agent = agents.find((a) => a.id === session.agentId);
   const tone =
     session.outcome === 'failed' ? 'danger'
     : session.outcome === 'escalated' ? 'warn'

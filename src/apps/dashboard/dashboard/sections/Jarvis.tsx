@@ -13,7 +13,8 @@
  */
 import { useEffect, useRef } from 'react';
 import { Bot, Lock, Mic, MicOff, Sparkles } from 'lucide-react';
-import { AGENTS, JARVIS_ROUTINES, JARVIS_SUGGESTIONS, USAGE_TODAY, MONTH_SUMMARY } from '../seed';
+import { JARVIS_ROUTINES, JARVIS_SUGGESTIONS, USAGE_TODAY, MONTH_SUMMARY } from '../seed';
+import { useDashboardAgents } from '../cmsAgents';
 import { ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill, SectionTitle } from '../Primitives';
 import { useVoiceNavigation } from '../../../../hooks/useVoiceNavigation';
 import { useShellStore } from '../../../../stores/shell.store';
@@ -22,6 +23,9 @@ export function Jarvis() {
   const { listening, toggle, supported, lastTranscript } = useVoiceNavigation();
   const transcriptRef = useRef<HTMLDivElement>(null);
   const addToast = useShellStore((s) => s.addToast);
+  // CMS-driven agent list: a freshly-created agent bumps the count and
+  // contributes to "agents sain" / "agents tournent" KPIs in real time.
+  const agents = useDashboardAgents();
 
   useEffect(() => {
     const el = transcriptRef.current;
@@ -32,7 +36,7 @@ export function Jarvis() {
 
   const today = new Date();
   const dateStr = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  const agentCount = AGENTS.length;
+  const agentCount = agents.length;
 
   return (
     <div className="flex flex-col gap-5 p-7">
@@ -216,7 +220,7 @@ export function Jarvis() {
             />
             <KpiTile
               label="Agents sains"
-              value={`${AGENTS.filter((a) => a.state === 'healthy').length} / ${AGENTS.length}`}
+              value={`${agents.filter((a) => a.state === 'healthy').length} / ${agents.length}`}
               tone="ok"
             />
             <KpiTile

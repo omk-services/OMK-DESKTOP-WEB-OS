@@ -11,7 +11,8 @@ import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronRight, Clock,
   MessageSquare, Sparkles, TrendingDown, TrendingUp, Wallet, Zap,
 } from 'lucide-react';
-import { AGENTS, COST_TREND, SESSIONS, USAGE_TODAY } from '../seed';
+import { COST_TREND, SESSIONS, USAGE_TODAY } from '../seed';
+import { useDashboardAgents } from '../cmsAgents';
 import {
   ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill,
   PrimaryButton, SectionTitle, Sparkline,
@@ -32,6 +33,11 @@ function sparklineForLast12h(): number[] {
 }
 
 export function Overview({ navigateToSection }: { navigateToSection: (id: string) => void } = { navigateToSection: () => {} }) {
+  // Agents list comes from the CMS so the "Active agents" KPI and the agent
+  // chip column reflect the latest state — including a freshly-created agent
+  // from the Agents section. The seed-derived USAGE_TODAY / SESSIONS / COST
+  // numbers stay on the seed; they're not user-mutable.
+  const agents = useDashboardAgents();
   const todayUsd = USAGE_TODAY.costUsd;
   // Trend derived from the real 8-day curve vs yesterday: avg of the last 3
   // days vs the previous 3 days, so the headline stays honest when the seed
@@ -41,8 +47,8 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
   const recentAvg = recent.reduce((a, b) => a + b.value, 0) / Math.max(1, recent.length);
   const priorAvg = prior.length ? prior.reduce((a, b) => a + b.value, 0) / prior.length : recentAvg;
   const trendPct = priorAvg === 0 ? 0 : Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
-  const activeAgents = AGENTS.filter(a => a.state !== 'tripped').length;
-  const trippedCircuits = AGENTS.filter(a => a.state === 'tripped').length;
+  const activeAgents = agents.filter(a => a.state !== 'tripped').length;
+  const trippedCircuits = agents.filter(a => a.state === 'tripped').length;
   // sessions 24h = seeded window (15) + visible historical rollup. The "+n"
   // is the long-tail prior to the seeded window — it stays the same magnitude
   // but is labelled honestly in the hint.
@@ -51,8 +57,8 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
   // Health line is derived from real data: count healthy agents and sum
   // 24h tokens from the seeded session window. The historical tail above is
   // added so the order of magnitude matches a real production trace.
-  const healthyCount = AGENTS.filter(a => a.state === 'healthy').length;
-  const degradedCount = AGENTS.filter(a => a.state === 'degraded').length;
+  const healthyCount = agents.filter(a => a.state === 'healthy').length;
+  const degradedCount = agents.filter(a => a.state === 'degraded').length;
   const failedCount = SESSIONS.filter(s => s.outcome === 'failed').length;
   const escalatedCount = SESSIONS.filter(s => s.outcome === 'escalated').length;
   const tokens24h = SESSIONS.reduce((acc, s) => acc + s.tokens, 0) + HISTORICAL_TAIL * 1200;
@@ -69,7 +75,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
       : trendPct > 0
         ? `en hausse de ${trendPct}%`
         : 'stable') +
-    `, avec ${activeAgents} agents actifs sur ${AGENTS.length}.`;
+    `, avec ${activeAgents} agents actifs sur ${agents.length}.`;
 
   return (
     <div className="flex flex-col gap-5 p-7">
@@ -123,9 +129,9 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
         </div>
         <KpiTile
           label="Active agents"
-          value={`${activeAgents} / ${AGENTS.length}`}
+          value={`${activeAgents} / ${agents.length}`}
           hint={`${trippedCircuits} coupé-circuit ouvert`}
-          tone={activeAgents === AGENTS.length ? 'ok' : 'warn'}
+          tone={activeAgents === agents.length ? 'ok' : 'warn'}
         />
         <KpiTile
           label="Sessions · 24h"
@@ -180,7 +186,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
             subtitle={`${activeAgents} actif${activeAgents > 1 ? 's' : ''} · ${degradedCount} dégradé${degradedCount > 1 ? 's' : ''} · ${trippedCircuits} coupé-circuit`}
           />
           <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
-            {AGENTS.map((a) => (
+            {agents.map((a) => (
               <li key={a.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <IconChip tone={a.state === 'healthy' ? 'ok' : a.state === 'degraded' ? 'warn' : 'danger'}>
                   <Bot className="h-4 w-4" />
@@ -220,7 +226,7 @@ export function Overview({ navigateToSection }: { navigateToSection: (id: string
           />
           <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
             {SESSIONS.slice(0, 8).map((s) => {
-              const agent = AGENTS.find(a => a.id === s.agentId);
+              const agent = agents.find(a => a.id === s.agentId);
               const tone =
                 s.outcome === 'failed' ? 'danger'
                 : s.outcome === 'escalated' ? 'warn'

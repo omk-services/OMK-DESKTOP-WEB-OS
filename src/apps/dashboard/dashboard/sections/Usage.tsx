@@ -3,10 +3,15 @@
  * 24 h, distribution par fournisseur, et projection fin de mois.
  */
 import { AlertTriangle, Coins, Gauge, Timer, TrendingUp } from 'lucide-react';
-import { AGENTS, COST_BUCKETS, MONTH_SUMMARY, USAGE_TODAY } from '../seed';
+import { COST_BUCKETS, MONTH_SUMMARY, USAGE_TODAY } from '../seed';
+import { useDashboardAgents } from '../cmsAgents';
 import { ACCENT, IconChip, KpiTile, Panel, ProgressBar, SectionTitle, Sparkline } from '../Primitives';
 
 export function Usage() {
+  // Agent list comes from CMS so the "tous comptés" footer reflects the
+  // current count (seed + user-created). The cost buckets stay on the seed
+  // — they're aggregates, not per-agent rows.
+  const agents = useDashboardAgents();
   const overRate = USAGE_TODAY.costUsd / USAGE_TODAY.budgetUsd;
   const remaining = USAGE_TODAY.budgetUsd - USAGE_TODAY.costUsd;
   const tokensTotal = USAGE_TODAY.tokensIn + USAGE_TODAY.tokensOut;
@@ -127,7 +132,7 @@ export function Usage() {
             })}
           </ul>
           <div className="mt-4 flex items-center gap-2 text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-            <AlertTriangle className="h-3 w-3" /> {AGENTS.length} agents · tous comptés
+            <AlertTriangle className="h-3 w-3" /> {agents.length} agents · tous comptés
           </div>
         </Panel>
       </div>

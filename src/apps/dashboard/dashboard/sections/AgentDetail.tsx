@@ -13,7 +13,7 @@
  * `savePromptOverrides` with a fetch + cache, but keep the same shape so
  * the page stays the same.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Bot, BrainCircuit, Cable, Check, Database, History, MessageSquare,
   Plug, RotateCcw, Save, Settings, ShieldCheck, Sparkles, Wrench, X,
@@ -402,30 +402,35 @@ function ConversationTab({ agent }: { agent: DashboardAgent }) {
 }
 
 function SessionsTab({ agent }: { agent: DashboardAgent }) {
-  // Local aggregation — driven by seed. The numbers add up to a believable 24h trace.
-  const last24h = [
-    { at: '08:48', tokens: 1840, cost: 0.014, channel: 'webhook', outcome: 'completed' },
-    { at: '08:36', tokens: 980,  cost: 0.002, channel: 'webhook', outcome: 'completed' },
-    { at: '08:29', tokens: 720,  cost: 0.001, channel: 'webhook', outcome: 'completed' },
-    { at: '07:14', tokens: 1640, cost: 0.006, channel: 'email',   outcome: 'completed' },
-    { at: '06:42', tokens: 2380, cost: 0.024, channel: 'webhook', outcome: 'completed' },
-    { at: '04:08', tokens: 980,  cost: 0.004, channel: 'webhook', outcome: 'failed' },
-  ];
+  // Per-agent session trace. The number of rows is derived from the
+  // agent's `sessionsLast24h` so a freshly created agent (0 sessions) shows
+  // the empty state, and an agent with N sessions shows N rows whose token
+  // and cost values follow the agent's average cost. This replaces the
+  // previous hard-coded six-row table that misrepresented every agent.
+  const rows = useMemo(() => deriveSessionTrace(agent), [agent]);
   return (
     <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
       <Panel pad="p-5">
-        <SectionTitle eyebrow="Trace" title={`${last24h.length} dernières sessions 24 h`} />
-        <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
-          {last24h.map((s, i) => (
-            <li key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-              <span className="font-mono text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{s.at}</span>
-              <span className="text-[11px] uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>{s.channel}</span>
-              <span className="ml-auto tabular-nums text-[12px]" style={{ color: 'var(--theme-text)' }}>{s.tokens.toLocaleString()} tok</span>
-              <span className="w-16 text-right tabular-nums text-[12px]" style={{ color: 'var(--theme-text)' }}>${s.cost.toFixed(3)}</span>
-              <Pill tone={s.outcome === 'failed' ? 'danger' : 'ok'}>{s.outcome}</Pill>
-            </li>
-          ))}
-        </ul>
+        <SectionTitle eyebrow="Trace" title={`${rows.length} dernières sessions 24 h`} />
+        {rows.length === 0 ? (
+          <EmptyState
+            icon={<History className="h-5 w-5" />}
+            title="Aucune session sur les 24 dernières heures"
+            hint="Quand l'agent tourne, chaque session apparaît ici avec son canal, ses tokens et son coût."
+          />
+        ) : (
+          <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+            {rows.map((s, i) => (
+              <li key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <span className="font-mono text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{s.at}</span>
+                <span className="text-[11px] uppercase tracking-wider" style={{ color: 'var(--theme-text-dim)' }}>{s.channel}</span>
+                <span className="ml-auto tabular-nums text-[12px]" style={{ color: 'var(--theme-text)' }}>{s.tokens.toLocaleString()} tok</span>
+                <span className="w-16 text-right tabular-nums text-[12px]" style={{ color: 'var(--theme-text)' }}>${s.cost.toFixed(3)}</span>
+                <Pill tone={s.outcome === 'failed' ? 'danger' : 'ok'}>{s.outcome}</Pill>
+              </li>
+            ))}
+          </ul>
+        )}
       </Panel>
       <Panel pad="p-5">
         <SectionTitle eyebrow="Récap" title="Sur la fenêtre" />
@@ -440,13 +445,51 @@ function SessionsTab({ agent }: { agent: DashboardAgent }) {
   );
 }
 
+/** FNV-1a-style deterministic hash for stable per-agent pseudo traces. */
+function hashSeed(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function deriveSessionTrace(agent: DashboardAgent): Array<{ at: string; tokens: number; cost: number; channel: 'webhook' | 'email' | 'in-app'; outcome: 'completed' | 'failed' }> {
+  const total = Math.min(agent.sessionsLast24h, 12);
+  if (total === 0) return [];
+  const channels: Array<'webhook' | 'email' | 'in-app'> = ['webhook', 'email', 'in-app'];
+  // Default channel preference: agents with email connection get more email
+  // sessions. The check covers the seed agents and any user-created agent
+  // that wires an email connection through the form.
+  const channelHint: 'webhook' | 'email' | 'in-app' = agent.connections.includes('email')
+    ? 'email'
+    : agent.connections.includes('webhook')
+      ? 'webhook'
+      : 'in-app';
+  const avgCost = total > 0 ? agent.costLast24h / total : 0;
+  const out: Array<{ at: string; tokens: number; cost: number; channel: 'webhook' | 'email' | 'in-app'; outcome: 'completed' | 'failed' }> = [];
+  for (let i = 0; i < total; i += 1) {
+    const h = hashSeed(`${agent.id}:${i}`);
+    const channelIdx = (h & 1) === 0 ? channelHint : channels[(h >>> 1) % channels.length];
+    const tokens = 600 + ((h >>> 4) % 2400);
+    const cost = +(avgCost * (0.4 + ((h >>> 8) % 100) / 100)).toFixed(3);
+    const outcome: 'completed' | 'failed' = ((h >>> 12) % 11) === 0 ? 'failed' : 'completed';
+    // Step the timestamp backward from "now" by 1.5h per row.
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - i * 90);
+    const at = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    out.push({ at, tokens, cost, channel: channelIdx, outcome });
+  }
+  return out;
+}
+
 function MemoriesTab({ agent }: { agent: DashboardAgent }) {
-  const sample = [
-    { fact: 'Ava Chen · ready for Q3 pricing repositioning', scope: 'shared', weight: 0.92, date: 'Jul 18' },
-    { fact: 'Marcus Reyes · stretched across 3 cohort launches', scope: 'agent-only', weight: 0.61, date: 'Jul 12' },
-    { fact: 'Priya Nandan · Weight Method framework articulated', scope: 'shared', weight: 0.94, date: 'Jul 8' },
-    { fact: 'Studio Nord · 21 days no session, escalate to retention', scope: 'agent-only', weight: 0.84, date: 'Jun 30' },
-  ];
+  // Per-agent memory sample: anchored on the agent's `memories` count, with
+  // a deterministic per-agent title. A user-created agent with `memories=0`
+  // shows the empty state; a seeded agent with N memories shows N rows that
+  // look distinct across agents (instead of the previous shared sample).
+  const sample = useMemo(() => deriveMemorySample(agent), [agent]);
   return (
     <Panel pad="p-5">
       <SectionTitle
@@ -455,25 +498,59 @@ function MemoriesTab({ agent }: { agent: DashboardAgent }) {
         subtitle="Provenance loggée · scope par agent ou ruche partagée"
         action={<Pill tone="info">Zero-PII seal</Pill>}
       />
-      <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
-        {sample.map((m, i) => (
-          <li key={i} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-            <IconChip tone={m.scope === 'shared' ? 'accent' : 'neutral'} size={28}>
-              <Database className="h-3.5 w-3.5" />
-            </IconChip>
-            <div className="min-w-0 flex-1">
-              <div className="text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
-                {m.fact}
+      {sample.length === 0 ? (
+        <EmptyState
+          icon={<Database className="h-5 w-5" />}
+          title="Aucune mémoire indexée pour cet agent"
+          hint="L'agent n'a encore rien indexé. Dès qu'il traite une session, les faits vérifiés apparaissent ici."
+        />
+      ) : (
+        <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+          {sample.map((m, i) => (
+            <li key={i} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+              <IconChip tone={m.scope === 'shared' ? 'accent' : 'neutral'} size={28}>
+                <Database className="h-3.5 w-3.5" />
+              </IconChip>
+              <div className="min-w-0 flex-1">
+                <div className="text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                  {m.fact}
+                </div>
+                <div className="mt-0.5 text-[10.5px] font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+                  {m.scope} · poids {m.weight.toFixed(2)} · {m.date}
+                </div>
               </div>
-              <div className="mt-0.5 text-[10.5px] font-mono" style={{ color: 'var(--theme-text-muted)' }}>
-                {m.scope} · poids {m.weight} · {m.date}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </Panel>
   );
+}
+
+/** Derive a believable memory sample for the agent. The exact text is
+ *  templated from the agent's role so each agent shows distinct rows (no
+ *  longer the same "Ava Chen" hard-coded list rendered for every agent). */
+function deriveMemorySample(agent: DashboardAgent): Array<{ fact: string; scope: 'shared' | 'agent-only'; weight: number; date: string }> {
+  if (agent.memories === 0) return [];
+  const h = hashSeed(agent.id);
+  const count = Math.min(4, Math.max(1, Math.round(agent.memories / 250)));
+  const sharedBase: Array<{ fact: string; date: string }> = [
+    { fact: `${agent.name} · pattern de cadrage observé sur 12 sessions`, date: '04 août 2026' },
+    { fact: `${agent.role} · escalade humaine à 70 confirmée en revue`, date: '01 août 2026' },
+  ];
+  const agentBase: Array<{ fact: string; date: string }> = [
+    { fact: `${agent.name} · ton aligné avec la voix du coach (3/3 samples OK)`, date: '28 juillet 2026' },
+    { fact: `${agent.role} · pic d'usage les mardis 09-11h`, date: '21 juillet 2026' },
+  ];
+  const out: Array<{ fact: string; scope: 'shared' | 'agent-only'; weight: number; date: string }> = [];
+  for (let i = 0; i < count; i += 1) {
+    const shared = (h & (1 << i)) !== 0;
+    const base = shared ? sharedBase : agentBase;
+    const row = base[i % base.length];
+    const weight = 0.55 + ((hashSeed(`${agent.id}:${i}`) >>> 8) % 40) / 100;
+    out.push({ fact: row.fact, scope: shared ? 'shared' : 'agent-only', weight, date: row.date });
+  }
+  return out;
 }
 
 function ConnectionsTab({ agent }: { agent: DashboardAgent }) {
@@ -493,63 +570,229 @@ function ConnectionsTab({ agent }: { agent: DashboardAgent }) {
         subtitle="Telegram · Slack · Email · Webhook — branchements via agentgateway"
         action={<Pill tone="ok">gateway opérationnel</Pill>}
       />
-      <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
-        {agent.connections.map((c) => {
-          const m = meta[c] ?? { label: c, tone: 'neutral' as const };
-          return (
-            <li key={c} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-              <IconChip tone={m.tone}>
-                <Cable className="h-4 w-4" />
-              </IconChip>
-              <div className="min-w-0 flex-1">
-                <div className="text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
-                  {m.label}
+      {agent.connections.length === 0 ? (
+        <EmptyState
+          icon={<Plug className="h-5 w-5" />}
+          title="Aucun canal branché pour cet agent"
+          hint="Les connexions sont définies à la création de l'agent. Branche un canal via l'API agents pour activer ce routage."
+        />
+      ) : (
+        <ul className="flex flex-col divide-y" style={{ borderColor: 'var(--panel-border-subtle)' }}>
+          {agent.connections.map((c) => {
+            const m = meta[c] ?? { label: c, tone: 'neutral' as const };
+            return (
+              <li key={c} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                <IconChip tone={m.tone}>
+                  <Cable className="h-4 w-4" />
+                </IconChip>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-semibold" style={{ color: 'var(--theme-text)' }}>
+                    {m.label}
+                  </div>
+                  <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    Statut : connecté · routeur agentgateway
+                  </div>
                 </div>
-                <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-                  Statut : connecté · routeur agentgateway
-                </div>
-              </div>
-              <Pill tone="ok">live</Pill>
-            </li>
-          );
-        })}
-      </ul>
+                <Pill tone="ok">live</Pill>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Panel>
   );
 }
 
 function SettingsTab({ agent }: { agent: DashboardAgent }) {
+  // Per-agent settings. Mirrors the prompt-overrides pattern: a localStorage
+  // map keyed by agent id, rehydrated on mount, mirrored back on every save.
+  // The brief explicitly asks for the Réglages tab to be modifiable and
+  // persisted like the system prompt is — same shape, same guarantees.
+  const [settingsOverrides, setSettingsOverrides] = useState<Record<string, AgentSettings>>(() => loadSettingsOverrides());
+  useEffect(() => {
+    saveSettingsOverrides(settingsOverrides);
+  }, [settingsOverrides]);
+  const effective = effectiveSettings(agent, settingsOverrides[agent.id]);
+  const [draft, setDraft] = useState<AgentSettings>(effective);
+  const [saved, setSaved] = useState<AgentSettings>(effective);
+  useEffect(() => {
+    setDraft(effective);
+    setSaved(effective);
+  }, [agent.id, effective.plafondSession, effective.plafondJour, effective.escalationScore]);
+  const dirty =
+    draft.plafondSession !== saved.plafondSession ||
+    draft.plafondJour !== saved.plafondJour ||
+    draft.escalationScore !== saved.escalationScore;
+  const canSave = dirty;
+  const addToast = useShellStore((s) => s.addToast);
+  const handleSave = (): void => {
+    setSettingsOverrides((prev) => ({ ...prev, [agent.id]: draft }));
+    setSaved(draft);
+    addToast({
+      source: 'Agents',
+      type: 'success',
+      message: `Réglages de ${agent.name} enregistrés · session ${draft.plafondSession} msg · jour $${draft.plafondJour.toFixed(2)} · escalade > ${draft.escalationScore}`,
+    });
+  };
+  const handleCancel = (): void => {
+    setDraft(saved);
+  };
+  const isOverridden =
+    settingsOverrides[agent.id] !== undefined &&
+    (settingsOverrides[agent.id]?.plafondSession !== effective.plafondSession ||
+      settingsOverrides[agent.id]?.plafondJour !== effective.plafondJour ||
+      settingsOverrides[agent.id]?.escalationScore !== effective.escalationScore);
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <Panel pad="p-5">
-        <SectionTitle eyebrow="Modèle" title="Fournisseur & quotas" />
+        <SectionTitle
+          eyebrow="Modèle"
+          title="Fournisseur & quotas"
+          action={isOverridden ? <Pill tone="accent">version personnalisée</Pill> : null}
+        />
         <div className="grid grid-cols-2 gap-3">
           <KV label="Modèle" value={agent.model} mono />
           <KV label="Latence p50" value="640 ms" mono />
           <KV label="Coût / 1k in" value={`$${agent.model.startsWith('claude-opus') ? '0.015' : '0.003'}`} mono />
           <KV label="Coût / 1k out" value={`$${agent.model.startsWith('claude-opus') ? '0.075' : '0.015'}`} mono />
         </div>
+        <div className="mt-4 flex items-start gap-2 rounded-lg p-3 text-[11px]" style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text-muted)' }}>
+          <Settings className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: ACCENT }} />
+          <span>Le modèle est défini à la création. Pour le changer, recrée l'agent avec le bon champ « Model ».</span>
+        </div>
       </Panel>
       <Panel pad="p-5">
         <SectionTitle eyebrow="Garde-fous" title="Bornes & escalade" />
-        <div className="grid grid-cols-2 gap-3">
-          <KV label="Plafond session" value="100 msg" mono />
-          <KV label="Plafond jour" value={`$${USAGE_BUDGET[agent.id] ?? '5.00'}`} mono />
-          <KV label="Escalade humaine" value="score > 70" mono />
-          <KV label="DLP scan" value="every call" mono />
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>
+              Plafond session
+            </span>
+            <div
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              style={{ background: 'var(--theme-surface-hover)', border: '1px solid var(--panel-border-subtle)' }}
+            >
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={draft.plafondSession}
+                onChange={(e) => setDraft((d) => ({ ...d, plafondSession: Math.max(1, Math.round(Number(e.target.value) || 0)) }))}
+                className="w-full bg-transparent text-[13px] font-bold tabular-nums outline-none"
+                style={{ color: 'var(--theme-text)' }}
+                aria-label="Plafond session (messages)"
+              />
+              <span className="shrink-0 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>msg</span>
+            </div>
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>
+              Plafond jour
+            </span>
+            <div
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              style={{ background: 'var(--theme-surface-hover)', border: '1px solid var(--panel-border-subtle)' }}
+            >
+              <span className="shrink-0 text-[13px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>$</span>
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                value={draft.plafondJour}
+                onChange={(e) => setDraft((d) => ({ ...d, plafondJour: Math.max(0, Number(e.target.value) || 0) }))}
+                className="w-full bg-transparent text-[13px] font-bold tabular-nums outline-none"
+                style={{ color: 'var(--theme-text)' }}
+                aria-label="Plafond jour (USD)"
+              />
+              <span className="shrink-0 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>USD / 24 h</span>
+            </div>
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--theme-text-dim)' }}>
+              Escalade humaine au-delà de
+            </span>
+            <div
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              style={{ background: 'var(--theme-surface-hover)', border: '1px solid var(--panel-border-subtle)' }}
+            >
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={draft.escalationScore}
+                onChange={(e) => setDraft((d) => ({ ...d, escalationScore: Math.max(0, Math.min(100, Math.round(Number(e.target.value) || 0))) }))}
+                className="w-full bg-transparent text-[13px] font-bold tabular-nums outline-none"
+                style={{ color: 'var(--theme-text)' }}
+                aria-label="Seuil d'escalade humaine (score)"
+              />
+              <span className="shrink-0 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/ 100</span>
+            </div>
+          </label>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <PrimaryButton size="sm" onClick={handleSave} disabled={!canSave}>
+              <Save className="h-3.5 w-3.5" /> Enregistrer
+            </PrimaryButton>
+            <GhostButton size="sm" onClick={handleCancel} disabled={!dirty}>
+              <X className="h-3.5 w-3.5" /> Annuler
+            </GhostButton>
+            <span className="ml-auto text-[10.5px] font-mono" style={{ color: 'var(--theme-text-dim)' }}>
+              DLP scan : every call
+            </span>
+          </div>
         </div>
       </Panel>
     </div>
   );
 }
 
-const USAGE_BUDGET: Record<string, string> = {
-  'agent-onboarding': '3.00',
-  'agent-sales':      '15.00',
-  'agent-retention':  '2.00',
-  'agent-knowledge':  '5.00',
-  'agent-jarvis':     '6.00',
+const SETTINGS_KEY = 'coach-os:agent-settings:v1';
+
+interface AgentSettings {
+  plafondSession: number;
+  plafondJour: number;
+  escalationScore: number;
+}
+
+const DEFAULT_SETTINGS: Record<string, AgentSettings> = {
+  'agent-onboarding': { plafondSession: 100, plafondJour: 3.0,  escalationScore: 70 },
+  'agent-sales':      { plafondSession: 200, plafondJour: 15.0, escalationScore: 70 },
+  'agent-retention':  { plafondSession: 50,  plafondJour: 2.0,  escalationScore: 60 },
+  'agent-knowledge':  { plafondSession: 500, plafondJour: 5.0,  escalationScore: 80 },
+  'agent-jarvis':     { plafondSession: 100, plafondJour: 6.0,  escalationScore: 100 },
 };
+
+function defaultSettingsFor(agent: DashboardAgent): AgentSettings {
+  if (DEFAULT_SETTINGS[agent.id]) return DEFAULT_SETTINGS[agent.id];
+  return { plafondSession: 100, plafondJour: 5.0, escalationScore: 70 };
+}
+
+function effectiveSettings(agent: DashboardAgent, override: AgentSettings | undefined): AgentSettings {
+  return override ?? defaultSettingsFor(agent);
+}
+
+function loadSettingsOverrides(): Record<string, AgentSettings> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed as Record<string, AgentSettings>;
+  } catch {
+    return {};
+  }
+}
+
+function saveSettingsOverrides(map: Record<string, AgentSettings>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(map));
+  } catch {
+    // Storage quota or private mode — degrade silently to in-memory only.
+  }
+}
 
 function EmptyState({
   icon, title, hint,

@@ -12,7 +12,8 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Bot, MessageSquare, ShieldCheck, Sparkles, Send } from 'lucide-react';
-import { AGENTS, CHAT_BY_AGENT, type ChatMessage } from '../seed';
+import { CHAT_BY_AGENT, type ChatMessage } from '../seed';
+import { useDashboardAgents } from '../cmsAgents';
 import { useShellStore } from '../../../../stores/shell.store';
 import { ACCENT, GhostButton, IconChip, Panel, Pill, PrimaryButton, SectionTitle } from '../Primitives';
 
@@ -50,7 +51,20 @@ function saveExtras(map: Record<string, ChatMessage[]>): void {
 }
 
 export function Chat() {
-  const [activeId, setActiveId] = useState<string>(AGENTS[0]?.id ?? '');
+  // Agent list is CMS-driven so a freshly created agent shows up in the
+  // rail. The seed `CHAT_BY_AGENT` still owns the canned thread context.
+  const agents = useDashboardAgents();
+  const [activeId, setActiveId] = useState<string>('');
+
+  // Default the active agent once the list is hydrated. The previous code
+  // initialised from `AGENTS[0]` at render time, which used a stable seed
+  // order; reading from a hook means we wait one tick for the CMS items map
+  // to settle, then pick the first agent.
+  useEffect(() => {
+    if (!activeId && agents.length > 0) {
+      setActiveId(agents[0].id);
+    }
+  }, [agents, activeId]);
   const [draft, setDraft] = useState<string>('');
   // User-submitted drafts, per agent. Seed messages stay below; user
   // drafts are appended in the order they were submitted so the thread
@@ -59,7 +73,7 @@ export function Chat() {
   // doesn't wipe what the user typed.
   const [extrasByAgent, setExtrasByAgent] = useState<Record<string, ChatMessage[]>>(() => loadExtras());
   const addToast = useShellStore((s) => s.addToast);
-  const active = AGENTS.find((a) => a.id === activeId);
+  const active = agents.find((a) => a.id === activeId);
   const seedMessages = CHAT_BY_AGENT[activeId] ?? [];
   const extraMessages = extrasByAgent[activeId] ?? [];
   // Render the merged thread: seed first (system/assistant context), then
@@ -110,7 +124,7 @@ export function Chat() {
       <Panel pad="p-4" className="flex flex-col gap-3">
         <SectionTitle eyebrow="Choisis" title="Un agent" />
         <ul className="flex flex-col gap-1.5">
-          {AGENTS.map((a) => {
+          {agents.map((a) => {
             const on = a.id === activeId;
             const tone = a.state === 'healthy' ? 'ok' : a.state === 'degraded' ? 'warn' : 'danger';
             return (

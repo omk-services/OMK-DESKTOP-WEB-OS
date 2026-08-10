@@ -57,7 +57,7 @@ import { Usage } from './dashboard/sections/Usage';
 import { Cost } from './dashboard/sections/Cost';
 import { AuditLog } from './dashboard/sections/AuditLog';
 import { AgentDetailPage } from './dashboard/sections/AgentDetail';
-import { AGENTS, findAgent } from './dashboard/seed';
+import { useDashboardAgents } from './dashboard/cmsAgents';
 import { ACCENT } from './dashboard/Primitives';
 // Modules de sections livres par les vagues 2 et 3, chacune cloisonnee dans son
 // dossier pour pouvoir travailler en parallele sans conflit sur ce fichier.
@@ -178,10 +178,13 @@ export function DashboardApp() {
   const openApp = useShellStore((s) => s.openApp);
   const addToast = useShellStore((s) => s.addToast);
 
-  // Agent detail overlay — opened by clicking an agent card.
+  // Agent detail overlay — opened by clicking an agent card. The list now
+  // comes from the CMS partition (useDashboardAgents) so creating / deleting
+  // an agent from the Agents section propagates here without re-mounting.
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
-  const openAgent = AGENTS.find((a) => a.id === openAgentId) ?? null;
+  const dashboardAgents = useDashboardAgents();
+  const openAgent = openAgentId ? dashboardAgents.find((a) => a.id === openAgentId) ?? null : null;
 
   // Clients drill — Pipeline cards open a client detail overlay.
   // We pick the labels Dashboard uses so the breadcrumb segment is consistent.
@@ -781,6 +784,3 @@ export function DashboardApp() {
     </>
   );
 }
-
-// keep referenced helpers reachable in case someone calls them externally
-void findAgent;
