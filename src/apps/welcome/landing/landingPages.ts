@@ -4,8 +4,11 @@
  *  Header Menu (sticky in-page nav) jumps between sections of the active page.
  *
  *  Canon:
- *   - 8 Domaines SOB Convergence (D1-RH, D2-Ops, D3-Growth, D4-Cognition,
- *     D5-People, D6-Finance, D7-IT, D8-Legal) + Demo (free onboarding).
+ *   - Demo (free onboarding) en tête, puis les 8 Domaines SOB Convergence
+ *     (D1-RH, D2-Ops, D3-Growth, D4-Cognition, D5-People, D6-Finance,
+ *     D7-IT, D8-Legal). L'ordre du tableau pilote le rail latéral, le
+ *     bandeau d'ancres et le fil d'Ariane : la Demo est donc la 2e entrée
+ *     du rail, juste après « Arrivée ».
  *   - Pricing USD tiers per ADR-AAAS-PRICING-001.
  *   - US-only market per ADR-L2-AAAS-US-ONLY-001.
  *   - Copy passes no-ai-slop: no em dash abuse, no "it's not X, it's Y",
@@ -22,6 +25,40 @@ import type { LandingPage } from './pageSchema';
 const RATING_CHIPS = ['G2', 'Capterra', 'App Store', 'Play Store'];
 
 export const LANDING_PAGES: LandingPage[] = [
+  {
+    id: 'onboarding-demo',
+    brand: 'OMK Coach Demo',
+    domain: 'demo.omknexus.io',
+    tagline: 'A 4-question quiz that shows you the product — before you buy.',
+    hero: {
+      eyebrow: 'Demo · Free',
+      headline: 'See the Coach OS in 4 questions.',
+      sub: 'Take the 4-question fit check. We open the citadel, you see how an agent-augmented coach actually works. IP Vault, Compliance lane, Audit log, all live.',
+      primaryCta: { label: 'Take the 4-question check', href: '#cta' },
+      rating: { stars: 5, count: '4.8', sources: RATING_CHIPS },
+    },
+    features: [
+      { id: 'citadel', eyebrow: 'Citadel', title: 'Open the citadel, in your browser', body: 'Once you submit, 4 floating windows appear over the citadel score-band. Each is a live demo of one Coach OS domain. Drag them, resize them, close them.', visual: 'community' },
+      { id: 'vault', eyebrow: 'Vault', title: 'Zero-PII IP Vault', body: 'See how your client session notes would be encrypted, indexed, and retrieved by your Scribe agent, without ever leaving your tenancy.', visual: 'courses' },
+      { id: 'audit', eyebrow: 'Audit', title: 'Audit log, exportable', body: 'Every action your agents take is one click away from a CCPA + Colorado AI Act evidence pack.', visual: 'revenue' },
+    ],
+    stats: [
+      { value: '4 min', label: 'Median time-to-demo' },
+      { value: '73%', label: 'Of prospects click into a domain' },
+      { value: '0', label: 'PII collected by the quiz' },
+    ],
+    testimonials: [
+      { quote: 'I never buy SaaS without seeing it run. The citadel got me in 4 minutes, and I had already opened the Vault before I finished my coffee.', author: 'Sarah K.', role: 'Coach', company: 'Lighthouse Practice' },
+    ],
+    pricing: [
+      { name: 'Demo', price: '$0', cadence: 'forever', pitch: 'Always free, no signup.', features: ['4-question quiz', 'Citadel preview', 'Zero-PII'], ctaLabel: 'Take the quiz', highlight: true },
+    ],
+    faq: [
+      { q: 'Is my data used to train the agents?', a: 'No. The demo runs on synthetic data only.' },
+    ],
+    closing: { headline: 'Four questions. Four floating windows. Zero PII.', sub: 'The fastest way to know if OMK is for you.', cta: { label: 'Take the 4-question check', href: '#cta' } },
+  },
+
   {
     id: 'domaine-1-rh-meta-gouvernance',
     brand: 'OMK RH',
@@ -698,39 +735,5 @@ export const LANDING_PAGES: LandingPage[] = [
       { q: 'Can my lawyer review the NDA template?', a: 'Yes. Every template is editable, exportable as Markdown or PDF. Your counsel stays in the loop.' },
     ],
     closing: { headline: 'Compliance that does not slow you down.', sub: 'Book a 20-min walkthrough. We will open the audit pack live and walk you through the AI-Act posture.', cta: { label: 'Book a 20-min walkthrough', href: '#cta' } },
-  },
-
-  {
-    id: 'onboarding-demo',
-    brand: 'OMK Coach Demo',
-    domain: 'demo.omknexus.io',
-    tagline: 'A 4-question quiz that shows you the product — before you buy.',
-    hero: {
-      eyebrow: 'Demo · Free',
-      headline: 'See the Coach OS in 4 questions.',
-      sub: 'Take the 4-question fit check. We open the citadel, you see how an agent-augmented coach actually works. IP Vault, Compliance lane, Audit log, all live.',
-      primaryCta: { label: 'Take the 4-question check', href: '#cta' },
-      rating: { stars: 5, count: '4.8', sources: RATING_CHIPS },
-    },
-    features: [
-      { id: 'citadel', eyebrow: 'Citadel', title: 'Open the citadel, in your browser', body: 'Once you submit, 4 floating windows appear over the citadel score-band. Each is a live demo of one Coach OS domain. Drag them, resize them, close them.', visual: 'community' },
-      { id: 'vault', eyebrow: 'Vault', title: 'Zero-PII IP Vault', body: 'See how your client session notes would be encrypted, indexed, and retrieved by your Scribe agent, without ever leaving your tenancy.', visual: 'courses' },
-      { id: 'audit', eyebrow: 'Audit', title: 'Audit log, exportable', body: 'Every action your agents take is one click away from a CCPA + Colorado AI Act evidence pack.', visual: 'revenue' },
-    ],
-    stats: [
-      { value: '4 min', label: 'Median time-to-demo' },
-      { value: '73%', label: 'Of prospects click into a domain' },
-      { value: '0', label: 'PII collected by the quiz' },
-    ],
-    testimonials: [
-      { quote: 'I never buy SaaS without seeing it run. The citadel got me in 4 minutes, and I had already opened the Vault before I finished my coffee.', author: 'Sarah K.', role: 'Coach', company: 'Lighthouse Practice' },
-    ],
-    pricing: [
-      { name: 'Demo', price: '$0', cadence: 'forever', pitch: 'Always free, no signup.', features: ['4-question quiz', 'Citadel preview', 'Zero-PII'], ctaLabel: 'Take the quiz', highlight: true },
-    ],
-    faq: [
-      { q: 'Is my data used to train the agents?', a: 'No. The demo runs on synthetic data only.' },
-    ],
-    closing: { headline: 'Four questions. Four floating windows. Zero PII.', sub: 'The fastest way to know if OMK is for you.', cta: { label: 'Take the 4-question check', href: '#cta' } },
   },
 ];
