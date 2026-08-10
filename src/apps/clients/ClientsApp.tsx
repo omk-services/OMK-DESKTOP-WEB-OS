@@ -161,20 +161,28 @@ export function ClientsApp() {
         <SectionHead title="Onboarding" subtitle="Agents run the 7-step welcome" />
         <FleetItemGrid cols={2}>
           {onboardingClients.map(c => {
-            const [step, total] = String(c.onboardingStep ?? '0 / 7').split(' / ').map(Number);
-            const pct = Math.round((step / total) * 100);
+            // Defensive parse: `onboardingStep` may be "5 / 7", "complete", "" or
+            // anything the coach typed. Anything that fails to parse as "<n> / <n>"
+            // falls back to 0 / 7 so the card never shows "NaN%".
+            const raw = String(c.onboardingStep ?? '0 / 7').split(' / ');
+            const step = Number(raw[0]);
+            const total = Number(raw[1]);
+            const safeStep = Number.isFinite(step) ? Math.max(0, step) : 0;
+            const safeTotal = Number.isFinite(total) && total > 0 ? total : 7;
+            const cappedStep = Math.min(safeStep, safeTotal);
+            const pct = Math.round((cappedStep / safeTotal) * 100);
             return (
               <FleetItemCard
                 key={String(c.id)}
                 title={String(c.name)}
-                subtitle={`Step ${step} / ${total}`}
+                subtitle={`Step ${cappedStep} / ${safeTotal}`}
                 statusLabel={`${pct}%`}
                 statusTone={pct >= 70 ? 'accent' : pct >= 30 ? 'warn' : 'danger'}
                 accent="#f59e0b"
                 icon={<GraduationCap className="w-5 h-5" />}
                 metricLabel="progress"
                 metricValue={`${pct}%`}
-                meta={`${step} of ${total} steps complete`}
+                meta={`${cappedStep} of ${safeTotal} steps complete`}
                 onClick={() => openClient(String(c.id))}
               />
             );
