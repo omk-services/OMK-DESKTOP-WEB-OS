@@ -11,6 +11,9 @@ import { launchTour, TOUR_IDS, type TourId } from '../../lib/tours';
 import { useShellStore } from '../../stores/shell.store';
 import { ThemeDetailPage } from './ThemeDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
+import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
+import { useWindowPage } from '../../contexts/WindowContext';
+import type { CmsCollectionDef, CmsItem } from '../../lib/cms/types';
 import { SettingsItemDetail } from './SettingsItemDetail';
 import { AssistantSettings } from './AssistantSettings';
 import { seedSettingsCms } from './seed';
@@ -475,6 +478,59 @@ function WallpaperPanel() {
 }
 
 export function SettingsApp() {
+  /* Fiche d'integration.
+   *
+   * SettingsItemDetail existait deja — formulaire controle, apercu vivant,
+   * sauvegarde vers le CMS et toast — mais restait inatteignable : le
+   * routage generique passe par COLLECTION_OWNERSHIP dans
+   * components/cms/itemDetailRegistry, ou `settings_integrations` n'est pas
+   * declaree (le commentaire y dit encore « Settings — none in seed », ce
+   * qui n'est plus vrai depuis la Phase-D2). L'app monte donc sa fiche
+   * elle-meme, comme le font Legal et Marketplace pour leur page de detail.
+   *
+   * L'etat vit ici et non dans la section Integrations : l'overlay se rend
+   * a cote d'AppFrame, et le crumb publie plus bas laisse
+   * AppFrame.navigateToSection fermer la fiche au changement de section. */
+  const [integrationDetail, setIntegrationDetail] = useState<{
+    def: CmsCollectionDef;
+    item: CmsItem;
+    index: number;
+    total: number;
+    prev?: CmsItem;
+    next?: CmsItem;
+  } | null>(null);
+
+  const openIntegrationDetail = (itemId: string) => {
+    const state = useCmsStore.getState();
+    const def = state.collections['settings_integrations'];
+    const list = state.items['settings_integrations'] ?? [];
+    const index = list.findIndex((i) => String(i.id) === itemId);
+    if (!def || index < 0) return;
+    setIntegrationDetail({
+      def,
+      item: list[index],
+      index,
+      total: list.length,
+      prev: list[index - 1],
+      next: list[index + 1],
+    });
+  };
+
+  // Le crumb partage : c'est ce qu'AppFrame.navigateToSection appelle pour
+  // fermer la fiche quand l'utilisateur change de section, sinon on
+  // naviguerait derriere un calque.
+  const { setDetail: setWindowDetail } = useWindowPage();
+  useEffect(() => {
+    if (integrationDetail) {
+      setWindowDetail({
+        label: String(integrationDetail.item[integrationDetail.def.titleField] ?? 'Integration'),
+        onBack: () => setIntegrationDetail(null),
+      });
+    } else {
+      setWindowDetail(null);
+    }
+  }, [integrationDetail, setWindowDetail]);
+
   // Flags are now persisted across reloads (Phase-D1).
   // Hydration runs once on mount via the lazy initializer; subsequent
   // updates write back to localStorage in the same render that flips
@@ -638,7 +694,14 @@ export function SettingsApp() {
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="w-9 h-9 rounded-lg bg-[var(--theme-surface-hover)] flex items-center justify-center shrink-0"><Plug className="w-4.5 h-4.5 text-[var(--theme-muted)]" /></span>
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-[var(--theme-text)]">{name}</div>
+                      <button
+                        type="button"
+                        onClick={() => openIntegrationDetail(String(it.id))}
+                        data-integration-open={String(it.id)}
+                        className="text-sm font-semibold text-[var(--theme-text)] text-left hover:text-[var(--theme-accent)] transition-colors"
+                      >
+                        {name}
+                      </button>
                       {it.description ? (
                         <div className="text-[11px] text-[var(--theme-muted)] mt-0.5 line-clamp-1">
                           {String(it.description)}
@@ -1000,6 +1063,7 @@ export function SettingsApp() {
   }, [themesSection]);
 
   return (
+    <>
     <AppFrame
       title="Settings"
       subtitle="System"
@@ -1008,5 +1072,26 @@ export function SettingsApp() {
       sections={sections}
       disableSignatureFx
     />
+    {integrationDetail ? (
+      <AppDetailOverlay
+        appId="settings"
+        accent={ACCENT}
+        onBack={() => setIntegrationDetail(null)}
+        motion={{ kind: 'fade-up', durationMs: 200 }}
+      >
+        <SettingsItemDetail
+          def={integrationDetail.def}
+          item={integrationDetail.item}
+          index={integrationDetail.index}
+          total={integrationDetail.total}
+          accent={ACCENT}
+          onBack={() => setIntegrationDetail(null)}
+          prev={integrationDetail.prev}
+          next={integrationDetail.next}
+          onNavigate={openIntegrationDetail}
+        />
+      </AppDetailOverlay>
+    ) : null}
+    </>
   );
 }
