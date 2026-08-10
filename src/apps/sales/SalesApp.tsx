@@ -1014,18 +1014,21 @@ function ContextPanel({ onSelect, navigateToSection }: { onSelect: (item: Detail
 
       <div className="mt-8 flex items-center gap-1.5">
         {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
-          <span
+          <button
             key={t}
-            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            type="button"
+            onClick={() => navigateToSection(t.toLowerCase())}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80 active:scale-[0.98]"
             style={{
               background: t === 'Context' ? 'var(--theme-text)' : 'var(--theme-surface)',
               color: t === 'Context' ? 'var(--theme-bg)' : 'var(--theme-text)',
               border: '1px solid var(--panel-border)',
               fontFamily: FONT_DISPLAY,
             }}
+            aria-label={`Jump to ${t} section`}
           >
             {t}
-          </span>
+          </button>
         ))}
       </div>
       <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
@@ -1131,18 +1134,21 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
 
       <div className="mt-8 flex items-center gap-1.5">
         {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
-          <span
+          <button
             key={t}
-            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            type="button"
+            onClick={() => navigateToSection(t.toLowerCase())}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80 active:scale-[0.98]"
             style={{
               background: t === 'Capabilities' ? 'var(--theme-text)' : 'var(--theme-surface)',
               color: t === 'Capabilities' ? 'var(--theme-bg)' : 'var(--theme-text)',
               border: '1px solid var(--panel-border)',
               fontFamily: FONT_DISPLAY,
             }}
+            aria-label={`Jump to ${t} section`}
           >
             {t}
-          </span>
+          </button>
         ))}
       </div>
       <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
@@ -1327,18 +1333,21 @@ function StackPanel({ onSelect }: { onSelect: (item: DetailItem) => void }) {
 
       <div className="mt-8 flex items-center gap-1.5">
         {['Today', 'Pipeline', 'Context', 'Capabilities', 'Stack'].map((t) => (
-          <span
+          <button
             key={t}
-            className="rounded-md px-3 py-1.5 text-[12px] font-semibold"
+            type="button"
+            onClick={() => navigateToSection(t.toLowerCase())}
+            className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80 active:scale-[0.98]"
             style={{
               background: t === 'Stack' ? 'var(--theme-text)' : 'var(--theme-surface)',
               color: t === 'Stack' ? 'var(--theme-bg)' : 'var(--theme-text)',
               border: '1px solid var(--panel-border)',
               fontFamily: FONT_DISPLAY,
             }}
+            aria-label={`Jump to ${t} section`}
           >
             {t}
-          </span>
+          </button>
         ))}
       </div>
       <div className="mt-2 h-px" style={{ background: 'var(--panel-border)' }} />
