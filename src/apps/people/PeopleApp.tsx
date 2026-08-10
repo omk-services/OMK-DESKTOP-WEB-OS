@@ -300,12 +300,13 @@ function Overview() {
 
 /** Fleet card — per-agent status card matching the template's "agent-cards"
  *  section. Clickable to open the agent's detail page. */
-function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void }) {
+function FleetCard({ agent, onClick, 'data-fleet-card': fleetCardAttr }: { agent: FleetAgent; onClick: () => void; 'data-fleet-card'?: string }) {
   const state = STATE_META[agent.state];
   const isProcessing = agent.state === 'EXECUTING' || agent.state === 'RETRY';
   return (
     <button
       onClick={onClick}
+      data-fleet-card={fleetCardAttr}
       className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4 flex flex-col gap-3 text-left transition-all hover:scale-[1.015] hover:shadow-md active:scale-[0.99] cursor-pointer"
     >
       <div className="flex items-center gap-2.5">
@@ -400,181 +401,15 @@ function FleetCard({ agent, onClick }: { agent: FleetAgent; onClick: () => void 
   );
 }
 
-/** Agent detail page — full Fleet design for one agent. */
-function FleetDetail({ agent, onBack }: { agent: FleetAgent; onBack: () => void }) {
-  const state = STATE_META[agent.state];
-  return (
-    <div className="h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar p-7">
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="self-start flex items-center gap-1.5 text-[11px] font-semibold text-[var(--theme-text-muted)] hover:text-[var(--theme-text)] transition-colors"
-      >
-        ← Back to Fleet
-      </button>
+/** Ancien rendu inline `FleetDetail` (148 lignes) — archivé 2026-08-10.
+ *  Le clic sur une carte de la Fleet peuple désormais `detail` du PeopleApp,
+ *  ce qui rend la fiche riche `<PeopleDetailPage>` dans l'overlay. Le rendu
+ *  inline faisait doublon avec la fiche riche et ne s'ouvrait plus depuis
+ *  la régression qui a vidé la branche `{detail ? ...}`. Conservé ici à
+ *  titre de comparaison (suppression matérielle interdite par la doctrine). */
+function _UnusedLegacyFleetDetail_REMOVED() { return null; }
 
-      {/* Hero — agent identity + state */}
-      <div
-        className="relative rounded-2xl p-6 overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${agent.accent}25, ${agent.accent}08)`,
-          border: `1px solid ${agent.accent}40`,
-        }}
-      >
-        <div className="flex items-start gap-5">
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center text-[color:#fff] text-2xl font-extrabold shrink-0"
-            style={{ background: agent.accent, boxShadow: `0 8px 24px ${agent.accent}40` }}
-          >
-            {agent.initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-[28px] font-bold text-[var(--theme-text)]" style={{ fontFamily: 'var(--theme-font-display)' }}>{agent.name}</h2>
-              <span className="font-mono text-[11px] font-bold text-[var(--theme-text-muted)] px-2 py-0.5 rounded bg-[var(--panel-border-subtle)]">{agent.code}</span>
-              <span
-                className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${state.pulse ? 'animate-pulse' : ''}`}
-                style={{ color: state.color, background: state.bg }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: state.color }} />
-                {state.label}
-              </span>
-            </div>
-            <div className="text-[13px] text-[var(--theme-text-muted)] mt-1">
-              {agent.role} · <span className="font-mono text-[var(--theme-text-muted)]">{agent.channel}</span>
-            </div>
-            <p className="text-[13px] text-[var(--theme-text)] mt-3 leading-relaxed max-w-2xl">{agent.bio}</p>
-          </div>
-        </div>
-
-        {/* Capabilities */}
-        <div className="flex items-center gap-1.5 mt-4 flex-wrap">
-          {agent.capabilities.map(c => (
-            <span
-              key={c}
-              className="text-[10.5px] font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: `${agent.accent}15`, color: agent.accent, boxShadow: `inset 0 0 0 1px ${agent.accent}30` }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Metrics grid — Tasks / Tokens / Latency / Success */}
-      <div className="grid grid-cols-4 gap-3">
-        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tasks today</div>
-          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.tasksToday}</div>
-        </div>
-        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Tokens used</div>
-          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.tokens}</div>
-        </div>
-        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Avg latency</div>
-          <div className="text-[32px] font-bold text-[var(--theme-text)] mt-1 tabular-nums">{agent.latency}</div>
-        </div>
-        <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">Success rate</div>
-          <div className="text-[32px] font-bold tabular-nums mt-1" style={{ color: agent.success >= 99 ? '#15803d' : agent.success >= 95 ? '#0891b2' : '#b45309' }}>{agent.success}%</div>
-        </div>
-      </div>
-
-      {/* Load bar (full width) */}
-      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
-        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)] mb-2">
-          <span>Current load</span>
-          <span className="text-[var(--theme-text)] font-bold text-[14px]">{agent.load}% · {agent.task}</span>
-        </div>
-        <div className="h-2 rounded-full bg-[var(--panel-border-subtle)] overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{
-              width: `${agent.load}%`,
-              background: agent.load > 80 ? '#b91c1c' : agent.load > 50 ? '#0891b2' : '#16a34a',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Recent runs */}
-      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm">
-        <div className="px-5 py-3 border-b border-[var(--panel-border-subtle)] flex items-center gap-2">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)]">RECENT RUNS · last 30 min</span>
-          <span className="ml-auto text-[10px] font-mono text-[var(--theme-text-dim)]">share · <span className="text-[var(--theme-text)] font-bold">{agent.share}%</span></span>
-        </div>
-        <ul className="divide-y divide-[var(--panel-border-subtle)]">
-          {agent.recentRuns.map((r, i) => (
-            <li key={i} className="flex items-center gap-3 px-5 py-2.5 text-[12px]">
-              <span className="font-mono text-[10.5px] text-[var(--theme-text-dim)] w-12 shrink-0">{r.ts}</span>
-              <span
-                className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: r.status === 'ok' ? '#16a34a' : r.status === 'warn' ? '#f59e0b' : '#dc2626' }}
-              />
-              <span className="text-[var(--theme-text)] flex-1 truncate">{r.task}</span>
-              <span
-                className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-                style={{
-                  color: r.status === 'ok' ? '#15803d' : r.status === 'warn' ? '#b45309' : '#b91c1c',
-                  background: r.status === 'ok' ? '#dcfce7' : r.status === 'warn' ? '#fef3c7' : '#fee2e2',
-                }}
-              >
-                {r.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Peers (Manager→Worker) */}
-      <div className="bg-[var(--panel-solid)] rounded-2xl border border-[var(--panel-border)] shadow-sm p-5">
-        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-dim)] mb-2">PEERS · MANAGER→WORKER HANDOFFS</div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {agent.peers.map(p => (
-            <span
-              key={p}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-surface-hover)] text-[var(--theme-text)] border border-[var(--panel-border)]"
-            >
-              {p}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Model + share footer */}
-      <div className="text-[10px] font-mono text-[var(--theme-text-dim)] text-center pt-2">
-        default model · <span className="text-[var(--theme-text)] font-bold">{agent.defaultModel}</span> · 4 log entries shown
-      </div>
-    </div>
-  );
-}
-
-function Fleet() {
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
-  const { setDetail } = useWindowPage();
-  const selected = selectedCode ? FLEET_AGENTS.find(a => a.code === selectedCode) : null;
-
-  useEffect(() => {
-    if (selected) {
-      setDetail({ label: selected.name, onBack: () => setSelectedCode(null) });
-    } else {
-      setDetail(null);
-    }
-  }, [selected, setDetail]);
-
-  // T3 — squad drill-down tour. Fires the first time the user opens an
-  // agent's detail page. The launchTour guard keeps it idempotent.
-  useEffect(() => {
-    if (selectedCode !== null) {
-      void launchTour(TOUR_IDS.SQUAD_DRILLDOWN);
-    }
-  }, [selectedCode]);
-
-  if (selected) {
-    return <FleetDetail agent={selected} onBack={() => setSelectedCode(null)} />;
-  }
-
+function Fleet({ onAgentClick }: { onAgentClick: (agent: FleetAgent) => void }) {
   const grouped: Array<{ key: 'green-lanterns' | 'xmen'; agents: FleetAgent[] }> = [
     { key: 'green-lanterns', agents: FLEET_AGENTS.filter(a => squadForAgent(a) === 'green-lanterns') },
     { key: 'xmen',          agents: FLEET_AGENTS.filter(a => squadForAgent(a) === 'xmen') },
@@ -616,17 +451,14 @@ function Fleet() {
                   <FleetCard
                     key={a.code}
                     agent={a}
-                    /* Le clic renseigne `selectedCode`, rien d'autre.
-                       Il posait auparavant une fiche riche via `setDetail(...)`
-                       SANS toucher a `selectedCode` : l'effet ci-dessus voyait
-                       donc `selected` toujours nul et rappelait aussitot
-                       `setDetail(null)`, effacant la fiche a peine posee. La
-                       page de detail ne s'ouvrait jamais, et l'etat de detail
-                       incoherent bloquait la navigation entre sections.
-                       `selectedCode` est la seule source de verite ici : il
-                       fait rendre <FleetDetail />, et l'effet se charge du
-                       fil d'Ariane. */
-                    onClick={() => setSelectedCode(a.code)}
+                    data-fleet-card={a.code}
+                    /* Le clic peuple le state `detail` du PeopleApp, ce qui :
+                       1) rend `<PeopleDetailPage>` dans l'overlay (la fiche riche),
+                       2) synchronise le fil d'Ariane via l'effet de PeopleApp.
+                       Avant cette correction, ce clic n'ouvrait qu'une fiche
+                       simplifiée inline (`FleetDetail`) et la fiche riche
+                       799 lignes (`PeopleDetailPage`) restait morte. */
+                    onClick={() => onAgentClick(a)}
                   />
                 ))}
               </div>
@@ -930,6 +762,37 @@ export function PeopleApp() {
     }
   }, [detail, setWindowDetail]);
 
+  /** Open the rich fiche for a Fleet agent.
+   *  Constructs a PeopleDetailItem so `<PeopleDetailPage>` can render its
+   *  full soft-UI surface (vitals, ladder, signal log, capabilities,
+   *  handoffs). T3 tour fires once on first open. */
+  const openAgentDetail = (agent: FleetAgent) => {
+    const squadLabel = squadForAgent(agent) === 'green-lanterns' ? 'Green Lanterns' : 'X-Men';
+    setDetail({
+      id: agent.code,
+      title: agent.name,
+      subtitle: `${agent.role} · ${agent.channel}`,
+      status: agent.state,
+      initials: agent.initials,
+      fields: [],
+      squad: [{ name: squadLabel, color: agent.accent }],
+      meta: [
+        { label: 'Channel',         value: agent.channel },
+        { label: 'Default model',   value: agent.defaultModel },
+        { label: 'Tasks today',     value: String(agent.tasksToday) },
+        { label: 'Share of fleet',  value: `${agent.share}%` },
+      ],
+    });
+  };
+
+  // T3 — squad drill-down tour. Fires the first time the user opens a
+  // Fleet agent's detail page. The launchTour guard keeps it idempotent.
+  useEffect(() => {
+    if (detail !== null) {
+      void launchTour(TOUR_IDS.SQUAD_DRILLDOWN);
+    }
+  }, [detail]);
+
   const Team = () => {
     return (
       <div className="p-7">
@@ -992,7 +855,7 @@ export function PeopleApp() {
     { id: 'approvals', label: 'Approvals',  icon: ListChecks,       render: () => <ApprovalsView /> },
     { id: 'team',      label: 'Team',       icon: Users,            render: Team },
     { id: 'agents',    label: 'Agents',     icon: Bot,              render: Agents },
-    { id: 'fleet',     label: 'Squads',     icon: Cpu,              render: () => <Fleet /> },
+    { id: 'fleet',     label: 'Squads',     icon: Cpu,              render: () => <Fleet onAgentClick={openAgentDetail} /> },
     { id: 'content',   label: 'Content',    icon: FileText,         render: Content },
     { id: 'schedule',  label: 'Cadence',    icon: Calendar,         render: Schedule },
     { id: 'culture',   label: 'Culture',    icon: Heart,            render: Culture },
