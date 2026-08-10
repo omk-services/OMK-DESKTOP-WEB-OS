@@ -152,8 +152,6 @@ const ACCENT = '#ea580c';
 export function ProductApp() {
   const items = useCmsStore(s => s.items['product_items']) ?? [];
   const releases = useCmsStore(s => s.items['product_releases']) ?? [];
-  const drill = useCollectionDrill('product_items', ['Roadmap', 'Backlog', 'Specs']);
-  const releasesDrill = useCollectionDrill('product_releases', 'Releases');
   const rankingsDrill = useCollectionDrill('product_rankings', 'Classement');
   const launchesDrill = useCollectionDrill('product_launches', 'Lancement');
   const mvpsDrill = useCollectionDrill('product_mvps', 'MVP');
@@ -196,13 +194,30 @@ export function ProductApp() {
     addToast({ source: 'Product', type: 'success', message: `Déplacé vers "${next}"` });
   };
 
+  /* Ouverture d'une fiche.
+   *
+   * Deux pieges deja payes :
+   *
+   * 1. Le titre des releases. `product_releases` titre sur `name`, pas sur
+   *    `title` (cf. son `titleField` dans lib/cms/seed.ts). Lire
+   *    `item.title` renvoyait `undefined` et la fiche s'ouvrait sur
+   *    « Untitled » sur les trois releases. Idem pour `changelog` et
+   *    `status`, absents de la collection : les vraies cles sont `notes`
+   *    et `when`.
+   *
+   * 2. Le crumb partage. L'app publie deja son crumb via l'effet sur
+   *    `detail` ; c'est lui que AppFrame.navigateToSection appelle pour
+   *    fermer la fiche quand on change de section. Appeler en plus
+   *    useCollectionDrill sur la meme collection republie ce crumb avec un
+   *    `onBack` qui ne ferme que l'etat interne du drill. Les deux drills
+   *    concernes etaient morts (absents du drillRegistry) : retires. */
   const openItem = (id: string): void => {
     const item = items.find(c => c.id === id);
-    if (!item) { drill.open(id); return; }
-    const stageState: 'doing' | 'done' | 'todo' = item.stage === 'now' ? 'doing' : item.stage === 'backlog' ? 'todo' : 'todo';
+    if (!item) return;
+    const stageState: 'doing' | 'done' | 'todo' = item.stage === 'now' ? 'doing' : 'todo';
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.title ?? 'Item sans titre'),
       subtitle: String(item.meta ?? ''),
       status: String(item.stage ?? 'now'),
       roadmap: [{ stage: String(item.stage ?? 'now'), state: stageState }],
@@ -210,23 +225,21 @@ export function ProductApp() {
       channels: [],
       fields: [],
     });
-    drill.open(id);
   };
 
   const openRelease = (id: string): void => {
     const item = releases.find(c => c.id === id);
-    if (!item) { releasesDrill.open(id); return; }
+    if (!item) return;
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.name ?? item.title ?? 'Release sans nom'),
       subtitle: String(item.version ?? '—'),
-      status: String(item.status ?? 'shipped'),
-      roadmap: [{ stage: 'shipped', state: 'done' }],
-      spec: String(item.changelog ?? ''),
+      status: String(item.when ?? 'shipped'),
+      roadmap: [{ stage: String(item.version ?? 'shipped'), state: 'done' }],
+      spec: String(item.notes ?? item.changelog ?? ''),
       channels: [],
       fields: [],
     });
-    releasesDrill.open(id);
   };
 
   const Roadmap = () => {

@@ -142,9 +142,6 @@ const ENRICHMENT_TONE: Record<AlertItem['enrichment'], 'ok' | 'warn'> = {
 };
 
 export function OperationsApp() {
-  const runbooksDrill = useCollectionDrill('runbooks', 'Runbooks');
-  const knowledgeDrill = useCollectionDrill('articles', 'Knowledge Base');
-  const incidentsDrill = useCollectionDrill('incidents', 'Incidents');
   const processesDrill = useCollectionDrill('processes', 'Processus');
   const benchmarksDrill = useCollectionDrill('benchmarks', 'Benchmarks');
   const changesDrill = useCollectionDrill('changes', 'Changements');
@@ -239,12 +236,24 @@ export function OperationsApp() {
     }
   }, [detail, setWindowDetail]);
 
+  /* Ouverture d'une fiche.
+   *
+   * Le crumb de detail est publie par le seul effet sur `detail` ci-dessus,
+   * via useWindowPage().setDetail. C'est ce que AppFrame.navigateToSection
+   * lit pour fermer la fiche quand on change de section.
+   *
+   * Piege deja paye ailleurs (Marketplace) : appeler en plus
+   * useCollectionDrill sur la MEME collection republie ce crumb partage
+   * avec un `onBack` qui ne ferme que l'etat interne du drill, pas
+   * l'overlay. Les trois drills concernes etaient morts par ailleurs
+   * (absents du drillRegistry, donc leur overlay n'etait jamais rendu) :
+   * ils sont retires. */
   const openRunbook = (id: string): void => {
     const item = runbooks.find(c => c.id === id);
-    if (!item) { runbooksDrill.open(id); return; }
+    if (!item) return;
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.title ?? 'Runbook sans titre'),
       subtitle: String(item.category ?? ''),
       status: String(item.category ?? 'active'),
       body: String(item.steps ?? ''),
@@ -256,15 +265,14 @@ export function OperationsApp() {
       incidents: [],
       fields: [],
     });
-    runbooksDrill.open(id);
   };
 
   const openArticle = (id: string): void => {
     const item = articles.find(c => c.id === id);
-    if (!item) { knowledgeDrill.open(id); return; }
+    if (!item) return;
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.title ?? 'Article sans titre'),
       subtitle: String(item.category ?? item.topic ?? ''),
       status: String(item.category ?? item.topic ?? 'active'),
       body: String(item.body ?? ''),
@@ -276,17 +284,16 @@ export function OperationsApp() {
       incidents: [],
       fields: [],
     });
-    knowledgeDrill.open(id);
   };
 
   const openIncident = (id: string): void => {
     const item = incidents.find(c => c.id === id);
-    if (!item) { incidentsDrill.open(id); return; }
+    if (!item) return;
     const sev = String(item.severity ?? 'ok');
     const sevLevel: 'low' | 'medium' | 'high' = sev === 'danger' ? 'high' : sev === 'warn' ? 'medium' : 'low';
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.title ?? 'Incident sans titre'),
       subtitle: String(item.when ?? ''),
       status: sev,
       body: String(item.resolution ?? ''),
@@ -297,7 +304,6 @@ export function OperationsApp() {
       incidents: [{ severity: sevLevel, title: String(item.title ?? 'Incident'), at: String(item.when ?? '') }],
       fields: [],
     });
-    incidentsDrill.open(id);
   };
 
   const Runbooks = () => {

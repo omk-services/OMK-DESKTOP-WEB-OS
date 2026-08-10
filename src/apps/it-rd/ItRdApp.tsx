@@ -53,9 +53,6 @@ const EVAL_TYPE_TONE: Record<string, 'ok' | 'warn' | 'accent' | 'neutral'> = {
 };
 
 export function ItRdApp() {
-  const servicesDrill = useCollectionDrill('services', 'Kernel');
-  const experimentsDrill = useCollectionDrill('it_experiments', 'Experiments');
-  const deploysDrill = useCollectionDrill('deploys', 'Deploys');
   const journalDrill = useCollectionDrill('it_journal', 'Journal');
   const loopsDrill = useCollectionDrill('it_loops', 'Boucles');
   const driftDrill = useCollectionDrill('it_drift', 'Drift');
@@ -134,9 +131,30 @@ export function ItRdApp() {
     setComposerOpen(false);
   };
 
+  /* Ouverture d'une fiche.
+   *
+   * Deux pieges deja payes, tous deux corriges ici :
+   *
+   * 1. Le titre. Ces trois collections ne portent PAS de champ `title` :
+   *    `services` titre sur `name`, `deploys` sur `commit` (cf. le
+   *    `titleField` de leur definition dans lib/cms/seed.ts). Lire
+   *    `item.title` renvoyait donc `undefined` et la fiche s'ouvrait sur
+   *    « Untitled » — sur les 4 services et les 3 deploys, sans exception.
+   *    Meme cause pour les champs annexes : `subtitle`, `sha`, `at`
+   *    n'existent sur aucun des deux, d'ou une fiche vide sous un titre
+   *    faux. On lit desormais les vraies cles.
+   *
+   * 2. Le crumb partage. L'app publie deja son crumb de detail via l'effet
+   *    sur `detail` (useWindowPage().setDetail), et c'est ce que
+   *    AppFrame.navigateToSection lit pour fermer la fiche quand on change
+   *    de section. Appeler en plus useCollectionDrill sur la meme
+   *    collection republie ce meme crumb avec un `onBack` qui ne ferme que
+   *    l'etat interne du drill. Ces trois drills etaient morts par ailleurs
+   *    (absents du drillRegistry, donc leur overlay n'etait jamais rendu) :
+   *    ils sont retires. */
   const openService = (id: string): void => {
     const item = services.find(c => c.id === id);
-    if (!item) { servicesDrill.open(id); return; }
+    if (!item) return;
     const logsRaw = String(item.logs ?? '');
     const logs = logsRaw
       ? logsRaw.split('\n').filter(Boolean).slice(0, 20).map((line, i) => ({
@@ -144,50 +162,57 @@ export function ItRdApp() {
           level: (line.toLowerCase().includes('error') ? 'error' : line.toLowerCase().includes('warn') ? 'warn' : 'info') as 'info' | 'warn' | 'error',
           line,
         }))
-      : [];
+      : [{ ts: '00:00', level: 'info' as const, line: String(item.detail ?? item.note ?? 'Aucun log enregistre pour ce service.') }];
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
-      subtitle: String(item.subtitle ?? ''),
+      title: String(item.name ?? 'Service sans nom'),
+      subtitle: String(item.note ?? ''),
       status: String(item.status ?? 'ok'),
       logs,
       deploys: [],
       fields: [],
     });
-    servicesDrill.open(id);
   };
 
   const openExperiment = (id: string): void => {
     const item = experiments.find(c => c.id === id);
-    if (!item) { experimentsDrill.open(id); return; }
+    if (!item) return;
     const logs = item.stage
       ? [{ ts: '00:00', level: 'info' as const, line: `Stage: ${String(item.stage)}` }]
       : [];
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
+      title: String(item.title ?? 'Experiment sans titre'),
       subtitle: String(item.meta ?? ''),
       status: String(item.stage ?? 'idea'),
-      logs,
+      logs: item.notes
+        ? [...logs, { ts: '00:01', level: 'info' as const, line: String(item.notes) }]
+        : logs,
       deploys: [],
       fields: [],
     });
-    experimentsDrill.open(id);
   };
 
   const openDeploy = (id: string): void => {
     const item = deploys.find(c => c.id === id);
-    if (!item) { deploysDrill.open(id); return; }
+    if (!item) return;
+    const status = String(item.status ?? 'live');
+    const normalised: 'live' | 'rolled-back' | 'building' =
+      status === 'rolled-back' ? 'rolled-back'
+      : status === 'rolling' || status === 'building' ? 'building'
+      : 'live';
+    const commit = String(item.commit ?? id);
+    const target = String(item.target ?? '');
+    const when = String(item.when ?? '');
     setDetail({
       id: String(item.id),
-      title: String(item.title ?? 'Untitled'),
-      subtitle: String(item.subtitle ?? ''),
-      status: String(item.status ?? 'live'),
-      logs: [{ ts: '00:00', level: 'info', line: String(item.subtitle ?? 'Deploy') }],
-      deploys: [{ sha: String(item.sha ?? id), at: String(item.at ?? ''), status: (String(item.status ?? 'live') === 'rolled-back' ? 'rolled-back' : String(item.status ?? 'live') === 'building' ? 'building' : 'live') as 'live' | 'rolled-back' | 'building' }],
+      title: commit,
+      subtitle: target,
+      status,
+      logs: [{ ts: '00:00', level: 'info', line: `${commit} → ${target || 'cible inconnue'}${when ? ` (${when})` : ''}` }],
+      deploys: [{ sha: commit, at: when, status: normalised }],
       fields: [],
     });
-    deploysDrill.open(id);
   };
 
   const Kernel = () => {

@@ -176,7 +176,6 @@ export function TasksApp() {
   const [detail, setDetail] = useState<TasksDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
-  const drill = useCollectionDrill('tasks', ['Today', 'Upcoming', 'Done']);
   const dodsDrill = useCollectionDrill('dods', 'Definition of Done');
   const comparatorsDrill = useCollectionDrill('comparators', 'Comparateur');
   const exposedActionsDrill = useCollectionDrill('exposed_actions', 'Actions exposees');
@@ -246,19 +245,25 @@ export function TasksApp() {
     updateItem('tasks', id, { done: !current?.done });
   };
 
+  /* Ouverture d'une fiche.
+   *
+   * Le crumb de detail est publie par le seul effet sur `detail` ci-dessus.
+   * Piege deja paye ailleurs (Marketplace) : appeler en plus
+   * useCollectionDrill sur la meme collection republie ce crumb partage
+   * avec un `onBack` qui ne ferme que l'etat interne du drill. Le drill
+   * `tasks` etait mort par ailleurs (absent du drillRegistry) : retire. */
   const openTask = (id: string): void => {
     const item = tasks.find(c => c.id === id);
-    if (!item) { drill.open(id); return; }
+    if (!item) return;
     setDetail({
       id: String(item.id),
-      title: String(item.label ?? 'Untitled'),
+      title: String(item.label ?? 'Tache sans titre'),
       subtitle: String(item.when ?? ''),
       status: item.done ? 'done' : String(item.group ?? 'today'),
       dueAt: String(item.when ?? ''),
       body: String(item.notes ?? item.body ?? ''),
       fields: [],
     });
-    drill.open(id);
   };
 
   const list = (filter: (t: typeof tasks[number]) => boolean, title: string, empty: string, withComposer = false) => {
