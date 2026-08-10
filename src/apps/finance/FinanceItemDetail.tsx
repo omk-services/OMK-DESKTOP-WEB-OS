@@ -299,7 +299,7 @@ function PlancherDetail(props: ItemDetailProps) {
           icon={CircleDollarSign}
           value={`$${price.toLocaleString('en-US')}`}
           color={accent}
-          sub={gap >= 0 ? `Marge ${gap.toLocaleString('en-US')}€ au-dessus du plancher.` : `${Math.abs(gap).toLocaleString('en-US')}€ SOUS le plancher.`}
+          sub={gap >= 0 ? `Marge $${gap.toLocaleString('en-US')} au-dessus du plancher.` : `$${Math.abs(gap).toLocaleString('en-US')} SOUS le plancher.`}
         />
       </div>
 
@@ -504,7 +504,7 @@ function CourbeDetail(props: ItemDetailProps) {
           icon={TrendingUp}
           value={`$${maxRevenue.toLocaleString('en-US')}`}
           color="#15803d"
-          sub={best ? `Au point ${best.price}€ × ${best.volume} ventes.` : 'Pas de scénarios.'}
+          sub={best ? `Au point $${best.price.toLocaleString('en-US')} × ${best.volume} ventes.` : 'Pas de scénarios.'}
         />
       </div>
 

@@ -309,7 +309,7 @@ export function FinanceApp() {
               icon: <Scale className="w-5 h-5" />,
               metricLabel: 'price / floor',
               metricValue: `$${price} / $${floor}`,
-              meta: gap >= 0 ? `marge +$${gap.toLocaleString('en-US')}` : `${gap.toLocaleString('en-US')}€ sous`,
+              meta: gap >= 0 ? `marge +$${gap.toLocaleString('en-US')}` : `$${Math.abs(gap).toLocaleString('en-US')} sous le plancher`,
             };
           }}
         />
