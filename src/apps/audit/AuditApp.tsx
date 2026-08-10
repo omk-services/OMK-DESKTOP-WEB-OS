@@ -114,15 +114,21 @@ export function AuditApp() {
   /* Brief-F — couche d'écriture. Le manuel est D4 append-only sur le fond,
    * mais une fiche par critère gagne un état "relue" (signé humain). C'est
    * la seule mutation : on pose un timestamp + un actor sur l'item, sans
-   * toucher au contenu canonique. Toast global au résultat. */
+   * toucher au contenu canonique. Toast global au résultat.
+   *
+   * `updateItem` (active tenant, vue plate) renvoie `void` dans cette
+   * codebase — le verdict est « la fonction n'a pas jete ». Si elle
+   * jetait un jour (collection inconnue), on garderait le silence et
+   * l'utilisateur reverrait son item : c'est l'echec attendu, pas un
+   * toast d'erreur. Le check `result !== undefined` du passe
+   * precedent etait faux : `void` est toujours `undefined`, donc le
+   * toast partait toujours — qu'il y ait eu ecriture ou pas. */
   const updateItem = useCmsStore(s => s.updateItem);
   const addToast = useShellStore(s => s.addToast);
   const markReviewed = (collectionId: string, id: string, label: string): void => {
     const reviewedAt = new Date().toISOString().slice(0, 16).replace('T', ' ');
-    const result = updateItem(collectionId, id, { reviewedAt, reviewedBy: 'human:ops' });
-    if (result !== undefined) {
-      addToast({ source: 'Audit', type: 'success', message: `Critère marqué relu : ${label}` });
-    }
+    updateItem(collectionId, id, { reviewedAt, reviewedBy: 'human:ops' });
+    addToast({ source: 'Audit', type: 'success', message: `Critère marqué relu : ${label}` });
   };
 
   const sections: AppSection[] = useMemo(() => [
