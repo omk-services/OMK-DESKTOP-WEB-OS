@@ -99,7 +99,12 @@ const sendResult = await page.evaluate(async ({ id, prompt }) => {
           const evLine = block.split('\n').find((l) => l.startsWith('event: '));
           const dataLine = block.split('\n').find((l) => l.startsWith('data: '));
           if (!evLine || !dataLine) continue;
-          const data = JSON.parse(dataLine.slice('data: '.length));
+          let data;
+          try {
+            data = JSON.parse(dataLine.slice('data: '.length));
+          } catch {
+            continue;
+          }
           if (evLine.slice(7).trim() === 'delta' && data?.text) acc += data.text;
         }
       }

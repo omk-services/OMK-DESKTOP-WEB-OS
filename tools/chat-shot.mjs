@@ -56,7 +56,7 @@ if (mode === 'error') {
 
 // Set the character and open the bubble.
 await page.evaluate(({ character }) => {
-  const w = /** @type {any} */ (window).__coachos;
+  const w = window.__coachos;
   if (!w?.assistant) return;
   w.assistant.getState().setCharacter(character);
   w.assistant.getState().setPosition(900, 480);

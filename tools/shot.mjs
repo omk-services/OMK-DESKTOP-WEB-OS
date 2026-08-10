@@ -83,7 +83,12 @@ if (!url && appId) {
   if (theme) {
     await page.evaluate((t) => {
       const brut = localStorage.getItem('coach-os-themes-v1');
-      const d = brut ? JSON.parse(brut) : { state: {}, version: 0 };
+      let d;
+      try {
+        d = brut ? JSON.parse(brut) : { state: {}, version: 0 };
+      } catch {
+        d = { state: {}, version: 0 };
+      }
       d.state = { ...d.state, globalTheme: t };
       localStorage.setItem('coach-os-themes-v1', JSON.stringify(d));
     }, theme);

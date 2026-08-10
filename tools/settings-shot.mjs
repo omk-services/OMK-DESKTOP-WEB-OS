@@ -43,14 +43,14 @@ await page.goto(base, { waitUntil: 'networkidle' });
 
 // Pick the character so the active preview is something interesting.
 await page.evaluate(({ character }) => {
-  const w = /** @type {any} */ (window).__coachos;
+  const w = window.__coachos;
   if (!w?.assistant) return;
   w.assistant.getState().setCharacter(character);
 }, { character });
 
 // Open Settings via the shell handle, then click the Assistant section.
 const ok = await page.evaluate(() => {
-  const w = /** @type {any} */ (window).__coachos;
+  const w = window.__coachos;
   if (!w?.shell) return 'absent';
   w.shell.getState().openApp('settings', 'Settings');
   return 'ok';

@@ -56,7 +56,12 @@ async function setupVoix(page, { voiceEnabled = true, characterId = 'clippy' } =
   // naviguer dans Settings avant de capturer.
   await page.addInitScript(({ voiceEnabled, characterId }) => {
     const raw = localStorage.getItem('coach-os-assistant-v1');
-    const cur = raw ? JSON.parse(raw) : { state: {}, version: 1 };
+    let cur;
+    try {
+      cur = raw ? JSON.parse(raw) : { state: {}, version: 1 };
+    } catch {
+      cur = { state: {}, version: 1 };
+    }
     cur.state = {
       ...cur.state,
       voiceEnabled,
@@ -286,7 +291,12 @@ async function preuve3() {
   await setupVoix(page, { voiceEnabled: true });
   await page.addInitScript(() => {
     const raw = localStorage.getItem('coach-os-assistant-v1');
-    const cur = raw ? JSON.parse(raw) : { state: {}, version: 1 };
+    let cur;
+    try {
+      cur = raw ? JSON.parse(raw) : { state: {}, version: 1 };
+    } catch {
+      cur = { state: {}, version: 1 };
+    }
     cur.state.agentsPrefs = {
       ...(cur.state.agentsPrefs ?? {}),
       'cerritos-holodeck': { backend: 'multica' },
