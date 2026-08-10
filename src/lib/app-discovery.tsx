@@ -51,7 +51,7 @@ registerApp({ id: 'welcome',     name: 'Welcome',               icon: Compass,  
 // Design — Six-Front-end showcase (drawbridge task #8 2026-07-30): pure-presentation
 // canvas that re-skins per sidebar style (Glassmorphism, Claymorphism, Brutalism,
 // Cyberpunk, Soft UI / Neumorphism, Editorial). No Supabase, no cognition hydration.
-registerApp({ id: 'design',      name: 'Design',                icon: Wand2,           accent: '#0f172a', description: 'Six front-end styles · one showcase canvas',   component: DesignApp   });
+registerApp({ id: 'design',      name: 'Design',                icon: Wand2,           accent: '#0f172a', description: 'Twenty front-end styles · one showcase canvas', component: DesignApp   });
 // Ontology — story 2 de l'epic couche-ontologie : lecteur des 12 entites,
 // relations et contrats poses par story 1 via `src/lib/ontology/index.ts`.
 // Accent `#0f766e` (teal plus fonce que `#0d9488` pris par Onboarding) pour
