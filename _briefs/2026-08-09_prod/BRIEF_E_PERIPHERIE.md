@@ -16,10 +16,20 @@ src/apps/design/**
 src/apps/ontology/**
 src/apps/audit/**
 src/apps/cognition/**
+src/agent/**
 ```
 
-Sept apps. **Interdit** : `src/components/`, `src/lib/`, `src/stores/`, `src/hooks/`,
-`src/apps/_ui/`, et toute app hors de cette liste. Un défaut vu ailleurs se **note au rapport**.
+Sept apps **plus le dossier `src/agent/`**. **Interdit** : `src/components/`, `src/lib/`,
+`src/stores/`, `src/hooks/`, `src/apps/_ui/`, et toute app hors de cette liste. Un défaut vu
+ailleurs se **note au rapport**.
+
+`src/agent/` t'est rattaché parce que l'agent du socle l'a signalé sans pouvoir y toucher.
+Il y a au moins deux dettes connues à cet endroit :
+
+- `src/agent/voice.ts` — double assertion de typage sur l'API `SpeechRecognition`.
+- `src/agent/tools.ts` — le handle DEV `window.__coachos` est typé par double assertion, alors
+  qu'une déclaration globale propre existe désormais dans `src/lib/coachos-global.d.ts`.
+  Sers-t'en au lieu de refaire un cast.
 
 ## Ce qui est déjà fait — ne le refais pas
 
