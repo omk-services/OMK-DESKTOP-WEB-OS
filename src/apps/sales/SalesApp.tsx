@@ -1120,7 +1120,7 @@ function CapabilitiesPanel({ cognition, onSelect }: { cognition: CognitionState;
         eyebrow="Sales OS · live operating layer · Capabilities"
         title="Sales OS"
         subtitle="The skills and routines that run the second brain. Eight skills on demand, six routines on a clock — each one is the kind of thing you used to do at 9am before you had an OS."
-        meta={{ label: 'Live', value: `${cognition.eventCount} events`, sub: `${SKILLS.length} skills · ${ROUTINES.length} routines` }}
+        meta={{ label: 'Live', value: `${cognition.eventCount} events`, sub: `${skillItems.length} skills · ${routineItems.length} routines` }}
       />
 
       <div className="mt-8 flex items-center gap-1.5">
