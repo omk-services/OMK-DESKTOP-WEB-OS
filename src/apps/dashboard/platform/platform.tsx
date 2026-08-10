@@ -2,16 +2,29 @@ import { useRef, useState } from 'react';
 import type React from 'react';
 import {
   BookOpen, Check, ChevronRight, CircleAlert, CircleCheck, Database,
-  FileArchive, FilePlus, KeyRound, Layers3, Link2, LockKeyhole, Network,
+  FileArchive, FilePlus, KeyRound, Layers3, Link2, LockKeyhole, Mail, Network,
   ShieldCheck, Sparkles, Upload, Users, X,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../../components/AppFrame';
 import { useShellStore } from '../../../stores/shell.store';
 import { Badge, StatCard } from '../../_ui/kit';
 import { FleetItemCard, FleetItemGrid } from '../../_ui/FleetItemCard';
-import { CONNECTORS, DOCUMENTS, MEMBERS, MEMORIES, ROLE_ORDER, type ConnectorState, type KnowledgeDocument, type MemberRole, type MemoryStatus } from './seed';
+import { CONNECTORS, DOCUMENTS, MEMBERS, MEMORIES, ROLE_ORDER, type ConnectorSeed, type ConnectorState, type KnowledgeDocument, type MemberRecord, type MemberRole, type MemoryStatus } from './seed';
 
 const ACCENT = '#7c3aed';
+
+// Cycle d'état d'un connecteur quand on clique. Le clic avance dans le
+// cycle, ce qui permet d'autoriser / déconnecter / demander l'accès à
+// partir du même geste. `indisponible` part vers `disponible` (demande),
+// `disponible` vers `connecte` (autorisation accordée), `connecte` vers
+// `disponible` (déconnecte proprement). La logique serveur remplacera ce
+// cycle par un vrai protocole OAuth via le gateway MCP ; en attendant,
+// l'UI reflète l'état local de manière honnête.
+const CONNECTOR_CYCLE: Record<ConnectorState, ConnectorState> = {
+  connecte: 'disponible',
+  disponible: 'connecte',
+  indisponible: 'disponible',
+};
 
 const stateMeta: Record<ConnectorState, { label: string; color: string; background: string }> = {
   connecte: { label: 'Connecté', color: '#15803d', background: '#dcfce7' },
@@ -52,10 +65,56 @@ function PlatformHeader({ title, subtitle, icon: Icon, action }: { title: string
 
 function Integrations() {
   const addToast = useShellStore((s) => s.addToast);
+  // L'état local permet au clic de cycler entre connecte / disponible /
+  // indisponible. Le clic avance dans le cycle ; le compteur visible dans
+  // les StatCards dérive du tableau local, ce qui rend le changement
+  // mesurable à l'œil.
+  const [connectors, setConnectors] = useState<ConnectorSeed[]>(CONNECTORS);
+
+  const cycleConnector = (id: string) => {
+    // On lit d'abord l'état courant pour calculer la transition, puis on
+    // appelle addToast EN DEHORS du setter (sinon React hurle « setState
+    // during render » : l'updater de setState est exécuté pendant le
+    // render du prochain tick).
+    const current = connectors.find((c) => c.id === id);
+    if (!current) return;
+    const next = CONNECTOR_CYCLE[current.state];
+    addToast({
+      source: 'Integrations',
+      type: 'info',
+      message: `${current.name} : ${stateMeta[current.state].label} → ${stateMeta[next].label}. Le serveur confirmera via le gateway.`,
+    });
+    setConnectors((prev) => prev.map((c) => (c.id === id ? { ...c, state: next } : c)));
+  };
+
+  const connected = connectors.filter(c => c.state === 'connecte').length;
+  const available = connectors.filter(c => c.state === 'disponible').length;
+
   return <div className="p-7" style={{ color: 'var(--theme-text)' }}>
     <PlatformHeader title="Integrations" subtitle="Chaque connecteur expose une capacité précise via le gateway MCP." icon={Network} action={<Badge tone="ok">gateway opérationnel</Badge>} />
-    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3"><StatCard label="Connectés" value={CONNECTORS.filter(c => c.state === 'connecte').length} hint="accès actif" tone="ok" /><StatCard label="Disponibles" value={CONNECTORS.filter(c => c.state === 'disponible').length} hint="prêts à autoriser" tone="warn" /><StatCard label="Gateway" value="1" hint="point d’entrée unique" tone="accent" /></div>
-    <FleetItemGrid cols={3}>{CONNECTORS.map((connector) => { const Icon = connector.icon; const meta = stateMeta[connector.state]; return <FleetItemCard key={connector.id} title={connector.name} subtitle={connector.access} description={connector.description} statusLabel={meta.label} statusTone={connector.state === 'connecte' ? 'ok' : connector.state === 'disponible' ? 'warn' : 'danger'} accent={ACCENT} icon={<Icon className="h-5 w-5" />} meta={connector.state === 'connecte' ? 'via agentgateway' : 'autorisation requise'} trailing={<ChevronRight className="h-4 w-4" style={{ color: meta.color }} />} onClick={() => addToast({ source: 'Integrations', type: 'info', message: connector.state === 'connecte' ? `${connector.name} déjà autorisé via le gateway.` : connector.state === 'disponible' ? `Demande d'autorisation envoyée pour ${connector.name}.` : `${connector.name} non autorisé sur cet espace.` })} />; })}</FleetItemGrid>
+    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3"><StatCard label="Connectés" value={connected} hint="accès actif" tone="ok" /><StatCard label="Disponibles" value={available} hint="prêts à autoriser" tone="warn" /><StatCard label="Gateway" value="1" hint="point d’entrée unique" tone="accent" /></div>
+    <FleetItemGrid cols={3}>
+      {connectors.map((connector) => {
+        const Icon = connector.icon;
+        const meta = stateMeta[connector.state];
+        return (
+          <div key={connector.id} data-connector-id={connector.id}>
+            <FleetItemCard
+              title={connector.name}
+              subtitle={connector.access}
+              description={connector.description}
+              statusLabel={meta.label}
+              statusTone={connector.state === 'connecte' ? 'ok' : connector.state === 'disponible' ? 'warn' : 'danger'}
+              accent={ACCENT}
+              icon={<Icon className="h-5 w-5" />}
+              meta={connector.state === 'connecte' ? 'via agentgateway' : 'autorisation requise'}
+              trailing={<ChevronRight className="h-4 w-4" style={{ color: meta.color }} />}
+              onClick={() => cycleConnector(connector.id)}
+            />
+          </div>
+        );
+      })}
+    </FleetItemGrid>
     <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--panel-border)] p-4 text-xs" style={{ color: 'var(--theme-muted)' }}><ShieldCheck className="h-4 w-4 shrink-0" style={{ color: '#15803d' }} /><span>Le navigateur ne reçoit pas les secrets MCP : le gateway centralise le routage et le serveur décide des autorisations.</span></div>
   </div>;
 }
@@ -254,16 +313,247 @@ function Memories() {
 
 function Members() {
   const addToast = useShellStore((s) => s.addToast);
+  // État local : la file de membres part du seed (5 comptes actifs) et
+  // s'enrichit des invitations émises par l'UI. Tant que le serveur ne
+  // confirme pas, ces ajouts sont marqués « pending ».
+  const [members, setMembers] = useState<MemberRecord[]>(MEMBERS);
+  const [inviting, setInviting] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<MemberRole>('analyst');
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
   // Audit coverage: every member row has an attributed actor in the seed —
   // 100% holds, but we derive it from data so adding an unattributed row
-  // would drop the badge to "4/5 attribués".
-  const attributed = MEMBERS.filter((m) => m.actor && m.actor.trim().length > 0).length;
-  const auditPct = MEMBERS.length === 0 ? 0 : Math.round((attributed / MEMBERS.length) * 100);
+  // would drop the badge to "4/5 attribués". Une invitation « pending »
+  // n'est pas comptée comme attribuée tant que personne ne l'a validée.
+  const attributed = members.filter((m) => (m.invitationStatus !== 'pending') && m.actor && m.actor.trim().length > 0).length;
+  const auditPct = members.length === 0 ? 0 : Math.round((attributed / members.length) * 100);
+
+  const resetInviteForm = () => {
+    setInviting(false);
+    setInviteEmail('');
+    setInviteRole('analyst');
+    setInviteError(null);
+  };
+
+  const submitInvite = () => {
+    const email = inviteEmail.trim().toLowerCase();
+    // Validation minimale côté client : un email avec un @ et un point.
+    // Le serveur refera la validation propre. Ici on refuse ce qui est
+    // manifestement faux, pas ce qui est subtilement faux.
+    if (!email) {
+      setInviteError("L'email est obligatoire.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setInviteError("Cet email ne ressemble pas à un email.");
+      return;
+    }
+    if (members.some((m) => (m.email ?? '').trim().toLowerCase() === email)) {
+      setInviteError(`Une invitation existe déjà pour ${email}.`);
+      return;
+    }
+    const initials = email
+      .split('@')[0]
+      .split(/[._-]+/)
+      .filter(Boolean)
+      .map((p) => p.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('') || '??';
+    const role = roleMeta[inviteRole];
+    const newMember: MemberRecord = {
+      id: `invite-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      name: email,
+      initials,
+      role: inviteRole,
+      opens: role.label,
+      activity: 'Invitation en attente',
+      actor: '—',
+      invitationStatus: 'pending',
+      email,
+    };
+    setMembers((prev) => [newMember, ...prev]);
+    addToast({
+      source: 'Members',
+      type: 'info',
+      message: `Invitation enregistrée pour ${email} (${role.label}). Elle sera envoyée quand le serveur validera l'invitation.`,
+    });
+    resetInviteForm();
+  };
+
+  const pendingCount = members.filter((m) => m.invitationStatus === 'pending').length;
+
   return <div className="p-7" style={{ color: 'var(--theme-text)' }}>
-    <PlatformHeader title="Members" subtitle="Les onglets se masquent côté interface ; l’autorité reste au serveur." icon={Users} action={<button type="button" onClick={() => addToast({ source: 'Members', type: 'info', message: 'Invitation générée — copie le lien et attribue-le à un acteur réel côté serveur.' })} className="rounded-lg px-3 py-2 text-xs font-bold" style={{ background: ACCENT, color: 'var(--theme-text)' }}>Inviter un membre</button>} />
-    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3"><StatCard label="Membres" value={MEMBERS.length} hint="accès nominatifs" /><StatCard label="Rôles" value={ROLE_ORDER.length} hint="viewer → owner" tone="accent" /><StatCard label="Audit" value={`${auditPct}%`} hint={auditPct === 100 ? 'changements attribués' : `${attributed}/${MEMBERS.length} attribués`} tone={auditPct === 100 ? 'ok' : 'warn'} /></div>
-    <Panel><div className="grid grid-cols-1 gap-3 border-b border-[var(--panel-border)] px-5 py-3 text-[10px] font-bold uppercase tracking-wider md:grid-cols-[1fr_120px_1fr_120px]" style={{ color: 'var(--theme-muted)' }}><span>Membre</span><span className="hidden md:inline">Rôle</span><span className="hidden md:inline">Accès ouvert</span><span className="hidden md:inline">Dernière activité</span></div><div className="divide-y divide-[var(--panel-border)]">{MEMBERS.map(member => { const role = roleMeta[member.role]; return <div key={member.id} className="grid grid-cols-1 gap-3 px-5 py-4 md:grid-cols-[1fr_120px_1fr_120px] md:items-center md:gap-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: ACCENT, color: '#ffffff' }}>{member.initials}</div><div className="min-w-0"><div className="truncate text-sm font-semibold">{member.name}</div><div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--theme-muted)' }}><KeyRound className="h-3 w-3" /> acteur : {member.actor}</div></div></div><div><SemanticPill color={role.color} background={role.background}>{role.label}</SemanticPill></div><div className="text-xs" style={{ color: 'var(--theme-muted)' }}>{member.opens}</div><div className="text-right text-[11px]" style={{ color: 'var(--theme-muted)' }}>{member.activity}</div></div>; })}</div></Panel>
-    <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--panel-border)] p-4 text-xs" style={{ color: 'var(--theme-muted)' }}><LockKeyhole className="h-4 w-4 shrink-0" style={{ color: '#b91c1c' }} /><span>Chaque changement de privilège doit être attribué à une personne réelle. Les contrôles serveur et les politiques de données ne dépendent pas de cette vue.</span></div>
+    <PlatformHeader
+      title="Members"
+      subtitle="Les onglets se masquent côté interface ; l’autorité reste au serveur."
+      icon={Users}
+      action={
+        <div className="flex items-center gap-2">
+          {pendingCount > 0 && <Badge tone="warn">{pendingCount} en attente</Badge>}
+          <button
+            type="button"
+            onClick={() => setInviting((v) => !v)}
+            data-invite-toggle
+            className="rounded-lg px-3 py-2 text-xs font-bold"
+            style={{ background: ACCENT, color: 'var(--theme-text)' }}
+          >
+            {inviting ? 'Annuler' : 'Inviter un membre'}
+          </button>
+        </div>
+      }
+    />
+
+    {inviting && (
+      <div
+        data-invite-form
+        className="mb-5 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-solid)] p-4 flex flex-col gap-3"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[11.5px] font-bold" style={{ color: 'var(--theme-text)' }}>
+            <Mail className="h-4 w-4" style={{ color: ACCENT }} />
+            Nouvelle invitation
+          </div>
+          <button
+            type="button"
+            onClick={resetInviteForm}
+            aria-label="Annuler l'invitation"
+            className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text)]"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+            Email *
+          </span>
+          <input
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="Ex : amadeus@coach-os.fr"
+            className="px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+            style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)', border: '1px solid var(--panel-border)' }}
+            data-invite-email
+            autoFocus
+            onKeyDown={(e) => { if (e.key === 'Enter') submitInvite(); }}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+            Rôle
+          </span>
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value as MemberRole)}
+            className="px-2.5 py-1.5 rounded-lg text-[12px] outline-none"
+            style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)', border: '1px solid var(--panel-border)' }}
+            data-invite-role
+          >
+            {ROLE_ORDER.map((r) => (
+              <option key={r} value={r}>{roleMeta[r].label}</option>
+            ))}
+          </select>
+        </label>
+
+        {inviteError && (
+          <div
+            role="alert"
+            data-invite-error
+            className="text-[11px] rounded-lg px-3 py-2"
+            style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+          >
+            {inviteError}
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={resetInviteForm}
+            className="text-[11px] font-semibold px-3 h-7 rounded-lg"
+            style={{ color: 'var(--theme-text-muted)' }}
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={submitInvite}
+            data-invite-submit
+            className="text-[11px] font-bold text-[color:#fff] h-7 px-3 rounded-lg"
+            style={{ background: '#059669' }}
+          >
+            Envoyer l'invitation
+          </button>
+        </div>
+      </div>
+    )}
+
+    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <StatCard label="Membres" value={members.length} hint={pendingCount > 0 ? `${pendingCount} en attente` : 'accès nominatifs'} />
+      <StatCard label="Rôles" value={ROLE_ORDER.length} hint="viewer → owner" tone="accent" />
+      <StatCard label="Audit" value={`${auditPct}%`} hint={auditPct === 100 ? 'changements attribués' : `${attributed}/${members.length} attribués`} tone={auditPct === 100 ? 'ok' : 'warn'} />
+    </div>
+
+    <Panel>
+      <div className="grid grid-cols-1 gap-3 border-b border-[var(--panel-border)] px-5 py-3 text-[10px] font-bold uppercase tracking-wider md:grid-cols-[1fr_140px_1fr_120px]" style={{ color: 'var(--theme-muted)' }}>
+        <span>Membre</span>
+        <span className="hidden md:inline">Rôle</span>
+        <span className="hidden md:inline">Accès ouvert</span>
+        <span className="hidden md:inline">Dernière activité</span>
+      </div>
+      <div className="divide-y divide-[var(--panel-border)]">
+        {members.map(member => {
+          const role = roleMeta[member.role];
+          const isPending = member.invitationStatus === 'pending';
+          return (
+            <div
+              key={member.id}
+              data-member-id={member.id}
+              data-member-status={isPending ? 'pending' : 'active'}
+              className="grid grid-cols-1 gap-3 px-5 py-4 md:grid-cols-[1fr_140px_1fr_120px] md:items-center md:gap-4"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{ background: isPending ? 'var(--theme-surface-hover)' : ACCENT, color: isPending ? 'var(--theme-text-muted)' : '#ffffff' }}
+                >
+                  {member.initials}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 truncate text-sm font-semibold">
+                    <span className="truncate">{member.name}</span>
+                    {isPending && (
+                      <span
+                        className="shrink-0 inline-flex items-center text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{ background: '#fef3c7', color: '#a16207', border: '1px solid #fcd34d' }}
+                        data-member-pending-badge
+                      >
+                        Invitation en attente
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--theme-muted)' }}>
+                    <KeyRound className="h-3 w-3" /> acteur : {member.actor}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <SemanticPill color={role.color} background={role.background}>{role.label}</SemanticPill>
+              </div>
+              <div className="text-xs" style={{ color: 'var(--theme-muted)' }}>{member.opens}</div>
+              <div className="text-right text-[11px]" style={{ color: 'var(--theme-muted)' }}>{member.activity}</div>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+    <div className="mt-5 flex items-start gap-3 rounded-xl border border-[var(--panel-border)] p-4 text-xs" style={{ color: 'var(--theme-muted)' }}>
+      <LockKeyhole className="h-4 w-4 shrink-0" style={{ color: '#b91c1c' }} />
+      <span>Chaque changement de privilège doit être attribué à une personne réelle. Les contrôles serveur et les politiques de données ne dépendent pas de cette vue.</span>
+    </div>
   </div>;
 }
 

@@ -45,6 +45,14 @@ export interface MemberRecord {
   opens: string;
   activity: string;
   actor: string;
+  /** Statut d'invitation. Un membre « actif » est créé dans le seed
+   *  (statut implicite). Un membre invité depuis l'UI reçoit « pending »
+   *  tant que personne ne l'a validé côté serveur. C'est ce qui permet
+   *  au compteur de bouger honnêtement quand on clique « Inviter ». */
+  invitationStatus?: 'active' | 'pending';
+  /** Email de la personne invitée (utile pour distinguer les pendings
+   *  et détecter les doublons case-insensitive). */
+  email?: string;
 }
 
 export const CONNECTORS: ConnectorSeed[] = [
