@@ -24,8 +24,9 @@ export function ClientsApp() {
   const addItem = useCmsStore(s => s.addItem);
   const addToast = useShellStore(s => s.addToast);
   const [detail, setDetail] = useState<ClientsDetailItem | null>(null);
-  const { setDetail: setWindowDetail } = useWindowPage();
+  const { activePage, setDetail: setWindowDetail } = useWindowPage();
 
+  // Mirror local detail into the window breadcrumb.
   useEffect(() => {
     if (detail) {
       setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
@@ -33,6 +34,22 @@ export function ClientsApp() {
       setWindowDetail(null);
     }
   }, [detail, setWindowDetail]);
+
+  // Crumb dupliqué : la fiche était publiée à la fois par setWindowDetail (ici)
+  // ET par useCollectionDrill('clients', ...). Quand on quittait une section
+  // clients, le drill fermait son openId mais `detail` restait set, donc
+  // l'overlay restait collé par-dessus. On ferme l'overlay dès qu'on quitte
+  // une section clients.
+  useEffect(() => {
+    const isClientsSection = ['Active', 'Onboarding', 'Churn Risk', 'Directory', 'IP Vault'].includes(activePage);
+    if (!isClientsSection && detail) {
+      setDetail(null);
+    }
+    if (!isClientsSection) {
+      drill.close();
+      vaultDrill.close();
+    }
+  }, [activePage, detail, drill, vaultDrill]);
 
   const activeClients = clients.filter(c => c.status === 'Active');
   const onboardingClients = clients.filter(c => c.status === 'Onboarding');
