@@ -1817,17 +1817,26 @@ function LiquidChromeHero() {
 export function DesignApp() {
   const [activeId, setActiveId] = useState<string>('overview');
 
-  // Keep the AppFrame's activeId in sync with the user's choice. The wrapper
-  // AppFrame renders its own sidebar with `sections`; the Overview section
-  // displays clickable cards that mutate activeId, which drives both the
-  // overview panel AND the dedicated hero section for the same style.
+  // Le picker de l'Overview annonce « Pick a style in the sidebar to re-skin
+  // the canvas » — mais onPick ne mutait que cet activeId local, alors que la
+  // section affichee est pilotee par l'activeId interne d'AppFrame. Cliquer
+  // une carte ne changeait donc que son propre surlignage : la promesse
+  // n'etait pas tenue. AppFrame passe `navigateToSection` a chaque section
+  // pour ce cas precis ; on s'en sert. Cela suppose que l'id du style et
+  // l'id de la section coincident — seul « cyberpunk » divergeait, declare
+  // « cyber » ici. Aligne.
   const sections: AppSection[] = useMemo(() => [
     { id: 'overview', label: 'Overview', icon: Wand2,
-      render: () => <OverviewPanel activeId={activeId === 'overview' ? 'glass' : activeId} onPick={(id) => setActiveId(id)} /> },
+      render: ({ navigateToSection }) => (
+        <OverviewPanel
+          activeId={activeId === 'overview' ? 'glass' : activeId}
+          onPick={(id) => { setActiveId(id); navigateToSection(id); }}
+        />
+      ) },
     { id: 'glass', label: 'Glass', icon: GlassWater, render: () => <GlassSection /> },
     { id: 'clay', label: 'Clay', icon: Shapes, render: () => <ClaySection /> },
     { id: 'brutalism', label: 'Brutalism', icon: Zap, render: () => <BrutalismSection /> },
-    { id: 'cyber', label: 'Cyberpunk', icon: Sparkles, render: () => <CyberSection /> },
+    { id: 'cyberpunk', label: 'Cyberpunk', icon: Sparkles, render: () => <CyberSection /> },
     { id: 'softui', label: 'Soft UI', icon: Layers, render: () => <SoftUiSection /> },
     { id: 'editorial', label: 'Editorial', icon: BookOpen, render: () => <EditorialSection /> },
     { id: 'y2k', label: 'Y2K', icon: Star, render: () => <Y2KSection /> },
