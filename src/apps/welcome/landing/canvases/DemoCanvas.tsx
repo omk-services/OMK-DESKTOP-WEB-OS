@@ -19,7 +19,8 @@
 
 import { useRef } from 'react';
 import { ArrowRight, Play, Sparkles, MessageSquare, ShieldCheck, Brain, Lock } from 'lucide-react';
-import { PageChrome, BackToTop } from '../PageChrome';
+import { PageChrome, BackToTop, scrollToAnchor } from '../PageChrome';
+import { useShellStore } from '../../../../stores/shell.store';
 import type { LandingPage } from '../pageSchema';
 
 export function DemoCanvas({ page, activePageId, onSelectPage }: {
@@ -70,9 +71,9 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
           </h1>
           <p className="text-base text-[var(--theme-text-muted)] leading-relaxed max-w-2xl">{page.hero.sub}</p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
+            <button type="button" data-cta="hero" onClick={() => scrollToAnchor(bodyRef.current, 'cta')} className="inline-flex items-center gap-2 rounded-full bg-[var(--theme-accent)] text-white px-6 py-3 text-sm font-semibold shadow-lg hover:bg-[var(--theme-accent-hover)] transition-all">
               <Play className="w-4 h-4 fill-current" /> {page.hero.primaryCta.label}
-            </a>
+            </button>
             <span className="text-xs text-[var(--theme-text-muted)]">4 min · 0 signup · 0 PII</span>
           </div>
         </section>
@@ -169,10 +170,12 @@ export function DemoCanvas({ page, activePageId, onSelectPage }: {
           <Brain className="w-7 h-7 text-white mx-auto mb-3" />
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'var(--theme-font-display)' }}>{page.closing.headline}</h2>
           <p className="text-white text-sm mt-2 max-w-xl mx-auto opacity-90">{page.closing.sub}</p>
-          <a href="#cta" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
+          <button type="button" data-cta="closing"
+            onClick={() => useShellStore.getState().openApp('onboarding', 'Onboarding')}
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-[color:#fff] px-6 py-3 text-sm font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all" style={{ color: 'var(--theme-accent)' }}>
             <Play className="w-4 h-4 fill-current" />
             {page.closing.cta.label} <ArrowRight className="w-4 h-4" />
-          </a>
+          </button>
           <p className="text-white text-[11px] mt-4 opacity-75">Si ça ne parle pas à ton vendredi soir, tu fermes l'onglet. Personne ne te relance.</p>
         </section>
 

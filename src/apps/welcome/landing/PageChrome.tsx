@@ -24,6 +24,19 @@ const PAGE_ICON: Record<string, typeof Compass> = {
 
 interface SectionMeta { id: string; label: string }
 
+/** Fait defiler le corps du canvas jusqu'a une section reperee par
+ *  `data-anchor`. Les canvases ne peuvent PAS s'appuyer sur une ancre native
+ *  (`<a href="#cta">`) pour deux raisons cumulees : les sections portent un
+ *  attribut `data-anchor`, pas un `id`, et surtout le corps defilant est un
+ *  conteneur interne — le navigateur fait defiler le document, qui lui ne
+ *  bouge pas. Les 18 CTA des nueve canvases etaient morts pour cette raison.
+ *  Exporte ici pour que l'unique implementation correcte soit partagee. */
+export function scrollToAnchor(root: HTMLElement | null, anchorId: string): void {
+  if (!root) return;
+  const target = root.querySelector(`[data-anchor="${anchorId}"]`);
+  if (target instanceof HTMLElement) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 export interface PageChromeProps {
   brand: string;
   domain: string;
@@ -98,12 +111,7 @@ export function PageChrome({
     return () => observer.disconnect();
   }, [sections, bodyRef]);
 
-  const scrollTo = (id: string) => {
-    const root = (bodyRef?.current ?? scrollSpyRef.current);
-    if (!root) return;
-    const target = root.querySelector(`[data-anchor="${id}"]`) as HTMLElement | null;
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const scrollTo = (id: string) => scrollToAnchor(bodyRef?.current ?? scrollSpyRef.current, id);
 
   if (bare) return <>{children}</>;
 
