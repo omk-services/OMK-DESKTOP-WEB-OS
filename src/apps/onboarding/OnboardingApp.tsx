@@ -85,7 +85,16 @@ function computeScore(answers: Record<string, number>): number {
   }, 0);
 }
 
-function ScoreBand({ score }: { score: number }) {
+/** Helper pur : renvoie les codes couleur / bande / sous-titre du
+ *  score de quiz. Le nom commence par un verbe (`pick`) plutot que par
+ *  un nom de composant — on rend un objet, pas du JSX. Cf. usage dans
+ *  la branche reveal de `CitadelPanel`. */
+function pickScoreBand(score: number): {
+  tone: string;
+  color: string;
+  bg: string;
+  sub: string;
+} {
   const maxScore = 12;
   const pct = Math.round((score / maxScore) * 100);
   if (pct >= 75) return { tone: 'Strong fit', color: '#15803d', bg: '#dcfce7', sub: 'Your onboarding answers indicate Nexus covers all four of your current gaps.' };
@@ -169,7 +178,7 @@ function CitadelPanel() {
   if (!citadelWin || !citadelWin.isOpen) return null;
 
   const score = computeScore(answers);
-  const band = phase === 'reveal' ? ScoreBand({ score }) : null;
+  const band = phase === 'reveal' ? pickScoreBand(score) : null;
   const q = QUIZ[stepIdx];
   const isLast = stepIdx === QUIZ.length - 1;
   const allAnswered = Object.keys(answers).length === QUIZ.length;
