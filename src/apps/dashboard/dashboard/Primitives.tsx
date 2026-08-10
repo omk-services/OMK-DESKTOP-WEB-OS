@@ -291,17 +291,20 @@ export function GhostButton({
   onClick,
   size = 'md',
   type = 'button',
+  disabled = false,
 }: {
   children: ReactNode;
   onClick?: () => void;
   size?: 'sm' | 'md';
   type?: 'button' | 'submit';
+  disabled?: boolean;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] ${
+      disabled={disabled}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100 ${
         size === 'sm' ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2 text-[12.5px]'
       }`}
       style={{

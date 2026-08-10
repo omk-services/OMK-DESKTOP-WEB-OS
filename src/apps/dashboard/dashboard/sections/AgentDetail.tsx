@@ -5,11 +5,18 @@
  *
  * The detail is rendered as a sibling of AppFrame (so it follows the topbar
  * theme, not the app sidebar theme — see ClientsApp precedent).
+ *
+ * System prompt persistence: the seed `DashboardAgent.systemPrompt` is
+ * immutable. The user-facing override lives in `PROMPT_OVERRIDES` (a
+ * localStorage map keyed by agent id). The effective prompt = override if
+ * present, else seed. When the API lands, replace `loadPromptOverrides` /
+ * `savePromptOverrides` with a fetch + cache, but keep the same shape so
+ * the page stays the same.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ArrowLeft, Bot, BrainCircuit, Cable, Database, History, MessageSquare,
-  Plug, Settings, ShieldCheck, Sparkles, Wrench,
+  ArrowLeft, Bot, BrainCircuit, Cable, Check, Database, History, MessageSquare,
+  Plug, RotateCcw, Save, Settings, ShieldCheck, Sparkles, Wrench, X,
 } from 'lucide-react';
 import type { DashboardAgent } from '../seed';
 import { CHAT_BY_AGENT } from '../seed';
@@ -30,6 +37,30 @@ const TABS: Array<{ id: TabId; label: string; icon: typeof Bot }> = [
   { id: 'settings',     label: 'Réglages',       icon: Settings },
 ];
 
+const PROMPT_OVERRIDES_KEY = 'coach-os:agent-prompts:v1';
+
+function loadPromptOverrides(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(PROMPT_OVERRIDES_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return {};
+    return parsed as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+function savePromptOverrides(map: Record<string, string>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PROMPT_OVERRIDES_KEY, JSON.stringify(map));
+  } catch {
+    // Storage quota or private mode — degrade silently to in-memory only.
+  }
+}
+
 export function AgentDetailPage({
   agent,
   onBack,
@@ -39,6 +70,24 @@ export function AgentDetailPage({
 }) {
   const [tab, setTab] = useState<TabId>('system');
   const addToast = useShellStore((s) => s.addToast);
+  // User-supplied overrides of the seed system prompt. Re-hydrated on
+  // mount and mirrored back to localStorage on every change. Survives
+  // tab switches, section changes, and page reloads.
+  const [promptOverrides, setPromptOverrides] = useState<Record<string, string>>(() => loadPromptOverrides());
+  useEffect(() => {
+    savePromptOverrides(promptOverrides);
+  }, [promptOverrides]);
+  const effectivePrompt = promptOverrides[agent.id] ?? agent.systemPrompt;
+  const savePrompt = (next: string): void => {
+    setPromptOverrides((prev) => ({ ...prev, [agent.id]: next }));
+  };
+  const resetPrompt = (): void => {
+    setPromptOverrides((prev) => {
+      const next = { ...prev };
+      delete next[agent.id];
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-full" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
@@ -143,7 +192,7 @@ export function AgentDetailPage({
           })}
         </div>
 
-        {tab === 'system' ? <SystemTab agent={agent} /> : null}
+        {tab === 'system' ? <SystemTab agent={agent} prompt={effectivePrompt} onSave={savePrompt} onReset={resetPrompt} /> : null}
         {tab === 'conversation' ? <ConversationTab agent={agent} /> : null}
         {tab === 'sessions' ? <SessionsTab agent={agent} /> : null}
         {tab === 'memories' ? <MemoriesTab agent={agent} /> : null}
@@ -154,22 +203,127 @@ export function AgentDetailPage({
   );
 }
 
-function SystemTab({ agent }: { agent: DashboardAgent }) {
+function SystemTab({
+  agent,
+  prompt,
+  onSave,
+  onReset,
+}: {
+  agent: DashboardAgent;
+  prompt: string;
+  onSave: (next: string) => void;
+  onReset: () => void;
+}) {
+  const addToast = useShellStore((s) => s.addToast);
+  // Local draft so the user can type freely without losing the saved value.
+  // Reset to the saved `prompt` whenever the agent changes (cancels pending
+  // edits when the user backtracks to a different agent card).
+  const [draft, setDraft] = useState<string>(prompt);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setDraft(prompt);
+    setError(null);
+  }, [prompt, agent.id]);
+  const trimmed = draft.trim();
+  const dirty = trimmed !== prompt.trim();
+  const canSave = trimmed.length > 0 && dirty;
+  const charCount = draft.length;
+  const handleSave = (): void => {
+    if (trimmed.length === 0) {
+      setError("Une invite vide laisse l'agent sans comportement défini. Renseigne au moins une phrase.");
+      return;
+    }
+    onSave(trimmed);
+    setError(null);
+    addToast({
+      source: 'Agents',
+      type: 'success',
+      message: `Invite système de ${agent.name} enregistrée · ${trimmed.length} caractères`,
+    });
+  };
+  const handleCancel = (): void => {
+    setDraft(prompt);
+    setError(null);
+  };
+  const handleReset = (): void => {
+    onReset();
+    setError(null);
+    addToast({
+      source: 'Agents',
+      type: 'info',
+      message: `Invite système de ${agent.name} remise à la version d'origine.`,
+    });
+  };
+  const isOverridden = draft !== prompt.trim();
   return (
     <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
       <Panel pad="p-5">
         <SectionTitle eyebrow="Système" title="Invite système" />
-        <pre
-          className="overflow-x-auto rounded-xl p-4 text-[12px] leading-relaxed"
+        <p className="mb-3 text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+          Ce texte pilote le comportement de l'agent. Chaque modification est tracée dans l'audit log.
+        </p>
+        <textarea
+          value={draft}
+          onChange={(e) => { setDraft(e.target.value); if (error) setError(null); }}
+          spellCheck={false}
+          rows={12}
+          aria-label={`Invite système de ${agent.name}`}
+          className="block w-full min-w-0 rounded-xl p-4 text-[12.5px] leading-relaxed"
           style={{
             background: 'var(--theme-surface-hover)',
             color: 'var(--theme-text)',
-            border: '1px solid var(--panel-border-subtle)',
+            border: `1px solid ${error ? '#b91c1c' : 'var(--panel-border-subtle)'}`,
             fontFamily: 'var(--theme-font-body)',
+            resize: 'vertical',
+            minHeight: 240,
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
           }}
-        >
-{agent.systemPrompt}
-        </pre>
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-[10.5px] font-mono" style={{ color: 'var(--theme-text-dim)' }}>
+          <span>{charCount.toLocaleString()} caractères</span>
+          <span>·</span>
+          <span>{trimmed.split(/\s+/).filter(Boolean).length.toLocaleString()} mots</span>
+          {isOverridden ? (
+            <>
+              <span>·</span>
+              <span style={{ color: ACCENT }}>version personnalisée active</span>
+            </>
+          ) : null}
+        </div>
+        {error ? (
+          <div
+            className="mt-2 flex items-start gap-2 rounded-lg p-2.5 text-[11.5px]"
+            style={{ background: 'rgba(185,28,28,0.10)', color: '#b91c1c', border: '1px solid rgba(185,28,28,0.35)' }}
+            role="alert"
+          >
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        ) : null}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <PrimaryButton size="sm" onClick={handleSave} disabled={!canSave}>
+            <Save className="h-3.5 w-3.5" /> Enregistrer
+          </PrimaryButton>
+          <GhostButton size="sm" onClick={handleCancel} disabled={!dirty}>
+            <X className="h-3.5 w-3.5" /> Annuler
+          </GhostButton>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={prompt.trim() === agent.systemPrompt.trim()}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40"
+            style={{
+              background: 'transparent',
+              color: 'var(--theme-text-muted)',
+              border: '1px solid var(--panel-border)',
+            }}
+            title="Revenir à l'invite d'origine (seed)"
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Remettre l'original
+          </button>
+        </div>
       </Panel>
       <Panel pad="p-5">
         <SectionTitle eyebrow="Garde-fous" title="Bornes actives" />
@@ -185,6 +339,13 @@ function SystemTab({ agent }: { agent: DashboardAgent }) {
             </li>
           ))}
         </ul>
+        <div
+          className="mt-4 flex items-start gap-2 rounded-lg p-3 text-[11px]"
+          style={{ background: 'var(--theme-surface-hover)', color: 'var(--theme-text-muted)' }}
+        >
+          <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: ACCENT }} />
+          <span>Les modifications sont persistées localement. Branche l'API agents pour les pousser côté serveur.</span>
+        </div>
       </Panel>
     </div>
   );
