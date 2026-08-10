@@ -11,8 +11,8 @@ import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { FinanceDetailPage, type FinanceDetailItem } from './FinanceDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { FinanceItemDetail } from './FinanceItemDetail';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { FleetItemGrid } from '../_ui/FleetItemCard';
+import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { seedFinanceCms } from './seed';
 import { useShellStore } from '../../stores/shell.store';
 
@@ -250,17 +250,6 @@ export function FinanceApp() {
     setComposerOpen(false);
   };
 
-  const PLANCHER_STATUS_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral'> = {
-    ok: 'ok',
-    warn: 'warn',
-    danger: 'danger',
-  };
-  const PLANCHER_STATUS_ACCENT: Record<string, string> = {
-    ok: '#16a34a',
-    warn: '#d97706',
-    danger: '#dc2626',
-  };
-
   const Planchers = () => {
     const belowFloor = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'danger').length;
     const tangential = plancherItems.filter((p) => String(p.status ?? '').toLowerCase() === 'warn').length;
@@ -290,28 +279,9 @@ export function FinanceApp() {
             )}
           </div>
         )}
-        <CMSCardList
+        <CollectionRepeater
           collectionId="plancher_marges"
           onOpen={plancherDrill.open}
-          cols={2}
-          render={(p: Record<string, unknown>) => {
-            const status = String(p.status ?? 'ok').toLowerCase();
-            const price = Number(p.price ?? 0);
-            const floor = Number(p.floor ?? 0);
-            const gap = Number(p.gap ?? price - floor);
-            return {
-              title: String(p.offer ?? 'Offre'),
-              subtitle: `${String(p.category ?? '')} · ${String(p.unit ?? '')}`,
-              description: String(p.note ?? '').slice(0, 140),
-              statusLabel: status.toUpperCase(),
-              statusTone: PLANCHER_STATUS_TONE[status] ?? 'neutral',
-              accent: PLANCHER_STATUS_ACCENT[status] ?? ACCENT,
-              icon: <Scale className="w-5 h-5" />,
-              metricLabel: 'price / floor',
-              metricValue: `$${price.toLocaleString('en-US')} / $${floor.toLocaleString('en-US')}`,
-              meta: gap >= 0 ? `marge +$${gap.toLocaleString('en-US')}` : `$${Math.abs(gap).toLocaleString('en-US')} sous le plancher`,
-            };
-          }}
         />
       </div>
     );
@@ -324,30 +294,9 @@ export function FinanceApp() {
           title="Courbes de demande"
           subtitle="Scénarios de prix et volume estimé · la pente plutôt qu'un chiffre isolé"
         />
-        <CMSCardList
+        <CollectionRepeater
           collectionId="courbe_demande"
           onOpen={courbeDrill.open}
-          cols={2}
-          render={(c: Record<string, unknown>) => {
-            const elasticity = String(c.elasticity ?? 'med').toLowerCase();
-            const eTone = elasticity === 'low' ? 'ok' : elasticity === 'med' ? 'warn' : 'danger';
-            const eColor = elasticity === 'low' ? '#16a34a' : elasticity === 'med' ? '#d97706' : '#dc2626';
-            const sweetSpot = Number(c.sweetSpot ?? 0);
-            const scenariosRaw = String(c.scenarios ?? '');
-            const points = scenariosRaw.split('·').filter(Boolean).length;
-            return {
-              title: String(c.offer ?? 'Offre'),
-              subtitle: `${String(c.category ?? '')} · ${points} scénarios`,
-              description: String(c.notes ?? '').slice(0, 140),
-              statusLabel: elasticity,
-              statusTone: eTone,
-              accent: eColor,
-              icon: <LineChart className="w-5 h-5" />,
-              metricLabel: 'sweet spot',
-              metricValue: `$${sweetSpot.toLocaleString('en-US')}`,
-              meta: String(c.sensitivity ?? ''),
-            };
-          }}
         />
       </div>
     );
@@ -366,25 +315,9 @@ export function FinanceApp() {
           <StatCard label="Dépense modèle / mois" value={`$${totalModel.toLocaleString('en-US')}`} hint={`${budgetItems.length} usages suivis`} />
           <StatCard label="Économie nette / mois" value={`$${totalSaving.toLocaleString('en-US')}`} tone="ok" hint="vs ETP remplacés" />
         </div>
-        <CMSCardList
+        <CollectionRepeater
           collectionId="budget_tokens"
           onOpen={budgetDrill.open}
-          cols={2}
-          render={(b: Record<string, unknown>) => {
-            const status = String(b.status ?? 'ok').toLowerCase();
-            return {
-              title: String(b.use ?? 'Usage'),
-              subtitle: `${String(b.category ?? '')} · ${String(b.fteRole ?? '')}`,
-              description: String(b.notes ?? '').slice(0, 140),
-              statusLabel: status.toUpperCase(),
-              statusTone: status === 'ok' ? 'ok' : status === 'warn' ? 'warn' : 'danger',
-              accent: status === 'ok' ? '#16a34a' : status === 'warn' ? '#d97706' : '#dc2626',
-              icon: <Coins className="w-5 h-5" />,
-              metricLabel: 'coût modèle',
-              metricValue: `$${Number(b.modelCost ?? 0).toLocaleString('en-US')} / mois`,
-              meta: `économie +$${Number(b.monthlySaving ?? 0).toLocaleString('en-US')}`,
-            };
-          }}
         />
       </div>
     );
@@ -397,31 +330,9 @@ export function FinanceApp() {
           title="Formes de prix"
           subtitle="Comment facturer une même prestation · cashflow, engagement client, risque"
         />
-        <CMSCardList
+        <CollectionRepeater
           collectionId="formes_prix"
           onOpen={formesDrill.open}
-          cols={2}
-          render={(f: Record<string, unknown>) => {
-            const cashflow = String(f.cashflow ?? 'recurring').toLowerCase();
-            const cfColor = cashflow === 'immediate' ? '#16a34a'
-              : cashflow === 'upfront' ? '#1d4ed8'
-              : cashflow === 'recurring' ? '#0d9488'
-              : cashflow === 'event' ? '#d97706'
-              : cashflow === 'deferred' ? '#7c3aed'
-              : ACCENT;
-            return {
-              title: String(f.shape ?? 'Forme'),
-              subtitle: String(f.offer ?? ''),
-              description: String(f.bestFor ?? '').slice(0, 140),
-              statusLabel: cashflow,
-              statusTone: 'accent',
-              accent: cfColor,
-              icon: <CircleDollarSign className="w-5 h-5" />,
-              metricLabel: 'engagement',
-              metricValue: String(f.commitment ?? '—').split('—')[0]!.trim().slice(0, 28) || '—',
-              meta: String(f.risk ?? '').slice(0, 60),
-            };
-          }}
         />
       </div>
     );
