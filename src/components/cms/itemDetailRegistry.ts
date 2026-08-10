@@ -117,9 +117,11 @@ type Registry = Map<string, ComponentType<ItemDetailProps>>;
 
 const getRegistry = (): Registry => {
   if (typeof window !== 'undefined') {
-    const w = window as unknown as { [k: string]: Registry | undefined };
-    if (!w[REGISTRY_KEY]) w[REGISTRY_KEY] = new Map<string, ComponentType<ItemDetailProps>>();
-    return w[REGISTRY_KEY] as Registry;
+    const registryWindow = window as Window & {
+      __CITADELLE_ITEM_DETAIL_REGISTRY__?: Registry;
+    };
+    registryWindow[REGISTRY_KEY] ??= new Map<string, ComponentType<ItemDetailProps>>();
+    return registryWindow[REGISTRY_KEY];
   }
   return new Map<string, ComponentType<ItemDetailProps>>();
 };
