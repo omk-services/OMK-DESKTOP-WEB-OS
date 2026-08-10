@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from 'react';
 import { Download, Lock, Search } from 'lucide-react';
-import { AUDIT_LOG } from '../seed';
+import { AUDIT_LOG, DLP_HITS } from '../seed';
 import type { AuditEntry } from '../seed';
 import { useShellStore } from '../../../../stores/shell.store';
 import { ACCENT, IconChip, KpiTile, Panel, Pill, SectionTitle } from '../Primitives';
@@ -106,9 +106,9 @@ export function AuditLog() {
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiTile label="Événements" value={AUDIT_LOG.length} tone="accent" hint="sur 24 h glissantes" />
-        <KpiTile label="DLP · clés AWS" value="0" tone="ok" hint="0 tentative bloquée" />
-        <KpiTile label="DLP · PEM" value="0" tone="ok" hint="0 header de clé privée" />
-        <KpiTile label="DLP · JWT" value="0" tone="warn" hint="0 jeton suspect" />
+        <KpiTile label="DLP · clés AWS" value={DLP_HITS.awsAccessKey} tone={DLP_HITS.awsAccessKey > 0 ? 'warn' : 'ok'} hint={`${DLP_HITS.awsAccessKey} tentative bloquée`} />
+        <KpiTile label="DLP · PEM" value={DLP_HITS.pemPrivateKey} tone={DLP_HITS.pemPrivateKey > 0 ? 'warn' : 'ok'} hint={`${DLP_HITS.pemPrivateKey} header de clé privée`} />
+        <KpiTile label="DLP · JWT" value={DLP_HITS.jwt} tone={DLP_HITS.jwt > 0 ? 'warn' : 'ok'} hint={`${DLP_HITS.jwt} jeton suspect`} />
       </div>
 
       <Panel pad="p-4">

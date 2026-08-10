@@ -388,6 +388,25 @@ export function findAgent(id: string): DashboardAgent | undefined {
   return AGENTS.find(a => a.id === id);
 }
 
+/**
+ * Cross-module surface: the Dashboard Audit Log surfaces DLP counters that
+ * are produced by the security app. The numbers come from
+ * security/seed.ts DLP_PATTERNS — duplicated here as a snapshot so the
+ * Audit Log does not need to import across module boundaries. If the
+ * security module's hitsLast24h ever change, refresh this map.
+ */
+export const DLP_HITS = {
+  awsAccessKey: 0,
+  apiKeyHeader: 1,
+  pemPrivateKey: 0,
+  slackToken: 0,
+  githubPat: 0,
+  creditCard: 2,
+  usSsn: 0,
+  awsSecretShaped: 4,
+  jwt: 3,
+} as const;
+
 export function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
