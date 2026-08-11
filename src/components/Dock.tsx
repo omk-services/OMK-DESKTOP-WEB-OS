@@ -24,16 +24,21 @@ import { X, Settings2, PanelBottom, PanelRight, Check } from 'lucide-react';
 
 /** Encombrement du dock horizontal, marge comprise.
  *
- *  46 et non 92 : la barre a ete reduite de moitie a la demande. Les pastilles
+ *  50 et non 92 : la barre a ete reduite de moitie a la demande. Les pastilles
  *  passent de 48 a 28 px et les icones de 24 a 16 — assez pour rester
  *  cliquables a la souris, sans manger le bas du bureau.
  *
+ *  Le chiffre est MESURE, pas estime : 28 px de pastille + 12 px de marge
+ *  interieure (`py-1.5`) + 2 px de bordure = 42 px de barre, plus 8 px de
+ *  `mb-2`. Il valait 46 — quatre pixels de moins que la realite, que
+ *  `DesktopIcons` reservait donc en trop peu.
+ *
  *  `DesktopIcons` l'importe pour s'arreter au-dessus de la barre. En position
  *  droite, cette reserve du bas n'a plus lieu d'etre : voir `LARGEUR_DOCK`. */
-export const HAUTEUR_DOCK = 46;
+export const HAUTEUR_DOCK = 50;
 
 /** Encombrement du dock vertical, marge comprise. */
-export const LARGEUR_DOCK = 52;
+export const LARGEUR_DOCK = 50;
 
 const TAILLE_PASTILLE = 28;
 const TAILLE_ICONE = 16;
@@ -112,11 +117,34 @@ export function Dock(): import('react').ReactNode {
           backdropFilter: skin.backdrop || undefined,
         }}
       >
+      {/* Defileur des pastilles.
+       *
+       *  `overflow-x-auto` + `overflow-y-visible` etait une paire ILLEGALE : le
+       *  CSS force l'axe `visible` a `auto` des que l'autre ne l'est pas. Les
+       *  decorations posees HORS de la pastille — bouton de fermeture en
+       *  `-top-1 -right-1`, pastille d'etat en `-bottom-1` — devenaient donc du
+       *  debordement defilable au lieu de deborder librement.
+       *
+       *  Mesure faite sur la production : survoler la DERNIERE pastille revelait
+       *  son bouton de fermeture, `scrollWidth` gagnait 4 px, une barre de
+       *  defilement horizontale apparaissait et prenait 15 px de hauteur — la
+       *  barre passait de 42 a 57 px. Le dock etant ancre en bas, il grandissait
+       *  VERS LE HAUT : la pastille fuyait sous le curseur, qui la perdait, ce
+       *  qui refermait le bouton, ce qui ramenait la pastille. D'ou le
+       *  tremblement, plusieurs fois par seconde.
+       *
+       *  Deux verrous. Une marge interieure qui LOGE les decorations (4 px de
+       *  debord, plus 1,4 px pris par `hover:scale-110` : 6 px suffisent), rendue
+       *  invisible par la marge negative qui la compense — rien ne bouge a
+       *  l'ecran. Et `no-scrollbar`, pour qu'un debordement legitime, quand
+       *  beaucoup d'apps sont ouvertes, ne reprenne jamais de place dans la mise
+       *  en page. Les deux axes sont desormais declares explicitement : plus de
+       *  paire illegale, donc plus de valeur calculee en douce. */}
       <div
-        className={`flex min-w-0 ${
+        className={`no-scrollbar -m-1.5 flex min-w-0 p-1.5 ${
           vertical
-            ? 'max-h-[70vh] flex-col items-center gap-1.5 overflow-y-auto overflow-x-visible'
-            : 'max-w-[78vw] items-end gap-1.5 overflow-x-auto overflow-y-visible'
+            ? 'max-h-[70vh] flex-col items-center gap-1.5 overflow-y-auto overflow-x-hidden'
+            : 'max-w-[78vw] items-end gap-1.5 overflow-x-auto overflow-y-hidden'
         }`}
       >
         {ouvertes.map(win => {
