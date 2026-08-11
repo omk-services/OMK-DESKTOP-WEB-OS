@@ -137,51 +137,64 @@ export const TENANT_LEVELS: {
 ];
 
 /**
- * Sonde reseau : envoie un HEAD sur l'endpoint d'autorisation Supabase du
- * provider et regarde le code renvoye. 302 = provider actif, 400/404 avec
- * mention explicite du provider = non configure. On n'utilise PAS
- * `signInWithOAuth` directement : cette fonction declenche une redirection
- * du navigateur et son resultat depend du timing de la session.
+ * Quels fournisseurs sont reellement actifs ?
  *
- * Si la sonde echoue, le bouton reste visible mais affiche son
- * `setupHint` : l'utilisateur voit la cause sans etre bloque.
+ *  La premiere version envoyait un HEAD sur `/auth/v1/authorize?provider=<id>`
+ *  et devinait l'etat d'apres le code HTTP. Mesure faite sur la production :
+ *  cet endpoint **n'accepte pas HEAD** et rend 405 — soit trois lignes rouges
+ *  en console a chaque chargement, une par fournisseur, et un etat toujours
+ *  faux puisque 405 tombait dans la branche « injoignable ».
+ *
+ *  C'est le meme defaut que la sonde de `supabase.ts` corrigee en meme temps :
+ *  interroger un endpoint avec une methode qu'il ne sert pas, puis inferer un
+ *  sens du code d'erreur. **Supabase dit lui-meme quels fournisseurs sont
+ *  actifs** : `GET /auth/v1/settings` rend un objet de booleens
+ *  (`{ google: false, apple: false, azure: false, ... }`).
+ *
+ *  Une seule requete pour tous les fournisseurs, au lieu d'une par
+ *  fournisseur, et une reponse affirmative au lieu d'une devinette.
  */
-const probeCache = new Map<ProviderId, Promise<ProviderStatus>>();
+let settingsPromise: Promise<Record<string, unknown> | null> | null = null;
 
 function supabaseUrl(): string | null {
   if (typeof window === 'undefined') return null;
   return (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? null;
 }
 
-export function probeProviderStatus(id: ProviderId): Promise<ProviderStatus> {
-  const cached = probeCache.get(id);
-  if (cached) return cached;
-  const promise = (async (): Promise<ProviderStatus> => {
-    if (!supabaseConfigured) return { state: 'unconfigured' };
+function fetchAuthSettings(): Promise<Record<string, unknown> | null> {
+  if (settingsPromise) return settingsPromise;
+  settingsPromise = (async () => {
     const base = supabaseUrl();
-    if (!base) return { state: 'unconfigured' };
+    const cle = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+    if (!base || !cle) return null;
     try {
-      const target = `${base.replace(/\/$/, '')}/auth/v1/authorize?provider=${encodeURIComponent(id)}`;
-      const res = await fetch(target, { method: 'HEAD', redirect: 'manual' });
-      // 302 = Supabase repond et detourne vers le provider. 200 = idem, page de
-      // confirmation chargee. 400/404 avec mention explicite du provider =
-      // non configure cote Supabase Dashboard.
-      if (res.status === 200 || res.status === 302) return { state: 'ready' };
-      const body = await res.text().catch(() => '');
-      if (body.toLowerCase().includes('provider') && body.toLowerCase().includes('disabled')) {
-        return { state: 'unconfigured' };
-      }
-      return { state: 'unreachable' };
+      const res = await fetch(`${base.replace(/\/$/, '')}/auth/v1/settings`, {
+        headers: { apikey: cle },
+      });
+      if (!res.ok) return null;
+      const data = (await res.json()) as Record<string, unknown>;
+      // Selon la version de GoTrue, la carte est a la racine ou sous `external`.
+      const externe = data.external;
+      return (externe && typeof externe === 'object' ? externe : data) as Record<string, unknown>;
     } catch {
-      return { state: 'unreachable' };
+      return null;
     }
   })();
-  probeCache.set(id, promise);
-  return promise;
+  return settingsPromise;
+}
+
+export function probeProviderStatus(id: ProviderId): Promise<ProviderStatus> {
+  return (async (): Promise<ProviderStatus> => {
+    if (!supabaseConfigured) return { state: 'unconfigured' };
+    const actifs = await fetchAuthSettings();
+    // Pas de reponse exploitable : Supabase est configure mais ne repond pas.
+    if (!actifs) return { state: 'unreachable' };
+    return actifs[id] === true ? { state: 'ready' } : { state: 'unconfigured' };
+  })();
 }
 
 export function resetProviderProbes(): void {
-  probeCache.clear();
+  settingsPromise = null;
 }
 
 /**
