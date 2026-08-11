@@ -1,0 +1,16 @@
+{
+  "id": "p_msoc49u8_up11",
+  "scenarioId": "scn_demo_msoc49u5",
+  "toolName": "collection.create",
+  "args": {
+    "collectionId": "tasks",
+    "fields": {
+      "label": "Verify proof",
+      "status": "open"
+    }
+  },
+  "displayName": "Créer Task : Verify proof",
+  "rationale": "test verify.mjs",
+  "actorId": "verify-script",
+  "createdAt": "2026-08-11T07:24:18.512Z"
+}

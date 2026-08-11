@@ -1,0 +1,184 @@
+<!doctype html>
+<!--
+  Coach OS — page diagnostic (/landing/diagnostic/)
+
+  Les six grilles de l'audit : maturité, données, nature de tâche,
+  automatisabilité, contexte, arbitrage & ROI. Registre : Editorial Mag
+  (papier crème, liseré noir) — un raisonnement se lit, il ne se parcourt
+  pas. La grille Editorial souligne le ton manuel de référence.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fdfbf5" />
+
+    <title>Diagnostic — Coach OS</title>
+    <meta name="description" content="Six grilles à passer avant d'allumer un outil : maturité, données, nature de tâche, automatisabilité, contexte, arbitrage. Reprises du manuel de diagnostic IA, adaptées au métier de coach solo." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://coach-os.app/landing/diagnostic/" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://coach-os.app/landing/diagnostic/" />
+    <meta property="og:site_name" content="Coach OS" />
+    <meta property="og:title" content="Le diagnostic avant l'outil — Coach OS" />
+    <meta property="og:description" content="Six grilles, cinq tests, un principe directeur. Cadrer avant d'allumer." />
+    <meta property="og:image" content="https://coach-os.app/landing/og-image.svg" />
+    <meta property="og:image:alt" content="Six grilles pour cadrer un projet IA avant d'allumer un outil." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Le diagnostic avant l'outil — Coach OS" />
+    <meta name="twitter:description" content="Six grilles, cinq tests, un principe directeur. Cadrer avant d'allumer." />
+    <meta name="twitter:image" content="https://coach-os.app/landing/og-image.svg" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Le diagnostic avant l'outil",
+      "description": "Six grilles à passer avant d'allumer un outil : maturité, données, nature de tâche, automatisabilité, contexte, arbitrage.",
+      "author": { "@type": "Organization", "name": "Coach OS" },
+      "publisher": { "@type": "Organization", "name": "Coach OS", "url": "https://coach-os.app" }
+    }
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/landing/favicon.svg" />
+    <link rel="stylesheet" href="/landing/styles.css" />
+  </head>
+
+  <body class="theme-editorial">
+    <main class="landing-shell" id="top">
+
+      <header class="landing-top" role="banner">
+        <a class="landing-top__brand" href="/landing/index.html" aria-label="Coach OS">
+          <span class="landing-top__brand-mark" aria-hidden="true">C</span>
+          <span>Coach <em>OS</em></span>
+        </a>
+        <nav class="landing-top__nav" aria-label="Pages du site">
+          <a href="/landing/diagnostic/index.html" aria-current="page">Diagnostic</a>
+          <a href="/landing/paliers/index.html">Paliers</a>
+          <a href="/landing/engagements/index.html">Engagements</a>
+          <a href="/landing/demo/index.html">Démo</a>
+        </nav>
+      </header>
+
+      <nav class="landing-crumbs" aria-label="Fil d'Ariane">
+        <a href="/landing/index.html">Accueil</a>
+        <span class="landing-crumbs__sep" aria-hidden="true">›</span>
+        <span class="landing-crumbs__here">Diagnostic</span>
+      </nav>
+
+      <!-- ── Intro ──────────────────────────────────────────────────── -->
+      <section class="section" id="diagnostic" aria-labelledby="diag-title">
+        <p class="section__eyebrow">Le mécanisme</p>
+        <h1 class="section__title" id="diag-title">Le diagnostic avant l'outil</h1>
+        <p class="section__intro">
+          Le réflexe qui tue un projet IA, ce n'est pas la technique — c'est le
+          cadrage. Six grilles à passer avant d'allumer quoi que ce soit.
+          Reprises du manuel de diagnostic IA, adaptées au métier de coach solo.
+        </p>
+
+        <div class="diag-coda">
+          <p class="diag-coda__label">Principe directeur</p>
+          <blockquote class="diag-coda__quote">
+            Une entreprise n'a pas un problème d'IA. Elle a des tâches qui coûtent
+            cher et dont personne ne parle. L'IA n'est que la <em>réponse éventuelle</em>.
+          </blockquote>
+          <p class="diag-coda__source">Source : audit.pdf p.1 — principe directeur</p>
+        </div>
+
+        <div class="diag-grid">
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Maturité</h3>
+            <span class="diag-cell__hint">Discuter / Connecter / Déléguer</span>
+            <p class="diag-cell__body">
+              On ne saute pas un niveau. Le niveau 1 se paie en abonnements ; le
+              niveau 2 se paie en processus ; le niveau 3 — la délégation réelle —
+              se paie en critères écrits et en instrumentations.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Données</h3>
+            <span class="diag-cell__hint">Ce qui peut entrer dans l'IA, et ce qui ne doit pas</span>
+            <p class="diag-cell__body">
+              Une note nominative n'est pas un cas de figure, c'est une
+              exclusion par défaut. Le bon réflexe : « est-ce RGPD-compatible,
+              puis-je tracer ce qui est traité automatiquement, puis-je l'effacer ? »
+              Trois oui ? Ça passe.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Nature de tâche</h3>
+            <span class="diag-cell__hint">Recherche, production, orchestration, raisonnement long</span>
+            <p class="diag-cell__body">
+              « L'IA oublie tout » n'est pas un défaut de l'IA, c'est le
+              mauvais outil. Chaque nature de tâche appelle une famille d'outils
+              et une puissance de modèle. Résumer trois heures de réunion dans un
+              chat généraliste, c'est diagnostiquer le mauvais problème.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Automatisabilité</h3>
+            <span class="diag-cell__hint">Cinq tests avant de promettre</span>
+            <p class="diag-cell__body">
+              T1 la tâche se répète, T2 la décision s'explique, T3 l'entrée est
+              exploitable, T4 l'erreur reste interne, T5 un propriétaire identifié
+              la tient. Un seul rouge, on repousse. Quelle que soit la douleur.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Contexte</h3>
+            <span class="diag-cell__hint">Ce qui rend votre pratique irremplaçable</span>
+            <p class="diag-cell__body">
+              Tous les concurrents ont accès aux mêmes modèles. La seule chose
+              non copiable, c'est ce que vous leur donnez à lire. Vos exemples
+              labellisés, vos exceptions, vos « ça dépend ». C'est là que vous
+              êtes seul. C'est là qu'il faut capitaliser.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Arbitrage &amp; ROI</h3>
+            <span class="diag-cell__hint">Chiffrer avant de promettre</span>
+            <p class="diag-cell__body">
+              gain = (h/mois × coût horaire chargé) − (coût d'exécution +
+              maintenance). Deux règles d'hygiène : ne comptez que le temps
+              réellement libéré, et provisionnez la maintenance, parce qu'une
+              automatisation se dérègle dès que l'outil source change.
+            </p>
+          </article>
+        </div>
+
+        <nav class="page-next" aria-label="Suite">
+          <a href="/landing/index.html" style="font-size:14px; color: var(--landing-text-muted); font-family: var(--landing-sans); font-weight: 600;">
+            ← Retour à l'accueil
+          </a>
+          <a href="/landing/paliers/index.html">
+            Voir les quatre paliers
+            <span class="page-next__arrow" aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </section>
+
+      <footer class="landing-footer">
+        <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
+        <span>
+          <a href="/landing/index.html">Accueil</a>
+          ·
+          <a href="/landing/paliers/index.html">Paliers</a>
+          ·
+          <a href="/landing/engagements/index.html">Engagements</a>
+          ·
+          <a href="/landing/demo/index.html">Démo</a>
+        </span>
+      </footer>
+
+    </main>
+  </body>
+</html>

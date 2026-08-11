@@ -292,6 +292,22 @@ export function AgentTile(props: AgentTileProps) {
     [character.width, character.height, barHaut, dockBas],
   );
 
+  // Re-render sur redimensionnement de la fenetre : sans cet ecouteur, un
+  // shrink laisse la decision de placement figee alors que la geometrie a
+  // change. Le filet de securite vit dans `bornerDansCadre` au-dessus ; ici
+  // on ne s'occupe que du flip horizontal/vertical.
+  const [, setWindowSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const sync = () => setWindowSize({ w: window.innerWidth, h: window.innerHeight });
+    sync();
+    window.addEventListener('resize', sync);
+    return () => window.removeEventListener('resize', sync);
+  }, []);
+
+  // Filet de securite : au montage et a chaque redimensionnement, on
+  // recadre la position de l'avatar dans le viewport. Sans ca, un agent
+  // charge depuis un store dont la position est issue d'une autre machine
+  // peut apparaitre hors cadre.
   useEffect(() => {
     const recadrer = () => {
       const borne = bornerDansCadre(agent.position);
@@ -486,6 +502,19 @@ export function AgentTile(props: AgentTileProps) {
   const showBubble = agent.bubbleOpen;
   const bubbleWidth = 280;
 
+  // ─── Placement de la bulle : on calcule a chaque rendu si elle tient a
+  // droite, sinon on la bascule a gauche. Meme chose en vertical : si elle
+  // depasse en bas, on la met au-dessus de l'avatar. C'est ce qui evite le
+  // piege historique : l'avatar colle au bord droit + bulle ouverte =
+  // avatar pousse hors du viewport par le flex layout. ───
+  const SPRITE_GAP = 12;
+  const ESTIMATED_BUBBLE_HEIGHT = 220; // hauteur approx d'une bulle agent
+  const placeBubbleLeft =
+    agent.position.x + character.width + bubbleWidth + SPRITE_GAP > window.innerWidth - 8;
+  const placeBubbleAbove =
+    agent.position.y + character.height + ESTIMATED_BUBBLE_HEIGHT + SPRITE_GAP >
+    window.innerHeight - dockBas;
+
   return (
     <div
       data-assistant-overlay
@@ -493,61 +522,70 @@ export function AgentTile(props: AgentTileProps) {
       data-agent-backend={agent.backend}
       data-agent-available={agent.backendAvailable}
       className="fixed z-[4500] select-none"
-      style={{ left: agent.position.x, top: agent.position.y }}
+      style={{ left: agent.position.x, top: agent.position.y, width: character.width, height: character.height }}
     >
-      <div className="flex items-end gap-3">
-        {showBubble && (
-          <AgentBubble
-            agent={agent}
-            character={character}
-            text={bubbleText}
-            isStreaming={isStreaming}
-            hasError={hasError}
-            input={input}
-            setInput={setInput}
-            onSend={send}
-            onStop={stop}
-            onClose={() => onSetBubbleOpen(agent.id, false)}
-            onClear={() => onClearHistory(agent.id)}
-            width={bubbleWidth}
-            voiceEnabled={voiceEnabled}
-            canListen={canListen}
-            recognitionState={recognition.state}
-            synthesisState={synthesis.state}
-            onStartListening={() => recognition.start()}
-            onStopListening={() => recognition.stop()}
-            onStopSpeaking={() => synthesis.stop()}
-          />
+      <div
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className="relative w-full h-full cursor-grab active:cursor-grabbing"
+        data-sprite-handle
+        title={agent.name}
+      >
+        <SpriteAgent
+          character={character}
+          intent={intent}
+          loop={entryDone ? isStreaming || hasError : false}
+          onFinished={entryDone ? undefined : () => setEntryDone(true)}
+        />
+        {!showBubble && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onToggleBubble(agent.id); }}
+            className="absolute -top-2 -right-2 h-5 w-5 rounded-full flex items-center justify-center text-white shadow"
+            style={{ background: character.bubble.border, fontSize: 10 }}
+            aria-label={`Open ${agent.name}`}
+            data-assistant-open
+          >
+            <MessageSquare className="w-2.5 h-2.5" />
+          </button>
         )}
-        <div
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          className="relative cursor-grab active:cursor-grabbing"
-          style={{ width: character.width, height: character.height }}
-          data-sprite-handle
-          title={agent.name}
-        >
-          <SpriteAgent
-            character={character}
-            intent={intent}
-            loop={entryDone ? isStreaming || hasError : false}
-            onFinished={entryDone ? undefined : () => setEntryDone(true)}
-          />
-          {!showBubble && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onToggleBubble(agent.id); }}
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full flex items-center justify-center text-white shadow"
-              style={{ background: character.bubble.border, fontSize: 10 }}
-              aria-label={`Open ${agent.name}`}
-              data-assistant-open
-            >
-              <MessageSquare className="w-2.5 h-2.5" />
-            </button>
-          )}
-        </div>
+        {showBubble && (
+          <div
+            style={{
+              position: 'absolute',
+              left: placeBubbleLeft ? -bubbleWidth - SPRITE_GAP : character.width + SPRITE_GAP,
+              top: placeBubbleAbove ? undefined : 0,
+              bottom: placeBubbleAbove ? character.height + SPRITE_GAP : undefined,
+              width: bubbleWidth,
+            }}
+            data-bubble-side={placeBubbleLeft ? 'left' : 'right'}
+            data-bubble-vertical={placeBubbleAbove ? 'above' : 'below'}
+          >
+            <AgentBubble
+              agent={agent}
+              character={character}
+              text={bubbleText}
+              isStreaming={isStreaming}
+              hasError={hasError}
+              input={input}
+              setInput={setInput}
+              onSend={send}
+              onStop={stop}
+              onClose={() => onSetBubbleOpen(agent.id, false)}
+              onClear={() => onClearHistory(agent.id)}
+              width={bubbleWidth}
+              voiceEnabled={voiceEnabled}
+              canListen={canListen}
+              recognitionState={recognition.state}
+              synthesisState={synthesis.state}
+              onStartListening={() => recognition.start()}
+              onStopListening={() => recognition.stop()}
+              onStopSpeaking={() => synthesis.stop()}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

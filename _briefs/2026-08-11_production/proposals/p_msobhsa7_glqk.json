@@ -1,0 +1,15 @@
+{
+  "id": "p_msobhsa7_glqk",
+  "scenarioId": "scn_test",
+  "toolName": "collection.create",
+  "args": {
+    "collectionId": "tasks",
+    "fields": {
+      "label": "Test",
+      "status": "open"
+    }
+  },
+  "displayName": "Test",
+  "actorId": "test-actor",
+  "createdAt": "2026-08-11T07:06:49.327Z"
+}

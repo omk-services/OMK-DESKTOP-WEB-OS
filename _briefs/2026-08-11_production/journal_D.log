@@ -1,0 +1,40 @@
+Tous les livrables sont en place. Récapitulatif.
+
+**Statut : terminé sur le périmètre alloué.**
+
+## Fichiers créés
+
+```
+src/lib/authProviders.ts                    — types, providers, niveau, sonde reseau
+src/components/auth/RotatingBackdrop.tsx    — decor anime (2 couches, crossfade 1s)
+src/components/auth/AuthCard.tsx             — formulaire sanctuaire (zone figee)
+src/components/auth/ProviderButtons.tsx     — boutons Google / Apple / Microsoft
+src/components/auth/LevelSelector.tsx       — Architecte / Coach / Demo
+src/apps/auth/AuthPage.tsx                  — composition + portique auth
+src/apps/auth/FOURNISSEURS.md               — guide pas-a-pas utilisateur
+src/App.tsx (modifie)                       — gate AuthPage → Desktop
+tools/auth-shot.mjs                         — capture dediee auth
+tools/auth-validation-shot.mjs              — capture erreurs de validation
+tools/auth-inspect.mjs                      — inspecteur DOM debug
+_briefs/2026-08-11_production/RAPPORT_D_AUTH.md
+_briefs/2026-08-11_production/01-09-*.png  — 9 captures (signin, signup, t0/t1/t2, reduced-motion, validation, niveaux)
+```
+
+## Mesures clés
+
+```
+champ courriel a : x=580 y=273 w=304 h=20
+  -> identique sur 02-t0.png (0.5s), 03-t1.png (1.5s), 04-t2.png (2.5s)
+  -> form au pixel identique pendant que le decor cycle Aurora -> Wabi-sabi
+```
+
+- 0 erreur TypeScript dans mes fichiers
+- Console clean (sauf un 404 hors périmètre sur 04-t2.png)
+- `prefers-reduced-motion` testé via `emulateMedia`
+- 3 niveaux (Architecte/Coach/Demo) avec transmission via metadata Supabase
+
+## Hors périmètre (cf. rapport §"Pas fait")
+
+- Page `/auth/callback` (le retour OAuth) — un reload suffit en attendant
+- Logique serveur multi-tenant — agent B
+- Tests unitaires — la preuve est par capture

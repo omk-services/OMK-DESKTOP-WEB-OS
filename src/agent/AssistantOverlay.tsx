@@ -21,6 +21,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { AgentTile } from './AgentTile';
 import { useAssistantStore } from '../stores/assistant.store';
 
+// Hook de dev : expose le store assistant sur window pour piloter la preuve
+// de confinement. Sans danger en prod (meme signature que shell.store.ts).
+if (typeof window !== 'undefined') {
+  (window as unknown as { __coachos?: Record<string, unknown> }).__coachos = {
+    ...((window as unknown as { __coachos?: Record<string, unknown> }).__coachos ?? {}),
+    assistant: useAssistantStore,
+  };
+}
+
 interface RosterResponse {
   agents: Array<{
     id: string;

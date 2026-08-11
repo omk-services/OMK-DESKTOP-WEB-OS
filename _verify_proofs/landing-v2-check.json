@@ -1,0 +1,966 @@
+{
+  "base": "http://localhost:5173",
+  "generatedAt": "2026-08-11T09:16:35.917Z",
+  "captures": [
+    {
+      "page": "home",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-home-1280.png"
+    },
+    {
+      "page": "diagnostic",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-diagnostic-1280.png"
+    },
+    {
+      "page": "paliers",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-paliers-1280.png"
+    },
+    {
+      "page": "engagements",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-engagements-1280.png"
+    },
+    {
+      "page": "demo",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-demo-1280-hidden.png",
+      "state": "hidden"
+    },
+    {
+      "page": "demo",
+      "viewport": "1280",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-demo-1280.png"
+    },
+    {
+      "page": "home",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-home-375.png"
+    },
+    {
+      "page": "diagnostic",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-diagnostic-375.png"
+    },
+    {
+      "page": "paliers",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-paliers-375.png"
+    },
+    {
+      "page": "engagements",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-engagements-375.png"
+    },
+    {
+      "page": "demo",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-demo-375-hidden.png",
+      "state": "hidden"
+    },
+    {
+      "page": "demo",
+      "viewport": "375",
+      "file": "_briefs\\2026-08-11_production\\captures\\landing-v2-demo-375.png"
+    }
+  ],
+  "consoleErrorsByPage": {
+    "home": [
+      {
+        "viewport": "1280",
+        "count": 0,
+        "errors": []
+      },
+      {
+        "viewport": "375",
+        "count": 0,
+        "errors": []
+      }
+    ],
+    "diagnostic": [
+      {
+        "viewport": "1280",
+        "count": 0,
+        "errors": []
+      },
+      {
+        "viewport": "375",
+        "count": 0,
+        "errors": []
+      }
+    ],
+    "paliers": [
+      {
+        "viewport": "1280",
+        "count": 0,
+        "errors": []
+      },
+      {
+        "viewport": "375",
+        "count": 0,
+        "errors": []
+      }
+    ],
+    "engagements": [
+      {
+        "viewport": "1280",
+        "count": 0,
+        "errors": []
+      },
+      {
+        "viewport": "375",
+        "count": 0,
+        "errors": []
+      }
+    ],
+    "demo": [
+      {
+        "viewport": "1280",
+        "count": 0,
+        "errors": []
+      },
+      {
+        "viewport": "375",
+        "count": 0,
+        "errors": []
+      }
+    ]
+  },
+  "contrasteByPage": {
+    "home": [
+      {
+        "name": "H1 hero",
+        "sel": "h1.hero__title",
+        "present": true,
+        "fg": "rgb(42,38,34)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 13.31,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "H1 section",
+        "sel": "h1.section__title",
+        "present": false
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".hero__subtitle",
+        "present": true,
+        "fg": "rgb(107,102,93)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 5.05,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Section intro",
+        "sel": ".section__intro",
+        "present": true,
+        "fg": "rgb(107,102,93)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 5.05,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": true,
+        "fg": "rgb(107,102,93)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 5.05,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Diag cell body",
+        "sel": ".diag-cell__body",
+        "present": false
+      },
+      {
+        "name": "Diag coda quote",
+        "sel": ".diag-coda__quote",
+        "present": false
+      },
+      {
+        "name": "Ladder cell body",
+        "sel": ".ladder-table td",
+        "present": false
+      },
+      {
+        "name": "Ladder pill green",
+        "sel": ".ladder-state--green",
+        "present": false
+      },
+      {
+        "name": "Ladder pill amber",
+        "sel": ".ladder-state--amber",
+        "present": false
+      },
+      {
+        "name": "Engage card body",
+        "sel": ".engage-card__body",
+        "present": false
+      },
+      {
+        "name": "Engage card title",
+        "sel": ".engage-card__title",
+        "present": false
+      },
+      {
+        "name": "Engage card mark",
+        "sel": ".engage-card__mark",
+        "present": false
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": true,
+        "fg": "rgb(244,241,234)",
+        "bg": "rgb(26,24,21) (cta-card cta-card--primary)",
+        "ratio": 15.71,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Primary button",
+        "sel": ".btn--primary",
+        "present": true,
+        "fg": "rgb(244,241,234)",
+        "bg": "rgb(26,24,21) (btn btn--primary)",
+        "ratio": 15.71,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Secondary button",
+        "sel": ".btn--secondary",
+        "present": true,
+        "fg": "rgb(42,38,34)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 13.31,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Footer",
+        "sel": ".landing-footer",
+        "present": true,
+        "fg": "rgb(110,105,96)",
+        "bg": "rgb(244,241,234) (theme-glass)",
+        "ratio": 4.83,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".demo-creds__list dt",
+        "present": false
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".demo-creds__list dd",
+        "present": false
+      },
+      {
+        "name": "Creds warn",
+        "sel": ".demo-creds__warn",
+        "present": false
+      },
+      {
+        "name": "Demo card lead",
+        "sel": ".demo-card__lead",
+        "present": false
+      },
+      {
+        "name": "Creds reveal btn",
+        "sel": ".demo-creds__reveal",
+        "present": false
+      }
+    ],
+    "diagnostic": [
+      {
+        "name": "H1 hero",
+        "sel": "h1.hero__title",
+        "present": false
+      },
+      {
+        "name": "H1 section",
+        "sel": "h1.section__title",
+        "present": true,
+        "fg": "rgb(17,17,17)",
+        "bg": "rgb(253,251,245) (theme-editorial)",
+        "ratio": 18.25,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".hero__subtitle",
+        "present": false
+      },
+      {
+        "name": "Section intro",
+        "sel": ".section__intro",
+        "present": true,
+        "fg": "rgb(61,56,51)",
+        "bg": "rgb(253,251,245) (theme-editorial)",
+        "ratio": 11.2,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": false
+      },
+      {
+        "name": "Diag cell body",
+        "sel": ".diag-cell__body",
+        "present": true,
+        "fg": "rgb(61,56,51)",
+        "bg": "rgb(247,243,232) (diag-cell)",
+        "ratio": 10.45,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Diag coda quote",
+        "sel": ".diag-coda__quote",
+        "present": true,
+        "fg": "rgb(253,251,245)",
+        "bg": "rgb(17,17,17) (diag-coda)",
+        "ratio": 18.25,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Ladder cell body",
+        "sel": ".ladder-table td",
+        "present": false
+      },
+      {
+        "name": "Ladder pill green",
+        "sel": ".ladder-state--green",
+        "present": false
+      },
+      {
+        "name": "Ladder pill amber",
+        "sel": ".ladder-state--amber",
+        "present": false
+      },
+      {
+        "name": "Engage card body",
+        "sel": ".engage-card__body",
+        "present": false
+      },
+      {
+        "name": "Engage card title",
+        "sel": ".engage-card__title",
+        "present": false
+      },
+      {
+        "name": "Engage card mark",
+        "sel": ".engage-card__mark",
+        "present": false
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": false
+      },
+      {
+        "name": "Primary button",
+        "sel": ".btn--primary",
+        "present": false
+      },
+      {
+        "name": "Secondary button",
+        "sel": ".btn--secondary",
+        "present": false
+      },
+      {
+        "name": "Footer",
+        "sel": ".landing-footer",
+        "present": true,
+        "fg": "rgb(90,83,74)",
+        "bg": "rgb(253,251,245) (theme-editorial)",
+        "ratio": 7.32,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".demo-creds__list dt",
+        "present": false
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".demo-creds__list dd",
+        "present": false
+      },
+      {
+        "name": "Creds warn",
+        "sel": ".demo-creds__warn",
+        "present": false
+      },
+      {
+        "name": "Demo card lead",
+        "sel": ".demo-card__lead",
+        "present": false
+      },
+      {
+        "name": "Creds reveal btn",
+        "sel": ".demo-creds__reveal",
+        "present": false
+      }
+    ],
+    "paliers": [
+      {
+        "name": "H1 hero",
+        "sel": "h1.hero__title",
+        "present": false
+      },
+      {
+        "name": "H1 section",
+        "sel": "h1.section__title",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(250,247,240) (theme-bento)",
+        "ratio": 16.35,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".hero__subtitle",
+        "present": false
+      },
+      {
+        "name": "Section intro",
+        "sel": ".section__intro",
+        "present": true,
+        "fg": "rgb(68,64,60)",
+        "bg": "rgb(250,247,240) (theme-bento)",
+        "ratio": 9.6,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": false
+      },
+      {
+        "name": "Diag cell body",
+        "sel": ".diag-cell__body",
+        "present": false
+      },
+      {
+        "name": "Diag coda quote",
+        "sel": ".diag-coda__quote",
+        "present": false
+      },
+      {
+        "name": "Ladder cell body",
+        "sel": ".ladder-table td",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(255,255,255) (ladder-table)",
+        "ratio": 17.49,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Ladder pill green",
+        "sel": ".ladder-state--green",
+        "present": true,
+        "fg": "rgb(21,128,61)",
+        "bg": "rgb(220,252,231) (ladder-state ladder-state--green)",
+        "ratio": 4.57,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Ladder pill amber",
+        "sel": ".ladder-state--amber",
+        "present": true,
+        "fg": "rgb(133,77,14)",
+        "bg": "rgb(254,243,199) (ladder-state ladder-state--amber)",
+        "ratio": 6.15,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Engage card body",
+        "sel": ".engage-card__body",
+        "present": false
+      },
+      {
+        "name": "Engage card title",
+        "sel": ".engage-card__title",
+        "present": false
+      },
+      {
+        "name": "Engage card mark",
+        "sel": ".engage-card__mark",
+        "present": false
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": false
+      },
+      {
+        "name": "Primary button",
+        "sel": ".btn--primary",
+        "present": true,
+        "fg": "rgb(250,247,240)",
+        "bg": "rgb(28,25,23) (btn btn--primary)",
+        "ratio": 16.35,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Secondary button",
+        "sel": ".btn--secondary",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(250,247,240) (theme-bento)",
+        "ratio": 16.35,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Footer",
+        "sel": ".landing-footer",
+        "present": true,
+        "fg": "rgb(87,83,78)",
+        "bg": "rgb(250,247,240) (theme-bento)",
+        "ratio": 7.13,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".demo-creds__list dt",
+        "present": false
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".demo-creds__list dd",
+        "present": false
+      },
+      {
+        "name": "Creds warn",
+        "sel": ".demo-creds__warn",
+        "present": false
+      },
+      {
+        "name": "Demo card lead",
+        "sel": ".demo-card__lead",
+        "present": false
+      },
+      {
+        "name": "Creds reveal btn",
+        "sel": ".demo-creds__reveal",
+        "present": false
+      }
+    ],
+    "engagements": [
+      {
+        "name": "H1 hero",
+        "sel": "h1.hero__title",
+        "present": false
+      },
+      {
+        "name": "H1 section",
+        "sel": "h1.section__title",
+        "present": true,
+        "fg": "rgb(15,23,42)",
+        "bg": "rgb(254,252,232) (theme-neobrutal)",
+        "ratio": 17.26,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".hero__subtitle",
+        "present": false
+      },
+      {
+        "name": "Section intro",
+        "sel": ".section__intro",
+        "present": true,
+        "fg": "rgb(31,41,55)",
+        "bg": "rgb(254,252,232) (theme-neobrutal)",
+        "ratio": 14.19,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": false
+      },
+      {
+        "name": "Diag cell body",
+        "sel": ".diag-cell__body",
+        "present": false
+      },
+      {
+        "name": "Diag coda quote",
+        "sel": ".diag-coda__quote",
+        "present": false
+      },
+      {
+        "name": "Ladder cell body",
+        "sel": ".ladder-table td",
+        "present": false
+      },
+      {
+        "name": "Ladder pill green",
+        "sel": ".ladder-state--green",
+        "present": false
+      },
+      {
+        "name": "Ladder pill amber",
+        "sel": ".ladder-state--amber",
+        "present": false
+      },
+      {
+        "name": "Engage card body",
+        "sel": ".engage-card__body",
+        "present": true,
+        "fg": "rgb(31,41,55)",
+        "bg": "rgb(254,249,195) (engage-card)",
+        "ratio": 13.67,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage card title",
+        "sel": ".engage-card__title",
+        "present": true,
+        "fg": "rgb(15,23,42)",
+        "bg": "rgb(254,249,195) (engage-card)",
+        "ratio": 16.62,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage card mark",
+        "sel": ".engage-card__mark",
+        "present": true,
+        "fg": "rgb(254,252,232)",
+        "bg": "rgb(0,0,0) (engage-card__mark)",
+        "ratio": 20.3,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": false
+      },
+      {
+        "name": "Primary button",
+        "sel": ".btn--primary",
+        "present": false
+      },
+      {
+        "name": "Secondary button",
+        "sel": ".btn--secondary",
+        "present": false
+      },
+      {
+        "name": "Footer",
+        "sel": ".landing-footer",
+        "present": true,
+        "fg": "rgb(75,85,99)",
+        "bg": "rgb(254,252,232) (theme-neobrutal)",
+        "ratio": 7.31,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".demo-creds__list dt",
+        "present": false
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".demo-creds__list dd",
+        "present": false
+      },
+      {
+        "name": "Creds warn",
+        "sel": ".demo-creds__warn",
+        "present": false
+      },
+      {
+        "name": "Demo card lead",
+        "sel": ".demo-card__lead",
+        "present": false
+      },
+      {
+        "name": "Creds reveal btn",
+        "sel": ".demo-creds__reveal",
+        "present": false
+      }
+    ],
+    "demo": [
+      {
+        "name": "H1 hero",
+        "sel": "h1.hero__title",
+        "present": false
+      },
+      {
+        "name": "H1 section",
+        "sel": "h1.section__title",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(232,229,225) (theme-softui)",
+        "ratio": 13.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".hero__subtitle",
+        "present": false
+      },
+      {
+        "name": "Section intro",
+        "sel": ".section__intro",
+        "present": true,
+        "fg": "rgb(68,64,60)",
+        "bg": "rgb(232,229,225) (theme-softui)",
+        "ratio": 8.18,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": false
+      },
+      {
+        "name": "Diag cell body",
+        "sel": ".diag-cell__body",
+        "present": true,
+        "fg": "rgb(68,64,60)",
+        "bg": "rgb(239,235,230) (diag-cell)",
+        "ratio": 8.66,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Diag coda quote",
+        "sel": ".diag-coda__quote",
+        "present": false
+      },
+      {
+        "name": "Ladder cell body",
+        "sel": ".ladder-table td",
+        "present": false
+      },
+      {
+        "name": "Ladder pill green",
+        "sel": ".ladder-state--green",
+        "present": false
+      },
+      {
+        "name": "Ladder pill amber",
+        "sel": ".ladder-state--amber",
+        "present": false
+      },
+      {
+        "name": "Engage card body",
+        "sel": ".engage-card__body",
+        "present": false
+      },
+      {
+        "name": "Engage card title",
+        "sel": ".engage-card__title",
+        "present": false
+      },
+      {
+        "name": "Engage card mark",
+        "sel": ".engage-card__mark",
+        "present": false
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": false
+      },
+      {
+        "name": "Primary button",
+        "sel": ".btn--primary",
+        "present": true,
+        "fg": "rgb(232,229,225)",
+        "bg": "rgb(28,25,23) (btn btn--primary)",
+        "ratio": 13.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Secondary button",
+        "sel": ".btn--secondary",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(232,229,225) (demo-card)",
+        "ratio": 13.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Footer",
+        "sel": ".landing-footer",
+        "present": true,
+        "fg": "rgb(87,83,78)",
+        "bg": "rgb(232,229,225) (theme-softui)",
+        "ratio": 6.08,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".demo-creds__list dt",
+        "present": true,
+        "fg": "rgb(87,83,78)",
+        "bg": "rgb(239,235,230) (demo-creds demo-creds--hidden)",
+        "ratio": 6.43,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".demo-creds__list dd",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(239,235,230) (demo-creds demo-creds--hidden)",
+        "ratio": 14.74,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds warn",
+        "sel": ".demo-creds__warn",
+        "present": true,
+        "fg": "rgb(68,64,60)",
+        "bg": "rgb(239,235,230) (demo-creds demo-creds--hidden)",
+        "ratio": 8.66,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Demo card lead",
+        "sel": ".demo-card__lead",
+        "present": true,
+        "fg": "rgb(68,64,60)",
+        "bg": "rgb(232,229,225) (demo-card)",
+        "ratio": 8.18,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds reveal btn",
+        "sel": ".demo-creds__reveal",
+        "present": true,
+        "fg": "rgb(28,25,23)",
+        "bg": "rgb(239,235,230) (demo-creds demo-creds--hidden)",
+        "ratio": 14.74,
+        "aa": true,
+        "aaa": true
+      }
+    ]
+  },
+  "failedContraste": {
+    "home": [],
+    "diagnostic": [],
+    "paliers": [],
+    "engagements": [],
+    "demo": []
+  },
+  "failedContrasteCount": {
+    "home": 0,
+    "diagnostic": 0,
+    "paliers": 0,
+    "engagements": 0,
+    "demo": 0
+  },
+  "navigation": {
+    "links": [
+      {
+        "text": "Diagnostic",
+        "href": "/landing/diagnostic/index.html",
+        "target": ""
+      },
+      {
+        "text": "Paliers",
+        "href": "/landing/paliers/index.html",
+        "target": ""
+      },
+      {
+        "text": "Engagements",
+        "href": "/landing/engagements/index.html",
+        "target": ""
+      },
+      {
+        "text": "Démo",
+        "href": "/landing/demo/index.html",
+        "target": ""
+      },
+      {
+        "text": "Application",
+        "href": "/",
+        "target": ""
+      }
+    ],
+    "navTest": [
+      {
+        "link": "Diagnostic",
+        "href": "/landing/diagnostic/index.html",
+        "backToHome": true
+      },
+      {
+        "link": "Paliers",
+        "href": "/landing/paliers/index.html",
+        "backToHome": true
+      },
+      {
+        "link": "Engagements",
+        "href": "/landing/engagements/index.html",
+        "backToHome": true
+      },
+      {
+        "link": "Démo",
+        "href": "/landing/demo/index.html",
+        "backToHome": true
+      },
+      {
+        "link": "Application",
+        "href": "/",
+        "backToHome": false
+      }
+    ]
+  },
+  "demoState": {
+    "hidden": {
+      "classes": "demo-creds demo-creds--hidden",
+      "blurApplied": false,
+      "btnLabel": "Révéler les identifiants",
+      "btnExpanded": "false"
+    },
+    "revealed": {
+      "classes": "demo-creds",
+      "blurApplied": false,
+      "btnLabel": "Masquer les identifiants",
+      "btnExpanded": "true"
+    }
+  }
+}

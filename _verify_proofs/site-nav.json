@@ -1,0 +1,106 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T09:43:08.529Z",
+  "headerNavigation": {
+    "links": [
+      {
+        "text": "Accueil",
+        "href": "/site/index.html"
+      },
+      {
+        "text": "Méthode",
+        "href": "/site/methode.html"
+      },
+      {
+        "text": "Paliers",
+        "href": "/site/paliers.html"
+      },
+      {
+        "text": "Engagements",
+        "href": "/site/engagements.html"
+      },
+      {
+        "text": "Démo",
+        "href": "/site/demo.html"
+      }
+    ],
+    "visited": [
+      {
+        "from": "Accueil",
+        "href": "/site/index.html",
+        "h1": "Le bureau qui tient votre méthode — pas l'inverse.",
+        "active": "Accueil"
+      },
+      {
+        "from": "Méthode",
+        "href": "/site/methode.html",
+        "h1": "Le diagnostic avant l'outil",
+        "active": "Méthode"
+      },
+      {
+        "from": "Paliers",
+        "href": "/site/paliers.html",
+        "h1": "Quatre paliers. Pas de piège.",
+        "active": "Paliers"
+      },
+      {
+        "from": "Engagements",
+        "href": "/site/engagements.html",
+        "h1": "Ce qu'on ne fait pas",
+        "active": "Engagements"
+      },
+      {
+        "from": "Démo",
+        "href": "/site/demo.html",
+        "h1": "Trois étapes. Pas de compte.",
+        "active": "Démo"
+      }
+    ]
+  },
+  "subnavNavigation": {
+    "links": [
+      {
+        "text": "Preuve de concept",
+        "href": "#palier-1"
+      },
+      {
+        "text": "SaaS",
+        "href": "#palier-2"
+      },
+      {
+        "text": "Marque blanche",
+        "href": "#palier-3"
+      },
+      {
+        "text": "Souveraineté",
+        "href": "#palier-4"
+      }
+    ],
+    "subnavVisits": [
+      {
+        "link": "Preuve de concept",
+        "hash": "#palier-1",
+        "scrolled": "",
+        "activeSubnav": "Preuve de concept"
+      },
+      {
+        "link": "SaaS",
+        "hash": "#palier-2",
+        "scrolled": "",
+        "activeSubnav": "Preuve de concept"
+      },
+      {
+        "link": "Marque blanche",
+        "hash": "#palier-3",
+        "scrolled": "",
+        "activeSubnav": "Preuve de concept"
+      },
+      {
+        "link": "Souveraineté",
+        "hash": "#palier-4",
+        "scrolled": "",
+        "activeSubnav": "Preuve de concept"
+      }
+    ]
+  }
+}

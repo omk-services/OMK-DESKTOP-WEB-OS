@@ -1,0 +1,12 @@
+{
+  "id": "p_msoblqjp_yo39",
+  "scenarioId": "scn_demo_msoblqjm",
+  "toolName": "collection.delete",
+  "args": {
+    "collectionId": "tasks",
+    "id": "task-1"
+  },
+  "displayName": "Supprimer Task : Relecture contrat Acme",
+  "actorId": "agent:cli",
+  "createdAt": "2026-08-11T07:09:53.701Z"
+}

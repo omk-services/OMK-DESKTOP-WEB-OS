@@ -1,0 +1,1208 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   Coach OS — site statique /site/
+   Périmètre agent J — campagne 2026-08-11.
+
+   Colonne vertébrale (ce qui ne change pas entre sections/pages) :
+     · grille 12 colonnes, gouttière 1.5rem, max-width 1200px ;
+     · transitions entre sections : 600ms cubic-bezier(0.16, 1, 0.3, 1) ;
+     · CTA principal : hauteur 48px, padding 0 24px ;
+     · pied de page identique sur les 5 pages.
+
+   Tout le reste varie par section — voir .sec-* classes plus bas.
+
+   Effets visuels Canvas UI :
+     · Les effets lourds sont portés par des keyframes CSS (cf. fin de fichier).
+     · prefers-reduced-motion: reduce annule tout mouvement.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── 0. RESET ───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; }
+h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd { margin: 0; }
+ul[role="list"], ol[role="list"] { list-style: none; padding: 0; margin: 0; }
+img, picture { max-width: 100%; display: block; }
+button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+a { color: inherit; }
+
+/* ── 1. VARIABLES PARTAGÉES ─────────────────────────────────────────────── */
+
+:root {
+  /* Grille et colonnes vertébrales */
+  --site-max: 1200px;
+  --site-gutter: clamp(1rem, 4vw, 2rem);
+  --site-grid-gap: 1.5rem;
+  --site-section-padding: clamp(4rem, 10vw, 7rem) var(--site-gutter);
+  --site-transition: 600ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Typographie de base — utilisée par toutes les sections sauf exceptions locales */
+  --site-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --site-font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --site-font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+
+  /* Couleurs neutres partagées */
+  --ink: #0a0a0a;
+  --ink-soft: #1a1a1a;
+  --ink-muted: #4a4a4a;
+  --ink-quiet: #6e6e6e;
+  --paper: #fafaf7;
+  --paper-warm: #f4f1ea;
+  --line: #d4d4d4;
+  --line-strong: #0a0a0a;
+}
+
+/* ── 2. ÉLÉMENTS PARTAGÉS ──────────────────────────────────────────────── */
+
+body {
+  font-family: var(--site-font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main { display: block; }
+
+a { text-underline-offset: 0.18em; }
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+::selection { background: var(--ink); color: var(--paper); }
+
+/* ── 3. EN-TÊTE PERSISTANT ──────────────────────────────────────────────── */
+
+.site-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(250, 250, 247, 0.92);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-top__inner {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: 0.875rem var(--site-gutter);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-top__brand {
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.site-top__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.site-top__brand em { font-style: normal; font-weight: 400; color: var(--ink-muted); }
+
+.site-top__nav {
+  display: flex;
+  gap: 1.25rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.site-top__nav a {
+  text-decoration: none;
+  font-size: 0.9375rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid transparent;
+}
+
+.site-top__nav a[aria-current="page"] {
+  border-bottom-color: var(--ink);
+  font-weight: 600;
+}
+
+.site-top__nav a:hover { border-bottom-color: var(--ink); }
+
+/* ── 4. SOUS-NAVIGATION INTRA-PAGE ──────────────────────────────────────── */
+
+.site-subnav {
+  position: sticky;
+  top: 3.125rem; /* juste sous l'en-tête */
+  z-index: 40;
+  background: rgba(250, 250, 247, 0.86);
+  backdrop-filter: saturate(180%) blur(6px);
+  -webkit-backdrop-filter: saturate(180%) blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-subnav__inner {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: 0.5rem var(--site-gutter);
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-subnav__inner::-webkit-scrollbar { display: none; }
+
+.site-subnav a {
+  text-decoration: none;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-muted);
+}
+
+.site-subnav a[aria-current="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── 5. STRUCTURE DE SECTION PARTAGÉE ───────────────────────────────────── */
+
+.site-section {
+  padding: var(--site-section-padding);
+  position: relative;
+  isolation: isolate;
+}
+
+.site-section__inner {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.site-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+
+.site-eyebrow--accent { color: var(--accent, var(--ink)); }
+
+.site-h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+}
+
+.site-h2 {
+  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.site-lead {
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.55;
+  max-width: 60ch;
+  margin-bottom: 2rem;
+}
+
+.site-prose {
+  max-width: 65ch;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.site-prose p + p { margin-top: 1em; }
+
+.site-rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2.5rem 0;
+}
+
+/* ── 6. BOUTONS (CTA) ───────────────────────────────────────────────────── */
+
+.site-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
+}
+
+.site-btn:hover { transform: translateY(-1px); }
+
+.site-btn__arrow { font-size: 1.125em; }
+
+/* ── 7. PIED DE PAGE PARTAGÉ ────────────────────────────────────────────── */
+
+.site-footer {
+  padding: 2.5rem var(--site-gutter);
+  border-top: 1px solid var(--line);
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.site-footer__inner {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.site-footer__nav { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.site-footer__nav a { text-decoration: none; border-bottom: 1px solid transparent; }
+.site-footer__nav a:hover { border-bottom-color: currentColor; }
+
+/* ── 8. EFFETS CANVAS UI EN PURE CSS ────────────────────────────────────── *
+ * Chaque effet a :
+ *  - un keyframe `kf-<name>` qui anime un fond ou un transform ;
+ *  - une classe `.fx-<name>` qui le pose, avec `prefers-reduced-motion: reduce`
+ *    qui annule l'animation.
+ * Le Canvas UI React (src/site/) utilise les mêmes noms pour rester aligné.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+.fx-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .fx-canvas { display: none !important; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SECTION 1 — Home · Hero
+   Style : Exaggerated Minimalism (47)
+   Effet : DecryptReveal
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-hero {
+  background: var(--paper);
+  color: var(--ink);
+  min-height: calc(100vh - 8rem);
+  display: grid;
+  align-items: center;
+  padding-block: clamp(5rem, 12vh, 9rem);
+  --accent: #ff5b1f;
+}
+
+.sec-hero .site-h1 {
+  font-weight: 900;
+  font-size: clamp(3rem, 10vw, 9rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  max-width: 14ch;
+}
+
+.sec-hero .site-h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.sec-hero .site-lead {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  font-weight: 400;
+  max-width: 50ch;
+  color: var(--ink-soft);
+}
+
+.sec-hero .hero__trust {
+  margin-top: 2rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+
+/* DecryptReveal — animation de décodage sur le titre */
+.sec-hero .fx-decrypt {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(255,91,31,0.06) 0 1px, transparent 1px 5px);
+  opacity: 0.7;
+  mix-blend-mode: multiply;
+}
+
+@keyframes kf-decrypt-shift {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 0 6px, 5px 0; }
+}
+
+.sec-hero .fx-decrypt {
+  animation: kf-decrypt-shift 1.6s steps(4) infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-hero .fx-decrypt { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SECTION 2 — Home · Pain
+   Style : Brutalism (4)
+   Effet : Liquid
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-pain {
+  background: var(--paper-warm);
+  color: var(--ink);
+  --accent: #ff0000;
+}
+
+.sec-pain .site-h2 {
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  border-bottom: 6px solid var(--ink);
+  padding-bottom: 0.5rem;
+}
+
+.pain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 0;
+  margin-top: 3rem;
+  border: 3px solid var(--ink);
+}
+
+.pain-card {
+  padding: 2rem 1.75rem;
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  background: var(--paper);
+  transition: none; /* brutalisme : pas de transition */
+}
+
+.pain-card:last-child { border-right: 0; }
+
+.pain-card__number {
+  display: block;
+  font-family: var(--site-font-mono);
+  font-size: 4.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  letter-spacing: -0.04em;
+}
+
+.pain-card__title {
+  font-family: var(--site-font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.pain-card__body {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.pain-card__source {
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--site-font-mono);
+  color: var(--ink-muted);
+}
+
+/* Liquid — bord liquide animé en arrière-plan */
+.sec-pain .fx-liquid {
+  position: absolute;
+  width: 60vmin;
+  height: 60vmin;
+  right: -10vmin;
+  top: 30%;
+  border-radius: 46% 54% 38% 62% / 52% 38% 62% 48%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,0,0,0.18), transparent 70%);
+  filter: blur(40px);
+  opacity: 0.5;
+}
+
+@keyframes kf-liquid-wave {
+  0%   { border-radius: 46% 54% 38% 62% / 52% 38% 62% 48%; transform: translateY(0) rotate(0deg); }
+  50%  { border-radius: 62% 38% 54% 46% / 38% 52% 48% 62%; transform: translateY(-20px) rotate(15deg); }
+  100% { border-radius: 46% 54% 38% 62% / 52% 38% 62% 48%; transform: translateY(0) rotate(0deg); }
+}
+
+.sec-pain .fx-liquid { animation: kf-liquid-wave 9s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-pain .fx-liquid { animation: none; border-radius: 50%; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SECTION 3 — Home · CTA
+   Style : Bento Box Grid (39)
+   Effet : ParticleReveal
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-cta {
+  background: var(--paper);
+  color: var(--ink);
+  --accent: #0080ff;
+}
+
+.cta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.cta-card {
+  background: #f5f5f7;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms ease;
+  grid-column: span 2;
+}
+
+.cta-card--primary {
+  background: var(--ink);
+  color: var(--paper);
+  grid-column: span 2;
+}
+
+.cta-card:hover { transform: scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.06); }
+.cta-card--primary:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.18); }
+
+.cta-card__eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.cta-card__title {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.cta-card__body {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+  max-width: 40ch;
+}
+
+.cta-card__note {
+  font-size: 0.8125rem;
+  margin-top: 1rem;
+  opacity: 0.7;
+}
+
+/* ParticleReveal — grille de points qui apparaît */
+.sec-cta .fx-particle {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--accent) 1px, transparent 1.5px);
+  background-size: 14px 14px;
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-cta .fx-particle { opacity: 0.25; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /methode · Intro
+   Style : Editorial Grid / Magazine (66)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-methode-intro {
+  background: var(--paper);
+  color: var(--ink);
+  padding-block: clamp(5rem, 10vw, 8rem);
+}
+
+.sec-methode-intro .site-h1 {
+  font-family: var(--site-font-serif);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  max-width: 22ch;
+}
+
+.sec-methode-intro .site-lead {
+  font-family: var(--site-font-serif);
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  font-style: italic;
+  color: var(--ink-soft);
+  max-width: 55ch;
+  line-height: 1.5;
+}
+
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--site-grid-gap);
+  margin-top: 4rem;
+}
+
+.editorial-grid__main {
+  grid-column: 1 / 9;
+}
+
+.editorial-grid__aside {
+  grid-column: 9 / -1;
+  border-left: 1px solid var(--line);
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.editorial-prose {
+  font-family: var(--site-font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  max-width: 60ch;
+}
+
+.editorial-prose p + p { margin-top: 1.25em; text-indent: 1.5em; }
+
+.editorial-prose p:first-of-type::first-letter {
+  font-family: var(--site-font-serif);
+  font-size: 4em;
+  font-weight: 700;
+  line-height: 0.85;
+  float: left;
+  margin: 0.1em 0.1em 0 0;
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /methode · Six grilles
+   Style : Swiss Modernism 2.0 (50)
+   Effet : Grid
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-grids {
+  background: #ffffff;
+  color: var(--ink);
+  padding-block: clamp(5rem, 10vw, 8rem);
+}
+
+.sec-grids .site-h2 {
+  font-family: var(--site-font-sans);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  font-size: clamp(1.875rem, 4vw, 3rem);
+}
+
+.sec-grids .site-eyebrow {
+  font-family: var(--site-font-mono);
+  color: #ff5b1f;
+}
+
+.grids-list {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0;
+  margin-top: 3rem;
+  border-top: 1px solid var(--ink);
+}
+
+.grid-row {
+  display: contents;
+}
+
+.grid-cell {
+  grid-column: span 4;
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid var(--ink);
+  border-right: 1px solid var(--ink);
+}
+
+.grid-cell:nth-child(3n) { border-right: 0; }
+
+.grid-cell__index {
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  margin-bottom: 0.5rem;
+}
+
+.grid-cell__label {
+  font-family: var(--site-font-sans);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.grid-cell__hint {
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+
+.grid-cell__body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* Grid — quadrillage de fond, Swiss precision */
+.sec-grids .fx-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 8.33% 80px; /* 12 colonnes */
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /methode · Coda
+   Style : Exaggerated Minimalism (47)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-coda {
+  background: var(--paper);
+  color: var(--ink);
+  padding-block: clamp(6rem, 14vw, 10rem);
+  --accent: #000;
+}
+
+.sec-coda blockquote {
+  font-size: clamp(1.75rem, 4.5vw, 3.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  max-width: 22ch;
+  margin: 0 auto;
+}
+
+.sec-coda blockquote em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.sec-coda cite {
+  display: block;
+  margin-top: 2.5rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  font-style: normal;
+  color: var(--ink-muted);
+  text-align: left;
+  max-width: 22ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /paliers
+   Style : Glassmorphism (3)
+   Effet : Glass
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-paliers {
+  background: linear-gradient(135deg, #0080ff 0%, #8b00ff 50%, #ff1493 100%);
+  color: #ffffff;
+  --accent: #ffffff;
+  position: relative;
+}
+
+.sec-paliers .site-eyebrow { color: rgba(255,255,255,0.85); }
+.sec-paliers .site-h2 { color: #ffffff; max-width: 22ch; }
+
+.paliers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.palier-card {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.palier-card__index {
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 1rem;
+}
+
+.palier-card__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+  line-height: 1.1;
+}
+
+.palier-card__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+
+.palier-card__state::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.palier-card__state--planned::before { background: #fbbf24; }
+.palier-card__state--today::before { background: #22c55e; }
+
+.palier-card__what {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.palier-card__where {
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  opacity: 0.85;
+  border-top: 1px solid rgba(255,255,255,0.3);
+  padding-top: 0.75rem;
+}
+
+.paliers-footnote {
+  margin-top: 3rem;
+  font-family: var(--site-font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #ffffff;
+  max-width: 50ch;
+}
+
+/* Glass — l'effet est déjà dans les cartes ; le fond se charge de l'effet */
+.sec-paliers .fx-glass-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2), transparent 50%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-paliers .fx-glass-overlay { display: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /engagements
+   Style : Brutalism (4)
+   Effet : Shatter
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-engagements {
+  background: #ffeb00; /* jaune brutaliste */
+  color: #000000;
+  --accent: #ff0000;
+}
+
+.sec-engagements .site-h2 {
+  font-family: var(--site-font-mono);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.engage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 0;
+  margin-top: 3rem;
+  border: 4px solid #000;
+}
+
+.engage-card {
+  padding: 2rem 1.5rem;
+  border-right: 4px solid #000;
+  border-bottom: 4px solid #000;
+  background: #ffffff;
+}
+
+.engage-card:nth-child(2n) { background: #000; color: #ffeb00; }
+.engage-card:nth-child(2n) .engage-card__source { color: rgba(255,235,0,0.7); }
+
+.engage-card:last-child { border-right: 0; }
+
+.engage-card__mark {
+  display: inline-block;
+  font-family: var(--site-font-mono);
+  font-weight: 900;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.25rem 0.625rem;
+  margin-bottom: 1rem;
+}
+
+.engage-card__title {
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  font-size: 1.375rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.engage-card__body {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.engage-card__source {
+  margin-top: 1rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #00000080;
+}
+
+/* Shatter — bord polygonal qui pulse */
+.sec-engagements .fx-shatter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 16px, rgba(0,0,0,0.06) 16px 18px);
+}
+
+@keyframes kf-shatter-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.02); }
+}
+
+.sec-engagements .fx-shatter { animation: kf-shatter-pulse 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-engagements .fx-shatter { animation: none; opacity: 0.4; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /demo · Comment entrer
+   Style : Interactive Product Demo (25)
+   Effet : ParticleReveal
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-demo-howto {
+  background: #ffffff;
+  color: var(--ink);
+  --accent: #6366f1;
+}
+
+.demo-steps {
+  counter-reset: step;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.demo-step {
+  position: relative;
+  padding: 2rem 1.5rem 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.demo-step::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: -1.25rem;
+  left: 1.25rem;
+  background: var(--ink);
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-family: var(--site-font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.demo-step__title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  margin: 0.5rem 0 0.75rem;
+  line-height: 1.15;
+}
+
+.demo-step__body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.demo-step__code {
+  margin-top: 1rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  background: #f5f5f7;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /demo · Identifiants (Terminal CLI #73)
+   Style : Terminal CLI
+   Effet : GlyphRain
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-demo-creds {
+  background: #050505;
+  color: #33ff00;
+  font-family: var(--site-font-mono);
+  --accent: #33ff00;
+  padding-block: clamp(5rem, 10vw, 8rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.sec-demo-creds .site-h2 {
+  font-family: var(--site-font-mono);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: #33ff00;
+  text-shadow: 0 0 6px rgba(51,255,0,0.4);
+}
+
+.sec-demo-creds .site-eyebrow {
+  color: #ffb000;
+  font-family: var(--site-font-mono);
+}
+
+.sec-demo-creds .site-lead {
+  color: #1a3d1a;
+  font-family: var(--site-font-mono);
+  font-size: 0.9375rem;
+}
+
+.creds-block {
+  margin-top: 2.5rem;
+  border: 1px solid #33ff00;
+  background: rgba(51,255,0,0.05);
+  padding: 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.creds-block dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.creds-block dt {
+  color: #ffb000;
+  font-weight: 700;
+}
+
+.creds-block dd {
+  margin: 0;
+  color: #33ff00;
+}
+
+.creds-block dd code {
+  background: rgba(51,255,0,0.1);
+  padding: 0.125rem 0.375rem;
+}
+
+.creds-warn {
+  margin-top: 1.5rem;
+  font-size: 0.8125rem;
+  color: #ff3333;
+  border-top: 1px solid rgba(51,255,0,0.3);
+  padding-top: 1rem;
+}
+
+.creds-statusbar {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--site-gutter);
+  font-size: 0.75rem;
+  color: #1a3d1a;
+  pointer-events: none;
+}
+
+.creds-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background: #33ff00;
+  margin-left: 0.25em;
+  vertical-align: text-bottom;
+  animation: kf-blink 1s steps(2) infinite;
+}
+
+@keyframes kf-blink {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creds-cursor { animation: none; }
+}
+
+/* GlyphRain — colonnes de glyphes qui défilent */
+.sec-demo-creds .fx-glyph-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg,
+      transparent 0 16px,
+      rgba(51,255,0,0.08) 16px 17px);
+  mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+}
+
+@keyframes kf-glyph-fall {
+  0%   { background-position: 0 -16px; }
+  100% { background-position: 0 16px; }
+}
+
+.sec-demo-creds .fx-glyph-rain { animation: kf-glyph-fall 1.6s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-demo-creds .fx-glyph-rain { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PAGE /demo · Pourquoi pas de données
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-demo-nodata {
+  background: var(--paper);
+  color: var(--ink);
+  --accent: #ff5b1f;
+}
+
+.nodata-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.nodata-list li {
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--accent);
+  background: #f5f5f7;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — adaptations mobile
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .editorial-grid__main,
+  .editorial-grid__aside { grid-column: 1 / -1; border-left: 0; padding-left: 0; }
+
+  .grid-cell { grid-column: span 6; }
+  .grid-cell:nth-child(3n) { border-right: 1px solid var(--ink); }
+  .grid-cell:nth-child(2n) { border-right: 0; }
+  .grid-cell:last-child { border-right: 0; }
+
+  .cta-card,
+  .cta-card--primary { grid-column: span 4; }
+
+  .pain-card { border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+  .engage-card { border-right: 4px solid #000; border-bottom: 4px solid #000; }
+
+  .sec-hero { min-height: auto; padding-block: 4rem; }
+}

@@ -1,0 +1,354 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T09:46:20.438Z",
+  "contrasteByPage": {
+    "home": [
+      {
+        "name": "Hero H1",
+        "sel": "h1.site-h1",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (site-section sec-hero)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero subtitle",
+        "sel": ".site-lead",
+        "present": true,
+        "fg": "rgb(26,26,26)",
+        "bg": "rgb(250,250,247) (site-section sec-hero)",
+        "ratio": 16.64,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Hero trust",
+        "sel": ".hero__trust",
+        "present": true,
+        "fg": "rgb(74,74,74)",
+        "bg": "rgb(250,250,247) (site-section sec-hero)",
+        "ratio": 8.48,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card title",
+        "sel": ".pain-card__title",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (pain-card)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card body",
+        "sel": ".pain-card__body",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (pain-card)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Pain card source",
+        "sel": ".pain-card__source",
+        "present": true,
+        "fg": "rgb(74,74,74)",
+        "bg": "rgb(250,250,247) (pain-card)",
+        "ratio": 8.48,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "CTA card title",
+        "sel": ".cta-card__title",
+        "present": true,
+        "fg": "rgb(250,250,247)",
+        "bg": "rgb(10,10,10) (cta-card cta-card--primary)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "CTA card body",
+        "sel": ".cta-card__body",
+        "present": true,
+        "fg": "rgb(250,250,247)",
+        "bg": "rgb(10,10,10) (cta-card cta-card--primary)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Footer",
+        "sel": ".site-footer",
+        "present": true,
+        "fg": "rgb(74,74,74)",
+        "bg": "rgb(250,250,247) (BODY)",
+        "ratio": 8.48,
+        "aa": true,
+        "aaa": true
+      }
+    ],
+    "methode": [
+      {
+        "name": "Intro H1",
+        "sel": "h1.site-h1",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (site-section sec-methode-intro)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Editorial prose",
+        "sel": ".editorial-prose p",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (site-section sec-methode-intro)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Editorial aside",
+        "sel": ".editorial-grid__aside",
+        "present": true,
+        "fg": "rgb(74,74,74)",
+        "bg": "rgb(250,250,247) (site-section sec-methode-intro)",
+        "ratio": 8.48,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Grid label",
+        "sel": ".grid-cell__label",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(255,255,255) (site-section sec-grids)",
+        "ratio": 19.8,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Grid body",
+        "sel": ".grid-cell__body",
+        "present": true,
+        "fg": "rgb(26,26,26)",
+        "bg": "rgb(255,255,255) (site-section sec-grids)",
+        "ratio": 17.4,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Coda quote",
+        "sel": "blockquote",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(250,250,247) (site-section sec-coda)",
+        "ratio": 18.93,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Coda cite",
+        "sel": "cite",
+        "present": true,
+        "fg": "rgb(74,74,74)",
+        "bg": "rgb(250,250,247) (site-section sec-coda)",
+        "ratio": 8.48,
+        "aa": true,
+        "aaa": true
+      }
+    ],
+    "paliers": [
+      {
+        "name": "Paliers H1",
+        "sel": "h1.site-h1",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.93,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Paliers lead",
+        "sel": ".site-lead",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.15,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Palier title",
+        "sel": ".palier-card__title",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.93,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Palier what",
+        "sel": ".palier-card__what",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.93,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Palier where",
+        "sel": ".palier-card__where",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.93,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "name": "Footnote",
+        "sel": ".paliers-footnote",
+        "present": true,
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(139,0,255) (gradient of site-section sec-paliers)",
+        "ratio": 5.93,
+        "aa": true,
+        "aaa": false
+      }
+    ],
+    "engagements": [
+      {
+        "name": "Engage H2",
+        "sel": "h1.site-h2",
+        "present": true,
+        "fg": "rgb(0,0,0)",
+        "bg": "rgb(255,235,0) (site-section sec-engagements)",
+        "ratio": 17.14,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage title",
+        "sel": ".engage-card__title",
+        "present": true,
+        "fg": "rgb(0,0,0)",
+        "bg": "rgb(255,255,255) (engage-card)",
+        "ratio": 21,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage body",
+        "sel": ".engage-card__body",
+        "present": true,
+        "fg": "rgb(0,0,0)",
+        "bg": "rgb(255,255,255) (engage-card)",
+        "ratio": 21,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage title (inverted)",
+        "sel": ".engage-card:nth-child(2n) .engage-card__title",
+        "present": true,
+        "fg": "rgb(255,235,0)",
+        "bg": "rgb(0,0,0) (engage-card)",
+        "ratio": 17.14,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Engage body (inverted)",
+        "sel": ".engage-card:nth-child(2n) .engage-card__body",
+        "present": true,
+        "fg": "rgb(255,235,0)",
+        "bg": "rgb(0,0,0) (engage-card)",
+        "ratio": 17.14,
+        "aa": true,
+        "aaa": true
+      }
+    ],
+    "demo": [
+      {
+        "name": "Demo howto H1",
+        "sel": "h1.site-h1",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(255,255,255) (site-section sec-demo-howto)",
+        "ratio": 19.8,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Step title",
+        "sel": ".demo-step__title",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(255,255,255) (demo-step)",
+        "ratio": 19.8,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Step body",
+        "sel": ".demo-step__body",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(255,255,255) (demo-step)",
+        "ratio": 19.8,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds dt",
+        "sel": ".creds-block dt",
+        "present": true,
+        "fg": "rgb(255,176,0)",
+        "bg": "rgb(5,5,5) (site-section sec-demo-creds)",
+        "ratio": 11.12,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Creds dd",
+        "sel": ".creds-block dd",
+        "present": true,
+        "fg": "rgb(51,255,0)",
+        "bg": "rgb(5,5,5) (site-section sec-demo-creds)",
+        "ratio": 14.99,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "name": "Nodata li",
+        "sel": ".nodata-list li",
+        "present": true,
+        "fg": "rgb(10,10,10)",
+        "bg": "rgb(245,245,247) (LI)",
+        "ratio": 18.18,
+        "aa": true,
+        "aaa": true
+      }
+    ]
+  },
+  "failedByPage": {
+    "home": 0,
+    "methode": 0,
+    "paliers": 0,
+    "engagements": 0,
+    "demo": 0
+  },
+  "totalFailed": 0
+}

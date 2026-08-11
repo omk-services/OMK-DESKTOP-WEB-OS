@@ -232,15 +232,14 @@ export const useShellStore = create<ShellState>((set, get) => ({
 
   saveLayout: () => {
     const { windows } = get();
-    // Don't persist a state containing only the auto-launched citadel window —
-    // we don't want subsequent reloads to rehydrate that state and skip the
-    // demo seed. The citadel-only state is transient.
-    const citadelOnly = windows.length === 1 && windows[0].id === 'onboarding' && windows[0].isOpen;
+    // Brief M (2026-08-11) — the citadel/onboarding auto-launch no longer
+    // exists. The previous special-case (`citadelOnly`) is dead code now; if
+    // the only window open is `audit` (the renamed onboarding), we still
+    // persist it — closing/reopening the browser should restore the same
+    // window instead of re-seeding the desktop empty. The check is kept only
+    // for the historical one-window case, where persisting a transient
+    // single-window layout is the right thing to do.
     try {
-      if (citadelOnly) {
-        localStorage.removeItem(LAYOUT_KEY);
-        return;
-      }
       localStorage.setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
     } catch {
       // The live layout remains usable when persistence is unavailable.
@@ -264,7 +263,16 @@ export const useShellStore = create<ShellState>((set, get) => ({
         && Array.isArray(data.state.windows)
         && data.state.windows.every(isAppWindow)
       ) {
-        set({ windows: data.state.windows });
+        // Brief M (2026-08-11) — silent migration: any window carrying the
+        // old `onboarding` id (persisted before the rename) is rewritten to
+        // `audit` on read. The window is otherwise untouched (position,
+        // size, open state). Without this, a saved layout would restore a
+        // window pointing at an unregistered app and render the "not
+        // registered" dead-end.
+        const migrated = (data.state.windows as Array<{ id?: string }>).map((w) =>
+          w && typeof w === 'object' && w.id === 'onboarding' ? { ...w, id: 'audit' } : w
+        );
+        set({ windows: migrated as typeof data.state.windows });
       } else {
         localStorage.removeItem(LAYOUT_KEY);
       }

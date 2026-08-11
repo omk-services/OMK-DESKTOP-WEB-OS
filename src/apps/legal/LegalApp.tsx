@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Scale, FileSignature, ShieldCheck, BookMarked, AlertTriangle } from 'lucide-react';
+import { Scale, FileSignature, ShieldCheck, BookMarked, AlertTriangle, Gauge, Layers, ListChecks, FileText, Camera, AlertOctagon, Building2, Bug, Wrench, Landmark } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Card, Badge } from '../_ui/kit';
 import { Toggle } from '../_ui/widgets';
@@ -13,6 +13,10 @@ import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { LegalItemDetail } from './LegalItemDetail';
 import { seedLegalCms } from './seed';
+import { ComplianceDashboard } from './ComplianceDashboard';
+import { ProwlerImport } from './ProwlerImport';
+import { ProboAnchor } from './ProboAnchor';
+import { SovereigntyTiers } from './SovereigntyTiers';
 
 registerItemDetail('legal', LegalItemDetail);
 seedLegalCms();
@@ -202,15 +206,108 @@ export function LegalApp() {
     );
   };
 
+  const Frameworks = () => (
+    <div className="p-7">
+      <SectionHead title="Cadres" subtitle="Les référentiels que la pratique vise (SOC 2, ISO 27001, RGPD, NIS 2…)." />
+      <CollectionRepeater collectionId="legal_frameworks" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Controls = () => (
+    <div className="p-7">
+      <SectionHead title="Contrôles" subtitle="Les exigences par cadre — code, owner, statut, preuves rattachées." />
+      <CollectionRepeater collectionId="legal_controls" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const CompPolicies = () => (
+    <div className="p-7">
+      <SectionHead title="Politiques internes" subtitle="Politiques versionnées, owner, date de revue." />
+      <CollectionRepeater collectionId="legal_compliance_policies" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Evidence = () => (
+    <div className="p-7">
+      <SectionHead title="Preuves" subtitle="Documents, captures, rapports qui attestent qu'un contrôle tient." />
+      <CollectionRepeater collectionId="legal_evidence" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Risks = () => (
+    <div className="p-7">
+      <SectionHead title="Risques" subtitle="Probabilité × impact, mitigation, owner." />
+      <CollectionRepeater collectionId="legal_risks" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Vendors = () => (
+    <div className="p-7">
+      <SectionHead title="Fournisseurs" subtitle="Le registre de sous-traitance — exigence RGPD." />
+      <CollectionRepeater collectionId="legal_vendors" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Gaps = () => (
+    <div className="p-7">
+      <SectionHead
+        title="Écarts"
+        subtitle="Ce qui n'est pas conforme. Source : revue manuelle, ou import Prowler (Outils)."
+      />
+      <CollectionRepeater collectionId="legal_gaps" onOpen={() => { /* dashboard covers drill */ }} />
+    </div>
+  );
+
+  const Tools = () => (
+    <div className="p-7 flex flex-col gap-4">
+      <SectionHead
+        title="Outils"
+        subtitle="Branchement vers les briques libres de conformité. Voir src/apps/legal/OUTILS.md pour les fiches."
+      />
+      <ProwlerImport />
+      <ProboAnchor />
+    </div>
+  );
+
   const sections: AppSection[] = [
-    { id: 'contracts', label: 'Contracts', icon: FileSignature, render: Contracts },
-    { id: 'compliance', label: 'Compliance', icon: ShieldCheck, render: Compliance },
-    { id: 'policies', label: 'Policies', icon: BookMarked, render: Policies },
+    // Vue d'ensemble
+    { id: 'dashboard',     label: 'Conformité',  icon: Gauge,         render: () => <ComplianceDashboard /> },
+    // Le registre (6 collections CMS)
+    { id: 'frameworks',    label: 'Cadres',      icon: Layers,        render: Frameworks },
+    { id: 'controls',      label: 'Contrôles',   icon: ListChecks,    render: Controls },
+    { id: 'comp-policies', label: 'Politiques',  icon: FileText,      render: CompPolicies },
+    { id: 'evidence',      label: 'Preuves',     icon: Camera,        render: Evidence },
+    { id: 'risks',         label: 'Risques',     icon: AlertOctagon,  render: Risks },
+    { id: 'vendors',       label: 'Fournisseurs',icon: Building2,     render: Vendors },
+    { id: 'gaps',          label: 'Écarts',      icon: Bug,           render: Gaps },
+    // Documents clients (legacy)
+    { id: 'contracts',     label: 'Contracts',   icon: FileSignature, render: Contracts },
+    { id: 'compliance',    label: 'AI-Act',      icon: ShieldCheck,   render: Compliance },
+    { id: 'policies',      label: 'Policies',    icon: BookMarked,    render: Policies },
+    // Outils + souveraineté
+    { id: 'tools',         label: 'Outils',      icon: Wrench,        render: Tools },
+    { id: 'sovereignty',   label: 'Souveraineté',icon: Landmark,      render: () => <SovereigntyTiers /> },
   ];
+
+  const groups: Record<string, string> = {
+    dashboard: "Vue d'ensemble",
+    frameworks: 'Le registre',
+    controls: 'Le registre',
+    'comp-policies': 'Le registre',
+    evidence: 'Le registre',
+    risks: 'Le registre',
+    vendors: 'Le registre',
+    gaps: 'Le registre',
+    contracts: 'Documents clients',
+    compliance: 'Documents clients',
+    policies: 'Documents clients',
+    tools: 'Outils & souveraineté',
+    sovereignty: 'Outils & souveraineté',
+  };
 
   return (
     <>
-      <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} canvasNuance={1} />
+      <AppFrame title="Legal" subtitle="Aquaman domain" icon={Scale} accent={ACCENT} sections={sections} groups={groups} canvasNuance={1} />
       {detail ? (
         <AppDetailOverlay
           appId="legal"

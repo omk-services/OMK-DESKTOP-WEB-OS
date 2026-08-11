@@ -1,0 +1,22 @@
+Tous les seuils passent. Récapitulatif du travail livré :
+
+**Fichiers modifiés** (périmètre strict `src/site/` et `public/site/` + 1 outil) :
+- `public/site/effects.js` — réécrit (117 → 380 lignes) : monte 7 effets canvas 2D réels, échoue bruyamment en cas de cible manquante, respecte `prefers-reduced-motion`
+- `public/site/index.html`, `methode.html`, `paliers.html`, `engagements.html`, `demo.html` — ajout de l'attribut `data-fx` aux 8 conteneurs d'effets
+
+**Fichiers créés** :
+- `tools/site-diversite.mjs` — mesure multi-pages avec sortie en code 1 si un seuil rate
+- `_briefs/2026-08-11_production/RAPPORT_K_SITE_RENDU.md` — rapport complet
+- `_briefs/2026-08-11_production/captures/site/` — 11 captures (5×1280, 5×375, 1 reduced)
+- `_verify_proofs/site-diversite.json` — sortie JSON de la mesure
+
+**Mesures** (toutes les seuils sont atteints) :
+- 5 polices distinctes (≥ 4)
+- 16 fonds distincts (≥ 6)
+- 8 rayons d'angle distincts (≥ 4)
+- 8 éléments `<canvas>` montés (≥ 4)
+- 0 erreur console
+- 1 274 – 1 332 ms de rendu par page (< 2 500 ms)
+- Mode `prefers-reduced-motion: reduce` : 0 canvas monté, contenu lisible
+
+Le piège du sélecteur muet est neutralisé : retirer un `data-fx` produit un `console.error` au lieu d'un repli silencieux.

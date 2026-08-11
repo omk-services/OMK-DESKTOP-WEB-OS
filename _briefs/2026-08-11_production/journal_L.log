@@ -1,0 +1,15 @@
+Tout est livré. Récapitulatif :
+
+**Tâches 1, 2, 3 — toutes faites.**
+
+- **Accueil sur le vrai bureau** : `TourOverlay` et `FirstRunInvitation` sont montés dans `Desktop.tsx` (au niveau du shell, là où vivent le Dock et les icônes). L'overlay survit maintenant à la fermeture de n'importe quelle fenêtre. La carte d'invitation « Faire le tour ? » apparaît au premier lancement, se refuse, persiste, et `Echap` interrompt à tout moment.
+- **Probo hébergé sans fourche** : `deploy/probo/render.yaml` (Blueprint Render, image officielle `getprobo/probo-app:stable`), `README.md` non-technique (6 étapes navigateur, grille de coûts), `.env.example`. `ProboAnchor` est branché sur `probe()` — iframe saine, ou message citant l'en-tête fautif (`X-Frame-Options` / `CSP frame-ancestors`), ou erreur réseau, jamais de cadre blanc.
+- **Observatoire neutralisé** : `knownStatus: 'down'` sur le service, `ServiceFrame` ne tire plus de fetch, badge « hors service » rouge, console propre.
+
+**Preuves** dans `_briefs/2026-08-11_production/captures/L_conformite_accueil/` :
+- 6 captures, dont 04 qui prouve la bulle suivant une fenêtre Clients déplacée hors de l'app Onboarding, et 05 qui prouve l'invitation absente après reload.
+- Assertions automatiques : `localStorage = {welcomeDismissed: "true", tourFired: "true"}`, `requetes vers :8787 = 0`, `zero erreur console` (sur le bureau).
+
+**Rapport** : `_briefs/2026-08-11_production/RAPPORT_L_CONFORMITE_ACCUEIL.md`.
+
+**tsc** : zéro erreur sur les fichiers que j'ai créés ou modifiés. Les 3 erreurs restantes dans le périmètre (`EmbeddedServicesPanel.tsx` et `ServiceFrame.tsx:253`) sont pré-existantes (G's work) et le brief interdit de les retoucher.

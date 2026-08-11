@@ -1,0 +1,24 @@
+Zéro erreur TypeScript sur tous mes fichiers `src/apps/legal/**`. Voici le récap final.
+
+## Récap — Brief F (Legal, la conformité sans Vanta)
+
+**Statut** : OK. Tous les livrables sont dans `src/apps/legal/**`, périmètre strictement respecté.
+
+**Fichiers créés** :
+- `src/apps/legal/ComplianceDashboard.tsx` — tableau de bord lisible (6 métriques + score par cadre)
+- `src/apps/legal/ProwlerImport.tsx` — import JSON Prowler, dédup case-insensitive, compteur avant/après
+- `src/apps/legal/ProboAnchor.tsx` — ancrage iframe documenté, pas construit
+- `src/apps/legal/SovereigntyTiers.tsx` — 4 paliers produit (PoC / SaaS / White Label / Souveraineté)
+- `src/apps/legal/OUTILS.md` — 4 fiches (Comp AI, Probo, Prowler, awesome-compliance)
+- `_briefs/2026-08-11_production/RAPPORT_F_LEGAL.md`
+
+**Fichiers étendus** :
+- `src/apps/legal/seed.ts` — 6 nouvelles collections CMS (cadres, contrôles, politiques, preuves, risques, fournisseurs, écarts), toutes CRUD-ready via le `CollectionRepeater` générique
+- `src/apps/legal/sovereignty.ts` — `SOVEREIGNTY_TIERS` ajouté sans casser `SOVEREIGNTY_LEVELS`
+- `src/apps/legal/LegalApp.tsx` — 8 nouvelles sections, 4 groupes (`Vue d'ensemble` / `Le registre` / `Documents clients` / `Outils & souveraineté`)
+
+**Preuve type-check** : `0 errors in src/apps/legal/**` (les erreurs résiduelles sont toutes dans `CollectionRepeater.tsx`, `supabase.ts`, `themes/store.ts`, `shell.store.ts` — fichiers hors périmètre, préexistants).
+
+**Preuve chaîne CRUD** : chaque section expose `data-cms-action="create-<id>"`, `data-cms-form="create-<id>"`, `data-cms-card="<id>"` — la chaîne compteur avant → form → soumission → carte dans la liste → compteur après est instrumentée.
+
+**Limites assumées** : pas de captures visuelles (les agents en parallèle touchent l'arbre, `tools/` n'est pas autorisé en écriture ici), pas d'écriture Supabase testée (projet en pause, cf. SOCLE.md), pas de detail page par item pour les nouvelles collections (le dashboard couvre le besoin de lecture).

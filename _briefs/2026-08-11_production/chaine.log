@@ -1,0 +1,103 @@
+=== chaine demarree 02:44:05 ===
+02:44:06 — en cours : A B C
+02:46:07 — en cours : A B C
+02:48:07 — en cours : A B C
+02:50:07 — en cours : A B C
+02:52:08 — en cours : A B C
+02:54:08 — en cours : A B C
+02:56:08 — en cours : A B C
+02:58:09 — en cours : A B C
+03:00:09 — en cours : A B C
+03:02:10 — en cours : A B C
+03:04:11 — en cours : A B C
+03:06:11 — en cours : A B C
+03:08:12 — en cours : B C
+03:10:12 — en cours : B C
+03:12:13 — en cours : B C
+03:14:13 — en cours : C
+03:16:14 — en cours : C
+03:18:14 — en cours : C
+03:20:14 — en cours : C
+03:22:15 — en cours : C
+03:24:15 — en cours : C
+03:26:16 — vague terminee : A B C
+03:26:16 — lance D
+03:28:47 — lance E
+03:31:17 — lance F
+03:31:18 — en cours : D E F
+03:33:22 — en cours : D E F
+03:35:25 — en cours : D E F
+03:37:26 — en cours : D E F
+03:39:27 — en cours : D E F
+03:41:27 — en cours : D E F
+03:43:28 — en cours : D E F
+03:45:29 — en cours : D E
+03:47:30 — en cours : D E
+03:49:30 — en cours : D E
+03:51:31 — en cours : D E
+03:53:32 — en cours : D E
+03:55:32 — en cours : D E
+03:57:34 — en cours : D E
+03:59:34 — en cours : D E
+04:01:35 — en cours : D E
+04:03:36 — en cours : E
+04:05:37 — en cours : E
+04:07:37 — en cours : E
+04:09:38 — en cours : E
+04:11:39 — en cours : E
+04:13:39 — en cours : E
+04:15:41 — en cours : E
+04:17:41 — vague terminee : D E F
+04:17:41 — lance G
+04:17:42 — en cours : G
+04:19:43 — en cours : G
+04:21:44 — en cours : G
+04:23:45 — en cours : G
+04:25:45 — en cours : G
+04:27:46 — en cours : G
+04:29:46 — en cours : G
+04:31:46 — en cours : G
+04:33:47 — en cours : G
+04:35:48 — en cours : G
+04:37:48 — en cours : G
+04:39:49 — en cours : G
+04:41:49 — en cours : G
+04:43:49 — en cours : G
+04:45:49 — en cours : G
+04:47:49 — en cours : G
+04:49:50 — en cours : G
+04:51:50 — en cours : G
+04:53:51 — en cours : G
+04:55:51 — en cours : G
+04:57:52 — en cours : G
+04:59:52 — en cours : G
+05:01:52 — en cours : G
+05:03:53 — en cours : G
+05:05:54 — en cours : G
+05:07:54 — en cours : G
+05:09:55 — en cours : G
+05:11:55 — en cours : G
+05:13:56 — en cours : G
+05:15:56 — en cours : G
+05:17:57 — en cours : G
+05:19:57 — en cours : G
+05:21:57 — en cours : G
+05:23:58 — en cours : G
+05:25:58 — en cours : G
+05:28:00 — en cours : G
+05:30:01 — en cours : G
+05:32:01 — en cours : G
+05:34:02 — en cours : G
+05:36:02 — en cours : G
+05:38:03 — vague terminee : G
+=== chaine terminee 05:38:03 ===
+06:19:37 — M attend la fin de L
+06:21:38 — M attend la fin de L
+06:23:38 — M attend la fin de L
+06:25:39 — M attend la fin de L
+06:27:39 — M attend la fin de L
+06:29:39 — M attend la fin de L
+06:31:40 — M attend la fin de L
+06:33:40 — M attend la fin de L
+06:35:40 — M attend la fin de L
+06:37:41 — L retombe, lancement de M

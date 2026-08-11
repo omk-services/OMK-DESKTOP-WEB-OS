@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "outDir": "dist/tooling",
+    "rootDir": "src/lib/tooling",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "sourceMap": false,
+    "noEmitOnError": false,
+    "noEmit": false,
+    "isolatedModules": false,
+    "types": ["node"]
+  },
+  "include": ["src/lib/tooling/**/*.ts"]
+}

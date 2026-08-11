@@ -101,3 +101,77 @@ export const SOVEREIGNTY_LEVELS: SovereigntyLevel[] = [
 export function getCurrentSovereigntyLevel(): SovereigntyLevel | undefined {
   return SOVEREIGNTY_LEVELS.find((l) => l.isCurrent === true);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  Product sovereignty tiers — distinct from IndyDevDan's six levels above.
+ *  Those describe the global sovereignty scale (model host, weights, silicon).
+ *  These describe the **product offering** tiers, where the customer's data
+ *  physically lives at each stage and what it takes to climb to the next.
+ *
+ *  Brief-F (2026-08-11) — the user is non-technical and asked: "where does
+ *  my data actually live at each stage, and what does it take to move up?"
+ *  This is the answer, kept here so it stays in lock-step with the legal
+ *  app's sovereignty section. Distinct from SOVEREIGNTY_LEVELS on purpose:
+ *  one is the academic ladder, the other is the commercial staircase.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface SovereigntyTier {
+  index: 0 | 1 | 2 | 3;
+  name: 'PoC' | 'SaaS' | 'White Label' | 'Souveraineté';
+  one: string;
+  dataLocation: string;
+  modelHost: string;
+  isolation: string;
+  upgrade: string;
+  price: string;
+  isCurrent?: boolean;
+}
+
+export const SOVEREIGNTY_TIERS: SovereigntyTier[] = [
+  {
+    index: 0,
+    name: 'PoC',
+    one: 'Single-tenant demo on a shared Supabase project. Free, fast, proof of value.',
+    dataLocation: 'Supabase Cloud — project OMK SERVICES INTERN (US, multi-tenant shared).',
+    modelHost: 'OpenRouter, free router, byok optional.',
+    isolation: 'None. Rows tagged by `tenant_id`; RLS depends on a working JWT hook.',
+    upgrade: 'Move to a dedicated Supabase project + custom JWT hook (2 hours of engineering).',
+    price: 'Free, time-boxed to 14 days.',
+    isCurrent: true,
+  },
+  {
+    index: 1,
+    name: 'SaaS',
+    one: 'Multi-tenant production on a dedicated project. Pay-as-you-grow.',
+    dataLocation: 'Supabase Cloud — project OMK SERVICES CUSTOMERS (US, dedicated to Coach OS).',
+    modelHost: 'OpenRouter, byok on enterprise. LiteLLM gateway in front of all calls.',
+    isolation: 'RLS-enforced at the row level; per-tenant API keys; full audit log.',
+    upgrade: 'Provision a dedicated Supabase project per client + bring your own model keys.',
+    price: '$279–$999 / month, billed monthly.',
+  },
+  {
+    index: 2,
+    name: 'White Label',
+    one: 'Dedicated Supabase project per client. Branded tenant. Custom domain.',
+    dataLocation: 'Supabase Cloud — one project per client (US or EU, chosen at signup).',
+    modelHost: 'Per-tenant model choice: Anthropic, OpenAI, Mistral, or local on Render.',
+    isolation: 'Full project isolation + per-tenant JWT hook + per-tenant RLS policies.',
+    upgrade: 'Move the project out of Supabase Cloud onto the client\'s own infrastructure.',
+    price: 'From $1,800 / month, annual contract.',
+  },
+  {
+    index: 3,
+    name: 'Souveraineté',
+    one: 'The whole stack on the client\'s hardware or a sovereign cloud of their choice.',
+    dataLocation: 'On the client\'s infrastructure — VPS, bare metal, OVH SecNumCloud, Scaleway Sovereign, or similar.',
+    modelHost: 'Open weights on rented or owned GPU (Mistral, Llama, Qwen) — no prompt ever leaves the box.',
+    isolation: 'Air-gap optional. Hardware-level key custody. The chain ends at the wall socket.',
+    upgrade: 'Nothing above. The chain ends here.',
+    price: 'On request — scoped per deployment, typically $25k–$80k setup + $4k–$12k / month ops.',
+  },
+];
+
+/** Returns the tier flagged `isCurrent: true`, or undefined if none. */
+export function getCurrentSovereigntyTier(): SovereigntyTier | undefined {
+  return SOVEREIGNTY_TIERS.find((t) => t.isCurrent === true);
+}

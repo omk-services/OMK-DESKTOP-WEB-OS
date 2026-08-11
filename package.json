@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "coach-os": "./cli/coach-os.mjs"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,7 +14,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b",
-    "typecheck:api": "tsc -p api/tsconfig.json --noEmit"
+    "typecheck:api": "tsc -p api/tsconfig.json --noEmit",
+    "tooling:build": "node scripts/build-tooling.mjs",
+    "tooling:skills": "node scripts/build-skills.mjs",
+    "tooling:verify": "node scripts/verify.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.34",
@@ -30,6 +36,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",

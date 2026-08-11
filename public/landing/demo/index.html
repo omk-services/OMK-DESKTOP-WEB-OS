@@ -1,0 +1,218 @@
+<!doctype html>
+<!--
+  Coach OS — page démo (/landing/demo/)
+
+  Entrée en démonstration avec identifiants publics (demo@coach-os.app
+  / demo-coach-os). Identifiants révélés au clic — pas de connexion
+  automatique, l'utilisateur doit voir qu'il se connecte. Registre :
+  Soft UI / Neu (relief tactile, fond pierre clair) — l'entrée doit être
+  accueillante et claire, pas agressive.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#e8e5e1" />
+
+    <title>Démo — Coach OS</title>
+    <meta name="description" content="Ouvrir la démo Coach OS avec un compte public : demo@coach-os.app. Le seed local démarre, aucune donnée n'est envoyée, aucun compte n'est créé." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://coach-os.app/landing/demo/" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://coach-os.app/landing/demo/" />
+    <meta property="og:site_name" content="Coach OS" />
+    <meta property="og:title" content="Entrer en démo sans compte — Coach OS" />
+    <meta property="og:description" content="Compte public partagé. Identifiants révélés au clic. Le seed local démarre, vous voyez l'interface et les collections." />
+    <meta property="og:image" content="https://coach-os.app/landing/og-image.svg" />
+    <meta property="og:image:alt" content="Entrée en démo Coach OS avec identifiants publics." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Entrer en démo sans compte — Coach OS" />
+    <meta name="twitter:description" content="Compte public partagé. Identifiants révélés au clic." />
+    <meta name="twitter:image" content="https://coach-os.app/landing/og-image.svg" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Entrer en démo sans compte",
+      "description": "Compte public partagé. Identifiants révélés au clic. Le seed local démarre.",
+      "author": { "@type": "Organization", "name": "Coach OS" }
+    }
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/landing/favicon.svg" />
+    <link rel="stylesheet" href="/landing/styles.css" />
+  </head>
+
+  <body class="theme-softui">
+    <main class="landing-shell" id="top">
+
+      <header class="landing-top" role="banner">
+        <a class="landing-top__brand" href="/landing/index.html" aria-label="Coach OS">
+          <span class="landing-top__brand-mark" aria-hidden="true">C</span>
+          <span>Coach <em>OS</em></span>
+        </a>
+        <nav class="landing-top__nav" aria-label="Pages du site">
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          <a href="/landing/paliers/index.html">Paliers</a>
+          <a href="/landing/engagements/index.html">Engagements</a>
+          <a href="/landing/demo/index.html" aria-current="page">Démo</a>
+        </nav>
+      </header>
+
+      <nav class="landing-crumbs" aria-label="Fil d'Ariane">
+        <a href="/landing/index.html">Accueil</a>
+        <span class="landing-crumbs__sep" aria-hidden="true">›</span>
+        <span class="landing-crumbs__here">Démo</span>
+      </nav>
+
+      <!-- ── Démo ──────────────────────────────────────────────────── -->
+      <section class="section" id="demo" aria-labelledby="demo-title">
+        <p class="section__eyebrow">L'entrée</p>
+        <h1 class="section__title" id="demo-title">Entrer en démo sans compte</h1>
+        <p class="section__intro">
+          Le bureau s'ouvre sur le seed local. Aucune donnée n'est envoyée,
+          aucun compte n'est créé. Vous voyez l'interface et les collections
+          telles qu'elles sont — pas une vitrine.
+        </p>
+
+        <article class="demo-card" aria-labelledby="creds-title">
+          <p class="demo-card__eyebrow">Compte de démonstration partagé</p>
+          <h2 class="demo-card__title" id="creds-title">Identifiants publics</h2>
+          <p class="demo-card__lead">
+            Cliquez sur « Révéler » pour voir les identifiants, puis ouvrez
+            l'application dans un autre onglet et connectez-vous à la main.
+            C'est ce geste — taper ses identifiants — qui rend la
+            démonstration crédible.
+          </p>
+
+          <div class="demo-creds demo-creds--hidden" id="creds" aria-live="polite">
+            <div class="demo-creds__head">
+              <span class="demo-creds__label">Identifiants (Supabase — projet OMK Services Intern)</span>
+              <button type="button" class="demo-creds__reveal" id="creds-toggle" aria-controls="creds" aria-expanded="false">
+                <span id="creds-toggle-label">Révéler les identifiants</span>
+                <span aria-hidden="true" id="creds-toggle-icon">▸</span>
+              </button>
+            </div>
+            <dl class="demo-creds__list">
+              <dt>Email</dt>
+              <dd>demo@coach-os.app</dd>
+              <dt>Mot de passe</dt>
+              <dd>demo-coach-os</dd>
+              <dt>Organisation</dt>
+              <dd>demo-coach</dd>
+            </dl>
+            <p class="demo-creds__warn">
+              Ce compte est public, partagé, et remis à zéro régulièrement.
+              N'y déposez aucune donnée réelle. Pour votre propre espace,
+              réservez un audit de 30 min.
+            </p>
+          </div>
+
+          <div class="demo-card__cta-row">
+            <a class="btn btn--primary" href="/">
+              Ouvrir la démonstration
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="btn btn--secondary" href="mailto:audit@coach-os.app?subject=Audit%2030%20min">
+              Réserver un audit
+            </a>
+          </div>
+        </article>
+
+        <!-- Pourquoi ces identifiants — désamorce l'inquiétude -->
+        <div class="diag-grid" style="margin-top: 56px;">
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Pourquoi un compte partagé</h3>
+            <span class="diag-cell__hint">Lisibilité de la démonstration</span>
+            <p class="diag-cell__body">
+              Vous voyez ce que voient les autres coachs en démo : six clients,
+              cinq affaires, six membres, le même seed à chaque fois. Pas une
+              vitrine montée pour vous : la réalité du produit sur des données
+              factices.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Pourquoi pas de connexion automatique</h3>
+            <span class="diag-cell__hint">Vous devez voir que vous vous connectez</span>
+            <p class="diag-cell__body">
+              Une démo qui vous connecte sans toucher le formulaire est une
+              démo truquée. Ici, vous tapez l'email, le mot de passe, et
+              l'application vous reconnaît. Si quelque chose casse entre la
+              page et l'app, vous le voyez — c'est ce qui rend la démo utile.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Pourquoi ça marche si Supabase tombe</h3>
+            <span class="diag-cell__hint">Le seed local survit au branchement</span>
+            <p class="diag-cell__body">
+              Si Supabase est en panne, l'application retombe sur le seed
+              local : même structure, mêmes collections, mêmes écrans. Vous
+              voyez le produit dans tous les cas — c'est ce que l'engagement
+              n°01 (« pas de SaaS qui vous enferme ») veut dire en pratique.
+            </p>
+          </article>
+
+          <article class="diag-cell">
+            <h3 class="diag-cell__label">Pour aller plus loin</h3>
+            <span class="diag-cell__hint">Votre propre espace, vos propres notes</span>
+            <p class="diag-cell__body">
+              L'audit de 30 min ouvre votre propre stack de notes — pas le
+              seed. Vous voyez ce qui se passe sur vos vraies données, on
+              chiffre le palier adapté, on configure l'espace. Aucun
+              follow-up automatique.
+            </p>
+          </article>
+        </div>
+
+        <nav class="page-next" aria-label="Suite">
+          <a href="/landing/engagements/index.html" style="font-size:14px; color: var(--landing-text-muted); font-family: var(--landing-sans); font-weight: 600;">
+            ← Revoir les engagements
+          </a>
+          <a href="/landing/diagnostic/index.html">
+            Lire le diagnostic avant l'outil
+            <span class="page-next__arrow" aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </section>
+
+      <footer class="landing-footer">
+        <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
+        <span>
+          <a href="/landing/index.html">Accueil</a>
+          ·
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          ·
+          <a href="/landing/paliers/index.html">Paliers</a>
+          ·
+          <a href="/landing/engagements/index.html">Engagements</a>
+        </span>
+      </footer>
+
+    </main>
+
+    <script>
+      // Identifiants révélés au clic — pas de connexion automatique.
+      (function () {
+        var box = document.getElementById('creds');
+        var btn = document.getElementById('creds-toggle');
+        var lbl = document.getElementById('creds-toggle-label');
+        var icn = document.getElementById('creds-toggle-icon');
+        if (!box || !btn) return;
+        btn.addEventListener('click', function () {
+          var hidden = box.classList.toggle('demo-creds--hidden');
+          var open = !hidden;
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (lbl) lbl.textContent = open ? 'Masquer les identifiants' : 'Révéler les identifiants';
+          if (icn) icn.textContent = open ? '▾' : '▸';
+        });
+      })();
+    </script>
+  </body>
+</html>

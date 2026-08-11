@@ -1,0 +1,235 @@
+<!doctype html>
+<!--
+  Coach OS — accueil (/)
+
+  Page statique. La promesse, les trois fuites, les deux entrées.
+  Court : se lit en moins d'une minute. Le diagnostic, les paliers et
+  les engagements ont chacun leur propre page — voir nav.
+
+  Périmètre agent I — voir _briefs/2026-08-11_production/BRIEF_I_LANDING_V2.md.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f4f1ea" />
+
+    <title>Coach OS — Le bureau qui tient votre méthode</title>
+
+    <meta name="description" content="Coach OS est le bureau web pour coach expert (500 à 2000 $/h) : diagnostic avant l'outil, données isolées par client, sortie prévue dès le premier jour. Pas de SaaS qui vous enferme." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://coach-os.app/landing/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://coach-os.app/landing/" />
+    <meta property="og:site_name" content="Coach OS" />
+    <meta property="og:title" content="Coach OS — Le bureau qui tient votre méthode" />
+    <meta property="og:description" content="Pour coach qui facture 500 à 2000 $/h. Diagnostic avant l'outil, données isolées, sortie prévue dès le premier jour." />
+    <meta property="og:image" content="https://coach-os.app/landing/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Coach OS — pour coach qui facture 500 à 2000 $/h. Le bureau qui tient votre méthode, pas l'inverse." />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Coach OS — Le bureau qui tient votre méthode" />
+    <meta name="twitter:description" content="Pour coach qui facture 500 à 2000 $/h. Diagnostic avant l'outil, données isolées, sortie prévue dès le premier jour." />
+    <meta name="twitter:image" content="https://coach-os.app/landing/og-image.svg" />
+    <meta name="twitter:image:alt" content="Coach OS — pour coach qui facture 500 à 2000 $/h. Le bureau qui tient votre méthode, pas l'inverse." />
+
+    <!-- Données structurées -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "Coach OS",
+          "url": "https://coach-os.app",
+          "description": "Bureau web pour coach expert : diagnostic avant l'outil, données isolées par client, sortie prévue dès le premier jour."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Coach OS",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Bureau web pour coach expert : notes de session, méthode, clients, automatisations. Données isolées, sortie prévue dès le premier jour.",
+          "offers": {
+            "@type": "Offer",
+            "category": "Subscription",
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/landing/favicon.svg" />
+    <link rel="stylesheet" href="/landing/styles.css" />
+  </head>
+
+  <body class="theme-glass">
+    <main class="landing-shell" id="top">
+
+      <header class="landing-top" role="banner">
+        <a class="landing-top__brand" href="/landing/index.html" aria-label="Coach OS">
+          <span class="landing-top__brand-mark" aria-hidden="true">C</span>
+          <span>Coach <em>OS</em></span>
+        </a>
+        <nav class="landing-top__nav" aria-label="Pages du site">
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          <a href="/landing/paliers/index.html">Paliers</a>
+          <a href="/landing/engagements/index.html">Engagements</a>
+          <a href="/landing/demo/index.html">Démo</a>
+        </nav>
+      </header>
+
+      <!-- ── Hero ────────────────────────────────────────────────────── -->
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="hero__eyebrow">Coach OS — pour coach qui facture 500 à 2000 $/h</p>
+        <h1 class="hero__title" id="hero-title">
+          Le bureau qui tient votre méthode — pas <em>l'inverse</em>.
+        </h1>
+        <p class="hero__subtitle">
+          Un bureau web pour coach expert : vos notes, vos clients, votre méthode,
+          vos automatisations. Avec une porte de sortie prévue dès le premier jour.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="mailto:audit@coach-os.app?subject=Audit%2030%20min">
+            Réserver un audit de 30 min
+            <span class="btn__arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--secondary" href="/landing/demo/index.html">
+            Entrer en démo sans compte
+          </a>
+        </div>
+        <p class="hero__trust">
+          Diagnostic avant l'outil. Données isolées par client. Sortie prévue dès le premier jour.
+        </p>
+        <p class="hero__trust" style="margin-top: 8px;">
+          <a href="/landing/diagnostic/index.html" style="color: inherit; border-bottom: 1px solid var(--landing-border-subtle); text-decoration: none;">Lire le diagnostic</a>
+          ·
+          <a href="/landing/paliers/index.html" style="color: inherit; border-bottom: 1px solid var(--landing-border-subtle); text-decoration: none;">Voir les quatre paliers</a>
+        </p>
+        <hr class="hero__rule" />
+      </section>
+
+      <!-- ── Pain ────────────────────────────────────────────────────── -->
+      <section class="section" aria-labelledby="pain-title">
+        <p class="section__eyebrow">Le problème</p>
+        <h2 class="section__title" id="pain-title">Trois fuites qui vident une pratique sans qu'on les voie</h2>
+        <p class="section__intro">
+          Vous facturez à l'heure, vous tenez une méthode, vous avez des clients.
+          Trois choses fuient en silence — et chacune a un coût mesurable.
+        </p>
+
+        <div class="pain-grid">
+          <article class="pain-card">
+            <span class="pain-card__number" aria-hidden="true">01</span>
+            <h3 class="pain-card__title">La méthode qui tient dans un cerveau</h3>
+            <p class="pain-card__body">
+              Vos 18 ans de pratique tiennent dans une tête, sur papier, ou dans
+              un Dropbox personnel. Si vous prenez six mois — burn-out, congé,
+              maladie — ce qui vous restait disparaît avec vous. Ce n'est pas
+              un risque, c'est une certitude statistique.
+            </p>
+            <p class="pain-card__source">Source : APOLLO_ONBOARDING_ANSWERS §2 — « Founder's IP at risk » (P1)</p>
+          </article>
+
+          <article class="pain-card">
+            <span class="pain-card__number" aria-hidden="true">02</span>
+            <h3 class="pain-card__title">La note qui part avec un partage d'écran</h3>
+            <p class="pain-card__body">
+              Vos notes de session contiennent des noms, des montants, parfois
+              des numéros de sécurité sociale ou des éléments médicaux. Un
+              partage d'écran distrait, un transfert à un assistant, une copie
+              dans ChatGPT public — et ce sont vos clients qui paient l'erreur.
+              RGPD, secret professionnel, devoir de conseil : trois cadres qui
+              tombent en même temps.
+            </p>
+            <p class="pain-card__source">Source : APOLLO_ONBOARDING_ANSWERS §3 — P2 (compliance) + P3 (PII leak)</p>
+          </article>
+
+          <article class="pain-card">
+            <span class="pain-card__number" aria-hidden="true">03</span>
+            <h3 class="pain-card__title">L'abonnement qui vous loue votre espace</h3>
+            <p class="pain-card__body">
+              Les outils SaaS vous donnent un accès — pas une propriété. Vos
+              données partent si vous partez, ou restent inextractibles si vous
+              restez. Le tarif augmente, la politique change, l'éditeur ferme :
+              vous n'y pouvez rien. Vous êtes un locataire, pas un propriétaire.
+            </p>
+            <p class="pain-card__source">Source : APOLLO_ONBOARDING_ANSWERS §3 — P5 « No graduation of ownership »</p>
+          </article>
+        </div>
+
+        <!-- Enchaînement : du problème vers le mécanisme -->
+        <nav class="page-next" aria-label="Suite">
+          <span class="page-next__all">Sections : Diagnostic · Paliers · Engagements</span>
+          <a href="/landing/diagnostic/index.html">
+            Comment on diagnostique avant l'outil
+            <span class="page-next__arrow" aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </section>
+
+      <!-- ── CTA ─────────────────────────────────────────────────────── -->
+      <section class="section" id="cta" aria-labelledby="cta-title">
+        <p class="section__eyebrow">L'appel à l'action</p>
+        <h2 class="section__title" id="cta-title">Deux entrées</h2>
+        <p class="section__intro">
+          Le chemin le plus court vers la conviction n'est pas l'inscription.
+          C'est de voir l'intérieur. Choisissez votre entrée.
+        </p>
+
+        <div class="cta-grid">
+          <article class="cta-card cta-card--primary">
+            <h3 class="cta-card__title">Réserver un audit de 30 min</h3>
+            <p class="cta-card__body">
+              Un appel sans script. Vous ouvrez votre propre stack de notes, on
+              vous montre le diagnostic, on chiffre le palier. Aucun
+              follow-up automatique.
+            </p>
+            <a class="btn btn--primary" href="mailto:audit@coach-os.app?subject=Audit%2030%20min">
+              Réserver
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </a>
+          </article>
+
+          <article class="cta-card">
+            <h3 class="cta-card__title">Entrer en démo sans compte</h3>
+            <p class="cta-card__body">
+              Le bureau s'ouvre sur le seed local. Aucune donnée n'est envoyée,
+              aucun compte n'est créé. Vous voyez l'interface et les
+              collections telles qu'elles sont — pas une vitrine.
+            </p>
+            <a class="btn btn--secondary" href="/landing/demo/index.html">
+              Ouvrir la démo
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </a>
+            <p class="cta-card__note">Le seed local survit au branchement Supabase : la démo marche même si la base est en panne.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="landing-footer">
+        <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
+        <span>
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          ·
+          <a href="/landing/paliers/index.html">Paliers</a>
+          ·
+          <a href="/landing/engagements/index.html">Engagements</a>
+          ·
+          <a href="/landing/demo/index.html">Démo</a>
+          ·
+          <a href="/">Application</a>
+        </span>
+      </footer>
+
+    </main>
+  </body>
+</html>

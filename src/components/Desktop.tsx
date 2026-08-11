@@ -15,6 +15,8 @@ import { useShellStore } from '../stores/shell.store';
 import { getApp } from '../lib/app-registry';
 import { useWallpaper } from '../lib/wallpaper';
 import { AssistantOverlay } from '../agent/AssistantOverlay';
+import { TourOverlay, FirstRunInvitation } from '../onboarding';
+import { TOURS } from '../apps/onboarding/tours/threeTours';
 
 /** Onboarding-only routes: when the prospect hits /onboarding or /demo, the
  *  Macro Desktop opens with the Onboarding window auto-launched + maximized.
@@ -131,6 +133,11 @@ export function Desktop(): import('react').ReactNode {
         <ToastContainer />
         <AppDrawer />
         <AssistantOverlay />
+        {/* TourOverlay — mounted at the shell so a tour survives closing or
+            opening any window. Catalogue is the same one OnboardingApp
+            uses, so a replay from the Onboarding app finds the same steps. */}
+        <TourOverlay catalogue={TOURS} />
+        <FirstRunInvitation enabled />
       </div>
     </ViewportGuard>
   );

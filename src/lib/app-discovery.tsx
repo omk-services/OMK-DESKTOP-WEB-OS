@@ -1,7 +1,7 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
 import type { ReactNode } from 'react';
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Sparkles, Compass, Shield, Wand2, Network, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Compass, Shield, Wand2, Network, BrainCircuit } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 
@@ -20,7 +20,6 @@ import { SalesApp } from '../apps/sales/SalesApp';
 import { FinanceApp } from '../apps/finance/FinanceApp';
 import { LegalApp } from '../apps/legal/LegalApp';
 import { SettingsApp } from '../apps/settings/SettingsApp';
-import { OnboardingApp } from '../apps/onboarding/OnboardingApp';
 import { WelcomeApp } from '../apps/welcome/WelcomeApp';
 import { AuditApp } from '../apps/audit/AuditApp';
 import { DesignApp } from '../apps/design/DesignApp';
@@ -36,14 +35,15 @@ registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,     
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
 registerApp({ id: 'sales',       name: 'Sales OS',             icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
-// Audit Diagnostic IA (Drawbridge Task 4 2026-07-28: extrait from C:\Users\amado\Downloads\audit.pdf)
-registerApp({ id: 'audit',       name: 'Audit Diagnostic IA',    icon: Shield,          accent: '#b91c1c', description: 'Manuel de diagnostic IA · 6 grilles canon',     component: AuditApp,     hidden: true });
+// Audit Diagnostic IA (Drawbridge Task 4 2026-07-28: extrait from C:\Users\amado\Downloads\audit.pdf).
+// Brief M (2026-08-11) — refonte de l'app : le diagnostic guidé a remplacé
+// le quiz commercial. L'app reste la même (id `audit`), seule l'app
+// `onboarding` (citadel) a été retirée. Une migration localStorage silencieuse
+// ramène les fenêtres `onboarding` vers `audit` à la lecture.
+registerApp({ id: 'audit',       name: 'Audit',                  icon: Shield,          accent: '#b91c1c', description: 'Diagnostic IA guidé · 6 grilles · verdict argumenté', component: AuditApp });
 registerApp({ id: 'finance',     name: 'Finance',              icon: Wallet,          accent: '#ca8a04', description: 'Unit economics, runway, invoices',               component: FinanceApp });
 registerApp({ id: 'legal',       name: 'Legal',                icon: Scale,           accent: '#64748b', description: 'Contracts and AI-Act compliance',                component: LegalApp });
 registerApp({ id: 'settings',    name: 'Settings',             icon: Settings,        accent: '#78716c', description: 'General, privacy, integrations',                 component: SettingsApp });
-// Onboarding Citadel — the Q4-2026 GTM demo-coach launch (4-question quiz →
-// mini-Desktop-OS shell with 4 live demo apps). Auto-opens on first launch.
-registerApp({ id: 'onboarding',  name: 'Onboarding',            icon: Sparkles,        accent: '#0d9488', description: '4-question fit · demo-coach citadel',           component: OnboardingApp, dockSlot: 0 });
 // Welcome — Circle.so-style landing pages, one per business domain. Sidebar
 // lists pages; canvas renders each as a one-page experience with sticky
 // header-menu in-page navigation.

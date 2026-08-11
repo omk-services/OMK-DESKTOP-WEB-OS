@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Coach OS — image de partage OG / Twitter
+  Format 1200×630 (ratio 1.91:1, standard Open Graph).
+  Poids : < 1 ko, pas de police chargée.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4f1ea"/>
+      <stop offset="100%" stop-color="#ebe6d8"/>
+    </linearGradient>
+    <radialGradient id="accent" cx="20%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="rgba(176, 74, 31, 0.18)"/>
+      <stop offset="100%" stop-color="rgba(176, 74, 31, 0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#accent)"/>
+
+  <!-- Eyebrow band -->
+  <rect x="80" y="80" width="320" height="6" fill="#b04a1f"/>
+
+  <!-- Eyebrow text -->
+  <text x="80" y="124" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-style="italic" fill="#b04a1f" letter-spacing="2">
+    Coach OS — pour coach qui facture 500 à 2000 $/h
+  </text>
+
+  <!-- Brand mark -->
+  <rect x="80" y="160" width="56" height="56" rx="12" fill="#1a1815"/>
+  <text x="108" y="206" font-family="Georgia, 'Times New Roman', serif" font-size="36" font-weight="700" font-style="italic" fill="#f4f1ea" text-anchor="middle">
+    C
+  </text>
+  <text x="156" y="206" font-family="Georgia, 'Times New Roman', serif" font-size="36" fill="#1a1815">
+    Coach <tspan font-style="italic" fill="#b04a1f">OS</tspan>
+  </text>
+
+  <!-- Main title (two lines) -->
+  <text x="80" y="320" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="500" fill="#1a1815" letter-spacing="-1">
+    Le bureau qui tient
+  </text>
+  <text x="80" y="400" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="500" fill="#1a1815" letter-spacing="-1">
+    votre méthode — pas <tspan font-style="italic" fill="#b04a1f">l&#8217;inverse</tspan>.
+  </text>
+
+  <!-- Trust line -->
+  <text x="80" y="476" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-style="italic" fill="#6b665d">
+    Diagnostic avant l&#8217;outil · Données isolées · Sortie prévue dès le premier jour.
+  </text>
+
+  <!-- Bottom rule -->
+  <line x1="80" y1="552" x2="1120" y2="552" stroke="#d8d3c6" stroke-width="1"/>
+
+  <!-- Bottom label -->
+  <text x="80" y="588" font-family="Georgia, 'Times New Roman', serif" font-size="18" font-weight="600" letter-spacing="2" fill="#948c80">
+    COACH&#8202;·&#8202;OS
+  </text>
+  <text x="1120" y="588" font-family="Georgia, 'Times New Roman', serif" font-size="18" font-style="italic" fill="#948c80" text-anchor="end">
+    coach-os.app
+  </text>
+</svg>

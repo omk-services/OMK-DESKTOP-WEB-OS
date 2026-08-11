@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agentplugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "coach-os": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/../mcp/server.mjs"],
+      "env": {
+        "COACH_OS_PROPOSAL_DIR": "${PLUGIN_DATA}/proposals"
+      },
+      "cwd": "${PLUGIN_ROOT}/.."
+    }
+  }
+}

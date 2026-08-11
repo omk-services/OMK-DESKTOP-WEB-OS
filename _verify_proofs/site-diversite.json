@@ -1,0 +1,195 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T10:21:01.096Z",
+  "seuils": {
+    "fonts": {
+      "min": 4,
+      "label": "polices distinctes (>= 4)"
+    },
+    "bgColors": {
+      "min": 6,
+      "label": "fonds distincts (>= 6)"
+    },
+    "radii": {
+      "min": 4,
+      "label": "rayons d'angle distincts (>= 4)"
+    },
+    "canvases": {
+      "min": 4,
+      "label": "éléments <canvas> montés (>= 4)"
+    },
+    "errors": {
+      "max": 0,
+      "label": "erreurs console total (== 0)"
+    },
+    "renderMs": {
+      "max": 2500,
+      "label": "temps de rendu utile par page (< 2500 ms)"
+    }
+  },
+  "totals": {
+    "distinctFonts": 5,
+    "distinctBgColors": 16,
+    "distinctRadii": 8,
+    "distinctShadows": 2,
+    "distinctBorders": 11,
+    "canvasesMounted": 8,
+    "totalErrors": 0,
+    "renderMsByPage": {
+      "home": 1337,
+      "methode": 1289,
+      "paliers": 1307,
+      "engagements": 1387,
+      "demo": 1326
+    }
+  },
+  "pages": {
+    "home": {
+      "fonts": [
+        "\"Times New Roman\"",
+        "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace"
+      ],
+      "bgs": [
+        "rgb(250, 250, 247)",
+        "rgba(250, 250, 247, 0.92)",
+        "rgb(10, 10, 10)",
+        "rgba(250, 250, 247, 0.86)",
+        "rgb(244, 241, 234)",
+        "rgb(255, 255, 255)",
+        "rgb(245, 245, 247)"
+      ],
+      "radii": [
+        "4px",
+        "48.4943% 49.8175%",
+        "24px",
+        "2px"
+      ],
+      "canvasMounted": 3,
+      "dataFxTargets": 3,
+      "renderMs": 1337,
+      "errors": {
+        "console": [],
+        "request": [],
+        "total": 0
+      }
+    },
+    "methode": {
+      "fonts": [
+        "\"Times New Roman\"",
+        "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "ui-serif, Georgia, Cambria, \"Times New Roman\", serif",
+        "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace"
+      ],
+      "bgs": [
+        "rgb(250, 250, 247)",
+        "rgba(250, 250, 247, 0.92)",
+        "rgb(10, 10, 10)",
+        "rgba(250, 250, 247, 0.86)",
+        "rgb(255, 255, 255)"
+      ],
+      "radii": [
+        "4px"
+      ],
+      "canvasMounted": 1,
+      "dataFxTargets": 1,
+      "renderMs": 1289,
+      "errors": {
+        "console": [],
+        "request": [],
+        "total": 0
+      }
+    },
+    "paliers": {
+      "fonts": [
+        "\"Times New Roman\"",
+        "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+        "ui-serif, Georgia, Cambria, \"Times New Roman\", serif"
+      ],
+      "bgs": [
+        "rgb(250, 250, 247)",
+        "rgba(250, 250, 247, 0.92)",
+        "rgb(10, 10, 10)",
+        "rgba(250, 250, 247, 0.86)",
+        "rgba(255, 255, 255, 0.18)",
+        "rgba(255, 255, 255, 0.06)"
+      ],
+      "radii": [
+        "4px",
+        "16px",
+        "999px"
+      ],
+      "canvasMounted": 1,
+      "dataFxTargets": 1,
+      "renderMs": 1307,
+      "errors": {
+        "console": [],
+        "request": [],
+        "total": 0
+      }
+    },
+    "engagements": {
+      "fonts": [
+        "\"Times New Roman\"",
+        "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace"
+      ],
+      "bgs": [
+        "rgb(250, 250, 247)",
+        "rgba(250, 250, 247, 0.92)",
+        "rgb(10, 10, 10)",
+        "rgba(250, 250, 247, 0.86)",
+        "rgb(255, 235, 0)",
+        "rgb(255, 255, 255)",
+        "rgb(255, 0, 0)",
+        "rgb(0, 0, 0)"
+      ],
+      "radii": [
+        "4px"
+      ],
+      "canvasMounted": 1,
+      "dataFxTargets": 1,
+      "renderMs": 1387,
+      "errors": {
+        "console": [],
+        "request": [],
+        "total": 0
+      }
+    },
+    "demo": {
+      "fonts": [
+        "\"Times New Roman\"",
+        "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+        "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+        "monospace"
+      ],
+      "bgs": [
+        "rgb(250, 250, 247)",
+        "rgba(250, 250, 247, 0.92)",
+        "rgb(10, 10, 10)",
+        "rgba(250, 250, 247, 0.86)",
+        "rgb(255, 255, 255)",
+        "rgb(245, 245, 247)",
+        "rgb(5, 5, 5)",
+        "rgba(51, 255, 0, 0.05)",
+        "rgba(51, 255, 0, 0.1)",
+        "rgb(51, 255, 0)"
+      ],
+      "radii": [
+        "4px",
+        "12px",
+        "6px",
+        "2px"
+      ],
+      "canvasMounted": 2,
+      "dataFxTargets": 2,
+      "renderMs": 1326,
+      "errors": {
+        "console": [],
+        "request": [],
+        "total": 0
+      }
+    }
+  }
+}

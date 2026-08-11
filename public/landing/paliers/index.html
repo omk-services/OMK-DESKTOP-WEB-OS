@@ -1,0 +1,188 @@
+<!doctype html>
+<!--
+  Coach OS — page paliers (/landing/paliers/)
+
+  Quatre paliers, du « ça tourne déjà » à la souveraineté. Registre :
+  Bento (grille propre, bordures fines) — c'est une comparaison côte-à-
+  côte, le registre Bento souligne la lecture en tableau sans surcharger.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#faf7f0" />
+
+    <title>Paliers — Coach OS</title>
+    <meta name="description" content="Quatre paliers : preuve de concept, SaaS, marque blanche, souveraineté. Ce qui existe aujourd'hui et ce qui est prévu. Sans piège, avec un chemin de sortie dès le premier jour." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://coach-os.app/landing/paliers/" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://coach-os.app/landing/paliers/" />
+    <meta property="og:site_name" content="Coach OS" />
+    <meta property="og:title" content="Quatre paliers. Pas de piège. — Coach OS" />
+    <meta property="og:description" content="Quatre paliers, du « ça tourne déjà » à la souveraineté. Le chemin de sortie est prévu dès le premier jour." />
+    <meta property="og:image" content="https://coach-os.app/landing/og-image.svg" />
+    <meta property="og:image:alt" content="Quatre paliers de Coach OS : preuve de concept, SaaS, marque blanche, souveraineté." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Quatre paliers. Pas de piège. — Coach OS" />
+    <meta name="twitter:description" content="Quatre paliers, du « ça tourne déjà » à la souveraineté. Le chemin de sortie est prévu dès le premier jour." />
+    <meta name="twitter:image" content="https://coach-os.app/landing/og-image.svg" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Quatre paliers. Pas de piège.",
+      "description": "Quatre paliers : preuve de concept, SaaS, marque blanche, souveraineté.",
+      "author": { "@type": "Organization", "name": "Coach OS" }
+    }
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/landing/favicon.svg" />
+    <link rel="stylesheet" href="/landing/styles.css" />
+  </head>
+
+  <body class="theme-bento">
+    <main class="landing-shell" id="top">
+
+      <header class="landing-top" role="banner">
+        <a class="landing-top__brand" href="/landing/index.html" aria-label="Coach OS">
+          <span class="landing-top__brand-mark" aria-hidden="true">C</span>
+          <span>Coach <em>OS</em></span>
+        </a>
+        <nav class="landing-top__nav" aria-label="Pages du site">
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          <a href="/landing/paliers/index.html" aria-current="page">Paliers</a>
+          <a href="/landing/engagements/index.html">Engagements</a>
+          <a href="/landing/demo/index.html">Démo</a>
+        </nav>
+      </header>
+
+      <nav class="landing-crumbs" aria-label="Fil d'Ariane">
+        <a href="/landing/index.html">Accueil</a>
+        <span class="landing-crumbs__sep" aria-hidden="true">›</span>
+        <span class="landing-crumbs__here">Paliers</span>
+      </nav>
+
+      <!-- ── Paliers ────────────────────────────────────────────────── -->
+      <section class="section" id="paliers" aria-labelledby="ladder-title">
+        <p class="section__eyebrow">L'offre</p>
+        <h1 class="section__title" id="ladder-title">Quatre paliers. Pas de piège.</h1>
+        <p class="section__intro">
+          Le but n'est pas de vous garder. La sortie est prévue dès le premier
+          jour. Chaque palier dit ce qui existe aujourd'hui et ce qui est prévu.
+        </p>
+
+        <table class="ladder-table">
+          <thead>
+            <tr>
+              <th scope="col">Palier</th>
+              <th scope="col">État</th>
+              <th scope="col">Ce que vous obtenez</th>
+              <th scope="col">Où vivent vos données</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Palier">Preuve de concept</td>
+              <td data-label="État">
+                <span class="ladder-state ladder-state--green">
+                  <span class="ladder-state__dot" aria-hidden="true"></span>
+                  Existe aujourd'hui
+                </span>
+              </td>
+              <td data-label="Ce que vous obtenez">Accès immédiat, espace partagé isolé entre coachs</td>
+              <td data-label="Où vivent vos données">Infrastructure OMK (Supabase CUSTOMERS)</td>
+            </tr>
+            <tr>
+              <td data-label="Palier">SaaS</td>
+              <td data-label="État">
+                <span class="ladder-state ladder-state--green">
+                  <span class="ladder-state__dot" aria-hidden="true"></span>
+                  Existe aujourd'hui
+                </span>
+              </td>
+              <td data-label="Ce que vous obtenez">Votre espace, vos utilisateurs, votre paramétrage</td>
+              <td data-label="Où vivent vos données">Infrastructure OMK, isolation par politique de sécurité</td>
+            </tr>
+            <tr>
+              <td data-label="Palier">Marque blanche</td>
+              <td data-label="État">
+                <span class="ladder-state ladder-state--amber">
+                  <span class="ladder-state__dot" aria-hidden="true"></span>
+                  Prévu
+                </span>
+              </td>
+              <td data-label="Ce que vous obtenez">Le produit à vos couleurs et votre domaine</td>
+              <td data-label="Où vivent vos données">Votre propre base, dédiée</td>
+            </tr>
+            <tr>
+              <td data-label="Palier">Souveraineté</td>
+              <td data-label="État">
+                <span class="ladder-state ladder-state--amber">
+                  <span class="ladder-state__dot" aria-hidden="true"></span>
+                  Prévu
+                </span>
+              </td>
+              <td data-label="Ce que vous obtenez">Le produit tourne chez vous</td>
+              <td data-label="Où vivent vos données">Votre infrastructure, vos clés, votre juridiction</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="ladder-footnote">
+          « On ne s'enferme pas ici. » La promesse n'est pas la gratuité —
+          c'est le chemin de sortie.
+        </p>
+
+        <!-- Enchaînement : argument commercial → engagements -->
+        <nav class="page-next" aria-label="Suite">
+          <a href="/landing/diagnostic/index.html" style="font-size:14px; color: var(--landing-text-muted); font-family: var(--landing-sans); font-weight: 600;">
+            ← Revoir le diagnostic
+          </a>
+          <a href="/landing/engagements/index.html">
+            Lire les engagements
+            <span class="page-next__arrow" aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </section>
+
+      <!-- ── CTA (léger, redirige vers la démo) ────────────────────── -->
+      <section class="section" aria-labelledby="try-title">
+        <p class="section__eyebrow">L'entrée</p>
+        <h2 class="section__title" id="try-title">Voir avant de choisir un palier</h2>
+        <p class="section__intro">
+          Le palier le plus court, c'est la démo. Identifiants publics, seed
+          local, aucun engagement.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/landing/demo/index.html">
+            Ouvrir la démo
+            <span class="btn__arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--secondary" href="mailto:audit@coach-os.app?subject=Audit%2030%20min">
+            Réserver un audit de 30 min
+          </a>
+        </div>
+      </section>
+
+      <footer class="landing-footer">
+        <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
+        <span>
+          <a href="/landing/index.html">Accueil</a>
+          ·
+          <a href="/landing/diagnostic/index.html">Diagnostic</a>
+          ·
+          <a href="/landing/engagements/index.html">Engagements</a>
+          ·
+          <a href="/landing/demo/index.html">Démo</a>
+        </span>
+      </footer>
+
+    </main>
+  </body>
+</html>

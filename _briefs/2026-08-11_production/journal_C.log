@@ -1,0 +1,22 @@
+Brief C livré. Voici l'état :
+
+**Livré** :
+- `src/lib/tooling/` — primitive `defineTool`, types, registry, serverStore, 5 adaptateurs (REST, MCP, CLI, Skill, in-app) + helper `zod-introspect`.
+- Catalogue de 13 outils (5 lectures, 5 navigations, 3 écritures) sous `src/lib/tooling/catalog/`.
+- `cli/coach-os.mjs` (binaire, déclaré dans `package.json#bin`), `mcp/server.mjs` (serveur stdio), `api/v1/[tool].ts` et `api/v1/tools.ts` (REST).
+- `coach-os-plugin/` conforme Agent Plugins 1.0.0 (plugin.json + mcp.json + 13 SKILL.md + INSTALL.md).
+- `skills/` (miroir public), `scripts/{build-tooling,build-skills,verify}.mjs`.
+- 3 scripts npm : `tooling:build`, `tooling:skills`, `tooling:verify`.
+
+**Prouvé par exécution** (`npm run tooling:verify`) :
+- CLI `--help` liste les commandes.
+- CLI `collection.list` rend 3 collections JSON.
+- MCP server répond à `initialize` (serverInfo `coach-os v0.1.0`) et `tools/list` (13 outils).
+- REST `POST /api/v1/collection.list` → 200, 3 collections.
+- **Ecriture = proposition** : `collection.create` rend `{ scenarioId, proposalId }`, écrit un fichier dans le sink, et `listItems('tasks')` reste à 3 items avant/après.
+
+**Périmètre respecté** : aucun fichier hors `src/lib/tooling/`, `api/`, `cli/`, `mcp/`, `skills/`, `coach-os-plugin/`, `package.json` n'a été touché. Les erreurs de typage préexistantes dans `src/apps/*` et `src/components/cms/*` ne sont pas les miennes.
+
+**Limites nommées dans le rapport** : le binding in-app runtime n'est pas câblé (sortie du scope, contrat posé), `serverStore` embarque un sous-ensemble réduit (3 collections, lecture seule), pas de tests unitaires Vitest, et le serveur REST n'a pas été déployé sur Vercel dans cette passe.
+
+Rapport : `_briefs/2026-08-11_production/RAPPORT_C_AI_NATIVE.md`.

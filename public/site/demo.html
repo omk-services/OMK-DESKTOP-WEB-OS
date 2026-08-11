@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#fafaf7" />
+<title>Démo sans compte — Coach OS</title>
+<meta name="description" content="Trois étapes pour entrer dans la démo sans créer de compte. Identifiants de démonstration fournis. Aucune donnée envoyée." />
+<link rel="canonical" href="https://coach-os.app/site/demo.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:url" content="https://coach-os.app/site/demo.html" />
+<meta property="og:title" content="Entrer en démo · Coach OS" />
+<meta property="og:description" content="Trois étapes. Identifiants fournis. Seed local : aucune donnée envoyée. La démo marche même si Supabase est en panne." />
+
+<link rel="icon" type="image/svg+xml" href="/site/favicon.svg" />
+<link rel="stylesheet" href="/site/styles.css" />
+</head>
+<body>
+
+<header class="site-top" role="banner">
+  <div class="site-top__inner">
+    <a class="site-top__brand" href="/site/index.html" aria-label="Coach OS — Accueil">
+      <span class="site-top__mark" aria-hidden="true">C</span>
+      <span>Coach <em>OS</em></span>
+    </a>
+    <nav class="site-top__nav" aria-label="Pages du site">
+      <a href="/site/index.html">Accueil</a>
+      <a href="/site/methode.html">Méthode</a>
+      <a href="/site/paliers.html">Paliers</a>
+      <a href="/site/engagements.html">Engagements</a>
+      <a href="/site/demo.html">Démo</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="site-subnav" aria-label="Sections de la page">
+  <div class="site-subnav__inner">
+    <a href="#howto">Comment entrer</a>
+    <a href="#creds">Identifiants</a>
+    <a href="#nodata">Pourquoi pas de données</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ── Comment entrer · Interactive Product Demo · ParticleReveal ────── -->
+  <section id="howto" class="site-section sec-demo-howto" aria-labelledby="howto-title">
+    <div class="fx-canvas fx-particle" data-fx="particle" aria-hidden="true" style="color:#6366f1;--accent:#6366f1;"></div>
+    <div class="site-section__inner">
+      <p class="site-eyebrow site-eyebrow--accent">L'entrée directe</p>
+      <h1 class="site-h1" id="howto-title">Trois étapes. Pas de compte.</h1>
+      <p class="site-lead">
+        Vous voyez l'interface et les collections telles qu'elles sont — pas une vitrine
+        préparée. La démo charge un seed local : vos clics ne quittent pas le navigateur.
+      </p>
+
+      <div class="demo-steps" role="list">
+
+        <article class="demo-step" role="listitem">
+          <h2 class="demo-step__title">Ouvrez l'application</h2>
+          <p class="demo-step__body">
+            Allez à l'URL racine de Coach OS. La page d'authentification s'affiche — c'est
+            l'entrée, pas un mur.
+          </p>
+          <p class="demo-step__code"><code>https://omk-desktop-web-os.vercel.app</code></p>
+        </article>
+
+        <article class="demo-step" role="listitem">
+          <h2 class="demo-step__title">Cliquez sur « Démo »</h2>
+          <p class="demo-step__body">
+            En bas du formulaire d'authentification, le lien <em>Entrer en démo</em> ouvre
+            le bureau sans créer de compte. Le seed local se charge en mémoire.
+          </p>
+        </article>
+
+        <article class="demo-step" role="listitem">
+          <h2 class="demo-step__title">Explorez les collections</h2>
+          <p class="demo-step__body">
+            23 collections sont pré-remplies : clients, sessions, SOP, méthode, agents.
+            Cliquez, filtrez, créez un item — il vit dans votre session, pas dans notre base.
+          </p>
+        </article>
+
+        <article class="demo-step" role="listitem">
+          <h2 class="demo-step__title">Quittez quand vous voulez</h2>
+          <p class="demo-step__body">
+            Fermez l'onglet. Le seed disparaît avec la session — c'est le but.
+            Aucun cookie de tracking, aucune trace, aucun follow-up.
+          </p>
+        </article>
+
+      </div>
+
+      <p style="margin-top: 3rem;">
+        <a class="site-btn" style="background:#0a0a0a;color:#fff" href="https://omk-desktop-web-os.vercel.app">
+          Ouvrir la démo
+          <span class="site-btn__arrow" aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Identifiants · Terminal CLI · GlyphRain ───────────────────────── -->
+  <section id="creds" class="site-section sec-demo-creds" aria-labelledby="creds-title">
+    <div class="fx-canvas fx-glyph-rain" data-fx="glyph-rain" aria-hidden="true"></div>
+    <div class="site-section__inner">
+      <p class="site-eyebrow">Artefact technique</p>
+      <h2 class="site-h2" id="creds-title">Identifiants — si vous passez par l'authentification</h2>
+      <p class="site-lead">
+        La démo sans compte ne demande rien. Mais si vous tenez à voir le formulaire
+        d'authentification avec un compte Supabase de pré-prod, voici les identifiants.
+        Ce ne sont pas des secrets — c'est un environnement jetable.
+      </p>
+
+      <div class="creds-block">
+        <dl>
+          <dt>URL</dt>
+          <dd><code>https://omk-desktop-web-os.vercel.app</code></dd>
+          <dt>Email</dt>
+          <dd><code>demo@coach-os.app</code></dd>
+          <dt>Mot de passe</dt>
+          <dd><code>coach-os-demo-2026</code></dd>
+          <dt>Tenant</dt>
+          <dd>Architecte · niveau démo</dd>
+        </dl>
+        <p class="creds-warn">
+          ⚠ Cet environnement est partagé. N'y écrivez rien de sensible. Le seed local est
+          plus représentatif : il ne dépend d'aucune base, d'aucun secret, d'aucun réseau.
+          <span class="creds-cursor" aria-hidden="true"></span>
+        </p>
+      </div>
+
+      <div class="creds-statusbar" aria-hidden="true">
+        <span>[ BATTERY: 88% ]</span>
+        <span>[ NET: CONNECTED ]</span>
+        <span>[ TENANT: demo ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Pourquoi pas de données ────────────────────────────────────────── -->
+  <section id="nodata" class="site-section sec-demo-nodata" aria-labelledby="nodata-title">
+    <div class="site-section__inner">
+      <p class="site-eyebrow site-eyebrow--accent">Le pourquoi du comment</p>
+      <h2 class="site-h2" id="nodata-title">Pourquoi la démo n'envoie aucune donnée</h2>
+      <p class="site-prose">
+        Le bureau de démonstration se sert d'un seed local. Vos clics vivent dans la mémoire
+        du navigateur et s'effacent à la fermeture de l'onglet. Voici pourquoi c'est le bon défaut.
+      </p>
+
+      <ul class="nodata-list">
+        <li>
+          <strong>Pas de piège à données.</strong> Vous quittez, vos notes quittent. C'est la
+          définition d'une démo honnête — pas d'inscription forcée, pas d'opt-in discret.
+        </li>
+        <li>
+          <strong>Le seed survit à Supabase.</strong> Si la base de production est en panne,
+          le seed local prend le relais. La démo reste démontrable. Un coach qui voit une
+          page d'erreur ne s'inscrit pas.
+        </li>
+        <li>
+          <strong>Le seed est représentatif.</strong> 23 collections pré-remplies, des dizaines
+          d'items lisibles — vous voyez les données que vous tiendrez, pas une version édulcorée.
+        </li>
+        <li>
+          <strong>Le branchement est explicite.</strong> Quand vous créez un vrai compte, vous
+          passez du seed local à votre propre base. La bascule est affichée, pas silencieuse.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="site-footer__inner">
+    <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
+    <nav class="site-footer__nav" aria-label="Liens du pied de page">
+      <a href="/site/index.html">Accueil</a>
+      <a href="/site/methode.html">Méthode</a>
+      <a href="/site/paliers.html">Paliers</a>
+      <a href="/site/engagements.html">Engagements</a>
+      <a href="/">Application</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/site/effects.js"></script>
+</body>
+</html>

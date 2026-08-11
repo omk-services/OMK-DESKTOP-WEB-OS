@@ -1,0 +1,304 @@
+{
+  "url": "http://localhost:5173/landing/index.html",
+  "generatedAt": "2026-08-11T08:09:53.977Z",
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "seo": {
+    "title": "Coach OS — Le bureau qui tient votre méthode",
+    "description": "Coach OS est le bureau web pour coach expert (500 à 2000 $/h) : diagnostic avant l'outil, données isolées par client, sortie prévue dès le premier jour. Pas de SaaS qui vous enferme.",
+    "canonical": "https://coach-os.app/landing/",
+    "ogTitle": "Coach OS — Le bureau qui tient votre méthode",
+    "ogDescription": "Pour coach qui facture 500 à 2000 $/h. Diagnostic avant l'outil, données isolées, sortie prévue dès le premier jour.",
+    "ogImage": "https://coach-os.app/landing/og-image.svg",
+    "ogImageAlt": "Coach OS — pour coach qui facture 500 à 2000 $/h. Le bureau qui tient votre méthode, pas l'inverse.",
+    "ogLocale": "fr_FR",
+    "twitterCard": "summary_large_image",
+    "twitterImageAlt": "Coach OS — pour coach qui facture 500 à 2000 $/h. Le bureau qui tient votre méthode, pas l'inverse.",
+    "structuredData": {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "Coach OS",
+          "url": "https://coach-os.app",
+          "description": "Bureau web pour coach expert : diagnostic avant l'outil, données isolées par client, sortie prévue dès le premier jour."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Coach OS",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Bureau web pour coach expert : notes de session, méthode, clients, automatisations. Données isolées, sortie prévue dès le premier jour.",
+          "offers": {
+            "@type": "Offer",
+            "category": "Subscription",
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      ]
+    },
+    "h1Count": 1,
+    "h1Text": "Le bureau qui tient votre méthode — pas l'inverse.",
+    "lang": "fr"
+  },
+  "sectionsPresent": {
+    "diagnostic": true,
+    "paliers": true,
+    "engagement": true,
+    "cta": true
+  },
+  "contraste": [
+    {
+      "name": "Hero H1",
+      "sel": "h1.hero__title",
+      "present": true,
+      "fg": "rgb(42,38,34)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 13.31,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "Hero subtitle",
+      "sel": ".hero__subtitle",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 5.05,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Hero eyebrow",
+      "sel": ".hero__eyebrow",
+      "present": true,
+      "fg": "rgb(176,74,31)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 4.84,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Hero trust line",
+      "sel": ".hero__trust",
+      "present": true,
+      "fg": "rgb(110,105,96)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 4.83,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Section title (intro)",
+      "sel": ".section__title",
+      "present": true,
+      "fg": "rgb(42,38,34)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 13.31,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "Section intro",
+      "sel": ".section__intro",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 5.05,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Section eyebrow",
+      "sel": ".section__eyebrow",
+      "present": true,
+      "fg": "rgb(110,105,96)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 4.83,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Pain card body",
+      "sel": ".pain-card__body",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(255,255,255) (pain-card)",
+      "ratio": 5.7,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Pain card source",
+      "sel": ".pain-card__source",
+      "present": true,
+      "fg": "rgb(110,105,96)",
+      "bg": "rgb(255,255,255) (pain-card)",
+      "ratio": 5.45,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Diagnostic coda quote",
+      "sel": ".diag-coda__quote",
+      "present": true,
+      "fg": "rgb(244,241,234)",
+      "bg": "rgb(26,24,21) (diag-coda)",
+      "ratio": 15.71,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "Diagnostic coda source",
+      "sel": ".diag-coda__source",
+      "present": true,
+      "fg": "rgb(244,241,234)",
+      "bg": "rgb(26,24,21) (diag-coda)",
+      "ratio": 15.71,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "Diag cell body",
+      "sel": ".diag-cell__body",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(250,248,243) (diag-cell)",
+      "ratio": 5.37,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Diag cell hint",
+      "sel": ".diag-cell__hint",
+      "present": true,
+      "fg": "rgb(176,74,31)",
+      "bg": "rgb(250,248,243) (diag-cell)",
+      "ratio": 5.15,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Ladder cell body",
+      "sel": ".ladder-table td",
+      "present": true,
+      "fg": "rgb(42,38,34)",
+      "bg": "rgb(255,255,255) (ladder-table)",
+      "ratio": 15.01,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "Ladder pill green",
+      "sel": ".ladder-state--green",
+      "present": true,
+      "fg": "rgb(29,90,44)",
+      "bg": "rgb(216,232,212) (ladder-state ladder-state--green)",
+      "ratio": 6.43,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Ladder pill amber",
+      "sel": ".ladder-state--amber",
+      "present": true,
+      "fg": "rgb(106,79,14)",
+      "bg": "rgb(241,230,197) (ladder-state ladder-state--amber)",
+      "ratio": 6.16,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Engage card body",
+      "sel": ".engage-card__body",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(255,255,255) (engage-card)",
+      "ratio": 5.7,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Engage card mark",
+      "sel": ".engage-card__mark",
+      "present": true,
+      "fg": "rgb(176,74,31)",
+      "bg": "rgb(255,255,255) (engage-card)",
+      "ratio": 5.46,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "CTA primary title",
+      "sel": ".cta-card--primary .cta-card__title",
+      "present": true,
+      "fg": "rgb(244,241,234)",
+      "bg": "rgb(26,24,21) (cta-card cta-card--primary)",
+      "ratio": 15.71,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "CTA primary body",
+      "sel": ".cta-card--primary .cta-card__body",
+      "present": true,
+      "fg": "rgb(244,241,234)",
+      "bg": "rgb(26,24,21) (cta-card cta-card--primary)",
+      "ratio": 15.71,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "CTA primary button",
+      "sel": ".cta-card .btn--primary",
+      "present": true,
+      "fg": "rgb(244,241,234)",
+      "bg": "rgb(176,74,31) (btn btn--primary)",
+      "ratio": 4.84,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "CTA secondary button",
+      "sel": ".cta-card .btn--secondary",
+      "present": true,
+      "fg": "rgb(42,38,34)",
+      "bg": "rgb(255,255,255) (cta-card)",
+      "ratio": 15.01,
+      "aa": true,
+      "aaa": true
+    },
+    {
+      "name": "CTA note",
+      "sel": ".cta-card__note",
+      "present": true,
+      "fg": "rgb(110,105,96)",
+      "bg": "rgb(255,255,255) (cta-card)",
+      "ratio": 5.45,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Ladder footnote",
+      "sel": ".ladder-footnote",
+      "present": true,
+      "fg": "rgb(107,102,93)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 5.05,
+      "aa": true,
+      "aaa": false
+    },
+    {
+      "name": "Footer",
+      "sel": ".landing-footer",
+      "present": true,
+      "fg": "rgb(110,105,96)",
+      "bg": "rgb(244,241,234) (BODY)",
+      "ratio": 4.83,
+      "aa": true,
+      "aaa": false
+    }
+  ],
+  "contrasteFailed": 0,
+  "allContrasteAA": true
+}

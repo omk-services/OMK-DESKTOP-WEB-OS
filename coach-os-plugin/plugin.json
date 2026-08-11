@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agentplugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "coach-os",
+  "version": "0.1.0",
+  "description": "Coach OS — AI-natif. 13 outils (collection, app, scenario) exposés via REST, MCP, CLI, Skill, in-app. Les écritures passent par la file d'approbation.",
+  "author": {
+    "name": "OMK Services",
+    "url": "https://github.com/omk-services/00-omk-saas-os"
+  },
+  "homepage": "https://omk-desktop-web-os.vercel.app",
+  "repository": "github:omk-services/00-omk-saas-os",
+  "license": "MIT",
+  "keywords": ["coach", "sop", "no-code", "approvals", "agent-skills", "mcp"],
+  "extensions": {
+    "claude-code": {
+      "mcpConfigPath": "mcp.json"
+    }
+  }
+}
