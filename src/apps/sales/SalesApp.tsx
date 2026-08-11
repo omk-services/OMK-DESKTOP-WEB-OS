@@ -1,14 +1,11 @@
 /**
  * SalesApp — Sales OS Control Center (editorial).
  *
- * L'app garde sa section Cognition existante et propose cinq onglets :
- * Today / Pipeline / Context / Capabilities / Stack. Le ton visuel est
- * editorial cream, chiffres tres gros, libelles en petites capitales
- * espacees, cartes a filet colore en bas. Le theme canonique de sales
- * est pose sur warm-paper au mount pour que les variables de theme
- * s'alignent sur le brief.
+ * Brief N (2026-08-11) — la couche Cognition a quitte Sales. Sales expose
+ * un seul indicateur (carte dans la sidebar "Cognition" avec un lien vers
+ * l'appautonome via `coach-os:open-app-section`). Plus de hook de donnees,
+ * plus de gestion d'etat/chargement/erreur pour Cognition dans cette app.
  *
- * Brief recap:
  *  - Les onglets sont rendus cote a cote, jamais dans AppFrame (heritage
  *    du theme de l'app). Les pages de detail passent par
  *    AppDetailOverlay monte en frere d'AppFrame (pattern canonique de
@@ -18,25 +15,19 @@
  *    (gagne / ICP fit), rouge (perdu / a relancer), et les statuts
  *    fondateurs (ok / warn / danger / accent) qui passent par des
  *    melanges de variables de theme.
- *  - L'app conserve ses donnees seedees (Cognition, calls, deals, tasks,
- *    docs, skills, routines, stack) — pas de nouvelles dependances, pas
+ *  - L'app conserve ses donnees seedees (calls, deals, tasks, docs,
+ *    skills, routines, stack) — pas de nouvelles dependances, pas
  *    de nouveau registre, pas de modification des autres apps.
  */
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import {
-  BookOpen, BrainCircuit, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards, ArrowRight,
+  BookOpen, BriefcaseBusiness, Calendar, CheckCheck, ChevronRight, CircleDashed, ClipboardList, Cloud, Cpu, Database, FileText, Handshake, Layers, Mail, MessageSquare, Mic, Phone, PhoneCall, Plug, Sparkles, Sun, Target, TrendingUp, Users, WalletCards, ArrowRight,
   type LucideIcon,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { useShellStore } from '../../stores/shell.store';
 import { useWindowPage } from '../../contexts/WindowContext';
-import { supabase, supabaseConfigured } from '../../lib/supabase';
-import { readTrustScore, silentReject, COGNITION_TRUST_FLOOR } from '../../lib/observability';
-import {
-  fetchEventCount, fetchEventTypeCounts, fetchLatestManifest, fetchRoutines,
-  type EventTypeCount, type Manifest, type Routine,
-} from '../../lib/cognition/queries';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import type { CmsItem } from '../../lib/cms/types';
 import { SalesDetailPage, type DetailItem } from './SalesDetailPage';
@@ -47,8 +38,6 @@ import { KanbanBoard } from '../_ui/widgets';
 
 registerItemDetail('sales', SalesItemDetail);
 seedSalesCms();
-
-import { CognitionOverviewContent } from '../cognition/CognitionApp';
 
 const ACCENT = '#ea580c';
 const SALES_TITLE = 'Sales OS';
@@ -84,18 +73,8 @@ interface ContextGroup { id: string; eyebrow: string; items: { id: string; title
 interface SkillRecord { id: string; name: string; description: string; icon: typeof BookOpen; }
 interface RoutineRecord { id: string; name: string; trigger: string; last: string; kind: 'event' | 'time' | 'manual'; isActive: boolean; }
 interface StackGroup { id: string; name: string; caption: string; tools: { id: string; name: string; role: string; cost?: string; status: ToolStatus; }[]; }
-interface CognitionState { routines: Routine[]; eventCount: number; eventTypes: EventTypeCount[]; manifest: Manifest | null; live: boolean; loading: boolean; error: string | null; }
 
 // ─── Seed data (carried over from the previous app, adapted to editorial) ──
-const FALLBACK_ROUTINES: Routine[] = [
-  { id: 'fallback-morning', org_id: '', name: 'Morning Routine', cadence: 'daily', time_of_day: '08:00:00', prompt_template: 'Walk the last 24h, update the second brain, surface the one thing.', skills_invoked: ['pipeline-review'], is_active: true },
-  { id: 'fallback-hygiene', org_id: '', name: 'Pipeline Hygiene', cadence: 'daily', time_of_day: '08:45:00', prompt_template: 'Find stale opportunities and assign next actions.', skills_invoked: ['pipeline-review'], is_active: true },
-  { id: 'fallback-prep', org_id: '', name: 'Call Prep', cadence: 'daily', time_of_day: null, prompt_template: 'Prepare the next prospect brief.', skills_invoked: ['call-prep', 'client-onepager'], is_active: true },
-  { id: 'fallback-followup', org_id: '', name: 'Post-Disc Followup', cadence: 'daily', time_of_day: null, prompt_template: 'Draft the next follow-up from call context.', skills_invoked: ['post-disc-followup', 'outreach'], is_active: true },
-  { id: 'fallback-scoring', org_id: '', name: 'Rep Scoring', cadence: 'weekly', time_of_day: null, prompt_template: 'Score recent sales conversations.', skills_invoked: ['sales-rep-analyzer'], is_active: true },
-  { id: 'fallback-weekly', org_id: '', name: 'Weekly Pipeline Review', cadence: 'weekly', time_of_day: null, prompt_template: 'Review conversion and stalled deals.', skills_invoked: ['pipeline-review', 'win-loss-analysis'], is_active: true },
-  { id: 'fallback-monthly', org_id: '', name: 'Monthly Intelligence Report', cadence: 'monthly', time_of_day: null, prompt_template: 'Extract recurring patterns from the month.', skills_invoked: ['win-loss-analysis'], is_active: true },
-];
 
 const CALLS: CallRecord[] = [
   { id: 'call-anish', name: 'Anish', company: 'Anish Labs', role: 'Co-founder & CEO · funded scale-up', time: '12:20', stage: 'Qualified · rebooked', score: 72, badge: 'on-ICP', brief: "Anish is back in the seat after a one-week slip. The discovery surfaced a clear trigger — paid search spend above a 12k €/mo threshold — and a buying committee with the founder, the head of growth, and a quiet CFO. The call's job is to confirm the budget owner and the implementation window before a proposal is drafted.", links: [{ label: 'Full brief', icon: FileText }, { label: 'LinkedIn', icon: Users }, { label: 'Website', icon: Cloud }, { label: 'Join call', icon: PhoneCall }, { label: 'Email', icon: Mail }, { label: '+33 1 02 03 04 05', icon: Phone }] },
@@ -181,47 +160,6 @@ const ROUTINES: RoutineRecord[] = []; // eslint-disable-line @typescript-eslint/
 void ROUTINES;
 const STACK: StackGroup[] = []; // eslint-disable-line @typescript-eslint/no-unused-vars
 void STACK;
-
-const EMPTY_COGNITION: CognitionState = { routines: [], eventCount: 0, eventTypes: [], manifest: null, live: false, loading: true, error: null };
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'Cognition data could not be loaded.';
-}
-
-function useCognitionData(): CognitionState {
-  const [state, setState] = useState<CognitionState>(EMPTY_COGNITION);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!supabaseConfigured) {
-      setState({ ...EMPTY_COGNITION, routines: FALLBACK_ROUTINES, live: false, loading: false });
-      return () => { cancelled = true; };
-    }
-
-    void Promise.all([
-      fetchRoutines(supabase),
-      fetchEventCount(supabase),
-      fetchEventTypeCounts(supabase),
-      fetchLatestManifest(supabase),
-    ]).then(([routines, eventCount, eventTypes, manifest]) => {
-      if (cancelled) return;
-      setState({ routines, eventCount, eventTypes, manifest, live: true, loading: false, error: null });
-    }).catch((error: unknown) => {
-      if (cancelled) return;
-      const message = errorMessage(error);
-      silentReject('sales-os:cognition-hydration', message);
-      setState({ ...EMPTY_COGNITION, loading: false, error: message });
-    });
-
-    return () => { cancelled = true; };
-  }, []);
-
-  return state;
-}
-
-function trustLabel(score: number): string {
-  return score >= COGNITION_TRUST_FLOOR ? 'gate armed' : 'gate review';
-}
 
 // ─── Detail-page adapters (re-use the existing SalesDetailPage) ──
 
@@ -681,7 +619,7 @@ const STAGE_DEFS: { id: string; label: string; tone: 'ok' | 'warn' | 'danger' | 
   { id: 'Lost', label: 'Lost or cold', tone: 'danger' },
 ];
 
-function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
+function PipelinePanel({ onSelect, navigateToSection, onOpenCognition }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void; onOpenCognition: () => void }) {
   void onSelect; // PipelinePanel currently exposes data only — no per-item detail
   // Read the live `deals` collection (registered in src/lib/cms/seed.ts).
   // Falls back to an empty array if the collection isn't registered yet
@@ -1005,6 +943,65 @@ function PipelinePanel({ onSelect, navigateToSection }: { onSelect: (item: Detai
           </ul>
         </article>
       </section>
+
+      {/* 05 Cognition indicator — Brief N (2026-08-11).
+         *  Sales garde UN SEUL temoin de Cognition : une carte avec un lien
+         *  qui ouvre l'app dediee via openApp. Pas d'etats, pas de chargement,
+         *  pas de gestion d'erreur — tout cela vit dans l'app Cognition. */}
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div className="flex items-baseline gap-3">
+            <span
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
+              style={{ background: 'var(--theme-text)', color: 'var(--theme-bg)', fontFamily: FONT_MONO }}
+            >05</span>
+            <h2
+              className="text-[20px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Cognition
+            </h2>
+          </div>
+          <Eyebrow>bureau dedie</Eyebrow>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenCognition}
+          className="flex w-full items-center justify-between gap-3 rounded-2xl p-5 text-left transition-all hover:-translate-y-0.5"
+          style={{
+            background: 'var(--theme-surface)',
+            border: '1px solid var(--panel-border)',
+            boxShadow: '0 1px 0 var(--panel-border-subtle)',
+          }}
+          aria-label="Ouvrir l'app Cognition"
+        >
+          <div>
+            <div
+              className="text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: 'var(--theme-text-dim)' }}
+            >
+              Routines · journal · manifeste
+            </div>
+            <div
+              className="mt-1 text-[15px] font-extrabold tracking-tight"
+              style={{ fontFamily: FONT_DISPLAY, color: 'var(--theme-text)' }}
+            >
+              Cognition a son bureau
+            </div>
+            <p
+              className="mt-1 text-[12.5px] leading-relaxed"
+              style={{ color: 'var(--theme-text-muted)' }}
+            >
+              La couche Cognition a quitte Sales. Routines, journal des evenements,
+              manifeste du graphe et souverainete du savoir vivent dans l'app dediee.
+            </p>
+          </div>
+          <ChevronRight
+            className="h-4 w-4 shrink-0"
+            style={{ color: 'var(--theme-text-dim)' }}
+          />
+        </button>
+      </section>
     </div>
   );
 }
@@ -1197,7 +1194,7 @@ function ContextPanel({ onSelect, navigateToSection }: { onSelect: (item: Detail
 
 // ─── Section: Capabilities ───
 
-function CapabilitiesPanel({ cognition, onSelect, navigateToSection }: { cognition: CognitionState; onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
+function CapabilitiesPanel({ onSelect, navigateToSection }: { onSelect: (item: DetailItem) => void; navigateToSection: (id: string) => void }) {
   // Read the formerly in-memory SKILLS + ROUTINES from the CMS store. Icon
   // is stored as a string identifier; the renderer maps it to a Lucide
   // component. Routines' `kind` is also a string enum.
@@ -1220,7 +1217,7 @@ function CapabilitiesPanel({ cognition, onSelect, navigateToSection }: { cogniti
         eyebrow="Sales OS · live operating layer · Capabilities"
         title="Sales OS"
         subtitle="The skills and routines that run the second brain. Eight skills on demand, six routines on a clock — each one is the kind of thing you used to do at 9am before you had an OS."
-        meta={{ label: 'Live', value: `${cognition.eventCount} events`, sub: `${skillItems.length} skills · ${routineItems.length} routines` }}
+        meta={{ label: 'Skills', value: `${skillItems.length}`, sub: `${routineItems.length} routines` }}
       />
 
       <div className="mt-8 flex items-center gap-1.5">
@@ -1316,7 +1313,7 @@ function CapabilitiesPanel({ cognition, onSelect, navigateToSection }: { cogniti
               Routines
             </h2>
           </div>
-          <Eyebrow>{cognition.live ? 'live · on schedule' : 'fallback routines'}</Eyebrow>
+          <Eyebrow>{`${routineItems.length} routines`}</Eyebrow>
         </div>
         <article
           className="rounded-2xl"
@@ -1575,17 +1572,6 @@ function StackIcon({ id }: { id: string }): ReactElement {
   const I = map[id] ?? Cpu;
   return <I className="h-4 w-4" />;
 }
-
-// ─── Section: Cognition (kept as the existing overview) ───
-
-function CognitionPanel({ cognition: _cognition }: { cognition: CognitionState }) {
-  return <CognitionOverviewContent />;
-}
-
-void useCognitionData; // keep TS happy even if no caller-side
-void trustLabel;       // keep TS happy even if no caller-side
-void readTrustScore;   // keep TS happy even if no caller-side
-void COGNITION_TRUST_FLOOR; // keep TS happy even if no caller-side
 
 // ─── Section: Kanban ───
 //
@@ -1930,7 +1916,6 @@ function KanbanPanel({ onSelect }: { onSelect: (item: DetailItem) => void }): Re
 // ─── Root SalesApp ───
 
 export function SalesApp() {
-  const cognition = useCognitionData();
   const openApp = useShellStore((state) => state.openApp);
   const [detail, setDetail] = useState<DetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
@@ -1961,6 +1946,14 @@ export function SalesApp() {
     setDetail(null);
   };
 
+  // Brief N (2026-08-11) — Sales garde un seul indicateur de Cognition : une
+  // carte dans la section Pipeline qui ouvre l'app Cognition via l'evenement
+  // `coach-os:open-app-section` (le seul a avoir un ecouteur, voir SOCLE.md).
+  const openCognition = (): void => {
+    openApp('cognition', 'Cognition');
+    setDetail(null);
+  };
+
   useEffect(() => {
     if (detail) {
       setWindowDetail({ label: detail.title, onBack: () => setDetail(null) });
@@ -1971,13 +1964,12 @@ export function SalesApp() {
 
   const sections: AppSection[] = useMemo(() => [
     { id: 'today', label: 'Today', icon: Sun, render: () => <TodayPanel onSelect={setDetail} /> },
-    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
+    { id: 'pipeline', label: 'Pipeline', icon: TrendingUp, render: () => <PipelinePanel onSelect={setDetail} navigateToSection={navigateToSection} onOpenCognition={openCognition} /> },
     { id: 'kanban', label: 'Kanban', icon: ClipboardList, render: () => <KanbanPanel onSelect={setDetail} /> },
     { id: 'context', label: 'Context', icon: BookOpen, render: () => <ContextPanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
-    { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel cognition={cognition} onSelect={setDetail} navigateToSection={navigateToSection} /> },
+    { id: 'capabilities', label: 'Capabilities', icon: Sparkles, render: () => <CapabilitiesPanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
     { id: 'stack', label: 'Stack', icon: Cpu, render: () => <StackPanel onSelect={setDetail} navigateToSection={navigateToSection} /> },
-    { id: 'cognition', label: 'Cognition', icon: BrainCircuit, render: () => <CognitionPanel cognition={cognition} /> },
-  ], [cognition]);
+  ], []);
 
   return (
     <div className="relative h-full">
