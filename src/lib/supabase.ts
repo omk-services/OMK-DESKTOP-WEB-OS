@@ -53,10 +53,27 @@ if (typeof window !== 'undefined') {
     // "demonstration locale" : silencieux.
   }
   if (supabaseConfigured) {
-    // On verifie la joignnabilite une fois, en parallele, sans bloquer
-    // l'app. Un echec explicite vaut mieux que 12 requetes sourdes.
-    void fetch(`${url}/auth/v1/`, { method: 'HEAD', mode: 'no-cors' })
-      .then(() => undefined)
+    // Sonde de joignabilite, une fois, en parallele, sans bloquer l'app.
+    //
+    // La premiere version tapait `/auth/v1/` en HEAD, sans cle et en
+    // `mode: 'no-cors'`. Elle echouait des deux cotes a la fois : Supabase
+    // rendait 401 faute de cle — deux lignes rouges en console a chaque
+    // chargement de la production — et la reponse opaque du mode `no-cors`
+    // ne rejette jamais, donc le `.catch` ne se declenchait pas. Elle
+    // polluait sans rien mesurer.
+    //
+    // `/auth/v1/health` avec la cle anonyme rend 200 (verifie sur INTERN).
+    // La cle est publique par conception : elle est deja embarquee dans le
+    // JavaScript livre.
+    void fetch(`${url}/auth/v1/health`, { headers: { apikey: anonKey } })
+      .then((r) => {
+        if (r.ok) return;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[supabase] configure mais repond ${r.status} — bascule sur le seed local.`,
+          { url },
+        );
+      })
       .catch(() => {
         // eslint-disable-next-line no-console
         console.warn(
