@@ -18,6 +18,7 @@ import { THEME_META } from '../lib/themes/tokens';
 import { getAllApps } from '../lib/app-registry';
 import { useAppVisibility } from '../stores/appVisibility.store';
 import { TopBarMenu } from './TopBarMenu';
+import { supabase, supabaseConfigured } from '../lib/supabase';
 import { ChangelogTabs } from './ChangelogTabs';
 import { CharacterMenu } from '../agent/CharacterMenu';
 import { ProfileWorkspaceSection } from './ProfileWorkspaceSection';
@@ -125,16 +126,27 @@ export function TopBar(): import('react').ReactNode {
               <ProfileWorkspaceSection />
               <div className="my-1.5 border-t" style={{ borderColor: 'var(--theme-border-subtle)' }} />
               <button
-                onClick={() => {
-                  // Sign-out is still a no-op (no auth yet), but at least
-                  // surface a toast and a hint so the click is observable.
-                  // Replace the stub with the real auth flow when the
-                  // Supabase session lands.
-                  addToast({
-                    source: 'Profile',
-                    type: 'info',
-                    message: 'Sign-out arrive avec l\'authentification Supabase — la session actuelle reste valide.',
-                  });
+                onClick={async () => {
+                  /* Sign out = fermer la session PUIS renvoyer sur le site.
+                   *
+                   * C'était un stub qui n'affichait qu'un toast. Deux raisons de
+                   * le brancher maintenant :
+                   *  - la session Supabase existe depuis la campagne du 11 août,
+                   *    donc « la session reste valide » était devenu faux ;
+                   *  - rien dans l'application ne pointait vers /site/. Le site
+                   *    était orphelin du produit, et la sortie du bureau est
+                   *    exactement l'endroit où l'on doit retomber dessus.
+                   *
+                   * `signOut()` peut échouer (réseau, session déjà expirée). On
+                   * redirige quand même : laisser l'utilisateur bloqué dans un
+                   * bureau dont il a demandé à sortir est pire qu'un jeton
+                   * périmé côté serveur. */
+                  try {
+                    if (supabaseConfigured) await supabase.auth.signOut();
+                  } catch (err) {
+                    console.error('[profil] échec de la fermeture de session', err);
+                  }
+                  window.location.href = '/site/index.html';
                 }}
                 className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
                 style={{ color: 'var(--theme-text-muted)' }}
