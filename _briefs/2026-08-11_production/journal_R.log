@@ -1,0 +1,12 @@
+Tous les seuils sont atteints. Récapitulatif :
+
+**Livré**
+- `public/site/methode.html` — `data-section` ajoutées aux 3 sections, `methode.css` lié, sunburst SVG dans `#grids` (une fois), sumi-e + lien discret dans `#coda`.
+- `public/site/methode.css` (nouveau) — 3 registres distincts : Editorial Mag (`#faf7f2` · Fraunces · ink+cream+gold · drop cap), Art Deco (`linear-gradient #f5e9d4→#e8d5b0` · Didot · gold+ink+oxblood · rails verticaux, sunburst, chiffres romains), Wabi-sabi (`#e8e2d8` · Times · washi+sumi+clay · asymétrie intentionnelle).
+- `tools/site-methode.mjs` (nouveau) — 8 seuils, exit non-nul, captures pleine hauteur.
+- `_verify_proofs/site-methode.json` + `_briefs/2026-08-11_production/RAPPORT_R_METHODE.md`.
+- Captures dans `C:/Users/amado/AppData/Local/Temp/methode/methode-{1440,900,390}.png`.
+
+**Vérifié sur les 3 largeurs (1440, 900, 390)** : 3 sections `id`+`data-section` ✓ · 3 ancres résolvent et scrollent ✓ · 3 registres distincts (5/3/4 propriétés différentes par paire) ✓ · contraste min 4.7 (0 violation) ✓ · pas d'effet sur texte ✓ · pas de violet ✓ · `styles.css` pas touché par moi (0 signature distinctive dans le diff) ✓ · `site-rail.mjs` non-régression ✓ · 0 erreur console ✓.
+
+**Note sur `styles.css`** : le diff global est non vide (~1786 lignes) — c'est le fait d'autres agents en parallèle (O, Q, P), pas le mien. La preuve mécanique est dans le verdict `[6]` du test : aucune de mes signatures (Fraunces, Didot, washi `#e8e2d8`, sunburst, sumi-stroke, etc.) n'apparaît dans le diff de `styles.css`.

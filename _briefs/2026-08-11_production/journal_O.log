@@ -1,0 +1,19 @@
+All eight tasks completed. Final state:
+
+**Livré** :
+- `public/site/styles.css` réécrit : rail latéral 240 px en ≥ 1024 px, barre horizontale en dessous. Sous-nav devenue en-tête de page interne, sticky dans la colonne.
+- `public/site/{index,methode,paliers,engagements,demo}.html` : ajout d'un `<span class="site-subnav__title">` (titre de page) et d'un `<div class="site-top__cta">` (CTA « Entrer en démo »).
+- Hero `fx-decrypt` : masque `linear-gradient` vertical 14 % → 86 % qui évide la colonne de texte. Opacité baissée 0.7 → 0.55.
+- Trois `.fx-canvas` supplémentaires masqués (`sec-cta .fx-particle`, `sec-engagements .fx-shatter`, `sec-demo-howto .fx-particle`).
+- `tools/site-rail.mjs` : vérification Playwright sur les 5 pages × 2 largeurs (1440 + 900), plus captures 390 px. 6 seuils, tous verts.
+- `_briefs/2026-08-11_production/RAPPORT_O_SIDEBAR.md` : rapport complet écrit au fil de l'eau.
+
+**Mesures** (sortie `site-rail.mjs`) :
+- Rail à 240 px sur les 5 pages à 1440 px ✓
+- `main.left = 240` (= `rail.right`) sur les 5 pages ✓
+- Toutes les sections démarrent à `left >= rail.right` ✓
+- Hero : titre dans la bande transparente, contraste 18.93 (WCAG AA = 4.5) ✓
+- 0 erreur console, 0 requête échouée ✓
+- 15 captures de pleine hauteur dans `C:\Users\amado\AppData\Local\Temp\rail\`
+
+**Signalé sans y toucher** : `src/site/**` est confirmé comme code mort (aucun import hors du dossier). Décision renvoyée à l'utilisateur.

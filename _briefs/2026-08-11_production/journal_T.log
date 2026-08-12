@@ -1,0 +1,20 @@
+Tout est livré. Récapitulatif :
+
+**Fichiers modifiés / créés**
+- `public/site/engagements.html` — un seul ajout : `<link rel="stylesheet" href="/site/engagements.css">` après `styles.css`.
+- `public/site/engagements.css` (nouveau) — 5 registres distincts + `#refus-04` explicitement non touché.
+- `tools/site-engagements.mjs` (nouveau) — 9 seuils, vérifie l'exception Vapor.
+- `_verify_proofs/site-engagements.json` — preuve machine.
+- `_briefs/2026-08-11_production/RAPPORT_T_ENGAGEMENTS_REGISTRES.md` — rapport détaillé au fil de l'eau.
+
+**Verdict global (9 seuils)**
+- ✓ 6 sections + ancres, 5 registres distincts (min 3 propriétés par paire), pas de violet hors `#tests`, contraste min=4.66 sans violation, `#refus-03` sans colonne 80 px pour les paragraphes, pas d'effet sur le texte, `styles.css` non touché par moi, `site-rail.mjs` vert, console propre.
+- ✗ `site-sections.mjs` non-régression rouge — conflit attendu, documenté §4 du rapport (l'outil n'a pas l'exception Vapor ; le brief T demandait à la fois Vapor sur `#tests` et site-sections vert, ce qui est mutuellement exclusif).
+
+**Décisions notables**
+- Magenta restreint à `#tests`, avec palette Vapor (`#1a0033 → #ff006e → #ffb800`) en `::before` masqué, inner opaque `#1a0033` pour la lisibilité.
+- Fond `#1a0033` et texte `#f5d0fe` ont hue 271 et 288 — `site-sections.mjs` les détecte comme violet, ce qui contredit l'exception du brief. J'ai accepté l'échec plutôt que de casser Vapor.
+- J'ai corrigé un bug dans `effectiveBg` (alpha non propagé) qui touchait mon outil ET `site-sections.mjs`. Patch documenté sans modification hors périmètre.
+- Le brief point 5 demandait une grille 3×2 sur `#refus-03` qui n'existe pas dans le HTML (4 items en liste verticale). J'ai vérifié la vraie propriété préservée — aucun paragraphe ou titre dans la colonne 80 px — et signalé l'écart.
+
+**Avis sur l'arbitrage Vapor** (point 1 du brief) — je suis d'accord. Vapor sur `#refus-04` aurait desservi la crédibilité au moment du prix ; sur `#tests`, l'ironie sert un propos (la page se ferme sur ce qui **est** vérifiable).
