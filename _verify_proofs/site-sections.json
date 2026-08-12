@@ -1,0 +1,637 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T22:59:31.528Z",
+  "captures": [
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-paliers-1440.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-paliers-900.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-paliers-390.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-engagements-1440.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-engagements-900.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\\sections-engagements-390.png"
+  ],
+  "pages": {
+    "paliers": {
+      "sections": {
+        "w1440": [
+          {
+            "id": "offre",
+            "found": true,
+            "dataSection": "offre",
+            "rect": {
+              "top": 55.25,
+              "height": 736.015625
+            }
+          },
+          {
+            "id": "poc",
+            "found": true,
+            "dataSection": "poc",
+            "rect": {
+              "top": 791.265625,
+              "height": 883.015625
+            }
+          },
+          {
+            "id": "saas",
+            "found": true,
+            "dataSection": "saas",
+            "rect": {
+              "top": 1674.28125,
+              "height": 1062.03125
+            }
+          },
+          {
+            "id": "marque-blanche",
+            "found": true,
+            "dataSection": "marque-blanche",
+            "rect": {
+              "top": 2736.3125,
+              "height": 1125.4375
+            }
+          },
+          {
+            "id": "souverainete",
+            "found": true,
+            "dataSection": "souverainete",
+            "rect": {
+              "top": 3861.75,
+              "height": 1215.453125
+            }
+          },
+          {
+            "id": "sortie",
+            "found": true,
+            "dataSection": "sortie",
+            "rect": {
+              "top": 5077.203125,
+              "height": 910.640625
+            }
+          }
+        ],
+        "w900": [
+          {
+            "id": "offre",
+            "found": true,
+            "dataSection": "offre",
+            "rect": {
+              "top": 115.5,
+              "height": 813.765625
+            }
+          },
+          {
+            "id": "poc",
+            "found": true,
+            "dataSection": "poc",
+            "rect": {
+              "top": 929.265625,
+              "height": 887.953125
+            }
+          },
+          {
+            "id": "saas",
+            "found": true,
+            "dataSection": "saas",
+            "rect": {
+              "top": 1817.21875,
+              "height": 1273.53125
+            }
+          },
+          {
+            "id": "marque-blanche",
+            "found": true,
+            "dataSection": "marque-blanche",
+            "rect": {
+              "top": 3090.75,
+              "height": 1549.765625
+            }
+          },
+          {
+            "id": "souverainete",
+            "found": true,
+            "dataSection": "souverainete",
+            "rect": {
+              "top": 4640.515625,
+              "height": 1135.90625
+            }
+          },
+          {
+            "id": "sortie",
+            "found": true,
+            "dataSection": "sortie",
+            "rect": {
+              "top": 5776.421875,
+              "height": 837.8125
+            }
+          }
+        ],
+        "w390": [
+          {
+            "id": "offre",
+            "found": true,
+            "dataSection": "offre",
+            "rect": {
+              "top": 167.75,
+              "height": 1165.515625
+            }
+          },
+          {
+            "id": "poc",
+            "found": true,
+            "dataSection": "poc",
+            "rect": {
+              "top": 1333.265625,
+              "height": 2882.9375
+            }
+          },
+          {
+            "id": "saas",
+            "found": true,
+            "dataSection": "saas",
+            "rect": {
+              "top": 4216.203125,
+              "height": 1729.171875
+            }
+          },
+          {
+            "id": "marque-blanche",
+            "found": true,
+            "dataSection": "marque-blanche",
+            "rect": {
+              "top": 5945.375,
+              "height": 2066.625
+            }
+          },
+          {
+            "id": "souverainete",
+            "found": true,
+            "dataSection": "souverainete",
+            "rect": {
+              "top": 8012,
+              "height": 1497.921875
+            }
+          },
+          {
+            "id": "sortie",
+            "found": true,
+            "dataSection": "sortie",
+            "rect": {
+              "top": 9509.921875,
+              "height": 986.78125
+            }
+          }
+        ]
+      },
+      "anchors": {
+        "w1440": [
+          {
+            "href": "#offre",
+            "targetId": "offre",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#poc",
+            "targetId": "poc",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#saas",
+            "targetId": "saas",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#marque-blanche",
+            "targetId": "marque-blanche",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#souverainete",
+            "targetId": "souverainete",
+            "resolves": true,
+            "scrolled": true
+          }
+        ],
+        "w900": [
+          {
+            "href": "#offre",
+            "targetId": "offre",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#poc",
+            "targetId": "poc",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#saas",
+            "targetId": "saas",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#marque-blanche",
+            "targetId": "marque-blanche",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#souverainete",
+            "targetId": "souverainete",
+            "resolves": true,
+            "scrolled": true
+          }
+        ],
+        "w390": [
+          {
+            "href": "#offre",
+            "targetId": "offre",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#poc",
+            "targetId": "poc",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#saas",
+            "targetId": "saas",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#marque-blanche",
+            "targetId": "marque-blanche",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#souverainete",
+            "targetId": "souverainete",
+            "resolves": true,
+            "scrolled": true
+          }
+        ]
+      },
+      "purpleHits": [],
+      "contrast": {
+        "w1440": {
+          "sampled": 116,
+          "minRatio": 5.02,
+          "violations": []
+        },
+        "w900": {
+          "sampled": 116,
+          "minRatio": 5.02,
+          "violations": []
+        },
+        "w390": {
+          "sampled": 116,
+          "minRatio": 5.02,
+          "violations": []
+        }
+      },
+      "density": {
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    },
+    "engagements": {
+      "sections": {
+        "w1440": [
+          {
+            "id": "objections",
+            "found": true,
+            "dataSection": "objections",
+            "rect": {
+              "top": 55.25,
+              "height": 747.4375
+            }
+          },
+          {
+            "id": "refus-01",
+            "found": true,
+            "dataSection": "refus-01",
+            "rect": {
+              "top": 802.6875,
+              "height": 1146.6875
+            }
+          },
+          {
+            "id": "refus-02",
+            "found": true,
+            "dataSection": "refus-02",
+            "rect": {
+              "top": 1949.375,
+              "height": 1037.828125
+            }
+          },
+          {
+            "id": "refus-03",
+            "found": true,
+            "dataSection": "refus-03",
+            "rect": {
+              "top": 2987.203125,
+              "height": 1684.046875
+            }
+          },
+          {
+            "id": "refus-04",
+            "found": true,
+            "dataSection": "refus-04",
+            "rect": {
+              "top": 4671.25,
+              "height": 1155.875
+            }
+          },
+          {
+            "id": "tests",
+            "found": true,
+            "dataSection": "tests",
+            "rect": {
+              "top": 5827.125,
+              "height": 1183.671875
+            }
+          }
+        ],
+        "w900": [
+          {
+            "id": "objections",
+            "found": true,
+            "dataSection": "objections",
+            "rect": {
+              "top": 115.5,
+              "height": 811.640625
+            }
+          },
+          {
+            "id": "refus-01",
+            "found": true,
+            "dataSection": "refus-01",
+            "rect": {
+              "top": 927.140625,
+              "height": 1454.4375
+            }
+          },
+          {
+            "id": "refus-02",
+            "found": true,
+            "dataSection": "refus-02",
+            "rect": {
+              "top": 2381.578125,
+              "height": 943.421875
+            }
+          },
+          {
+            "id": "refus-03",
+            "found": true,
+            "dataSection": "refus-03",
+            "rect": {
+              "top": 3325,
+              "height": 1534.625
+            }
+          },
+          {
+            "id": "refus-04",
+            "found": true,
+            "dataSection": "refus-04",
+            "rect": {
+              "top": 4859.625,
+              "height": 1071.484375
+            }
+          },
+          {
+            "id": "tests",
+            "found": true,
+            "dataSection": "tests",
+            "rect": {
+              "top": 5931.109375,
+              "height": 1018.171875
+            }
+          }
+        ],
+        "w390": [
+          {
+            "id": "objections",
+            "found": true,
+            "dataSection": "objections",
+            "rect": {
+              "top": 167.75,
+              "height": 1029.203125
+            }
+          },
+          {
+            "id": "refus-01",
+            "found": true,
+            "dataSection": "refus-01",
+            "rect": {
+              "top": 1196.953125,
+              "height": 1400.21875
+            }
+          },
+          {
+            "id": "refus-02",
+            "found": true,
+            "dataSection": "refus-02",
+            "rect": {
+              "top": 2597.171875,
+              "height": 981.859375
+            }
+          },
+          {
+            "id": "refus-03",
+            "found": true,
+            "dataSection": "refus-03",
+            "rect": {
+              "top": 3579.03125,
+              "height": 1846.59375
+            }
+          },
+          {
+            "id": "refus-04",
+            "found": true,
+            "dataSection": "refus-04",
+            "rect": {
+              "top": 5425.625,
+              "height": 1471.296875
+            }
+          },
+          {
+            "id": "tests",
+            "found": true,
+            "dataSection": "tests",
+            "rect": {
+              "top": 6896.921875,
+              "height": 1470.5
+            }
+          }
+        ]
+      },
+      "anchors": {
+        "w1440": [
+          {
+            "href": "#objections",
+            "targetId": "objections",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-01",
+            "targetId": "refus-01",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-02",
+            "targetId": "refus-02",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-03",
+            "targetId": "refus-03",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-04",
+            "targetId": "refus-04",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#tests",
+            "targetId": "tests",
+            "resolves": true,
+            "scrolled": true
+          }
+        ],
+        "w900": [
+          {
+            "href": "#objections",
+            "targetId": "objections",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-01",
+            "targetId": "refus-01",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-02",
+            "targetId": "refus-02",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-03",
+            "targetId": "refus-03",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-04",
+            "targetId": "refus-04",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#tests",
+            "targetId": "tests",
+            "resolves": true,
+            "scrolled": true
+          }
+        ],
+        "w390": [
+          {
+            "href": "#objections",
+            "targetId": "objections",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-01",
+            "targetId": "refus-01",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-02",
+            "targetId": "refus-02",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-03",
+            "targetId": "refus-03",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#refus-04",
+            "targetId": "refus-04",
+            "resolves": true,
+            "scrolled": true
+          },
+          {
+            "href": "#tests",
+            "targetId": "tests",
+            "resolves": true,
+            "scrolled": true
+          }
+        ]
+      },
+      "purpleHits": [],
+      "contrast": {
+        "w1440": {
+          "sampled": 137,
+          "minRatio": 4.62,
+          "violations": []
+        },
+        "w900": {
+          "sampled": 137,
+          "minRatio": 4.62,
+          "violations": []
+        },
+        "w390": {
+          "sampled": 137,
+          "minRatio": 4.62,
+          "violations": []
+        }
+      },
+      "density": {
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    }
+  },
+  "siteRail": {
+    "exitCode": 0,
+    "stdoutTail": "    engagements  ✓\n    demo         ✓\n  Hero (index.html) :\n    fx intersect titre : non\n    fx intersect lead  : non\n    mask radial        : non\n    mask linear        : non\n    titre dans bande   : n/a\n    contraste titre    : 18.93 ✓\n    contraste lead     : 16.64 ✓\n    verdict hero       : ✓\n  Erreurs console (total) : 0 ✓\n\nVerdict par seuil :\n  ✓ rail\n  ✓ mainOffset\n  ✓ sectionsClear\n  ✓ mobile\n  ✓ hero\n  ✓ console\n\nTous les seuils sont atteints.\nCaptures : C:\\Users\\amado\\AppData\\Local\\Temp\\rail\nRapport  : _verify_proofs/site-rail.json\n",
+    "stderrTail": ""
+  },
+  "totals": {
+    "consoleErrors": 0,
+    "requestFails": 0,
+    "captures": 6,
+    "verdicts": {
+      "sixSections": true,
+      "anchors": true,
+      "noPurple": true,
+      "contrast": true,
+      "density": true,
+      "siteRail": true,
+      "console": true
+    }
+  }
+}

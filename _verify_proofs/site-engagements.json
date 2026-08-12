@@ -1,0 +1,1265 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T22:59:00.672Z",
+  "captures": [
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\engagements\\engagements-1440.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\engagements\\engagements-900.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\engagements\\engagements-390.png"
+  ],
+  "stylesCssGitDiff": {
+    "exitCode": 0,
+    "stdoutStat": "public/site/styles.css | 1786 +++++++++++++++++++++++++++++++++++++++++++++++-\n 1 file changed, 1755 insertions(+), 31 deletions(-)",
+    "engagementsLeakHits": [],
+    "untouchedByMe": true
+  },
+  "page": {
+    "w1440": {
+      "sections": [
+        {
+          "id": "objections",
+          "found": true,
+          "dataSection": "objections",
+          "rect": {
+            "top": 55.25,
+            "left": 240,
+            "width": 1200,
+            "height": 747.4375
+          }
+        },
+        {
+          "id": "refus-01",
+          "found": true,
+          "dataSection": "refus-01",
+          "rect": {
+            "top": 802.6875,
+            "left": 240,
+            "width": 1200,
+            "height": 1146.6875
+          }
+        },
+        {
+          "id": "refus-02",
+          "found": true,
+          "dataSection": "refus-02",
+          "rect": {
+            "top": 1949.375,
+            "left": 240,
+            "width": 1200,
+            "height": 1037.828125
+          }
+        },
+        {
+          "id": "refus-03",
+          "found": true,
+          "dataSection": "refus-03",
+          "rect": {
+            "top": 2987.203125,
+            "left": 240,
+            "width": 1200,
+            "height": 1684.046875
+          }
+        },
+        {
+          "id": "tests",
+          "found": true,
+          "dataSection": "tests",
+          "rect": {
+            "top": 5827.125,
+            "left": 240,
+            "width": 1200,
+            "height": 1183.671875
+          }
+        },
+        {
+          "id": "refus-04",
+          "found": true,
+          "dataSection": "refus-04",
+          "rect": {
+            "top": 4671.25,
+            "left": 240,
+            "width": 1200,
+            "height": 1155.875
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#objections",
+          "targetId": "objections",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-01",
+          "targetId": "refus-01",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-02",
+          "targetId": "refus-02",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-03",
+          "targetId": "refus-03",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-04",
+          "targetId": "refus-04",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#tests",
+          "targetId": "tests",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "objections": {
+          "backgroundColor": "rgb(245, 240, 232)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "88px",
+            "fontWeight": "900",
+            "color": "rgb(28, 25, 23)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(28, 25, 23)"
+          }
+        },
+        "refus-01": {
+          "backgroundColor": "rgb(255, 235, 0)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "64px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "14px",
+            "fontWeight": "900",
+            "color": "rgb(255, 235, 0)"
+          }
+        },
+        "refus-02": {
+          "backgroundColor": "rgb(254, 243, 199)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "64px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "900",
+            "color": "rgb(250, 250, 247)"
+          }
+        },
+        "refus-03": {
+          "backgroundColor": "rgb(254, 249, 195)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Verdana, Geneva, sans-serif",
+            "fontSize": "48px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "15px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          }
+        },
+        "tests": {
+          "backgroundColor": "rgb(26, 0, 51)",
+          "backgroundImage": "none",
+          "color": "rgb(255, 255, 255)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(255, 255, 255)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "\"Times New Roman\", Times, serif",
+            "fontSize": "64px",
+            "fontWeight": "700",
+            "color": "rgb(255, 255, 255)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(0, 240, 255)"
+          }
+        }
+      },
+      "distinctPairs": {
+        "objections-refus-01": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor"
+          ]
+        },
+        "objections-refus-02": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-refus-03": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-01-refus-02": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-02-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-02-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-03-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        }
+      },
+      "purpleHits": [],
+      "effectViolations": [],
+      "refus03Cols": {
+        "found": true,
+        "items": [
+          {
+            "idx": 0,
+            "gridTemplateColumns": "80px 1026px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 1026,
+                "height": 44
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 1,
+            "gridTemplateColumns": "80px 1026px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 1026,
+                "height": 44
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 2,
+            "gridTemplateColumns": "80px 1026px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 1026,
+                "height": 44
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 3,
+            "gridTemplateColumns": "80px 1026px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 1026,
+                "height": 44
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          }
+        ]
+      },
+      "refus03Violations": 0,
+      "contrast": {
+        "sampled": 137,
+        "minRatio": 4.66,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    },
+    "w900": {
+      "sections": [
+        {
+          "id": "objections",
+          "found": true,
+          "dataSection": "objections",
+          "rect": {
+            "top": 115.5,
+            "left": 0,
+            "width": 900,
+            "height": 811.640625
+          }
+        },
+        {
+          "id": "refus-01",
+          "found": true,
+          "dataSection": "refus-01",
+          "rect": {
+            "top": 927.140625,
+            "left": 0,
+            "width": 900,
+            "height": 1454.4375
+          }
+        },
+        {
+          "id": "refus-02",
+          "found": true,
+          "dataSection": "refus-02",
+          "rect": {
+            "top": 2381.578125,
+            "left": 0,
+            "width": 900,
+            "height": 943.421875
+          }
+        },
+        {
+          "id": "refus-03",
+          "found": true,
+          "dataSection": "refus-03",
+          "rect": {
+            "top": 3325,
+            "left": 0,
+            "width": 900,
+            "height": 1534.625
+          }
+        },
+        {
+          "id": "tests",
+          "found": true,
+          "dataSection": "tests",
+          "rect": {
+            "top": 5931.109375,
+            "left": 0,
+            "width": 900,
+            "height": 1018.171875
+          }
+        },
+        {
+          "id": "refus-04",
+          "found": true,
+          "dataSection": "refus-04",
+          "rect": {
+            "top": 4859.625,
+            "left": 0,
+            "width": 900,
+            "height": 1071.484375
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#objections",
+          "targetId": "objections",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-01",
+          "targetId": "refus-01",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-02",
+          "targetId": "refus-02",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-03",
+          "targetId": "refus-03",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-04",
+          "targetId": "refus-04",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#tests",
+          "targetId": "tests",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "objections": {
+          "backgroundColor": "rgb(245, 240, 232)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "72px",
+            "fontWeight": "900",
+            "color": "rgb(28, 25, 23)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(28, 25, 23)"
+          }
+        },
+        "refus-01": {
+          "backgroundColor": "rgb(255, 235, 0)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "54px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "14px",
+            "fontWeight": "900",
+            "color": "rgb(255, 235, 0)"
+          }
+        },
+        "refus-02": {
+          "backgroundColor": "rgb(254, 243, 199)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "54px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "900",
+            "color": "rgb(250, 250, 247)"
+          }
+        },
+        "refus-03": {
+          "backgroundColor": "rgb(254, 249, 195)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Verdana, Geneva, sans-serif",
+            "fontSize": "45px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "15px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          }
+        },
+        "tests": {
+          "backgroundColor": "rgb(26, 0, 51)",
+          "backgroundImage": "none",
+          "color": "rgb(255, 255, 255)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(255, 255, 255)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "\"Times New Roman\", Times, serif",
+            "fontSize": "54px",
+            "fontWeight": "700",
+            "color": "rgb(255, 255, 255)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(0, 240, 255)"
+          }
+        }
+      },
+      "distinctPairs": {
+        "objections-refus-01": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor"
+          ]
+        },
+        "objections-refus-02": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-refus-03": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-01-refus-02": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-02-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-02-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-03-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        }
+      },
+      "purpleHits": [],
+      "effectViolations": [],
+      "refus03Cols": {
+        "found": true,
+        "items": [
+          {
+            "idx": 0,
+            "gridTemplateColumns": "60px 754px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 754,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 1,
+            "gridTemplateColumns": "60px 754px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 754,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 2,
+            "gridTemplateColumns": "60px 754px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 754,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          },
+          {
+            "idx": 3,
+            "gridTemplateColumns": "60px 754px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 754,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 526,
+                "height": 96
+              }
+            ]
+          }
+        ]
+      },
+      "refus03Violations": 0,
+      "contrast": {
+        "sampled": 137,
+        "minRatio": 4.66,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    },
+    "w390": {
+      "sections": [
+        {
+          "id": "objections",
+          "found": true,
+          "dataSection": "objections",
+          "rect": {
+            "top": 167.75,
+            "left": 0,
+            "width": 390,
+            "height": 1029.203125
+          }
+        },
+        {
+          "id": "refus-01",
+          "found": true,
+          "dataSection": "refus-01",
+          "rect": {
+            "top": 1196.953125,
+            "left": 0,
+            "width": 390,
+            "height": 1400.21875
+          }
+        },
+        {
+          "id": "refus-02",
+          "found": true,
+          "dataSection": "refus-02",
+          "rect": {
+            "top": 2597.171875,
+            "left": 0,
+            "width": 390,
+            "height": 981.859375
+          }
+        },
+        {
+          "id": "refus-03",
+          "found": true,
+          "dataSection": "refus-03",
+          "rect": {
+            "top": 3579.03125,
+            "left": 0,
+            "width": 390,
+            "height": 1846.59375
+          }
+        },
+        {
+          "id": "tests",
+          "found": true,
+          "dataSection": "tests",
+          "rect": {
+            "top": 6896.921875,
+            "left": 0,
+            "width": 390,
+            "height": 1470.5
+          }
+        },
+        {
+          "id": "refus-04",
+          "found": true,
+          "dataSection": "refus-04",
+          "rect": {
+            "top": 5425.625,
+            "left": 0,
+            "width": 390,
+            "height": 1471.296875
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#objections",
+          "targetId": "objections",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-01",
+          "targetId": "refus-01",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-02",
+          "targetId": "refus-02",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-03",
+          "targetId": "refus-03",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#refus-04",
+          "targetId": "refus-04",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#tests",
+          "targetId": "tests",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "objections": {
+          "backgroundColor": "rgb(245, 240, 232)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "44px",
+            "fontWeight": "900",
+            "color": "rgb(28, 25, 23)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(28, 25, 23)"
+          }
+        },
+        "refus-01": {
+          "backgroundColor": "rgb(255, 235, 0)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "14px",
+            "fontWeight": "900",
+            "color": "rgb(255, 235, 0)"
+          }
+        },
+        "refus-02": {
+          "backgroundColor": "rgb(254, 243, 199)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "36px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "Impact, \"Arial Black\", sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "900",
+            "color": "rgb(250, 250, 247)"
+          }
+        },
+        "refus-03": {
+          "backgroundColor": "rgb(254, 249, 195)",
+          "backgroundImage": "none",
+          "color": "rgb(0, 0, 0)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(0, 0, 0)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "Verdana, Geneva, sans-serif",
+            "fontSize": "32px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          },
+          "body": {
+            "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "15px",
+            "fontWeight": "900",
+            "color": "rgb(0, 0, 0)"
+          }
+        },
+        "tests": {
+          "backgroundColor": "rgb(26, 0, 51)",
+          "backgroundImage": "none",
+          "color": "rgb(255, 255, 255)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(255, 255, 255)",
+          "borderTopWidth": "0px",
+          "boxShadow": "none",
+          "heading": {
+            "fontFamily": "\"Times New Roman\", Times, serif",
+            "fontSize": "36px",
+            "fontWeight": "700",
+            "color": "rgb(255, 255, 255)"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "700",
+            "color": "rgb(0, 240, 255)"
+          }
+        }
+      },
+      "distinctPairs": {
+        "objections-refus-01": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor"
+          ]
+        },
+        "objections-refus-02": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-refus-03": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "objections-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-01-refus-02": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-01-tests": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        },
+        "refus-02-refus-03": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-02-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "refus-03-tests": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        }
+      },
+      "purpleHits": [],
+      "effectViolations": [],
+      "refus03Cols": {
+        "found": true,
+        "items": [
+          {
+            "idx": 0,
+            "gridTemplateColumns": "60px 276px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 41
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 168
+              }
+            ]
+          },
+          {
+            "idx": 1,
+            "gridTemplateColumns": "60px 276px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 168
+              }
+            ]
+          },
+          {
+            "idx": 2,
+            "gridTemplateColumns": "60px 276px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 168
+              }
+            ]
+          },
+          {
+            "idx": 3,
+            "gridTemplateColumns": "60px 276px",
+            "children": [
+              {
+                "tag": "H3",
+                "cls": "sec-refus03__step-title",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 36
+              },
+              {
+                "tag": "P",
+                "cls": "",
+                "gridColumn": "2",
+                "width": 276,
+                "height": 144
+              }
+            ]
+          }
+        ]
+      },
+      "refus03Violations": 0,
+      "contrast": {
+        "sampled": 137,
+        "minRatio": 4.66,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    }
+  },
+  "siteRail": {
+    "exitCode": 0,
+    "stdoutTail": "    engagements  ✓\n    demo         ✓\n  Hero (index.html) :\n    fx intersect titre : non\n    fx intersect lead  : non\n    mask radial        : non\n    mask linear        : non\n    titre dans bande   : n/a\n    contraste titre    : 18.93 ✓\n    contraste lead     : 16.64 ✓\n    verdict hero       : ✓\n  Erreurs console (total) : 0 ✓\n\nVerdict par seuil :\n  ✓ rail\n  ✓ mainOffset\n  ✓ sectionsClear\n  ✓ mobile\n  ✓ hero\n  ✓ console\n\nTous les seuils sont atteints.\nCaptures : C:\\Users\\amado\\AppData\\Local\\Temp\\rail\nRapport  : _verify_proofs/site-rail.json\n",
+    "stderrTail": ""
+  },
+  "siteSections": {
+    "exitCode": 0,
+    "stdoutTail": "      w390 min 5.02 ✓\n    engagements\n      w1440 min 4.62 ✓\n      w900 min 4.62 ✓\n      w390 min 4.62 ✓\n  Densité (caractères par section, cible > 400) :\n    paliers      ✓\n    engagements  ✓\n  site-rail.mjs : exit 0 ✓\n  Erreurs console (total) : 0 ✓\n  Requêtes échouées (total) : 0 ✓\n\nVerdict par seuil :\n  ✓ sixSections\n  ✓ anchors\n  ✓ noPurple\n  ✓ contrast\n  ✓ density\n  ✓ siteRail\n  ✓ console\n\nTous les seuils sont atteints.\nCaptures : C:\\Users\\amado\\AppData\\Local\\Temp\\sections-paliers-engagements\nRapport  : _verify_proofs/site-sections.json\n",
+    "stderrTail": ""
+  },
+  "totals": {
+    "consoleErrors": 0,
+    "requestFails": 0,
+    "captures": 3,
+    "verdicts": {
+      "sectionsAndAnchors": true,
+      "distinctRegisters": true,
+      "noPurple": true,
+      "contrast": true,
+      "refus03Columns": true,
+      "noEffectOnText": true,
+      "stylesCssUnchanged": true,
+      "siteRail": true,
+      "siteSections": true,
+      "console": true
+    }
+  }
+}

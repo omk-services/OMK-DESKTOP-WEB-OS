@@ -1,0 +1,517 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "generatedAt": "2026-08-11T22:57:22.772Z",
+  "captures": [
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\methode\\methode-1440.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\methode\\methode-900.png",
+    "C:\\Users\\amado\\AppData\\Local\\Temp\\methode\\methode-390.png"
+  ],
+  "stylesCssGitDiff": {
+    "exitCode": 0,
+    "stdoutStat": "public/site/styles.css | 1786 +++++++++++++++++++++++++++++++++++++++++++++++-\n 1 file changed, 1755 insertions(+), 31 deletions(-)",
+    "methodeLeakHits": [],
+    "untouchedByMe": true
+  },
+  "page": {
+    "w1440": {
+      "sections": [
+        {
+          "id": "intro",
+          "found": true,
+          "dataSection": "introduction",
+          "rect": {
+            "top": 55.25,
+            "left": 240,
+            "width": 1200,
+            "height": 944.296875
+          }
+        },
+        {
+          "id": "grids",
+          "found": true,
+          "dataSection": "six-grilles",
+          "rect": {
+            "top": 999.546875,
+            "left": 240,
+            "width": 1200,
+            "height": 1211.15625
+          }
+        },
+        {
+          "id": "coda",
+          "found": true,
+          "dataSection": "coda",
+          "rect": {
+            "top": 2210.703125,
+            "left": 240,
+            "width": 1200,
+            "height": 764.03125
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#intro",
+          "targetId": "intro",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#grids",
+          "targetId": "grids",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#coda",
+          "targetId": "coda",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "intro": {
+          "backgroundColor": "rgb(250, 247, 242)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": {
+            "fontFamily": "Fraunces, Georgia, \"Times New Roman\", serif",
+            "fontSize": "76px",
+            "fontWeight": "400",
+            "color": "rgb(28, 25, 23)",
+            "textAlign": "start"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(180, 83, 9)",
+            "textAlign": "start"
+          }
+        },
+        "grids": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgb(245, 233, 212) 0%, rgb(232, 213, 176) 100%)",
+          "color": "rgb(69, 26, 3)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(120, 53, 15)",
+          "borderTopWidth": "1px",
+          "heading": {
+            "fontFamily": "Didot, \"Bodoni 72\", \"Bodoni MT\", Georgia, serif",
+            "fontSize": "60px",
+            "fontWeight": "400",
+            "color": "rgb(69, 26, 3)",
+            "textAlign": "center"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(120, 53, 15)",
+            "textAlign": "center"
+          }
+        },
+        "coda": {
+          "backgroundColor": "rgb(232, 226, 216)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": null,
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(68, 64, 60)",
+            "textAlign": "start"
+          }
+        }
+      },
+      "distinctPairs": {
+        "intro-grids": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "intro-coda": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "grids-coda": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        }
+      },
+      "effectViolations": [],
+      "purpleHits": [],
+      "contrast": {
+        "sampled": 60,
+        "minRatio": 4.7,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    },
+    "w900": {
+      "sections": [
+        {
+          "id": "intro",
+          "found": true,
+          "dataSection": "introduction",
+          "rect": {
+            "top": 115.5,
+            "left": 0,
+            "width": 900,
+            "height": 1004.421875
+          }
+        },
+        {
+          "id": "grids",
+          "found": true,
+          "dataSection": "six-grilles",
+          "rect": {
+            "top": 1119.921875,
+            "left": 0,
+            "width": 900,
+            "height": 1423.984375
+          }
+        },
+        {
+          "id": "coda",
+          "found": true,
+          "dataSection": "coda",
+          "rect": {
+            "top": 2543.90625,
+            "left": 0,
+            "width": 900,
+            "height": 648.96875
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#intro",
+          "targetId": "intro",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#grids",
+          "targetId": "grids",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#coda",
+          "targetId": "coda",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "intro": {
+          "backgroundColor": "rgb(250, 247, 242)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": {
+            "fontFamily": "Fraunces, Georgia, \"Times New Roman\", serif",
+            "fontSize": "54px",
+            "fontWeight": "400",
+            "color": "rgb(28, 25, 23)",
+            "textAlign": "start"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(180, 83, 9)",
+            "textAlign": "start"
+          }
+        },
+        "grids": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgb(245, 233, 212) 0%, rgb(232, 213, 176) 100%)",
+          "color": "rgb(69, 26, 3)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(120, 53, 15)",
+          "borderTopWidth": "1px",
+          "heading": {
+            "fontFamily": "Didot, \"Bodoni 72\", \"Bodoni MT\", Georgia, serif",
+            "fontSize": "45px",
+            "fontWeight": "400",
+            "color": "rgb(69, 26, 3)",
+            "textAlign": "center"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(120, 53, 15)",
+            "textAlign": "center"
+          }
+        },
+        "coda": {
+          "backgroundColor": "rgb(232, 226, 216)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": null,
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(68, 64, 60)",
+            "textAlign": "start"
+          }
+        }
+      },
+      "distinctPairs": {
+        "intro-grids": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "intro-coda": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "grids-coda": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        }
+      },
+      "effectViolations": [],
+      "purpleHits": [],
+      "contrast": {
+        "sampled": 60,
+        "minRatio": 4.7,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    },
+    "w390": {
+      "sections": [
+        {
+          "id": "intro",
+          "found": true,
+          "dataSection": "introduction",
+          "rect": {
+            "top": 167.75,
+            "left": 0,
+            "width": 390,
+            "height": 1342.734375
+          }
+        },
+        {
+          "id": "grids",
+          "found": true,
+          "dataSection": "six-grilles",
+          "rect": {
+            "top": 1510.484375,
+            "left": 0,
+            "width": 390,
+            "height": 2500.875
+          }
+        },
+        {
+          "id": "coda",
+          "found": true,
+          "dataSection": "coda",
+          "rect": {
+            "top": 4011.359375,
+            "left": 0,
+            "width": 390,
+            "height": 573.59375
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "href": "#intro",
+          "targetId": "intro",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#grids",
+          "targetId": "grids",
+          "resolves": true,
+          "scrolled": true
+        },
+        {
+          "href": "#coda",
+          "targetId": "coda",
+          "resolves": true,
+          "scrolled": true
+        }
+      ],
+      "computed": {
+        "intro": {
+          "backgroundColor": "rgb(250, 247, 242)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": {
+            "fontFamily": "Fraunces, Georgia, \"Times New Roman\", serif",
+            "fontSize": "40px",
+            "fontWeight": "400",
+            "color": "rgb(28, 25, 23)",
+            "textAlign": "start"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(180, 83, 9)",
+            "textAlign": "start"
+          }
+        },
+        "grids": {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgb(245, 233, 212) 0%, rgb(232, 213, 176) 100%)",
+          "color": "rgb(69, 26, 3)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(120, 53, 15)",
+          "borderTopWidth": "1px",
+          "heading": {
+            "fontFamily": "Didot, \"Bodoni 72\", \"Bodoni MT\", Georgia, serif",
+            "fontSize": "36px",
+            "fontWeight": "400",
+            "color": "rgb(69, 26, 3)",
+            "textAlign": "center"
+          },
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(120, 53, 15)",
+            "textAlign": "center"
+          }
+        },
+        "coda": {
+          "backgroundColor": "rgb(232, 226, 216)",
+          "backgroundImage": "none",
+          "color": "rgb(28, 25, 23)",
+          "textAlign": "start",
+          "fontFamily": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "borderTopColor": "rgb(28, 25, 23)",
+          "borderTopWidth": "0px",
+          "heading": null,
+          "body": {
+            "fontFamily": "ui-monospace, \"Cascadia Code\", Menlo, Consolas, monospace",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "color": "rgb(68, 64, 60)",
+            "textAlign": "start"
+          }
+        }
+      },
+      "distinctPairs": {
+        "intro-grids": {
+          "distinctCount": 5,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "intro-coda": {
+          "distinctCount": 3,
+          "props": [
+            "backgroundColor",
+            "headingFontFamily",
+            "bodyFontFamily"
+          ]
+        },
+        "grids-coda": {
+          "distinctCount": 4,
+          "props": [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "headingFontFamily"
+          ]
+        }
+      },
+      "effectViolations": [],
+      "purpleHits": [],
+      "contrast": {
+        "sampled": 60,
+        "minRatio": 4.7,
+        "violations": []
+      },
+      "console": [],
+      "requestFails": []
+    }
+  },
+  "siteRail": {
+    "exitCode": 0,
+    "stdoutTail": "    engagements  ✓\n    demo         ✓\n  Hero (index.html) :\n    fx intersect titre : non\n    fx intersect lead  : non\n    mask radial        : non\n    mask linear        : non\n    titre dans bande   : n/a\n    contraste titre    : 18.93 ✓\n    contraste lead     : 16.64 ✓\n    verdict hero       : ✓\n  Erreurs console (total) : 0 ✓\n\nVerdict par seuil :\n  ✓ rail\n  ✓ mainOffset\n  ✓ sectionsClear\n  ✓ mobile\n  ✓ hero\n  ✓ console\n\nTous les seuils sont atteints.\nCaptures : C:\\Users\\amado\\AppData\\Local\\Temp\\rail\nRapport  : _verify_proofs/site-rail.json\n",
+    "stderrTail": ""
+  },
+  "totals": {
+    "consoleErrors": 0,
+    "requestFails": 0,
+    "captures": 3,
+    "verdicts": {
+      "sectionsAndAnchors": true,
+      "distinctRegisters": true,
+      "contrast": true,
+      "noEffectOnText": true,
+      "noPurple": true,
+      "stylesCssUnchanged": true,
+      "siteRail": true,
+      "console": true
+    }
+  }
+}
