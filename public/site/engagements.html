@@ -17,6 +17,7 @@
 
 <link rel="icon" type="image/svg+xml" href="/site/favicon.svg" />
 <link rel="stylesheet" href="/site/styles.css" />
+<link rel="stylesheet" href="/site/engagements.css" />
 </head>
 <body>
 
@@ -30,81 +31,312 @@
       <a href="/site/index.html">Accueil</a>
       <a href="/site/methode.html">Méthode</a>
       <a href="/site/paliers.html">Paliers</a>
-      <a href="/site/engagements.html">Engagements</a>
+      <a href="/site/engagements.html" aria-current="page">Engagements</a>
       <a href="/site/demo.html">Démo</a>
     </nav>
+    <div class="site-top__cta">
+      <a class="site-btn" style="background:#0a0a0a;color:#fff" href="/site/demo.html">
+        Entrer en démo
+        <span class="site-btn__arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </header>
 
 <nav class="site-subnav" aria-label="Sections de la page">
   <div class="site-subnav__inner">
-    <a href="#refus-1">Refus n°01</a>
-    <a href="#refus-2">Refus n°02</a>
-    <a href="#refus-3">Refus n°03</a>
-    <a href="#refus-4">Refus n°04</a>
+    <span class="site-subnav__title">Engagements</span>
+    <a href="#objections">Ce qu'on ne fait pas</a>
+    <a href="#refus-01">Refus n°01</a>
+    <a href="#refus-02">Refus n°02</a>
+    <a href="#refus-03">Refus n°03</a>
+    <a href="#refus-04">Refus n°04</a>
+    <a href="#tests">Tests</a>
   </div>
 </nav>
 
 <main>
 
-  <!-- ── Engagements · Brutalism · Shatter ─────────────────────────────── -->
-  <section id="engagements" class="site-section sec-engagements" aria-labelledby="engage-title">
-    <div class="fx-canvas fx-shatter" data-fx="shatter" aria-hidden="true"></div>
+  <!-- ── 0. Objections · jaune brutaliste, hachures, capitales condensees ── -->
+  <section id="objections" class="site-section sec-objections" data-section="objections" aria-labelledby="obj-title">
+    <div class="sec-objections__hatch" aria-hidden="true"></div>
     <div class="site-section__inner">
-      <p class="site-eyebrow" style="color:#000;">Les objections</p>
-      <h1 class="site-h2" id="engage-title">Ce qu'on ne fait pas</h1>
-      <p class="site-prose" style="max-width: 55ch; font-size: 1.0625rem;">
-        Quatre lignes que toute la page pourrait résumer. Si l'une d'elles est fausse un jour,
-        c'est le moment de fermer ce site.
+      <p class="sec-objections__eyebrow">Les objections</p>
+      <h1 class="sec-objections__h1" id="obj-title">CE QU'ON NE FAIT PAS</h1>
+      <p class="sec-objections__lead">
+        Quatre lignes que toute la page pourrait résumer. Si l'une d'elles est fausse
+        un jour, c'est le moment de fermer ce site. Chaque refus est développé dans
+        sa propre section, avec la forme qu'il mérite&nbsp;: le test concret pour
+        l'enfermement, le journal d'audit pour l'IA, le déroulé pour la démo, le
+        calcul pour le prix.
+      </p>
+      <ul class="sec-objections__toc" aria-label="Sommaire des quatre refus">
+        <li><span class="sec-objections__toc-mark">01</span> Pas de SaaS qui vous enferme — la forme réelle de l'export, en JSON.</li>
+        <li><span class="sec-objections__toc-mark">02</span> Pas d'IA qui apprend de vos données — extrait de journal d'audit, format terminal.</li>
+        <li><span class="sec-objections__toc-mark">03</span> Pas de «&nbsp;book a demo&nbsp;» sans vos données — le déroulé de l'audit de 30 minutes.</li>
+        <li><span class="sec-objections__toc-mark">04</span> Pas de prix inventé — les variables dont dépend le chiffrage.</li>
+      </ul>
+      <p class="sec-objections__close">
+        Et à la fin, la section <a href="#tests">«&nbsp;Les tests&nbsp;»</a> reprend les
+        quatre phrases en version courte, à vérifier soi-même, sans compte.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 1. Refus n°01 · noir sur jaune · export concret ─────────────────── -->
+  <section id="refus-01" class="site-section sec-refus-01" data-section="refus-01" aria-labelledby="refus01-title">
+    <div class="site-section__inner">
+      <p class="sec-refus__eyebrow">Refus n°01</p>
+      <h2 class="sec-refus__h2" id="refus01-title">Pas de SaaS qui vous enferme</h2>
+
+      <div class="sec-refus__cols">
+        <div class="sec-refus__col">
+          <p>
+            Aucun export verrouillé, aucun format propriétaire. Vos données sortent
+            en standard, à n'importe quel palier, sans préavis. Le verrouillage n'est
+            pas un modèle économique — c'est un piège qu'on refuse de poser. Si
+            l'export devenait indisponible un jour, c'est le moment de fermer ce
+            site.
+          </p>
+          <p>
+            L'export couvre l'intégralité de votre espace&nbsp;: clients, sessions,
+            SOP, méthode, notes, agents, journal d'audit. Il est déclenchable depuis
+            l'écran <em>Paramètres &gt; Export</em>, ou par un appel API authentifié,
+            et il n'est pas journalisé dans l'audit comme une opération sensible —
+            c'est un droit, pas une faveur.
+          </p>
+          <p class="sec-refus__source">
+            Test — exporter l'intégralité de votre espace en CSV + JSON, à tout moment.
+          </p>
+        </div>
+
+        <div class="sec-refus__col">
+          <h3 class="sec-refus__h3">La forme réelle de l'export</h3>
+<pre class="sec-refus__code" aria-label="Exemple de forme d'export JSON"><code>{
+  "schema_version": "2026-08-11",
+  "tenant": "omk-internal",
+  "exported_at": "2026-08-11T14:32:11Z",
+  "entities": [
+    "clients", "sessions", "notes", "sops",
+    "method_steps", "agents", "audit_log"
+  ],
+  "files": [
+    "clients.csv",
+    "sessions.csv",
+    "notes.jsonl",
+    "sops.csv",
+    "method_steps.csv",
+    "agents.csv",
+    "audit_log.csv"
+  ],
+  "warnings": [
+    "vector_embeddings: omitted — reconstructible from notes.jsonl",
+    "user_accounts: omitted — recreatable from your IdP"
+  ]
+}</code></pre>
+          <p class="sec-refus__note">
+            Ce qui n'est pas exporté, et pourquoi&nbsp;: les embeddings vectoriels
+            (reconstructibles depuis les textes), les comptes utilisateurs (à recréer
+            chez vous). Aucune ligne n'est jamais retenue.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. Refus n°02 · terminal vert #33ff00 sur noir · journal d'audit ── -->
+  <section id="refus-02" class="site-section sec-refus-02" data-section="refus-02" aria-labelledby="refus02-title">
+    <div class="site-section__inner">
+      <p class="sec-refus02__eyebrow">Refus n°02 · journal d'audit</p>
+      <h2 class="sec-refus02__h2" id="refus02-title">Pas d'IA qui apprend de vos données</h2>
+      <p class="sec-refus02__lead">
+        Vos notes de session ne servent pas à entraîner un modèle public. Le
+        traitement est tracé — l'audit log enregistre chaque appel, son entrée, sa
+        sortie, son refus éventuel. Le zéro-PII est une mécanique, pas une promesse.
+        Le RGPD n'est pas un cadre qu'on respecte par accident — c'est un code
+        qu'on applique.
       </p>
 
-      <div class="engage-grid" role="list">
-
-        <article id="refus-1" class="engage-card" role="listitem">
-          <span class="engage-card__mark">Refus n°01</span>
-          <h2 class="engage-card__title">Pas de SaaS qui vous enferme</h2>
-          <p class="engage-card__body">
-            Aucun export verrouillé, aucun format propriétaire. Vos données sortent en standard,
-            à n'importe quel palier, sans préavis. Le verrouillage n'est pas un modèle
-            économique — c'est un piège qu'on refuse de poser.
-          </p>
-          <p class="engage-card__source">Test — exporter l'intégralité de votre espace en CSV + JSON, à tout moment</p>
-        </article>
-
-        <article id="refus-2" class="engage-card" role="listitem">
-          <span class="engage-card__mark">Refus n°02</span>
-          <h2 class="engage-card__title">Pas d'IA qui apprend de vos données</h2>
-          <p class="engage-card__body">
-            Vos notes de session ne servent pas à entraîner un modèle public. Le traitement est tracé,
-            l'audit log est exportable, le zéro-PII est une mécanique, pas une promesse. Le RGPD
-            n'est pas un cadre qu'on respecte par accident — c'est un code qu'on applique.
-          </p>
-          <p class="engage-card__source">Test — l'audit log montre chaque appel IA, son entrée, sa sortie, son refus éventuel</p>
-        </article>
-
-        <article id="refus-3" class="engage-card" role="listitem">
-          <span class="engage-card__mark">Refus n°03</span>
-          <h2 class="engage-card__title">Pas de « book a demo » sans montrer vos données</h2>
-          <p class="engage-card__body">
-            L'audit de 30 min ouvre votre propre stack — pas une démo préparée. Vous voyez ce qui se
-            passe sur vos vraies notes, pas sur des notes d'exemple. Si nous ne savons pas montrer
-            le produit sur vos données, nous ne savons pas le montrer.
-          </p>
-          <p class="engage-card__source">Test — venir à l'audit avec un dossier de notes, repartir avec un diagnostic chiffré</p>
-        </article>
-
-        <article id="refus-4" class="engage-card" role="listitem">
-          <span class="engage-card__mark">Refus n°04</span>
-          <h2 class="engage-card__title">Pas de prix inventé</h2>
-          <p class="engage-card__body">
-            On ne vous annoncera pas un tarif qu'on n'a pas vérifié. Si le chiffre n'est pas publié,
-            c'est qu'il est à calculer sur l'audit — parce qu'il dépend du volume, du palier et du
-            niveau de souveraineté. Un prix en vitrine ment par construction.
-          </p>
-          <p class="engage-card__source">Test — le prix sort de l'audit, pas du site</p>
-        </article>
-
+      <div class="sec-refus02__log" aria-label="Extrait de journal d'audit, valeurs de démonstration">
+        <pre class="sec-refus02__log-body"><code><span class="ts">[2026-08-11T14:32:11.482Z]</span> <span class="kv">actor</span>=coach.os/session <span class="kv">tenant</span>=demo-tenant
+<span class="ts">[2026-08-11T14:32:11.483Z]</span> <span class="op">call</span> agent.summarize_session
+<span class="ts">[2026-08-11T14:32:11.484Z]</span>   <span class="kv">model</span>=openrouter/anthropic/claude-haiku-4-5
+<span class="ts">[2026-08-11T14:32:11.484Z]</span>   <span class="kv">input_tokens</span>=4217  <span class="kv">note</span>="notes redactionnelles — auteur neutre"
+<span class="ts">[2026-08-11T14:32:13.118Z]</span>   <span class="kv">output_tokens</span>=188  <span class="kv">latency_ms</span>=1634
+<span class="ts">[2026-08-11T14:32:13.119Z]</span>   <span class="kv">redact_pii</span>=on  <span class="kv">pii_stripped</span>=[email, phone]
+<span class="ts">[2026-08-11T14:32:13.120Z]</span>   <span class="ok">verdict</span>=ok  <span class="kv">audit_id</span>=aud_4e7b…91c2
+<span class="ts">[2026-08-11T14:32:13.121Z]</span>   <span class="ok">training_opt_out</span>=true  <span class="kv">provider</span>=openrouter
+<span class="ts">[2026-08-11T14:32:14.802Z]</span> <span class="op">call</span> agent.draft_followup
+<span class="ts">[2026-08-11T14:32:14.803Z]</span>   <span class="kv">model</span>=openrouter/anthropic/claude-haiku-4-5
+<span class="ts">[2026-08-11T14:32:14.803Z]</span>   <span class="kv">input_tokens</span>=2114
+<span class="ts">[2026-08-11T14:32:15.547Z]</span>   <span class="refused">verdict</span>=refused  <span class="kv">reason</span>=pii-leak-detected
+<span class="ts">[2026-08-11T14:32:15.548Z]</span>   <span class="kv">audit_id</span>=aud_4e7b…91c3</code></pre>
       </div>
+
+      <p class="sec-refus02__source">
+        Test — l'audit log montre chaque appel IA, son entrée, sa sortie, son refus
+        éventuel. Exportable en CSV depuis l'écran <em>Paramètres &gt; Audit</em>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 3. Refus n°03 · jaune sur noir · déroulé 30 min ─────────────────── -->
+  <section id="refus-03" class="site-section sec-refus-03" data-section="refus-03" aria-labelledby="refus03-title">
+    <div class="site-section__inner">
+      <p class="sec-refus03__eyebrow">Refus n°03</p>
+      <h2 class="sec-refus03__h2" id="refus03-title">
+        Pas de «&nbsp;book a demo&nbsp;» sans montrer vos données
+      </h2>
+      <p class="sec-refus03__lead">
+        L'audit de 30&nbsp;minutes ouvre votre propre stack — pas une démo préparée.
+        Vous voyez ce qui se passe sur vos vraies notes, pas sur des notes d'exemple.
+        Si nous ne savons pas montrer le produit sur vos données, nous ne savons pas
+        le montrer. Voici le déroulé, en quatre temps.
+      </p>
+
+      <ol class="sec-refus03__steps">
+        <li>
+          <h3 class="sec-refus03__step-title">Avant — ce qu'on vous demande d'apporter</h3>
+          <p>
+            Un dossier de notes anonymisé, entre 5 et 30 sessions. Texte brut ou
+            CSV, peu importe. On préfère ce que vous avez déjà plutôt qu'un
+            échantillon fabriqué. Si vous n'avez rien sous la main, on part sur le
+            seed public — mais c'est explicitement noté dans la fiche d'audit.
+          </p>
+        </li>
+        <li>
+          <h3 class="sec-refus03__step-title">Pendant — ce qui se passe</h3>
+          <p>
+            On lance le bureau, on importe vos notes, on regarde ce que les agents
+            produisent. Aucune étape n'est scénarisée&nbsp;: on prend les choses
+            dans l'ordre où elles se présentent, on note les blocages réels. Si
+            quelque chose ne marche pas, on le dit — c'est le but.
+          </p>
+        </li>
+        <li>
+          <h3 class="sec-refus03__step-title">Ce qu'on montre</h3>
+          <p>
+            Le diagnostic chiffré que le bureau produit, l'audit log des appels
+            IA, la projection sur votre pratique (ce qui tient, ce qui demande un
+            ajustement). On ne montre jamais l'«&nbsp;avenir&nbsp;» du produit — ce
+            qui est prévu est marqué <em>prévu</em>, en toutes lettres, dans la
+            <a href="/site/paliers.html">page Paliers</a>.
+          </p>
+        </li>
+        <li>
+          <h3 class="sec-refus03__step-title">Ce avec quoi on repart</h3>
+          <p>
+            Vous repartez avec le diagnostic chiffré (PDF), la liste de ce qui
+            tient et de ce qui ne tient pas, et — si vous le souhaitez — une
+            proposition tarifaire calculée sur votre volume réel. Aucune relance,
+            aucun «&nbsp;on en reparle la semaine prochaine&nbsp;».
+          </p>
+        </li>
+      </ol>
+
+      <p class="sec-refus03__source">
+        Test — venir à l'audit avec un dossier de notes, repartir avec un diagnostic
+        chiffré.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 4. Refus n°04 · papier austere, encre, une colonne etroite ─────── -->
+  <section id="refus-04" class="site-section sec-refus-04" data-section="refus-04" aria-labelledby="refus04-title">
+    <div class="site-section__inner sec-refus04__inner">
+      <p class="sec-refus04__eyebrow">Refus n°04</p>
+      <h2 class="sec-refus04__h2" id="refus04-title">Pas de prix inventé</h2>
+      <p class="sec-refus04__lead">
+        On ne vous annoncera pas un tarif qu'on n'a pas vérifié. Si le chiffre
+        n'est pas publié, c'est qu'il est à calculer sur l'audit — parce qu'il
+        dépend du volume, du palier et du niveau de souveraineté. Un prix en
+        vitrine ment par construction. Voici les variables dont il dépend.
+      </p>
+
+      <ol class="sec-refus04__vars">
+        <li>
+          <strong>Le volume.</strong> Nombre de sessions par mois, nombre de clients
+          actifs, taille des dossiers importés. C'est la variable la plus simple à
+          mesurer et la plus sous-estimée par les coachs qui démarrent.
+        </li>
+        <li>
+          <strong>Le palier.</strong> Preuve de concept (gratuit, 14 jours),
+          SaaS (forfait mensuel), marque blanche (contrat annuel),
+          souveraineté (forfait d'installation + opération). Le saut tarifaire
+          entre le SaaS et la marque blanche est délibérément franc — c'est le
+          moment où le produit change de nature.
+        </li>
+        <li>
+          <strong>Le niveau de souveraineté.</strong> Une base multi-tenant
+          partagée n'a pas le même coût opérationnel qu'un projet Supabase dédié
+          par client, qui n'a pas le même coût qu'une installation souveraine
+          sur votre matériel. Les trois sont réels et tenables — mais l'effort
+          d'ingénierie n'est pas le même.
+        </li>
+        <li>
+          <strong>Ce que vous trouvez juste.</strong> Quatrième variable, et
+          c'est la nôtre. Le chiffrage que vous obtenez n'est pas une extraction
+          automatique — il passe par un arbitrage humain, parce qu'un forfait
+          sans conversation cache toujours quelque chose.
+        </li>
+      </ol>
+
+      <p class="sec-refus04__close">
+        Le prix sort de l'audit, pas du site. C'est moins vendeur, et c'est
+        précisément le but.
+      </p>
+
+      <p class="sec-refus04__source">
+        Test — le prix sort de l'audit, pas du site.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 5. Tests · noir sur jaune · 4 phrases verifiables, numerotees ───── -->
+  <section id="tests" class="site-section sec-tests" data-section="tests" aria-labelledby="tests-title">
+    <div class="site-section__inner">
+      <p class="sec-tests__eyebrow">Quatre phrases vérifiables</p>
+      <h2 class="sec-tests__h2" id="tests-title">Les tests</h2>
+      <p class="sec-tests__lead">
+        Quatre phrases du site qu'un prospect peut aller vérifier lui-même, sans
+        demander un rendez-vous, sans remplir un formulaire, sans créer un compte.
+        Si l'une d'elles ne tient plus la vérification, c'est le moment de fermer
+        ce site.
+      </p>
+
+      <ol class="sec-tests__list">
+        <li>
+          <span class="sec-tests__num">01</span>
+          <p>
+            Exporter l'intégralité de votre espace en CSV&nbsp;+&nbsp;JSON, à
+            tout moment, depuis l'écran <em>Paramètres &gt; Export</em>.
+            Sans préavis. Sans ticket support. Sans email au DPO.
+          </p>
+        </li>
+        <li>
+          <span class="sec-tests__num">02</span>
+          <p>
+            L'audit log montre chaque appel IA, son entrée, sa sortie, son refus
+            éventuel. Exportable en CSV depuis l'écran
+            <em>Paramètres &gt; Audit</em>. Aucune ligne n'est jamais retenue.
+          </p>
+        </li>
+        <li>
+          <span class="sec-tests__num">03</span>
+          <p>
+            Venir à l'audit avec un dossier de notes réelles, repartir avec un
+            diagnostic chiffré — sur vos données, pas sur un exemple préparé.
+          </p>
+        </li>
+        <li>
+          <span class="sec-tests__num">04</span>
+          <p>
+            Le prix sort de l'audit, pas du site. Aucune grille publique, aucune
+            extraction automatique, aucun tarif en vitrine qui ne sera pas celui
+            que vous paierez.
+          </p>
+        </li>
+      </ol>
     </div>
   </section>
 

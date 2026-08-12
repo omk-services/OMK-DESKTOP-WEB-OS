@@ -1,0 +1,472 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Coach OS — /site/methode.html — surcharge par section
+   Périmètre agent R — campagne 2026-08-11.
+
+   Trois sections, trois registres (valeurs reprises de src/apps/design/DesignApp.tsx,
+   lignes 528-1490 — fichier source, lecture seule) :
+
+     #intro      · Editorial Mag   (#faf7f2 · Fraunces · ink+cream+gold · drop cap)
+     #grids      · Art Deco        (linear-gradient #f5e9d4→#e8d5b0 · Didot · gold+ink+oxblood · stepped vertical symmetry)
+     #coda       · Wabi-sabi       (#e8e2d8 · Times · washi+sumi+clay · intentional asymmetry)
+
+   Aucun effet (canvas, pseudo-element décoratif) ne recouvre un rectangle de texte
+   — BARRE §4.1. Le motif Art Deco (sunburst, losanges) vit exclusivement dans la
+   marge supérieure et les bordures verticales, jamais derrière les paragraphes.
+
+   Ce fichier est lié après styles.css dans le <head> de methode.html uniquement.
+   styles.css reste intact.
+   ───────────────────────────────────────────────────────────────────────── */
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   1. SEC-METHODE-INTRO · Editorial Mag
+   ════════════════════════════════════════════════════════════════════════ */
+
+.sec-methode-intro {
+  /* Valeur exacte du fichier source DesignApp.tsx:530 */
+  background: #faf7f2;
+  color: #1c1917;       /* ink / stone-900 */
+  padding-block: clamp(5rem, 10vw, 8rem);
+  --accent: #b45309;    /* amber-700 — référence palette "ink black + cream + gold" */
+}
+
+/* Le h1 — Fraunces, fine rule, fort contraste. Valeurs reprises DesignApp.tsx:546-552 */
+.sec-methode-intro .site-h1 {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  max-width: 22ch;
+  color: #1c1917;
+}
+
+.sec-methode-intro .site-h1 em {
+  font-style: italic;
+  color: #b45309;
+  text-decoration: underline;
+  text-decoration-color: #b45309;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 8px;
+}
+
+.sec-methode-intro .site-eyebrow {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #b45309;
+  margin-bottom: 1rem;
+}
+
+.sec-methode-intro .site-lead {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  color: #1c1917;
+  max-width: 55ch;
+  line-height: 1.5;
+  margin-top: 1.5rem;
+}
+
+/* Bento — deux colonnes, colonne principale 65 chars, encadré source à droite */
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+  border-top: 1px solid #1c1917;
+  padding-top: 2.5rem;
+}
+
+.editorial-grid__main {
+  grid-column: 1 / 8;
+}
+
+.editorial-grid__aside {
+  grid-column: 9 / -1;
+  border-left: 1px solid #d4d4d4;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  color: #4a4a4a;
+  font-family: ui-serif, Georgia, serif;
+  line-height: 1.6;
+}
+
+.editorial-grid__aside strong {
+  color: #1c1917;
+  font-weight: 700;
+}
+
+/* Lettrine sur le premier paragraphe — DesignApp.tsx:565-566 */
+.editorial-prose {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  max-width: 65ch;
+  color: #1c1917;
+}
+
+.editorial-prose p + p {
+  margin-top: 1.25em;
+  text-indent: 1.5em;
+}
+
+.editorial-prose p:first-of-type::first-letter {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 4.5em;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 0.85;
+  float: left;
+  margin: 0.08em 0.12em 0 -0.05em;
+  color: #b45309;
+}
+
+.editorial-prose em {
+  font-style: italic;
+  color: #1c1917;
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   2. SEC-GRIDS · Art Deco
+   �═══════════════════════════════════════════════════════════════════════ */
+
+/* Fond crème dégradé vertical — DesignApp.tsx:1060 */
+.sec-grids {
+  background: linear-gradient(180deg, #f5e9d4 0%, #e8d5b0 100%);
+  color: #451a03;       /* amber-950 — encre foncée */
+  padding-block: clamp(5rem, 10vw, 8rem);
+  --accent: #b45309;
+  position: relative;
+  border-top: 1px solid #78350f;
+  border-bottom: 1px solid #78350f;
+}
+
+/* Deux rails verticaux décoratifs, à gauche et à droite de la section.
+   Reprend le motif "stepped diamonds" de DesignApp.tsx:1070-1075.
+   Vivent dans la marge — jamais derrière un rectangle de texte. */
+.sec-grids::before,
+.sec-grids::after {
+  content: "";
+  position: absolute;
+  top: 4rem;
+  bottom: 4rem;
+  width: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sec-grids::before {
+  left: 12px;
+  background-image:
+    linear-gradient(to bottom,
+      #b45309 0 4px, transparent 4px 14px);
+  background-size: 14px 14px;
+  background-repeat: repeat-y;
+  width: 14px;
+  opacity: 0.55;
+}
+
+.sec-grids::after {
+  right: 12px;
+  background-image:
+    linear-gradient(to bottom,
+      #b45309 0 4px, transparent 4px 14px);
+  background-size: 14px 14px;
+  background-repeat: repeat-y;
+  width: 14px;
+  opacity: 0.55;
+}
+
+/* Le contenu de la section passe devant les rails décoratifs. */
+.sec-grids .site-section__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sunburst — UNE SEULE FOIS, en tête de section. Pas répété par grille.
+   DesignApp.tsx:1081-1090 — losanges radiaux, cercle d'or, centre oxblood. */
+.sec-grids .deco-sunburst {
+  display: block;
+  margin: 1.5rem auto 2.5rem;
+  width: 96px;
+  height: 96px;
+  opacity: 0.85;
+}
+
+.sec-grids .site-h2 {
+  font-family: 'Didot', 'Bodoni 72', 'Bodoni MT', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: #451a03;
+  text-align: center;
+  max-width: 28ch;
+  margin: 0 auto;
+}
+
+.sec-grids .site-eyebrow {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #78350f;
+  text-align: center;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* Grille des six cartes — six degres, alignés sur axe vertical central.
+   En 1440 px : 3 colonnes × 2 rangées. En 900 px : 2 colonnes. En 390 px : 1 colonne. */
+.grids-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 3rem;
+  border-top: 1px solid #78350f;
+  border-left: 1px solid #78350f;
+}
+
+.grid-cell {
+  padding: 2rem 1.75rem;
+  border-right: 1px solid #78350f;
+  border-bottom: 1px solid #78350f;
+  background: transparent;
+  position: relative;
+}
+
+/* Chiffres romains en chiffres massifs, comme un registre */
+.grid-cell__index {
+  font-family: 'Didot', 'Bodoni MT', Georgia, serif;
+  font-style: italic;
+  font-size: 2.5rem;
+  letter-spacing: 0.04em;
+  color: #b45309;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.grid-cell__label {
+  font-family: 'Didot', 'Bodoni MT', Georgia, serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  line-height: 1.1;
+  color: #451a03;
+  margin-bottom: 0.75rem;
+}
+
+.grid-cell__hint {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78350f;
+  margin-bottom: 1rem;
+}
+
+.grid-cell__body {
+  font-family: 'Didot', 'Bodoni MT', Georgia, serif;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #451a03;
+}
+
+.grid-cell__body strong {
+  font-weight: 700;
+  color: #1c1917;
+}
+
+@media (max-width: 900px) {
+  .grids-list { grid-template-columns: repeat(2, 1fr); }
+  .grid-cell:nth-child(2n) { border-right: 0; }
+  .grid-cell:nth-child(2n+1) { border-right: 1px solid #78350f; }
+}
+
+@media (max-width: 560px) {
+  .grids-list { grid-template-columns: 1fr; }
+  .grid-cell { border-right: 0 !important; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   3. SEC-CODA · Wabi-sabi
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Washi cream — DesignApp.tsx:1420 */
+.sec-coda {
+  background: #e8e2d8;
+  color: #1c1917;
+  padding-block: clamp(6rem, 14vw, 10rem);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Texture washi subtile — deux auréoles de tan, opacité faible.
+   Vit dans le fond, n'atteint jamais un rectangle de texte. */
+.sec-coda::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 22% 30%, rgba(107, 66, 38, 0.10) 0%, transparent 28%),
+    radial-gradient(ellipse at 78% 75%, rgba(107, 66, 38, 0.10) 0%, transparent 32%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sec-coda .site-section__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Asymétrie intentionnelle : on ne centre pas, on décale.
+   Le bloc texte est calé à gauche mais avec une marge de gauche
+   plus large qu'un centrage strict, et le cite flotte à droite. */
+.sec-coda blockquote {
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: #1c1917;
+  max-width: 38ch;
+  margin: 0 0 0 clamp(0px, 8vw, 6rem);
+  text-align: left;
+}
+
+.sec-coda blockquote em {
+  font-style: italic;
+  color: #44403c;
+}
+
+.sec-coda .site-eyebrow {
+  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #44403c;
+  margin-bottom: 1.25rem;
+}
+
+/* Trait à l'encre — un seul, posé de travers, en pied de section.
+   DesignApp.tsx:1437-1438 — sumi-e. */
+.sec-coda .sumi-stroke {
+  display: block;
+  margin: 3rem 0 0 clamp(0px, 8vw, 6rem);
+  width: clamp(140px, 22vw, 240px);
+  height: auto;
+  opacity: 0.78;
+}
+
+/* Le cite flotte à droite, en dehors de l'alignement du blocquote — asymétrie */
+.sec-coda cite {
+  display: block;
+  margin-top: 1.25rem;
+  margin-left: auto;
+  margin-right: clamp(0px, 4vw, 3rem);
+  font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #44403c;
+  max-width: 32ch;
+  text-align: right;
+}
+
+/* Lien discret vers /site/paliers.html — pas de bouton criard */
+.sec-coda .coda-next {
+  display: inline-block;
+  margin-top: 2.5rem;
+  margin-left: clamp(0px, 8vw, 6rem);
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: #44403c;
+  text-decoration: none;
+  border-bottom: 1px solid #44403c;
+  padding-bottom: 2px;
+}
+
+.sec-coda .coda-next:hover {
+  color: #1c1917;
+  border-bottom-color: #1c1917;
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   Responsive — tous registres
+   ════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .editorial-grid {
+    grid-template-columns: 1fr;
+  }
+  .editorial-grid__main,
+  .editorial-grid__aside {
+    grid-column: 1 / -1;
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid #d4d4d4;
+    padding-top: 1.5rem;
+  }
+  .editorial-grid__main {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  /* Les rails verticaux décoratifs Art Deco ne doivent pas chevaucher
+     le contenu à largeur réduite. Cachés en dessous de 900 px — la
+     symétrie verticale reste visible par la grille 2 colonnes. */
+  .sec-grids::before,
+  .sec-grids::after {
+    display: none;
+    background-image: none;
+    content: none;
+  }
+
+  .sec-coda blockquote,
+  .sec-coda .sumi-stroke,
+  .sec-coda .coda-next {
+    margin-left: 0;
+  }
+  .sec-coda cite {
+    margin-right: 0;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-grids::before,
+  .sec-grids::after,
+  .sec-coda::before {
+    animation: none !important;
+  }
+}
+
+/* ── Les six grilles : 3 par ligne, sur 2 lignes ──────────────────────────
+   Le conteneur passait bien en `repeat(3, 1fr)` ici, mais chaque cellule
+   gardait `grid-column: span 4` — une règle de `styles.css` écrite pour une
+   ancienne grille de 12 colonnes (12 / 4 = 3 par ligne). Une cellule qui
+   réclame 4 pistes sur 3 est reportée seule sur sa ligne : six cartes pleine
+   largeur au lieu de deux rangées de trois, plus une 4e colonne fantôme de 0 px.
+
+   Le conteneur avait été mis à jour, les enfants non. Rien dans le CSS ne le
+   signale : la grille se contente d'obéir. Mesuré dans la page, pas relu.     */
+.grids-list > .grid-cell {
+  grid-column: auto;
+}
+
+/* La bordure gauche du conteneur suffit ; sans ça la 1re colonne double son filet. */
+.grids-list > .grid-cell:nth-child(3n + 1) {
+  border-left: 0;
+}

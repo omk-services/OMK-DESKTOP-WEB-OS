@@ -494,7 +494,10 @@
   function mountAll() {
     const targets = document.querySelectorAll('[data-fx]');
     if (!targets.length) {
-      console.error('[effects] aucune cible [data-fx] trouvée dans la page');
+      // Page sans cible [data-fx] — état légitime (les registres typographiques
+      // n'ont pas besoin d'un canvas d'effet). On ne lève plus d'erreur, sinon
+      // les pages /paliers et /engagements après refonte agent P 2026-08-11
+      // émettraient un console.error à chaque chargement.
       return;
     }
 

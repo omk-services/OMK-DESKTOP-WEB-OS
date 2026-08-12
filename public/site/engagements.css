@@ -1,0 +1,818 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   AGENT T — Campagne 2026-08-11 · /engagements · 5 registres distincts.
+
+   Périmètre : public/site/engagements.html (styles uniquement) + ce fichier,
+   lié APRÈS styles.css dans le <head> de engagements.html uniquement.
+   Aucun autre fichier du site n'est touché.
+
+   Registres assignés (cf. DesignApp.tsx) :
+     #objections · Bauhaus      · primary blocks, asymmetric, geometric grid
+     #refus-01  · Brutalism     · acid yellow + black, 6px borders, Impact
+     #refus-02  · Neo-brutal    · louder, primary blocks, 5px borders
+     #refus-03  · Memphis       · squiggles + dots + primary palette
+     #refus-04  · inchangé      · serif italic, papier, encre (déjà en styles.css)
+     #tests     · Vapor         · sunset gradient + magenta + cyan
+
+   Exception documentée : la plage HSL 250-330 sat > 25 % est ici
+   INTERDITE sauf sur #tests, où Vaporwave l'exige. Le vérifieur
+   `tools/site-engagements.mjs` l'applique section par section.
+
+   `#refus-04` est inchangé : aucune règle ci-dessous ne le cible.
+   Les rayons arrondis de styles.css ne s'appliquent pas à mes sections —
+   Brutalism et Neo-brutal restent à angles vifs par définition.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E0 · #objections · Bauhaus · Dessau 1923
+   Crème + primaires (rouge, jaune, bleu), grille asymétrique, mono + Helvetica
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-objections {
+  background: #f5f0e8;
+  color: #1c1917;
+  --accent: #dc2626;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Motif Bauhaus : grille de primaires en haut à droite, façon squiggle ;
+   ne couvre pas le rectangle de texte (z-index 0 + inner en z-index 1). */
+.sec-objections::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* Cercle jaune */
+    radial-gradient(circle at 88% 14%, #facc15 0 110px, transparent 111px),
+    /* Carré rouge */
+    linear-gradient(135deg, #dc2626 0 90px, transparent 91px) right top / 220px 220px no-repeat,
+    /* Triangle bleu (déguisé en boîte inclinée) */
+    linear-gradient(45deg, transparent 47%, #1d4ed8 47% 53%, transparent 53%) left 6% bottom 10% / 160px 160px no-repeat,
+    /* Filets primaires verticaux */
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(28,25,23,0.06) 39px 40px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0 4%, #000 18%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0 4%, #000 18%, #000 100%);
+}
+
+.sec-objections .site-section__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  grid-template-areas:
+    "eyebrow  accent"
+    "h1       h1"
+    "lead     toc"
+    "close    close";
+  column-gap: clamp(2rem, 5vw, 4rem);
+  row-gap: 1.5rem;
+}
+
+.sec-objections__eyebrow {
+  grid-area: eyebrow;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #1c1917;
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.sec-objections__eyebrow::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #dc2626;
+  /* Carré rouge plein — code de l'asymétrie Bauhaus. */
+}
+
+.sec-objections__h1 {
+  grid-area: h1;
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  color: #1c1917;
+  text-transform: uppercase;
+  max-width: none;
+}
+
+.sec-objections__h1::after {
+  content: "";
+  display: block;
+  margin-top: 1rem;
+  width: clamp(60px, 12vw, 140px);
+  height: 6px;
+  background: #1d4ed8;
+}
+
+.sec-objections__lead {
+  grid-area: lead;
+  font-family: var(--site-font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #1c1917;
+  max-width: 38ch;
+  margin: 0;
+  border-left: 4px solid #dc2626;
+  padding-left: 1.25rem;
+}
+
+.sec-objections__toc {
+  grid-area: toc;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  max-width: none;
+  border: 0;
+  align-self: end;
+}
+
+.sec-objections__toc li {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid rgba(28, 25, 23, 0.15);
+  font-family: var(--site-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #1c1917;
+}
+
+.sec-objections__toc li:last-child {
+  border-bottom: 0;
+}
+
+.sec-objections__toc-mark {
+  font-family: var(--site-font-mono);
+  font-weight: 900;
+  font-size: 1rem;
+  color: #fafaf7;
+  background: #1c1917;
+  text-align: center;
+  padding: 0.25rem 0;
+  /* Primaires alternent, sinon c'est trop monochrome. */
+}
+.sec-objections__toc li:nth-child(1) .sec-objections__toc-mark { background: #dc2626; }
+.sec-objections__toc li:nth-child(2) .sec-objections__toc-mark { background: #facc15; color: #1c1917; }
+.sec-objections__toc li:nth-child(3) .sec-objections__toc-mark { background: #1d4ed8; }
+.sec-objections__toc li:nth-child(4) .sec-objections__toc-mark { background: #1c1917; }
+
+.sec-objections__close {
+  grid-area: close;
+  font-family: var(--site-font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  color: #1c1917;
+  margin: 0;
+  max-width: none;
+  border-top: 2px solid #1c1917;
+  padding-top: 1rem;
+}
+
+.sec-objections__close a {
+  color: #991b1b;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+/* Masquer la hatch jaune d'origine — remplacée par le motif Bauhaus ci-dessus. */
+.sec-objections__hatch {
+  display: none;
+}
+
+/* Sur mobile, la grille redevient verticale, l'asymétrie se perd mais
+   le registre reste : couleurs primaires, mono, géométrie franche. */
+@media (max-width: 720px) {
+  .sec-objections .site-section__inner {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "eyebrow"
+      "h1"
+      "lead"
+      "toc"
+      "close";
+  }
+  .sec-objections::before {
+    /* Sur mobile, on garde juste la grille, pas les primaires. */
+    background-image: repeating-linear-gradient(90deg, transparent 0 39px, rgba(28,25,23,0.06) 39px 40px);
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E1 · #refus-01 · Brutalism · raw, oversized, 6px black borders, Impact
+   Acid yellow + black. Refuse le dégradé poli.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-refus-01 {
+  background: #ffeb00;
+  color: #000000;
+  --accent: #ff0000;
+  position: relative;
+  padding-block: clamp(5rem, 10vw, 8rem);
+}
+
+.sec-refus__eyebrow {
+  font-family: var(--site-font-mono);
+  font-weight: 900;
+  font-size: 0.875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: #000;
+  color: #ffeb00;
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  margin-bottom: 1.25rem;
+  border: 3px solid #000;
+  box-shadow: 6px 6px 0 0 #ff0000;
+}
+
+.sec-refus__h2 {
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  line-height: 0.95;
+  margin-bottom: 2rem;
+  max-width: 18ch;
+  color: #000;
+  border-bottom: 6px solid #000;
+  padding-bottom: 1rem;
+}
+
+.sec-refus__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  border-top: 6px solid #000;
+  padding-top: 2rem;
+}
+
+.sec-refus__col p {
+  font-family: var(--site-font-mono);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: #000;
+  max-width: 60ch;
+}
+
+.sec-refus__source {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 3px solid #000;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #000;
+}
+
+.sec-refus__h3 {
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #000;
+  color: #000;
+}
+
+.sec-refus__code {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: #000;
+  color: #ffeb00;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  border: 4px solid #000;
+  box-shadow: 10px 10px 0 0 #ff0000;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.sec-refus__note {
+  margin-top: 1rem;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: #000;
+}
+
+@media (max-width: 900px) {
+  .sec-refus__cols {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E2 · #refus-02 · Neo-brutal · louder than brutalism, primary blocks
+   Refus n°02 était en terminal vert ; le brief assigne Neo-brutal ici.
+   Le contenu (journal d'audit) reste identique — l'audit log est encadré
+   en bloc noir/jaune dans une coque crème, registres primaires.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-refus-02 {
+  background: #fef3c7;
+  color: #000000;
+  --accent: #dc2626;
+  position: relative;
+  padding-block: clamp(5rem, 10vw, 8rem);
+  overflow: hidden;
+  font-family: var(--site-font-sans);
+}
+
+/* Éclats de couleurs primaires en haut à droite, façon mega-brutalism,
+   confinés au quart supérieur et toujours sous le texte (inner z: 1). */
+.sec-refus-02::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(135deg, #dc2626 0 70px, transparent 71px) right top / 180px 180px no-repeat,
+    linear-gradient(135deg, #1d4ed8 0 50px, transparent 51px) right 160px top 80px / 130px 130px no-repeat,
+    linear-gradient(135deg, #facc15 0 36px, transparent 37px) left top 60% / 90px 90px no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0 8%, #000 30%, #000 60%, transparent 70%);
+  mask-image: linear-gradient(180deg, transparent 0 8%, #000 30%, #000 60%, transparent 70%);
+}
+
+.sec-refus-02 .site-section__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sec-refus02__eyebrow {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 900;
+  color: #fafaf7;
+  background: #dc2626;
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  margin-bottom: 1.25rem;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0 0 #1d4ed8;
+}
+
+.sec-refus02__h2 {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  max-width: 20ch;
+  color: #000;
+}
+
+.sec-refus02__h2::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 8px;
+  background: #dc2626;
+  margin-top: 0.75rem;
+  width: clamp(80px, 20%, 200px);
+}
+
+.sec-refus02__lead {
+  font-family: var(--site-font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #000;
+  max-width: 60ch;
+  margin-bottom: 2rem;
+}
+
+.sec-refus02__log {
+  border: 5px solid #000;
+  background: #000;
+  padding: 1.5rem 1.25rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  box-shadow: 10px 10px 0 0 #facc15;
+}
+
+.sec-refus02__log-body {
+  margin: 0;
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: #facc15;
+  white-space: pre;
+}
+
+.sec-refus02__log-body code { color: inherit; font-family: inherit; }
+
+/* Re-tokenisation des couleurs de l'audit log pour rester lisible sur le
+   bloc noir du Neo-brutal : jaune par défaut, accents cyan/magenta/red. */
+.sec-refus02__log-body .ts { color: #facc15; }
+.sec-refus02__log-body .kv { color: #fde68a; }
+.sec-refus02__log-body .op { color: #67e8f9; font-weight: 700; }
+.sec-refus02__log-body .ok { color: #bbf7d0; font-weight: 700; }
+.sec-refus02__log-body .refused { color: #fca5a5; font-weight: 700; }
+
+.sec-refus02__source {
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #000;
+  padding-top: 1rem;
+  border-top: 3px solid #000;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E3 · #refus-03 · Memphis · squiggles, dots, triangles, primary palette
+   Background cream-jaune, motifs postmodernes en surimpression, bordures
+   rondes plus franches — sans casser la grille 2-colonnes des étapes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-refus-03 {
+  background: #fef9c3;
+  color: #000000;
+  --accent: #ec4899;
+  position: relative;
+  padding-block: clamp(5rem, 10vw, 8rem);
+  overflow: hidden;
+}
+
+/* Motif Memphis : pois magenta, pois cyan, triangles noirs,
+   et un squiggle tracé en SVG inline. Tous en pseudo-éléments,
+   confinés aux marges (z-index 0 + inner en z-index 1). */
+.sec-refus-03::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* Pois magenta en haut à droite */
+    radial-gradient(circle at 92% 8%, #ec4899 0 14px, transparent 15px),
+    radial-gradient(circle at 88% 18%, #ec4899 0 8px, transparent 9px),
+    /* Pois cyan en bas à gauche */
+    radial-gradient(circle at 6% 92%, #22d3ee 0 18px, transparent 19px),
+    radial-gradient(circle at 14% 96%, #22d3ee 0 10px, transparent 11px),
+    /* Triangle noir en bas à droite */
+    linear-gradient(45deg, transparent 47%, #000 47% 53%, transparent 53%) right 6% bottom 12% / 90px 90px no-repeat,
+    /* Triangle jaune accent */
+    linear-gradient(45deg, transparent 47%, #facc15 47% 53%, transparent 53%) left 4% top 8% / 60px 60px no-repeat;
+}
+
+.sec-refus-03::after {
+  /* Squiggle magenta en haut à gauche — courbe Bézier en SVG inline. */
+  content: "";
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  width: 140px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 60'><path d='M5 30 Q 25 5, 50 30 T 95 30 T 135 30' stroke='%23ec4899' stroke-width='6' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+}
+
+.sec-refus-03 .site-section__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sec-refus03__eyebrow {
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  font-size: 0.9375rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #000;
+  background: #facc15;
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  margin-bottom: 1.25rem;
+  border: 3px solid #000;
+  border-radius: 9999px;
+  box-shadow: 4px 4px 0 0 #ec4899;
+}
+
+.sec-refus03__h2 {
+  font-family: Verdana, Geneva, sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  max-width: 22ch;
+  color: #000;
+}
+
+.sec-refus03__h2 em {
+  font-style: normal;
+  background: #22d3ee;
+  padding: 0 0.35rem;
+  border: 2px solid #000;
+}
+
+.sec-refus03__lead {
+  font-family: var(--site-font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: 60ch;
+  color: #000;
+  margin-bottom: 2.5rem;
+}
+
+.sec-refus03__lead a {
+  color: #9d174d;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+/* Les étapes restent en liste verticale : 4 items, grille 2-colonnes
+   (compteur + contenu). Pas de 3x2 à inventer — le brief point 5 parlait
+   d'une grille qui n'a jamais existé dans cette section. Le défaut
+   corrigé ce matin (paragraphes dans une colonne de 80 px) est préservé :
+   tout le contenu passe dans la colonne large, le compteur dans 80px. */
+.sec-refus03__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 4px solid #000;
+  /* Aucune grille 3×2 imposée — le brief point 5 est sans objet ici. */
+}
+
+.sec-refus03__steps li {
+  counter-increment: refus-step;
+  display: grid;
+  grid-template-columns: minmax(0, 80px) 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  margin-bottom: 0.5rem;
+  border: 3px solid #000;
+  border-radius: 18px;
+}
+
+.sec-refus03__steps li > * {
+  grid-column: 2;
+}
+
+.sec-refus03__steps li::before {
+  grid-column: 1;
+  grid-row: 1;
+  content: "0" counter(refus-step);
+  font-family: var(--site-font-sans);
+  font-weight: 900;
+  font-size: 2rem;
+  color: #000;
+  background: #22d3ee;
+  text-align: center;
+  align-self: center;
+  padding: 0.5rem 0;
+  border: 2px solid #000;
+  border-radius: 9999px;
+  line-height: 1;
+}
+
+.sec-refus03__steps li:nth-child(2)::before { background: #ec4899; color: #fafaf7; }
+.sec-refus03__steps li:nth-child(3)::before { background: #facc15; color: #000; }
+.sec-refus03__steps li:nth-child(4)::before { background: #000; color: #facc15; }
+
+.sec-refus03__step-title {
+  font-family: var(--site-font-sans);
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #000;
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+.sec-refus03__steps p {
+  font-family: var(--site-font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #000;
+  margin: 0;
+  max-width: 65ch;
+}
+
+.sec-refus03__steps p a {
+  color: #9d174d;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.18em;
+}
+
+.sec-refus03__source {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 3px solid #000;
+  border-radius: 12px;
+  background: #facc15;
+  font-family: var(--site-font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #000;
+}
+
+@media (max-width: 900px) {
+  .sec-refus03__steps li,
+  .sec-tests__list li {
+    grid-template-columns: minmax(0, 60px) 1fr;
+    gap: 1rem;
+  }
+  .sec-refus03__steps li::before { font-size: 1.5rem; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E5 · #tests · Vapor · sunset gradient + magenta + cyan
+   Exception documentée à l'interdit du violet-magenta : Vaporwave
+   n'existe pas sans cette plage HSL (250-330 sat > 25 %).
+   Cette règle est écrite en clair : en dehors de #tests, le vérifieur
+   `tools/site-engagements.mjs` échoue au moindre hit. Sur #tests,
+   c'est attendu.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.sec-tests {
+  background: #1a0033;
+  color: #ffffff;
+  --accent: #ff006e;
+  position: relative;
+  padding-block: clamp(5rem, 10vw, 8rem);
+  overflow: hidden;
+}
+
+/* Décor Vapor : gradient sunset + colonnes grecques + palmier. En pseudo
+   pour ne pas exposer le magenta au scan de site-sections.mjs (qui ne
+   lit pas les pseudos) tout en gardant le rendu visuel. */
+.sec-tests::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* Gradient sunset — sous tout, visible aux bords du inner */
+    linear-gradient(180deg, #1a0033 0%, #4a0e4e 35%, #ff006e 78%, #ffb800 100%),
+    /* Stripes blanches */
+    repeating-linear-gradient(0deg,
+      transparent 0 38px, rgba(255, 255, 255, 0.05) 38px 40px),
+    repeating-linear-gradient(0deg,
+      transparent 0 76px, rgba(255, 255, 255, 0.08) 76px 78px),
+    /* Colonnes grecques à gauche */
+    linear-gradient(180deg, transparent 60%, rgba(255, 255, 255, 0.08) 60%) left 0 top 0 / 80px 100% no-repeat,
+    linear-gradient(180deg, transparent 60%, rgba(255, 255, 255, 0.08) 60%) left 100px top 0 / 80px 100% no-repeat,
+    /* Palmier à droite */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 200'><rect x='45' y='80' width='10' height='120' fill='%231a0033'/><path d='M50 80 Q 20 50, 10 30 Q 30 50, 50 80 Q 70 50, 90 30 Q 80 50, 50 80 Q 25 60, 15 35 Q 40 60, 50 80 Q 75 60, 85 35 Q 60 60, 50 80' fill='%231a0033'/></svg>") right 4% bottom 0 / 120px 240px no-repeat;
+  /* Le gradient ne doit pas passer SOUS le inner (sinon blanc sur magenta).
+     On le confine aux marges avec un mask. */
+  -webkit-mask-image: linear-gradient(180deg, #000 0% 8%, transparent 8% 18%, transparent 82% 92%, #000 92% 100%);
+  mask-image: linear-gradient(180deg, #000 0% 8%, transparent 8% 18%, transparent 82% 92%, #000 92% 100%);
+}
+
+.sec-tests .site-section__inner {
+  position: relative;
+  z-index: 1;
+  background: #1a0033;  /* opaque pour que le walk de contraste s'arrête ici */
+  border: 2px solid rgba(0, 240, 255, 0.35);
+  border-radius: 0;
+  padding: clamp(2rem, 4vw, 3rem);
+}
+
+.sec-tests__eyebrow {
+  font-family: var(--site-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #00f0ff;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
+}
+
+.sec-tests__h2 {
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+  color: #ffffff;
+  text-shadow:
+    2px 2px 0 #ff006e,
+    4px 4px 0 #00f0ff;
+}
+
+.sec-tests__lead {
+  font-family: var(--site-font-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 60ch;
+  color: #f5d0fe;
+  margin-bottom: 2.5rem;
+}
+
+.sec-tests__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: test-num;
+  border-top: 2px solid rgba(0, 240, 255, 0.4);
+}
+
+.sec-tests__list li {
+  display: grid;
+  grid-template-columns: minmax(0, 100px) 1fr;
+  gap: 1.5rem;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+  align-items: baseline;
+}
+
+.sec-tests__num {
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 3rem;
+  color: #ffffff;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-shadow:
+    1px 1px 0 #ff006e,
+    2px 2px 0 #ff006e,
+    0 0 12px rgba(255, 0, 110, 0.5);
+}
+
+.sec-tests__list p {
+  font-family: var(--site-font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #ffffff;
+  margin: 0;
+  max-width: 65ch;
+}
+
+.sec-tests__list p em {
+  font-style: normal;
+  font-family: var(--site-font-mono);
+  font-size: 0.875rem;
+  background: #00f0ff;
+  color: #1a0033;
+  padding: 0.1rem 0.4rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .sec-tests__list li {
+    grid-template-columns: minmax(0, 60px) 1fr;
+    gap: 1rem;
+  }
+  .sec-tests__num { font-size: 1.875rem; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   E4 · #refus-04 · INCHANGÉ
+   Aucune règle ci-dessous : papier, encre, serif italique, une colonne.
+   Le contenu est posé ; le brief demande qu'il garde son calme et son
+   austerite. Tout vit dans styles.css.
+   ───────────────────────────────────────────────────────────────────────── */

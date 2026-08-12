@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
-<meta name="theme-color" content="#0080ff" />
+<meta name="theme-color" content="#0a0a0a" />
 <title>Les quatre paliers — Coach OS</title>
 <meta name="description" content="Quatre paliers, pas de piège : preuve de concept, SaaS, marque blanche, souveraineté. Le but n'est pas de vous garder — la sortie est prévue dès le premier jour." />
 <link rel="canonical" href="https://coach-os.app/site/paliers.html" />
@@ -17,6 +17,7 @@
 
 <link rel="icon" type="image/svg+xml" href="/site/favicon.svg" />
 <link rel="stylesheet" href="/site/styles.css" />
+<link rel="stylesheet" href="/site/paliers.css" />
 </head>
 <body>
 
@@ -29,92 +30,311 @@
     <nav class="site-top__nav" aria-label="Pages du site">
       <a href="/site/index.html">Accueil</a>
       <a href="/site/methode.html">Méthode</a>
-      <a href="/site/paliers.html">Paliers</a>
+      <a href="/site/paliers.html" aria-current="page">Paliers</a>
       <a href="/site/engagements.html">Engagements</a>
       <a href="/site/demo.html">Démo</a>
     </nav>
+    <div class="site-top__cta">
+      <a class="site-btn" style="background:#0a0a0a;color:#fff" href="/site/demo.html">
+        Entrer en démo
+        <span class="site-btn__arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </header>
 
 <nav class="site-subnav" aria-label="Sections de la page">
   <div class="site-subnav__inner">
-    <a href="#palier-1">Preuve de concept</a>
-    <a href="#palier-2">SaaS</a>
-    <a href="#palier-3">Marque blanche</a>
-    <a href="#palier-4">Souveraineté</a>
+    <span class="site-subnav__title">Paliers</span>
+    <a href="#offre">Offre</a>
+    <a href="#poc">Preuve de concept</a>
+    <a href="#saas">SaaS</a>
+    <a href="#marque-blanche">Marque blanche</a>
+    <a href="#souverainete">Souveraineté</a>
   </div>
 </nav>
 
 <main>
 
-  <!-- ── Quatre paliers · Glassmorphism · Glass ─────────────────────────── -->
-  <section id="ladder" class="site-section sec-paliers" aria-labelledby="ladder-title">
-    <div class="fx-canvas fx-glass-overlay" data-fx="glass-overlay" aria-hidden="true"></div>
-    <div class="site-section__inner">
+  <!-- ── 0. Offre · éditorial suisse · papier, serif, colonne large ─────── -->
+  <section id="offre" class="site-section sec-offre" data-section="offre" aria-labelledby="offre-title">
+    <div class="site-section__inner site-section__inner--sse">
       <p class="site-eyebrow">L'offre</p>
-      <h1 class="site-h1" id="ladder-title">Quatre paliers. Pas de piège.</h1>
-      <p class="site-lead" style="color: rgba(255,255,255,0.92);">
+      <h1 class="sec-offre__h1" id="offre-title">Quatre paliers. Pas de piège.</h1>
+      <p class="sec-offre__lead">
         Le but n'est pas de vous garder. La sortie est prévue dès le premier jour.
-        Chaque palier dit ce qui existe aujourd'hui et ce qui est prévu.
+      </p>
+      <p class="sec-offre__body">
+        Quatre paliers, du plus petit au plus grand&nbsp;: la <em>preuve de concept</em>
+        pour vérifier que la méthode tient, le <em>SaaS</em> pour passer à la pratique
+        quotidienne, la <em>marque blanche</em> quand l'identité de votre cabinet compte,
+        la <em>souveraineté</em> quand vos données doivent rester chez vous. La plupart
+        des coachs commencent au palier&nbsp;01 et n'en bougent jamais. Les trois autres
+        existent pour ceux qui en ont besoin, pas pour faire monter la facture.
+      </p>
+      <p class="sec-offre__body sec-offre__body--accent">
+        Chaque palier dit ce qui existe aujourd'hui et ce qui est prévu. Les deux
+        paliers «&nbsp;prévus&nbsp;» sont écrits comme tels, en toutes lettres — pas
+        dans un astérisque, pas dans une pastille de couleur. La transparence sur ce
+        qui n'est pas encore là vaut plus qu'un roadmap enjolivé.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 1. Preuve de concept · registre plan technique · papier quadrillé ─ -->
+  <section id="poc" class="site-section sec-poc" data-section="poc" aria-labelledby="poc-title">
+    <div class="sec-poc__grid" aria-hidden="true"></div>
+    <div class="site-section__inner">
+      <div class="sec-poc__meta">
+        <span class="sec-poc__index">PALIER 01</span>
+        <span class="sec-poc__state sec-poc__state--today">EXISTE AUJOURD'HUI</span>
+      </div>
+      <h2 class="sec-poc__h2" id="poc-title">Preuve de concept</h2>
+      <p class="sec-poc__lead">
+        Le coach qui n'a encore rien déplacé. Accès immédiat, espace partagé
+        isolé entre coachs — vous vérifiez que la méthode tient avant d'investir.
       </p>
 
-      <div class="paliers-grid">
+      <dl class="sec-poc__sheet">
+        <dt>Pour qui</dt>
+        <dd>Le coach qui hésite à quitter un outil qu'il maîtrise déjà. Vous voulez voir
+            l'OS fonctionner sur un cas réel, pas lire une description fonctionnelle.</dd>
 
-        <article id="palier-1" class="palier-card">
-          <p class="palier-card__index">Palier n°01</p>
-          <h2 class="palier-card__title">Preuve de concept</h2>
-          <p class="palier-card__state palier-card__state--today">Existe aujourd'hui</p>
-          <p class="palier-card__what">
-            Accès immédiat. Espace partagé isolé entre coachs.
-            Vous vérifiez que la méthode tient avant d'investir.
+        <dt>Ce qui existe aujourd'hui</dt>
+        <dd>L'infrastructure OMK tourne sur Supabase Cloud, projet OMK Services Intern,
+            en multi-tenant. L'isolation entre coachs est portée par une politique de
+            sécurité au niveau ligne&nbsp;: chaque requête lit, dans le jeton de session,
+            l'identifiant du tenant qui l'a émise.</dd>
+
+        <dt>La première semaine</dt>
+        <dd>
+          <ol class="sec-poc__steps">
+            <li>Création du compte, branchement explicite au seed local.</li>
+            <li>Import d'un dossier de notes existant (texte ou CSV).</li>
+            <li>Première session annotée avec un agent IA — l'audit log enregistre
+                entrée, sortie, refus éventuel.</li>
+            <li>Lecture du diagnostic chiffré que le bureau produit.</li>
+            <li>Décision&nbsp;: ça tient pour votre pratique, ou ça ne tient pas.</li>
+          </ol>
+        </dd>
+
+        <dt>Ce qu'il faut y mettre</dt>
+        <dd>Deux à trois heures par semaine, un dossier de notes réelles, et
+            l'honnêteté de signaler ce qui ne marche pas. Pas de présence quotidienne
+            exigée — la preuve de concept ne ressemble pas à un abonnement.</dd>
+
+        <dt>Comment on en sort</dt>
+        <dd>Export CSV et JSON de l'intégralité de l'espace, à tout moment, sans préavis.
+            Les deux formats sont décrits dans la section <a href="/site/engagements.html#refus-01">«&nbsp;Pas de SaaS qui vous enferme&nbsp;»</a>.
+            Vous repartez avec vos données, sans nous demander la permission.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── 2. SaaS · éditorial dense · papier chaud, deux colonnes, filets ─── -->
+  <section id="saas" class="site-section sec-saas" data-section="saas" aria-labelledby="saas-title">
+    <div class="site-section__inner">
+      <div class="sec-saas__meta">
+        <span class="sec-saas__index">PALIER 02</span>
+        <span class="sec-saas__state sec-saas__state--today">EXISTE AUJOURD'HUI</span>
+      </div>
+      <h2 class="sec-saas__h2" id="saas-title">SaaS</h2>
+      <p class="sec-saas__lead">
+        Votre espace, vos utilisateurs, votre paramétrage. Vous passez de l'évaluation
+        à la pratique quotidienne — l'OS devient l'endroit où vos sessions vivent,
+        pas celui où vous venez tester.
+      </p>
+
+      <div class="sec-saas__cols">
+        <div class="sec-saas__col">
+          <h3 class="sec-saas__h3">Ce qui change par rapport à la preuve de concept</h3>
+          <p>
+            Le seed local s'efface. Vos données vivent désormais dans votre base
+            Supabase, projet OMK Services Customers, isolée par politique de
+            sécurité&nbsp;: chaque ligne porte l'identifiant de votre organisation, le
+            jeton de session le porte aussi, la base refuse de renvoyer une ligne qui
+            ne correspond pas. L'isolation n'est pas une promesse commerciale — c'est
+            une mécanique testée par des cas adversariaux (cf. ADR-OMK-004).
           </p>
-          <p class="palier-card__where">Infrastructure OMK · Supabase CUSTOMERS</p>
-        </article>
-
-        <article id="palier-2" class="palier-card">
-          <p class="palier-card__index">Palier n°02</p>
-          <h2 class="palier-card__title">SaaS</h2>
-          <p class="palier-card__state palier-card__state--today">Existe aujourd'hui</p>
-          <p class="palier-card__what">
-            Votre espace, vos utilisateurs, votre paramétrage.
-            Vous passez de l'évaluation à la pratique quotidienne.
+          <p>
+            Les agents IA que vous avez testés en preuve de concept restent
+            disponibles, mais leur exécution passe par une passerelle qui trace
+            chaque appel. L'audit log devient exportable au format CSV — vous pouvez
+            le transmettre à votre DPO ou à votre avocat sans rien demander.
           </p>
-          <p class="palier-card__where">Infrastructure OMK · isolation par politique de sécurité</p>
-        </article>
+        </div>
 
-        <article id="palier-3" class="palier-card">
-          <p class="palier-card__index">Palier n°03</p>
-          <h2 class="palier-card__title">Marque blanche</h2>
-          <p class="palier-card__state palier-card__state--planned">Prévu</p>
-          <p class="palier-card__what">
-            Le produit à vos couleurs et votre domaine. Vos clients
-            voient votre marque, pas la nôtre.
-          </p>
-          <p class="palier-card__where">Votre propre base · dédiée</p>
-        </article>
+        <div class="sec-saas__col">
+          <h3 class="sec-saas__h3">Le tableau de faits</h3>
+          <table class="sec-saas__facts">
+            <tbody>
+              <tr><th scope="row">Ce qui est isolé</th><td>Vos lignes, par politique de sécurité (RLS). Personne d'autre ne lit ce que vous avez écrit.</td></tr>
+              <tr><th scope="row">Où vivent les données</th><td>Supabase Cloud, région US, projet dédié à Coach OS.</td></tr>
+              <tr><th scope="row">Qui a les clés</th><td>Vous, par export. Nous, par obligation opérationnelle — jamais en lecture client.</td></tr>
+              <tr><th scope="row">Si vous arrêtez</th><td>Export complet CSV + JSON en une commande, vos données vous quittent, le bail est résilié.</td></tr>
+              <tr><th scope="row">Ce qui n'est pas exportable</th><td>Les embeddings vectoriels (reconstituables depuis les textes exportés), les comptes utilisateurs (à recréer chez vous).</td></tr>
+              <tr><th scope="row">Modèle d'IA</th><td>OpenRouter, BYOK possible en palier entreprise, LiteLLM en façade pour la traçabilité.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <article id="palier-4" class="palier-card">
-          <p class="palier-card__index">Palier n°04</p>
-          <h2 class="palier-card__title">Souveraineté</h2>
-          <p class="palier-card__state palier-card__state--planned">Prévu</p>
-          <p class="palier-card__what">
-            Le produit tourne chez vous. Vos données, vos sauvegardes,
-            vos règles d'audit, votre juridiction.
-          </p>
-          <p class="palier-card__where">Votre infrastructure · vos clés · votre juridiction</p>
-        </article>
+  <!-- ── 3. Marque blanche · nuancier · pastilles sans violet/magenta ────── -->
+  <section id="marque-blanche" class="site-section sec-mb" data-section="marque-blanche" aria-labelledby="mb-title">
+    <div class="site-section__inner">
+      <div class="sec-mb__meta">
+        <span class="sec-mb__index">PALIER 03</span>
+        <span class="sec-mb__state sec-mb__state--planned">PRÉVU — pas encore ouvert à la commercialisation</span>
+      </div>
+      <h2 class="sec-mb__h2" id="mb-title">Marque blanche</h2>
+      <p class="sec-mb__lead">
+        Le produit à vos couleurs et votre domaine. Vos clients voient votre marque,
+        pas la nôtre. C'est le sujet — et c'est aussi le seul endroit du site où la
+        couleur a le droit d'être le sujet.
+      </p>
 
+      <div class="sec-mb__swatches" role="list" aria-label="Six teintes de référence pour habillages marque blanche">
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#2f3e46;"><figcaption><span>Ardoise</span><code>#2F3E46</code></figcaption></figure>
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#2d5016;"><figcaption><span>Sapin</span><code>#2D5016</code></figcaption></figure>
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#6b2737;"><figcaption><span>Bordeaux</span><code>#6B2737</code></figcaption></figure>
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#c9b48a;"><figcaption><span>Sable</span><code>#C9B48A</code></figcaption></figure>
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#b35a3a;"><figcaption><span>Terracotta</span><code>#B35A3A</code></figcaption></figure>
+        <figure class="sec-mb__sw" role="listitem" style="--sw:#1f1f1f;"><figcaption><span>Fusain</span><code>#1F1F1F</code></figcaption></figure>
       </div>
 
-      <p class="paliers-footnote">
-        « On ne s'enferme pas ici. » La promesse n'est pas la gratuité — c'est le chemin de sortie.
+      <div class="sec-mb__cols">
+        <div class="sec-mb__col">
+          <h3 class="sec-mb__h3">Ce qui reste visible de Coach OS</h3>
+          <p>
+            C'est la question qui revient et qu'il faut poser crument. Trois choses
+            restent visibles, par construction et par choix&nbsp;:
+          </p>
+          <ul class="sec-mb__list">
+            <li>Le pied de page porte une mention «&nbsp;Coach OS&nbsp;» petite, en mono, gris&nbsp;— c'est notre signature, vous ne l'effacez pas.</li>
+            <li>La télémétrie d'erreur reste routée chez nous. Sans elle, on ne sait pas corriger.</li>
+            <li>Les mises à jour du produit passent par notre dépôt&nbsp;: vous recevez les correctifs le même jour que nous, vous ne choisissez pas la version.</li>
+          </ul>
+        </div>
+
+        <div class="sec-mb__col">
+          <h3 class="sec-mb__h3">Ce qui devient le vôtre</h3>
+          <p>
+            Le domaine (votre cabinet pointe sur votre instance), le logo, la palette
+            (les six teintes ci-dessus ne sont qu'un départ — vous choisissez), les
+            emails transactionnels, la page de connexion, les conditions générales,
+            la politique de confidentialité, et — surtout — la base de données&nbsp;:
+            un projet Supabase dédié par client, hébergé en US ou en EU selon votre
+            choix au moment du contrat.
+          </p>
+          <p class="sec-mb__when">
+            Calendrier indicatif&nbsp;: ouverture de la commercialisation au
+            quatrième trimestre 2026, sur dossier. Nous prenons trois clients
+            pilotes avant d'ouvrir en libre service.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. Souveraineté · contractuel · encre sur noir, serif, calme ────── -->
+  <section id="souverainete" class="site-section sec-souv" data-section="souverainete" aria-labelledby="souv-title">
+    <div class="site-section__inner">
+      <div class="sec-souv__meta">
+        <span class="sec-souv__index">PALIER 04</span>
+        <span class="sec-souv__state sec-souv__state--planned">PRÉVU — pas encore ouvert à la commercialisation</span>
+      </div>
+      <h2 class="sec-souv__h2" id="souv-title">Souveraineté</h2>
+      <p class="sec-souv__lead">
+        Le produit tourne chez vous. Vos données, vos sauvegardes, vos règles d'audit,
+        votre juridiction. Le palier le plus lourd est aussi le plus calme — c'est ce
+        qui le rend croyable.
       </p>
+
+      <article class="sec-souv__contract">
+        <p>
+          À ce palier, Coach OS n'est plus un service&nbsp;: c'est un logiciel livré
+          sous forme d'image Docker, exécuté sur votre infrastructure ou sur un cloud
+          souverain de votre choix. L'image est reproductible, le code est auditable,
+          les dépendances sont énumérées dans un SBOM signé.
+        </p>
+        <p>
+          Aucune communication sortante ne quitte votre réseau sans que vous l'ayez
+          autorisée. Les appels d'IA — si vous en voulez — pointent vers un modèle
+          que vous choisissez, sur du matériel que vous contrôlez, dans une juridiction
+          que vous choisissez. La chaîne se termine à la prise électrique de votre salle
+          machine.
+        </p>
+        <p>
+          L'app <a href="https://omk-desktop-web-os.vercel.app/legal">Legal</a> décrit la même
+          échelle, du niveau modèle (IndyDevDan) au niveau produit&nbsp;: c'est ce dernier
+          qui s'applique ici. Niveau&nbsp;3 du modèle (passerelle LiteLLM auto-hébergée),
+          palier&nbsp;3 du produit (souveraineté complète).
+        </p>
+        <!-- Un « prix indicatif : 25 000 à 80 000 USD » se trouvait ici. Retire le
+             11 aout : il contredisait mot pour mot le refus n°04 de la page
+             Engagements — « le prix sort de l'audit, pas du site. Aucune grille
+             publique. » Le paragraphe se refutait meme lui-meme, puisqu'il finissait
+             par « ils ne descendent jamais en vitrine » en etant dans la vitrine.
+             Aucun seuil ne pouvait l'attraper : une contradiction entre deux pages
+             ne se mesure pas, elle se lit. -->
+        <p class="sec-souv__price">
+          Le prix de ce palier dépend de votre infrastructure, de votre juridiction et
+          de votre volume réel. Il sort de l'audit, jamais du site — comme pour les
+          trois autres. C'est moins vendeur, et c'est la seule façon de ne pas annoncer
+          un chiffre qu'on n'a pas vérifié.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── 5. Sortie · bande orange pleine largeur, une phrase, un bouton ──── -->
+  <section id="sortie" class="site-section sec-sortie" data-section="sortie" aria-labelledby="sortie-title">
+    <div class="site-section__inner sec-sortie__inner">
+      <blockquote class="sec-sortie__quote" id="sortie-title">
+        «&nbsp;On ne s'enferme pas ici. La promesse n'est pas la gratuité —
+        c'est le chemin de sortie.&nbsp;»
+      </blockquote>
+      <p class="sec-sortie__action">
+        <a class="site-btn sec-sortie__btn" href="/site/demo.html">
+          Réserver l'audit de 30 minutes
+          <span class="site-btn__arrow" aria-hidden="true">→</span>
+        </a>
+      </p>
+      <p class="sec-sortie__alt">
+        Ou <a href="https://omk-desktop-web-os.vercel.app">entrer en démo</a> sans compte,
+        sans rendez-vous.
+      </p>
+      <dl class="sec-sortie__notes">
+        <dt>Ce qu'on fait pendant l'audit</dt>
+        <dd>
+          Trente minutes, votre dossier de notes réelles sous les yeux, le bureau ouvert
+          devant vous. Pas de slideware. Vous repartez avec un diagnostic chiffré
+          (PDF) et la liste de ce qui tient, de ce qui demande un ajustement, et de ce
+          qui ne tient pas du tout. Aucune relance.
+        </dd>
+        <dt>Ce qu'il faut apporter</dt>
+        <dd>
+          Cinq à trente sessions au format texte brut ou CSV, un calendrier libre de
+          trente minutes, et l'honnêteté de dire ce qui ne marche pas dans votre
+          pratique actuelle. Si vous n'avez rien sous la main, on part sur le seed
+          public — c'est noté sur la fiche d'audit.
+        </dd>
+        <dt>Si vous repartez sans signer</dt>
+        <dd>
+          Le diagnostic vous accompagne, le chiffrage éventuel aussi. Aucun suivi
+          commercial, aucune relance programmée, aucun email à signer. C'est la
+          différence entre un audit et une démo commerciale — l'audit n'a rien à
+          vendre à la fin, et c'est précisément ce qui le rend utile.
+        </dd>
+      </dl>
     </div>
   </section>
 
 </main>
 
-<footer class="site-footer" role="contentinfo" style="background: rgba(255,255,255,0.06); border-top: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.85);">
+<footer class="site-footer" role="contentinfo">
   <div class="site-footer__inner">
     <span>Coach OS — pour coach qui facture 500 à 2000 $/h</span>
     <nav class="site-footer__nav" aria-label="Liens du pied de page">

@@ -61,22 +61,30 @@
       <a href="/site/engagements.html">Engagements</a>
       <a href="/site/demo.html">Démo</a>
     </nav>
+    <div class="site-top__cta">
+      <a class="site-btn" style="background:#0a0a0a;color:#fff" href="/site/demo.html">
+        Entrer en démo
+        <span class="site-btn__arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </header>
 
 <nav class="site-subnav" aria-label="Sections de la page">
   <div class="site-subnav__inner">
-    <a href="#hero">Hero</a>
-    <a href="#pain">Pain</a>
-    <a href="#cta">Entrer</a>
+    <span class="site-subnav__title">Accueil</span>
+    <a href="#hero" data-section-link="hero">Hero</a>
+    <a href="#pain" data-section-link="pain">Pain</a>
+    <a href="#methode" data-section-link="methode">Méthode</a>
+    <a href="#donnees" data-section-link="donnees">Données</a>
+    <a href="#cta" data-section-link="cta">Entrer</a>
   </div>
 </nav>
 
 <main>
 
   <!-- ── Hero · Exaggerated Minimalism · DecryptReveal ─────────────────── -->
-  <section id="hero" class="site-section sec-hero" aria-labelledby="hero-title">
-    <div class="fx-canvas fx-decrypt" data-fx="decrypt" aria-hidden="true"></div>
+  <section id="hero" data-section="hero" class="site-section sec-hero" aria-labelledby="hero-title">
     <div class="site-section__inner">
       <p class="site-eyebrow site-eyebrow--accent">Coach OS — pour coach qui facture 500 à 2000 $/h</p>
       <h1 class="site-h1" id="hero-title">
@@ -91,8 +99,7 @@
   </section>
 
   <!-- ── Pain · Brutalism · Liquid ─────────────────────────────────────── -->
-  <section id="pain" class="site-section sec-pain" aria-labelledby="pain-title">
-    <div class="fx-canvas fx-liquid" data-fx="liquid" aria-hidden="true"></div>
+  <section id="pain" data-section="pain" class="site-section sec-pain" aria-labelledby="pain-title">
     <div class="site-section__inner">
       <p class="site-eyebrow">Le problème</p>
       <h2 class="site-h2" id="pain-title">Trois fuites qui vident une pratique sans qu'on les voie</h2>
@@ -139,11 +146,44 @@
     </div>
   </section>
 
-  <!-- ── CTA · Bento Box Grid · ParticleReveal ─────────────────────────── -->
-  <section id="cta" class="site-section sec-cta" aria-labelledby="cta-title">
-    <div class="fx-canvas fx-particle" data-fx="particle" aria-hidden="true"></div>
+  <section id="methode" data-section="methode" class="site-section sec-methode-home" aria-labelledby="methode-title">
     <div class="site-section__inner">
-      <p class="site-eyebrow">L'appel à l'action</p>
+      <p class="site-eyebrow">Le bureau, en quatre gestes</p>
+      <h2 class="site-h2" id="methode-title">Votre méthode reste le centre de gravité</h2>
+      <div class="home-bento" role="list">
+        <article class="home-bento__cell home-bento__cell--method" role="listitem">
+          <span class="home-bento__label">01 · Méthode</span>
+          <h3>Vos repères deviennent une séquence que vous pouvez transmettre.</h3>
+          <a href="/site/methode.html">Voir la méthode <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="home-bento__cell" role="listitem">
+          <span class="home-bento__label">02 · Notes</span>
+          <p>La note de session reste attachée au bon client, au bon moment, au bon contexte.</p>
+        </article>
+        <article class="home-bento__cell" role="listitem">
+          <span class="home-bento__label">03 · Clients</span>
+          <p>Chaque dossier garde son fil, sans vous forcer à changer votre façon de conduire l'accompagnement.</p>
+        </article>
+        <article class="home-bento__cell" role="listitem">
+          <span class="home-bento__label">04 · Automatisations</span>
+          <p>Les gestes répétitifs partent en arrière-plan ; votre jugement reste devant.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="donnees" data-section="donnees" class="site-section sec-donnees-home" aria-labelledby="donnees-title">
+    <div class="site-section__inner">
+      <div class="home-glass-card">
+        <p class="site-eyebrow">La souveraineté</p>
+        <h2 class="site-h2" id="donnees-title">Vos données ont une sortie, dès le premier jour</h2>
+        <p class="site-prose">Vos notes et vos dossiers vivent dans un espace que vous pouvez comprendre, reprendre et quitter. Le bureau vous aide à travailler ; il ne vous enferme pas.</p>
+        <a class="home-glass-card__link" href="/site/engagements.html">Lire nos engagements <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+  <section id="cta" data-section="cta" class="site-section sec-cta" aria-labelledby="cta-title">
+    <div class="site-section__inner">
       <h2 class="site-h2" id="cta-title">Deux entrées</h2>
       <p class="site-prose">
         Le chemin le plus court vers la conviction n'est pas l'inscription. C'est de voir l'intérieur.
