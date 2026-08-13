@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Network, Workflow, Gauge, GitBranch, Siren, Plus, CheckCircle2, ShieldAlert, GitMerge } from 'lucide-react';
+import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Workflow, Gauge, GitBranch, Siren, Plus, CheckCircle2, ShieldAlert, GitMerge, Share2 } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -825,7 +825,7 @@ export function OperationsApp() {
     {
       id: 'context-layer',
       label: 'Context Layer',
-      icon: Network,
+      icon: Share2,
       render: () => (
         <OntologySection
           accent={ACCENT}

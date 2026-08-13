@@ -29,28 +29,27 @@ import {
   GitBranch,
   FileCheck,
   History,
-  ArrowLeft,
   AlertTriangle,
   CheckCircle2,
   RotateCcw,
-  User,
   Filter,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { ThemedSectionHead } from '../_ui/ontology/ThemedSectionHead';
+import { EntityCard } from '../_ui/ontology/EntityCard';
+import { EntityDetail } from '../_ui/ontology/EntityDetail';
+import { ContractDetail } from '../_ui/ontology/ContractDetail';
 import { StatCard, Card, Badge } from '../_ui/kit';
 import {
   getEntity,
   listEntities,
   relationsOf,
   contractOf,
-  listAttributesOf,
   type EntityId,
   type EntityDef,
-  type EntityAttribute,
   type Relation,
 } from '../../lib/ontology';
-import { useOntologyScope, useOntologyScopeStore, type ScopeFilter as UIScopeFilter } from '../../lib/ontology/scope-store';
+import { useOntologyScope, useOntologyScopeStore } from '../../lib/ontology/scope-store';
 
 /** Accent dedie au registre. Distinct des 17 accents deja deployes dans
  *  `app-discovery.ts` ; `#0f766e` est un teal plus fonce que le teal
@@ -208,66 +207,6 @@ export function validateRegistry(): ValidationIssue[] {
 
 /* ──────────────────────────── Entities ──────────────────────────── */
 
-/** Carte cliquable d'une entite — ouverte dans la grille. */
-function EntityCard({ entity, scope, accent, onOpen }: {
-  entity: EntityDef;
-  scope: UIScopeFilter;
-  accent: string;
-  onOpen: (id: EntityId) => void;
-}) {
-  // Marqueur visuel : badge 'personnel' si l'entite porte au moins un
-  // attribut scope 'personal' ET le filtre actif n'exclut pas ces
-  // attributs (mode 'all'). En mode 'org' on cache le badge : il
-  // annoncerait l'existence de contenu qu'on a decide de ne pas
-  // montrer. Cf. spec story 3 Design Notes §"Pourquoi masquer plutot
-  // que voiler".
-  const hasPersonal = entity.attributes.some((a) => a.scope === 'personal');
-  const showPersonalMarker = hasPersonal && scope === 'all';
-  // Compteur d'attributs visible : on suit le filtre actif pour rester
-  // coherent avec le detail. Sinon l'utilisateur voit "5 attr." sur la
-  // carte puis un tableau de 4 lignes en mode 'org', ce qui est
-  // trompeur.
-  const visibleAttrs = entity.attributes.filter((a) =>
-    scope === 'all' ? true : (a.scope ?? 'org') === scope,
-  );
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(entity.id)}
-      className="text-left bg-[var(--panel)] rounded-xl border border-[var(--panel-border)] shadow-sm hover:shadow-md transition-all p-4 flex flex-col gap-2 focus:outline-none focus:ring-2"
-      style={{ ['--tw-ring-color' as string]: accent } as React.CSSProperties}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white"
-          style={{ background: accent }}
-        >
-          <Database className="w-4 h-4" />
-        </div>
-        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--theme-text-muted)]">
-          {visibleAttrs.length} attr.
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="font-bold text-[var(--theme-text)] text-[14px] tracking-tight">
-          {entity.label}
-        </div>
-        {showPersonalMarker ? (
-          <Badge tone="warn">
-            <span className="inline-flex items-center gap-1">
-              <User className="w-3 h-3" />
-              personnel
-            </span>
-          </Badge>
-        ) : null}
-      </div>
-      <div className="text-[12px] text-[var(--theme-text-muted)] line-clamp-3">
-        {entity.description}
-      </div>
-    </button>
-  );
-}
-
 /**
  * Interrupteur 2 positions : « Organisation seule » / « Tout ».
  * Persiste via le store Zustand `scope-store`. Spec §Design notes :
@@ -310,105 +249,6 @@ function ScopeToggle(): React.ReactElement {
       >
         Tout
       </button>
-    </div>
-  );
-}
-
-/**
- * Detail inline : tableau d'attributs typés + bouton retour.
- * Spec §Design notes : choix justifie « masquer » plutot que « voiler »
- * — les attributs personnels disparaissent en mode 'org', reapparaissent
- * avec un badge en mode 'all'.
- */
-function EntityDetail({
-  entity,
-  scope,
-  onBack,
-}: {
-  entity: EntityDef;
-  scope: UIScopeFilter;
-  onBack: () => void;
-}) {
-  const attrs: readonly EntityAttribute[] = listAttributesOf(entity.id, { scope });
-
-  // En mode 'org', on peut tomber sur une entite qui n'a que des
-  // attributs personnels (cas degenere mais verrouille par les
-  // invariants : on garde l'entite visible pour servir de plan).
-  const empty = attrs.length === 0;
-
-  return (
-    <div className="flex flex-col gap-5">
-      <button
-        type="button"
-        onClick={onBack}
-        className="self-start inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Retour aux entites
-      </button>
-
-      <Card title={entity.label}>
-        <div className="px-5 pb-4 text-[13px] text-[var(--theme-text)] leading-relaxed">
-          {entity.description}
-        </div>
-      </Card>
-
-      <Card title="Attributs">
-        {empty ? (
-          <div className="px-5 pb-4 text-[12.5px] text-[var(--theme-text-dim)] italic">
-            Aucun attribut organisationnel pour cette entite. Basculez sur
-            « Tout » pour voir les notes personnelles.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full text-[12.5px]">
-            <thead>
-              <tr className="text-left text-[10.5px] uppercase tracking-wider text-[var(--theme-text-dim)]">
-                <th className="px-5 py-2 font-semibold">Nom</th>
-                <th className="px-5 py-2 font-semibold">Type</th>
-                <th className="px-5 py-2 font-semibold">Requis</th>
-                <th className="px-5 py-2 font-semibold">Cible</th>
-                <th className="px-5 py-2 font-semibold">Portee</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attrs.map((a) => (
-                <tr
-                  key={a.name}
-                  className="border-t border-[var(--panel-border-subtle)]"
-                >
-                  <td className="px-5 py-2 font-mono text-[var(--theme-text)]">{a.name}</td>
-                  <td className="px-5 py-2">
-                    <Badge tone={a.type === 'ref' ? 'accent' : 'neutral'}>{a.type}</Badge>
-                  </td>
-                  <td className="px-5 py-2">
-                    {a.required ? (
-                      <Badge tone="ok">requis</Badge>
-                    ) : (
-                      <Badge tone="neutral">optionnel</Badge>
-                    )}
-                  </td>
-                  <td className="px-5 py-2 font-mono text-[var(--theme-text-dim)]">
-                    {a.ref ?? '—'}
-                  </td>
-                  <td className="px-5 py-2">
-                    {a.scope === 'personal' ? (
-                      <Badge tone="warn">
-                        <span className="inline-flex items-center gap-1">
-                          <User className="w-3 h-3" />
-                          personnel
-                        </span>
-                      </Badge>
-                    ) : (
-                      <span className="text-[11px] text-[var(--theme-text-dim)]">org</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        )}
-      </Card>
     </div>
   );
 }
@@ -511,79 +351,6 @@ function RelationsList({ allRelations, entityIds }: {
 /* ──────────────────────────── Contracts ──────────────────────────── */
 
 /** Detail d'un contrat : 2 listes a puces (Triggers + Allowed actions). */
-function ContractDetail({ entityId, onBack }: { entityId: EntityId; onBack: () => void }) {
-  const entity = getEntity(entityId);
-  const contract = contractOf(entityId);
-
-  if (!entity || !contract) {
-    return (
-      <div className="flex flex-col gap-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="self-start inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Retour aux contrats
-        </button>
-        <div className="text-[13px] text-[var(--theme-text-dim)] italic">
-          Aucun contrat pour cette entite.
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-5">
-      <button
-        type="button"
-        onClick={onBack}
-        className="self-start inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--theme-text-dim)] hover:text-[var(--theme-text)] transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Retour aux contrats
-      </button>
-
-      <Card title={entity.label}>
-        <div className="px-5 pb-4 text-[13px] text-[var(--theme-text)] leading-relaxed">
-          {entity.description}
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card title="Declencheurs">
-          <ul className="px-5 pb-4 flex flex-col gap-1.5">
-            {contract.triggers.map((t) => (
-              <li
-                key={t}
-                className="text-[12.5px] font-mono text-[var(--theme-text)] flex items-center gap-2"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: ACCENT }}
-                />
-                {t}
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card title="Actions permises">
-          <ul className="px-5 pb-4 flex flex-col gap-1.5">
-            {contract.allowedActions.map((a) => (
-              <li
-                key={a}
-                className="text-[12.5px] font-mono text-[var(--theme-text)] flex items-center gap-2"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--theme-text-dim)] shrink-0" />
-                {a}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
 /* ──────────────────────────── Versions ──────────────────────────── */
 
 /** Section Versions : compteurs + verification des invariants + encart
@@ -769,6 +536,7 @@ export function OntologyApp() {
       {selectedContract ? (
         <ContractDetail
           entityId={selectedContract}
+          accent={ACCENT}
           onBack={() => setSelectedContract(null)}
         />
       ) : (
