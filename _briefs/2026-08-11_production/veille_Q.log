@@ -1,0 +1,145 @@
+[17:09:06] veille sur l'agent Q — releve toutes les 60 s
+[17:13:09] arbre stable sur 3 releves · journal = 0 o
+[17:13:09] ATTENTION : journal vide. Un exit 127 ressemble a un agent muet mais dit « commande introuvable ». A verifier.
+[17:13:44] tools/site-rail.mjs : VERT
+[17:14:33] tools/site-sections.mjs : VERT
+[17:16:37] tools/site-rondeur.mjs : VERT
+[17:16:37] tout est vert — tour de gauntlet sur les cinq pages
+════════ index · tour 1 · 17:16:38 ════════
+── capture de http://localhost:5173/site/index.html vers C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/index
+{
+ "captures": 18,
+ "largeurs": [
+  1440,
+  900,
+  390
+ ],
+ "erreurs_console": 0,
+ "requetes_en_echec": 0,
+ "dossier": "C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/index"
+}
+── trois critiques a contexte neuf
+   systeme : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/index/critique_systeme.json
+   brief : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/index/critique_brief.json
+   artisan : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/index/critique_artisan.json
+
+── verdicts du tour index
+   brief : "verdict": "amendable"
+   systeme : 
+   artisan : "verdict": "RECALE"
+
+Les trois doivent rendre PASSE DEUX TOURS D'AFFILEE pour arreter la boucle.
+Un tour vert isole est souvent un coup de des.
+
+════════ methode · tour 1 · 17:28:08 ════════
+── capture de http://localhost:5173/site/methode.html vers C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/methode
+{
+ "captures": 18,
+ "largeurs": [
+  1440,
+  900,
+  390
+ ],
+ "erreurs_console": 0,
+ "requetes_en_echec": 0,
+ "dossier": "C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/methode"
+}
+── trois critiques a contexte neuf
+   brief : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/methode/critique_brief.json
+   systeme : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/methode/critique_systeme.json
+   artisan : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/methode/critique_artisan.json
+
+── verdicts du tour methode
+   brief : "verdict": "RECALE"
+   systeme : 
+   artisan : "verdict": "recale"
+
+Les trois doivent rendre PASSE DEUX TOURS D'AFFILEE pour arreter la boucle.
+Un tour vert isole est souvent un coup de des.
+
+════════ paliers · tour 1 · 17:36:04 ════════
+── capture de http://localhost:5173/site/paliers.html vers C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/paliers
+{
+ "captures": 18,
+ "largeurs": [
+  1440,
+  900,
+  390
+ ],
+ "erreurs_console": 0,
+ "requetes_en_echec": 0,
+ "dossier": "C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/paliers"
+}
+── trois critiques a contexte neuf
+   brief : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/paliers/critique_brief.json
+   artisan : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/paliers/critique_artisan.json
+   systeme : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/paliers/critique_systeme.json
+
+── verdicts du tour paliers
+   brief : "verdict": "rejected"
+   systeme : 
+   artisan : 
+
+Les trois doivent rendre PASSE DEUX TOURS D'AFFILEE pour arreter la boucle.
+Un tour vert isole est souvent un coup de des.
+
+════════ engagements · tour 1 · 17:45:12 ════════
+── capture de http://localhost:5173/site/engagements.html vers C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/engagements
+{
+ "captures": 18,
+ "largeurs": [
+  1440,
+  900,
+  390
+ ],
+ "erreurs_console": 0,
+ "requetes_en_echec": 0,
+ "dossier": "C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/engagements"
+}
+── trois critiques a contexte neuf
+   brief : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/engagements/critique_brief.json
+   systeme : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/engagements/critique_systeme.json
+   artisan : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/engagements/critique_artisan.json
+
+── verdicts du tour engagements
+   brief : "verdict": "recalé"
+   systeme : 
+   artisan : 
+
+Les trois doivent rendre PASSE DEUX TOURS D'AFFILEE pour arreter la boucle.
+Un tour vert isole est souvent un coup de des.
+
+════════ demo · tour 1 · 17:55:23 ════════
+── capture de http://localhost:5173/site/demo.html vers C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/demo
+{
+ "captures": 18,
+ "largeurs": [
+  1440,
+  900,
+  390
+ ],
+ "erreurs_console": 0,
+ "requetes_en_echec": 0,
+ "dossier": "C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/demo"
+}
+── trois critiques a contexte neuf
+   brief : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/demo/critique_brief.json
+   systeme : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/demo/critique_systeme.json
+   artisan : rendu dans C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/demo/critique_artisan.json
+
+── verdicts du tour demo
+   brief : "verdict": "recale"
+   systeme : 
+   artisan : "verdict": "recale"
+
+Les trois doivent rendre PASSE DEUX TOURS D'AFFILEE pour arreter la boucle.
+Un tour vert isole est souvent un coup de des.
+
+════════ tour 1 termine · 18:04:12 ════════
+Verdicts : C:/Users/amado/AppData/Local/Temp/gauntlet/tour-1/*/critique_*.json
+
+Rappel : trois PASSE sur UN tour ne suffisent pas. Il en faut deux
+d'affilee — trois critiques a contexte neuf sur la meme page rendent
+des avis differents, et un vert isole est souvent un coup de des.
+[18:04:12] tour de gauntlet termine
+[18:04:13] VEILLE TERMINEE — rien de plus ne se lancera sans decision humaine.

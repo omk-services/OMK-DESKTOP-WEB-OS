@@ -1,0 +1,38 @@
+Tous les livrables sont en place. Récapitulatif final :
+
+**Livrables produits** (tous dans `_briefs/2026-08-11_production/` sauf le script)
+
+| Fichier | Taille | Rôle |
+|---|---:|---|
+| `tools/geordi-carte.py` | 15.6 KB | Script lecture-seule, plafond 30 000 fichiers, jonctions détectées et non suivies, frontmatter seul lu. Exit code 3 sur plafond atteint. |
+| `geordi_inventaire.json` | 290 KB | Inventaire brut — 30 000 fichiers parcourus, 18 sous-dossiers cartographiés, 17 993 `.md` avec frontmatter mesurés. |
+| `RAPPORT_V_CARTOGRAPHIE_GEORDI.md` | 31 KB | 7 sections : méthode, inventaire, 4 piliers, DIKW, entités vs 12 coach-os, blocages, 3 questions ouvertes. |
+| `journal_V.log` | 4.4 KB | Synthèse à l'attention des autres agents de la campagne. |
+
+**Mesure globale** : inventaire **partiel** (cap atteint). Couverture 14/14 sous-dossiers top-level, dont 9 bien couverts (`00_Index`, `01_Guides`, `02_Templates`, `03_Memory_Unified`, `07_`, `08_`, `09_Life_OS`, `Cerritos_Plane_Settings`, `graphify-out`) et 5 partiellement (`04_From_V2_Root` et `05_From_V2_Domains` surtout, à cause du cap).
+
+**Découvertes saillantes à acter**
+
+1. **96,5 % des `.md` mesurés n'ont pas `description:`** — critère bloquant d'indexation déclaré `RESOURCES_INDEX.md` ligne 32. La promesse de « porte d'entrée unique » de `INDEX_OF_INDEXES.md` est inopérante en l'état.
+2. **OKF v0.1 non appliqué** : 86 % des `.md` avec FM manquent `type:` (le seul champ **requis**).
+3. **Deux résidences pour Graphify** (`graphify-out/` top-level + `wiki/graphify-out/`), non tranchées dans `INDEX_OF_INDEXES.md`.
+4. **4 des 12 entités coach-os sont absentes** du modèle Geordi : `Organization`, `Membership`, `Client`, `Offering`. Le multi-coach amorcé côté coach-os n'a pas encore d'analogue côté KB.
+5. **22 707 `.md`** dans `04_From_V2_Root/` + `05_From_V2_Domains/` marqués hors-KB (PARA_MAP D-2026-08-01-#2) — non mesurés ici (cap), attendent l'étape 3 du Plan.
+
+Aucune lecture de secret, aucune modification de fichier dans Geordi, aucun déplacement. Les 3 questions ouvertes terminent le rapport.
+SessionEnd hook [python3 "$CLAUDE_PROJECT_DIR"/.bmad-loop/bmad_loop_hook.py SessionEnd] failed: Hook cancelled
+SessionEnd hook [bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/hook.sh] failed: Hook cancelled
+ichier, pas un dossier) — signale en §1.4 du rapport, a corriger dans un run ulterieur.
+- Aucune lecture de secret : 3 fichiers a surface-sensible mentionnes en §5.4 par chemin uniquement.
+
+**Decouvertes a acter par l'architecte**
+- OKF v0.1 n'est **pas applique** : 86 % des `.md` avec frontmatter n'ont pas le seul champ **requis** (`type:`). Si l'ontologie meta d'A'Space OS depend d'OKF, c'est un blocage en amont.
+- Le critere bloquant d'indexation (`description:` non vide) elimine 96,5 % des `.md` mesures — y compris `01_Guides/03_IT` (10 452 transcripts) et `09_Life_OS/LD01..08` (297). La promesse de `RESOURCES_INDEX.md` est inoperante tant que ce champ n'est pas rempli ou qu'une exception n'est pas documentee.
+- 22 707 `.md` canon dans `04_From_V2_Root/` + `05_From_V2_Domains/` (PARA_MAP) **hors-KB assume** (D-2026-08-01-#2). Le present rapport ne les a pas mesures (cap atteint) ; a rejouer soit en passes par sous-dossier (signature `--include`), soit en relevant le cap (a valider).
+- 4 des 12 entites coach-os (`Organization`, `Membership`, `Client`, `Offering`) sont **absentes** du modele Geordi. Pour la conception d'une ontologie meta A'Space OS, l'architecte tranchera lesquelles promouvoir — surtout `Organization` qui supporte le passage mono -> multi-coach deja commence cote coach-os.
+- Doublons structurels : `01_Guides/02_Ops` ET `02_Ops_Ops`, `03_IT` ET `03_IT_IT`, etc. Le routage canon est ambigu sur ces variantes.
+
+**Avis sur les trois questions ouvertes** (reponses rapides pour aider l'arbitrage)
+1. `description:` vide : option **(c)** creer un statut canonique « transcript brut » dans OKF v0.2 est la moins couteuse et respecte la nature du corpus (10 452 transcripts YouTube ne deviendront jamais indexables champ par champ).
+2. Deux residences Graphify : option **(a)** fusionner via une jonction (le Geordi tolere deja ca), avec `INDEX_OF_INDEXES.md` qui pointe vers la residence canon.
+3. Hors-KB `04/05_From_V2_*` : option **(c)** basculer en `04_Archives_Data` (et reconnaitre la trace historique comme canon a part), desengorgeant la racine KB.
