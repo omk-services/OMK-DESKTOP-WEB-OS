@@ -33,8 +33,30 @@ function isOAuthCallbackPath(): boolean {
   return window.location.pathname.toLowerCase().startsWith('/auth/callback');
 }
 
+/** Le site arrive-t-il en demandant explicitement la porte d'entree ?
+ *
+ *  `?auth=1` force l'affichage de la page de connexion, meme si un mode a ete
+ *  memorise. Sans ca, le bouton « Entrer en demo » du site ouvrait le bureau
+ *  directement des la deuxieme visite : l'etat `demo` reste en localStorage, et
+ *  `readBootState()` le rend tel quel.
+ *
+ *  Le bureau ne doit jamais s'afficher en dehors de la porte. Un visiteur qui
+ *  arrive depuis le site doit voir ce qu'il achete — la page d'entree — pas
+ *  l'interieur d'un espace de travail dont il ne sait pas a qui il appartient.
+ *
+ *  On efface aussi l'etat memorise : sinon un simple rechargement sans le
+ *  parametre reouvrirait le bureau, et la porte n'aurait servi qu'une fois. */
+function demandeLaPorte(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).has('auth');
+}
+
 function readBootState(): AuthBootState {
   if (typeof window === 'undefined') return { mode: 'pending', level: 'architect' };
+  if (demandeLaPorte()) {
+    try { window.localStorage.removeItem(AUTH_BOOT_KEY); } catch { /* navigation privee */ }
+    return { mode: 'pending', level: 'architect' };
+  }
   try {
     const brut = window.localStorage.getItem(AUTH_BOOT_KEY);
     if (!brut) return { mode: 'pending', level: 'architect' };
