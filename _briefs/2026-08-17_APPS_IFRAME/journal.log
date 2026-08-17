@@ -1,0 +1,13 @@
+Rapport livré dans `_briefs/2026-08-17_APPS_IFRAME/RAPPORT_ARCHITECTURE.md` (679 lignes, 32 KB).
+
+**Structure rédigée :**
+- §0 trou béant (`placeholder.invalid`) → recommandation **V1 = Easy uniquement avec URL réelle**
+- §1 Q1 → 3 tables (`apps`, `app_versions`, `app_installations`) sur CUSTOMERS, RLS via `est_membre_du_tenant` / `est_admin_du_tenant` déjà dispos
+- §2 Q2 → V1 = `private` + `tenant` ; `public` V2 avec validation `pending → published` ; interdiction d'interpoler `tenant_id` dans `manifest_url`
+- §3 Q3 → OAuth mesuré sur doc officielle (Notion 3 req/s, Airtable 5 req/s/base, ClickUp 100/min par token) ; tokens en `bytea` chiffrés, RLS `user_id = auth.uid()` strict
+- §4 Q4 → tableau de 18 cibles mesurées par `curl -I` ; recommandation liste blanche + probe `HEAD` à la publication
+- §5 Q5 → installations **épinglées** sur `pinned_version_id`, suppression = archive
+- §6 ordre de bataille V1 (1-2 sprints) → V2 → V3
+- §7 ce qui n'a pas pu être tranché (Curator, chiffrement, cout Storage, delta text/uuid INTERN/CUSTOMERS)
+
+Aucune ligne de `src/` ni de migration n'a été modifiée.

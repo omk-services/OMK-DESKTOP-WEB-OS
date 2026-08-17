@@ -1,0 +1,14 @@
+Brief terminé. Résumé :
+
+**Périmètre touché** (7 fichiers en écriture +1 nouveau test) :
+- `src/lib/tenant/contract.ts` — ajout du type brandé `OrgId` (uuid), helpers `isValidOrgId`/`toOrgId`, champ optionnel `orgId?` sur `MembershipRecord`. `TenantId` (slug) reste pour la partition locale.
+- `src/lib/auth/backend.supabase.ts` — réécrit : extraction de l'`org_id` depuis le claim JWT, erreur explicite `NoActiveMembershipError` si le claim est absent, toutes les requêtes utilisent `org_id` au lieu de `tenant_id`.
+- `src/lib/audit/logger.ts` et `src/lib/audit/queries.ts` — INSERT et SELECT basculés sur `org_id` via lecture du claim JWT. Aucun UPDATE/DELETE (vérifié).
+- `src/lib/audit/ingest.ts` — pas de modification : la valeur extraite du payload Observer reste locale, le claim JWT pilote la colonne DB.
+- `src/lib/auth/backend.supabase.test.ts` (nouveau) — 4 tests qui verrouillent : aucun `tenant_id` n'arrive à Supabase, OrgId et TenantId sont non-interchangeables (`@ts-expect-error` ×2), claim JWT absent → erreur explicite (3 sous-cas).
+
+**Décision clé** : source de l'`org_id` = claim JWT (vs requête `organizations`), pour3 raisons : source d'autorité serveur, pas de round-trip, cas d'absence rendu visible.
+
+**Vérifications** : `npx tsc --noEmit` = 0, `npx tsc -p api/tsconfig.json --noEmit` = 0, 22 tests verts sur le périmètre, 38 +25 tests verts sur les adjacents (`memberships.test.ts`, `storage-scope.*`).
+
+Rapport complet : `_briefs/2026-08-17_CANON_UUID/RAPPORT.md`.
