@@ -363,35 +363,26 @@ export const useCmsStore = create<CmsState>((set, get) => ({
     // import it here without a cycle. The function only runs at bootstrap or
     // on tenant switch, so the dynamic import cost is one-shot.
     const { seedCms } = await import('./seed');
-    seedCms();
-    // After seedCms registers everything under the *current* active tenant,
-    // copy each registered collection into the requested tenant's slice.
-    const seeded = useCmsStore.getState();
-    set((s) => {
-      const nextCollectionsByTenant: Record<TenantId, Record<string, CmsCollectionDefTenant>> = {
-        ...s.collectionsByTenant,
-      };
-      const nextItemsByTenant: Record<TenantId, Record<string, CmsItemTenant[]>> = {
-        ...s.itemsByTenant,
-      };
-      // Copy active tenant's collections + items into the target tenant.
-      const activeCollections = seeded.collectionsByTenant[seeded.activeTenantId] ?? {};
-      const activeItems = seeded.itemsByTenant[seeded.activeTenantId] ?? {};
-      const targetCollections: Record<string, CmsCollectionDefTenant> = {};
-      const targetItems: Record<string, CmsItemTenant[]> = {};
-      for (const [cid, cdef] of Object.entries(activeCollections)) {
-        targetCollections[cid] = stampCollection(cdef, tenantId);
-        targetItems[cid] = (activeItems[cid] ?? []).map((it) => stampTenant(it, tenantId));
-      }
-      nextCollectionsByTenant[tenantId] = { ...(nextCollectionsByTenant[tenantId] ?? {}), ...targetCollections };
-      nextItemsByTenant[tenantId] = { ...(nextItemsByTenant[tenantId] ?? {}), ...targetItems };
-      const isActive = s.activeTenantId === tenantId;
-      return {
-        collectionsByTenant: nextCollectionsByTenant,
-        itemsByTenant: nextItemsByTenant,
-        ...(isActive ? rebuildFlatView(nextCollectionsByTenant, nextItemsByTenant, tenantId) : {}),
-      };
-    });
+    // On amorce DIRECTEMENT l'espace demande.
+    //
+    // Avant : `seedCms()` sans argument, puis recopie de
+    // `collectionsByTenant[activeTenantId]` vers `tenantId`. Deux fautes se
+    // composaient. D'abord `seedCms()` rendait la main sans rien faire, son
+    // drapeau module etant deja pose au demarrage. Ensuite `setTenant` avait
+    // DEJA bascule `activeTenantId` sur le nouvel espace et lui avait pose une
+    // partition vide : la recopie lisait donc cette partition vide et copiait
+    // du vide dans du vide. Le nouvel espace n'avait aucune collection, et le
+    // premier formulaire repondait « Collection inconnue : "invoices" ».
+    seedCms(tenantId);
+
+    // `registerCollectionFor` a deja ecrit dans la partition de `tenantId` et
+    // republie la vue plate si cet espace est l'actif. Il ne reste qu'a
+    // republier au cas ou la bascule s'est faite pendant l'import dynamique.
+    set((s) =>
+      s.activeTenantId === tenantId
+        ? rebuildFlatView(s.collectionsByTenant, s.itemsByTenant, tenantId)
+        : s
+    );
   },
 
   purge: (tenantId) => {

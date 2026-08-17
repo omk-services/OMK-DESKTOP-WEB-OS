@@ -4,6 +4,7 @@
  *  live Supabase data once an org is authenticated. */
 import { useCmsStore } from './cms.store';
 import type { CmsCollectionDef, CmsItem } from './types';
+import type { TenantId } from '../tenant/contract';
 
 function def(partial: CmsCollectionDef): CmsCollectionDef {
   return partial;
@@ -465,33 +466,48 @@ const demoCoachMetricsItems: CmsItem[] = [
 
 /* ═══ Registration ═══ */
 
-let seeded = false;
-
-export function seedCms(): void {
-  if (seeded) return;
-  seeded = true;
-  useCmsStore.getState().registerCollection(clientsDef, clientsItems);
-  useCmsStore.getState().registerCollection(articlesDef, articlesItems);
-  useCmsStore.getState().registerCollection(teamDef, teamItems);
-  useCmsStore.getState().registerCollection(agentsDef, agentsItems);
-  useCmsStore.getState().registerCollection(runbooksDef, runbooksItems);
-  useCmsStore.getState().registerCollection(incidentsDef, incidentsItems);
-  useCmsStore.getState().registerCollection(servicesDef, servicesItems);
-  useCmsStore.getState().registerCollection(itExperimentsDef, itExperimentsItems);
-  useCmsStore.getState().registerCollection(deploysDef, deploysItems);
-  useCmsStore.getState().registerCollection(tasksDef, tasksItems);
-  useCmsStore.getState().registerCollection(marketplaceDef, marketplaceItems);
-  useCmsStore.getState().registerCollection(productItemsDef, productItemsItems);
-  useCmsStore.getState().registerCollection(releasesDef, releasesItems);
-  useCmsStore.getState().registerCollection(growthChannelsDef, growthChannelsItems);
-  useCmsStore.getState().registerCollection(growthExperimentsDef, growthExperimentsItems);
-  useCmsStore.getState().registerCollection(dealsDef, dealsItems);
-  useCmsStore.getState().registerCollection(invoicesDef, invoicesItems);
-  useCmsStore.getState().registerCollection(contractsDef, contractsItems);
-  useCmsStore.getState().registerCollection(policiesDef, policiesItems);
-  useCmsStore.getState().registerCollection(sessionNotesDef, sessionNotesItems);
+/** Amorce les 23 collections dans l'espace demandé.
+ *  Sans argument : l'espace actif, ce qui préserve les appelants existants.
+ *
+ *  AUCUN GARDE ICI, ET C'EST VOULU. La version d'origine portait un
+ *  `let seeded = false` au niveau module : `seedCms()` ne s'exécutait donc
+ *  qu'une fois par chargement de page, et la bascule vers un second espace
+ *  laissait sa partition vide — d'où « Collection inconnue : "invoices" »
+ *  au premier formulaire.
+ *
+ *  Le remplacer par un `Set` par espace ne suffisait pas : un garde qui vit
+ *  HORS du store ment dès que le store est réinitialisé ou réhydraté, et il
+ *  affirme alors « déjà amorcé » sur une partition vide. Le test de
+ *  non-régression `seed-bascule-tenant.test.ts` attrape exactement ce cas.
+ *
+ *  `registerCollectionFor` est déjà idempotent : il sort sans rien faire si
+ *  la collection existe dans la partition visée. Le store est donc la seule
+ *  source de vérité sur « ai-je déjà amorcé ». Le coût de 23 appels qui ne
+ *  font rien est négligeable devant une classe entière de bugs. */
+export function seedCms(tenantId?: TenantId): void {
+  const target = tenantId ?? useCmsStore.getState().activeTenantId;
+  useCmsStore.getState().registerCollectionFor(target, clientsDef, clientsItems);
+  useCmsStore.getState().registerCollectionFor(target, articlesDef, articlesItems);
+  useCmsStore.getState().registerCollectionFor(target, teamDef, teamItems);
+  useCmsStore.getState().registerCollectionFor(target, agentsDef, agentsItems);
+  useCmsStore.getState().registerCollectionFor(target, runbooksDef, runbooksItems);
+  useCmsStore.getState().registerCollectionFor(target, incidentsDef, incidentsItems);
+  useCmsStore.getState().registerCollectionFor(target, servicesDef, servicesItems);
+  useCmsStore.getState().registerCollectionFor(target, itExperimentsDef, itExperimentsItems);
+  useCmsStore.getState().registerCollectionFor(target, deploysDef, deploysItems);
+  useCmsStore.getState().registerCollectionFor(target, tasksDef, tasksItems);
+  useCmsStore.getState().registerCollectionFor(target, marketplaceDef, marketplaceItems);
+  useCmsStore.getState().registerCollectionFor(target, productItemsDef, productItemsItems);
+  useCmsStore.getState().registerCollectionFor(target, releasesDef, releasesItems);
+  useCmsStore.getState().registerCollectionFor(target, growthChannelsDef, growthChannelsItems);
+  useCmsStore.getState().registerCollectionFor(target, growthExperimentsDef, growthExperimentsItems);
+  useCmsStore.getState().registerCollectionFor(target, dealsDef, dealsItems);
+  useCmsStore.getState().registerCollectionFor(target, invoicesDef, invoicesItems);
+  useCmsStore.getState().registerCollectionFor(target, contractsDef, contractsItems);
+  useCmsStore.getState().registerCollectionFor(target, policiesDef, policiesItems);
+  useCmsStore.getState().registerCollectionFor(target, sessionNotesDef, sessionNotesItems);
   // demo-coach Onboarding Citadel (Q4-2026 GTM demo) — 4 mini-apps de vitrine
-  useCmsStore.getState().registerCollection(demoCoachAppsDef, demoCoachAppsItems);
-  useCmsStore.getState().registerCollection(demoCoachNotesDef, demoCoachNotesItems);
-  useCmsStore.getState().registerCollection(demoCoachMetricsDef, demoCoachMetricsItems);
+  useCmsStore.getState().registerCollectionFor(target, demoCoachAppsDef, demoCoachAppsItems);
+  useCmsStore.getState().registerCollectionFor(target, demoCoachNotesDef, demoCoachNotesItems);
+  useCmsStore.getState().registerCollectionFor(target, demoCoachMetricsDef, demoCoachMetricsItems);
 }
