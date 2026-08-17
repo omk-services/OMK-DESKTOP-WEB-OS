@@ -1,6 +1,6 @@
 /** App discovery — central registration of every Coach OS app.
  *  Registration order = desktop-icon order (OMK Business OS sidebar grouping). */
-import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Compass, Shield, Wand2, Network, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, UserCog, ClipboardList, Cpu, Contact, CheckSquare, Store, Boxes, Sprout, Handshake, Wallet, Scale, Settings, Compass, Shield, Wand2, Network, BrainCircuit, AppWindow, Hammer } from 'lucide-react';
 import { registerApp } from './app-registry';
 import { seedCms } from './cms/seed';
 
@@ -13,6 +13,8 @@ import { ItRdApp } from '../apps/it-rd/ItRdApp';
 import { ClientsApp } from '../apps/clients/ClientsApp';
 import { TasksApp } from '../apps/tasks/TasksApp';
 import { MarketplaceApp } from '../apps/marketplace/MarketplaceApp';
+import { AppStoreApp } from '../apps/app-store/AppStoreApp';
+import { SaaSBuilderApp } from '../apps/saas-builder/SaaSBuilderApp';
 import { ProductApp } from '../apps/product/ProductApp';
 import { GrowthApp } from '../apps/growth/GrowthApp';
 import { SalesApp } from '../apps/sales/SalesApp';
@@ -32,6 +34,13 @@ registerApp({ id: 'it-rd',       name: 'IT / R&D',             icon: Cpu,       
 registerApp({ id: 'clients',     name: 'Clients',              icon: Contact,         accent: '#2563eb', description: 'Accounts, onboarding and churn risk',            component: ClientsApp });
 registerApp({ id: 'tasks',       name: 'Tasks',                icon: CheckSquare,     accent: '#0d9488', description: 'What needs you today',                           component: TasksApp });
 registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,           accent: '#db2777', description: 'Sandboxed integrations',                         component: MarketplaceApp });
+// App Store — vitrine des mini-programmes 3D (Easy/Hard/Expert).
+// Inspire de la sidebar gauche de macro.com : meme forme, futur
+// Sandbox Gateway des 8 domaines G1-G8 sur le meme squelette.
+registerApp({ id: 'app-store',    name: 'App Store',             icon: AppWindow,       accent: '#7c3aed', description: '3D mini-programmes (Easy / Hard / Expert)',       component: AppStoreApp });
+// SaaS builder — inspire de Bench Studio. SPEC_SAAS_BUILDER_V1.md.
+// Produit des AppSpec JSON, les publie dans App Store via 'saas.appSpec.publish'.
+registerApp({ id: 'saas-builder', name: 'SaaS Builder',          icon: Hammer,          accent: '#7c3aed', description: 'Genere des AppSpec JSON (Bench Studio-inspired)', component: SaaSBuilderApp });
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
 registerApp({ id: 'sales',       name: 'Sales OS',             icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });

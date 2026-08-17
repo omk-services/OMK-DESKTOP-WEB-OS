@@ -1,6 +1,7 @@
 /** Desktop — wallpaper + desktop-icon launcher + window rendering + persistence (Coach OS) */
 import { useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
+import { Box } from 'lucide-react';
 import { useDemoShellStore, markCitadelSeen } from '../lib/demoShell';
 import { TopBar } from './TopBar';
 import { Wallpaper } from './Wallpaper';
@@ -13,6 +14,8 @@ import { ViewportGuard } from './ViewportGuard';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useShellStore } from '../stores/shell.store';
 import { getApp } from '../lib/app-registry';
+import { useThreeAppStore } from '../stores/threeApp.store';
+import { ThreeProgramApp } from '../apps/three-program/ThreeProgramApp';
 import { useWallpaper } from '../lib/wallpaper';
 import { AssistantOverlay } from '../agent/AssistantOverlay';
 import { TourOverlay, FirstRunInvitation } from '../onboarding';
@@ -114,8 +117,15 @@ export function Desktop(): import('react').ReactNode {
             {windows.map(win => {
               if (win.id === 'drawer' || !win.isOpen) return null;
               const app = getApp(win.id);
-              const Icon = app?.icon;
-              const Component = app?.component;
+              // Mini-programmes 3D : appId `three:<slug>`. Le registre
+              // statique ne les connait pas, on lit le store dynamique
+              // a la place.
+              const threeSlug = win.id.startsWith('three:')
+                ? useThreeAppStore.getState().apps[win.id.slice('three:'.length)]
+                : undefined;
+              const Icon = app?.icon ?? (threeSlug ? Box : undefined);
+              const Component = app?.component
+                ?? (threeSlug ? () => <ThreeProgramApp appId={win.id} /> : undefined);
               return (
                 <div key={win.id} className="pointer-events-auto">
                   <WindowFrame id={win.id} title={win.title} icon={Icon ? <Icon className="w-3.5 h-3.5" /> : undefined}>

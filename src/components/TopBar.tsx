@@ -23,6 +23,7 @@ import { ChangelogTabs } from './ChangelogTabs';
 import { CharacterMenu } from '../agent/CharacterMenu';
 import { ProfileWorkspaceSection } from './ProfileWorkspaceSection';
 import { NotificationsDropdown } from './NotificationsDropdown';
+import { useSession } from '../stores/session.store';
 // canvas-ui v30 — no upstream equivalent for the retired BorderBeam / ThinkingOrbs
 // (they were v1 CSS-only sister patterns). Replaced with a styled accent strip
 // on the ecosystem seal + a CSS pulse dot in the voice button.
@@ -33,6 +34,14 @@ export function TopBar(): import('react').ReactNode {
   const openApp = useShellStore((s) => s.openApp);
   const addToast = useShellStore((s) => s.addToast);
   const userHidden = useAppVisibility((s) => s.hidden);
+  const session = useSession((s) => s.session);
+  const sessionLoading = useSession((s) => s.loading);
+  const sessionUser = session?.user ?? null;
+  const displayName = sessionUser?.user_metadata?.display_name
+    || sessionUser?.user_metadata?.full_name
+    || (sessionUser?.email ? sessionUser.email.split('@')[0] : null);
+  const userEmail = sessionUser?.email ?? null;
+  const initials = (displayName || userEmail || '?').slice(0, 2).toUpperCase();
   const toggleAppVisibility = useAppVisibility((s) => s.toggle);
   const resetAppVisibility = useAppVisibility((s) => s.reset);
   const voice = useVoiceNavigation();
@@ -106,11 +115,22 @@ export function TopBar(): import('react').ReactNode {
             >
               <div className="flex items-center gap-3 px-2 py-2.5 mb-1 rounded-xl" style={{ background: 'var(--theme-surface-hover)' }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--theme-on-accent)] font-bold" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                  AK
+                  {initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[12px] font-semibold truncate" style={{ color: 'var(--theme-text)' }}>Amadou Kone</div>
-                  <div className="text-[10px] truncate" style={{ color: 'var(--theme-text-muted)' }}>amdkn777@gmail.com</div>
+                  {sessionLoading ? (
+                    <div className="text-[12px] truncate" style={{ color: 'var(--theme-text-muted)' }}>Chargement…</div>
+                  ) : userEmail ? (
+                    <>
+                      <div className="text-[12px] font-semibold truncate" style={{ color: 'var(--theme-text)' }}>{displayName ?? userEmail}</div>
+                      <div className="text-[10px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{userEmail}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[12px] font-semibold truncate" style={{ color: 'var(--theme-text)' }}>Non connecté</div>
+                      <div className="text-[10px] truncate" style={{ color: 'var(--theme-text-muted)' }}>—</div>
+                    </>
+                  )}
                 </div>
               </div>
               <button onClick={() => { openApp('settings', 'Settings'); }} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]" style={{ color: 'var(--theme-text)' }}>

@@ -8,6 +8,9 @@
  *  identifier `tenant` stays in code; "tenant" is infra jargon that
  *  does not belong on a UI surface).
  *
+ *  2026-08-15 — brief WORKSPACE_BRANCHES : ajout d'un bouton « Brancher »
+ *  qui crée une branche WorkSpace sur le tenant actif (rôle owner/admin).
+ *
  *  The Profile menu is fixed-width (260px). The workspace section fits
  *  inside it: section header, list of known tenants with a check on
  *  the active one, click to switch, and an inline "Enregistrer un
@@ -16,12 +19,25 @@
  *  Does not touch the partition layer: this is purely a relocation of
  *  the selector surface. The active tenant id, the registry of known
  *  tenants, and the CMS mirror all keep flowing through
- *  `useTenantStore` exactly as before. */
+ *  `useTenantStore` exactly as before.
+ *
+ *  2026-08-15 — brief MEMBERSHIPS : ajout d'un bouton « Inviter un
+ *  membre » qui ouvre la modale `InviteMember`. Le bouton est visible
+ *  **uniquement** si la session résolue a une membership 'owner' active
+ *  sur le tenant actif (cloison stricte). L'appel réel `inviterMembre()`
+ *  n'est pas branché : la modale remonte l'intention via un toast.
+ */
 import { useEffect, useRef, useState } from 'react';
-import { Building2, Check, Plus } from 'lucide-react';
+import { Building2, Check, GitBranch, Plus, UserPlus } from 'lucide-react';
 import { useTenantStore, TENANT_DEMO_COACH } from '../stores/tenant.store';
 import { useShellStore } from '../stores/shell.store';
-import type { TenantId } from '../lib/tenant/contract';
+import { useSession } from '../stores/session.store';
+import { useMembershipsStore, selectMembersFor } from '../stores/memberships.store';
+import { InviteMember } from './InviteMember';
+import type { TenantId, MembershipRole } from '../lib/tenant/contract';
+import { createBranch } from '../lib/workspace/branches';
+import { peutCreerBranche } from '../lib/workspace/permissions';
+import type { MembershipRole as WorkspaceMembershipRole } from '../lib/workspace/types';
 
 export function ProfileWorkspaceSection(): import('react').ReactNode {
   const activeTenantId = useTenantStore((s) => s.activeTenantId);
@@ -32,7 +48,22 @@ export function ProfileWorkspaceSection(): import('react').ReactNode {
   const addToast = useShellStore((s) => s.addToast);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
+  const [inviteOpen, setInviteOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Pour déterminer si l'utilisateur courant est owner du tenant
+  // actif, on lit la session pour l'actorId, puis on regarde la
+  // membership chargée dans le store. C'est la cloison qui parle :
+  // un owner dans tenant A n'est rien dans tenant B.
+  const session = useSession((s) => s.session);
+  const members = useMembershipsStore(selectMembersFor(activeTenantId));
+  const isOwner = (() => {
+    if (!session?.user) return false;
+    const userId = session.user.id;
+    return members.some(
+      (m) => m.userId === userId && m.status === 'active' && m.role === 'owner',
+    );
+  })();
 
   useEffect(() => {
     if (adding && inputRef.current) inputRef.current.focus();
@@ -68,6 +99,47 @@ export function ProfileWorkspaceSection(): import('react').ReactNode {
     });
     setNewName('');
     setAdding(false);
+  };
+
+  // Rôle effectif — défaut 'owner' tant que MEMBERSHIPS n'est pas branché.
+  // Le bouton « Brancher » est désactivé si le rôle ne permet pas la création.
+  const actorRole: WorkspaceMembershipRole = 'owner';
+  const canBranch = peutCreerBranche(actorRole);
+
+  const handleBrancher = async (): Promise<void> => {
+    const name = window.prompt(
+      'Nom de la branche WorkSpace (kebab-case, max 64 caractères) :',
+      `presentation-${new Date().toISOString().slice(0, 10)}`,
+    );
+    if (!name) return;
+    const trimmed = name.trim();
+    if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(trimmed)) {
+      addToast({
+        source: 'Brancher',
+        type: 'warning',
+        message: 'Nom invalide. kebab-case attendu (a-z, 0-9, tirets).',
+      });
+      return;
+    }
+    const r = await createBranch({
+      tenantId: activeTenantId,
+      name: trimmed,
+      actorId: 'local-user',
+      actorRole,
+    });
+    if (r.ok) {
+      addToast({
+        source: 'Brancher',
+        type: 'success',
+        message: `Branche « ${trimmed} » créée depuis ${activeTenantId}.`,
+      });
+    } else {
+      addToast({
+        source: 'Brancher',
+        type: 'warning',
+        message: `Création refusée : ${r.error}`,
+      });
+    }
   };
 
   return (
@@ -164,6 +236,54 @@ export function ProfileWorkspaceSection(): import('react').ReactNode {
           Enregistrer un espace
         </button>
       )}
+
+      {/* Bouton « Brancher » — 2026-08-15 brief WORKSPACE_BRANCHES.
+          Visible seulement pour les rôles qui peuvent créer une branche. */}
+      {canBranch && (
+        <button
+          type="button"
+          onClick={handleBrancher}
+          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
+          style={{ color: 'var(--theme-text-muted)' }}
+        >
+          <GitBranch className="w-3.5 h-3.5" />
+          Brancher
+        </button>
+      )}
+
+      {/* Bouton « Inviter un membre » — 2026-08-15 brief MEMBERSHIPS.
+          Visible **uniquement** pour les owners du tenant actif. La
+          détection lit la session + le store memberships (cf.
+          memberships.store.ts). La modale remonte l'intention via
+          un toast — l'appel API réel est branché ailleurs. */}
+      {isOwner && (
+        <button
+          type="button"
+          onClick={() => setInviteOpen(true)}
+          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11.5px] font-medium text-left transition-colors hover:bg-[var(--theme-surface-hover)]"
+          style={{ color: 'var(--theme-text-muted)' }}
+          data-testid="invite-member-button"
+        >
+          <UserPlus className="w-3.5 h-3.5" />
+          Inviter un membre
+        </button>
+      )}
+
+      {/* Modal d'invitation. Toujours rendue (cachée via open) pour
+          éviter des montées/unmounts qui font perdre le focus. */}
+      <InviteMember
+        open={inviteOpen}
+        tenantLabel={displayName || activeTenantId}
+        onClose={() => setInviteOpen(false)}
+        onSubmit={(input) => {
+          addToast({
+            source: 'Invitation',
+            type: 'info',
+            message: `Invitation ${input.role} envoyée à ${input.email} (en attente d'envoi réel).`,
+          });
+          setInviteOpen(false);
+        }}
+      />
     </div>
   );
 }
