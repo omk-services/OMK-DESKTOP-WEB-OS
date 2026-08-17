@@ -9,6 +9,9 @@
 
 import { z } from 'zod';
 import { readTypeName, unwrapAll, getObjectShape } from './zod-introspect';
+// Note : conversion de schéma uniquement — pas de ToolContext ici. La
+// résolution d'identité (../identity) est appliquée par mcp.ts avant
+// d'appeler tool.execute.
 
 export function zodToInputSchema(schema: z.ZodTypeAny): Record<string, unknown> {
   return convert(schema);

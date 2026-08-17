@@ -23,6 +23,8 @@ import type { z } from 'zod';
 import type { ToolCategory, ToolContext, ToolDefinition, ToolResult } from './types';
 
 export interface DefineToolOptions<TSchema extends z.ZodTypeAny, TOut> {
+  /** Interface MCP Apps, optionnelle. Voir adapters/mcp-apps.ts. */
+  ui?: import('./adapters/mcp-apps').ToolUi;
   name: string;
   description: string;
   category: ToolCategory;
@@ -65,6 +67,7 @@ export function defineTool<TSchema extends z.ZodTypeAny, TOut>(
     schema: opts.schema,
     displayName: opts.displayName,
     execute: opts.execute,
+    ui: opts.ui,
   };
 }
 

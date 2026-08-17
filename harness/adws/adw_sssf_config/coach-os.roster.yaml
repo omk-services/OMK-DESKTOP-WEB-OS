@@ -1,0 +1,28 @@
+# GENERE par coach-os — src/lib/tooling/adapters/harness.ts
+# Fragment a fusionner dans adws/adw_sssf_config/sssf.config.yaml
+
+defaults:
+  protected_files:
+    - adws/adw_modules/
+    - adws/adw_sssf_config/
+    - adws/adw_*.py
+    # Ajout coach-os : sans cette ligne, un agent reecrit la garde qui
+    # le bride. SSSF ne protege pas ce dossier par defaut.
+    - adws/adw_data/harness_engineering/
+
+agents:
+  - name: coach-os-operator
+    purpose: >-
+      Operer coach-os par ses outils publies. Toute ecriture depose une
+      proposition dans la file d'approbation ; la fusion reste humaine.
+    harness_engineering:
+      - adws/adw_data/harness_engineering/coach-os.ts
+    writes:
+      # Perimetre exclusif. Un agent qui ecrit hors de cette liste est un
+      # agent qui ecrase le travail d'un autre sans que ni l'un ni
+      # l'autre ne le voie.
+      - specs/
+
+# Variables attendues dans l'environnement du run — jamais dans ce
+# fichier, qui est versionne.
+#   COACH_OS_TENANT  COACH_OS_ACTOR  COACH_OS_ROLE

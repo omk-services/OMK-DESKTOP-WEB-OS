@@ -14,6 +14,9 @@ import { z } from 'zod';
 import { parseArgs } from '../defineTool';
 import { get, list } from '../registry';
 import { readTypeName, unwrapAll, getObjectShape } from './zod-introspect';
+import { resolveIdentity } from '../identity';
+import { assertPermission } from '../permissions';
+import { appendEvent } from '../../audit/logger';
 import type { ToolContext, ToolDefinition } from '../types';
 
 export const DEFAULT_TENANT = 'demo';
@@ -26,12 +29,27 @@ function json(status: number, body: unknown): Response {
   });
 }
 
-/** Extrait le tenant et l'acteur depuis les en-têtes. Côté Vercel, ce
- *  sera posé par l'auth ; pour la V1, on retombe sur les défauts. */
-function ctxFromHeaders(request: Request): ToolContext {
-  const tenantId = request.headers.get('x-coach-os-tenant') ?? DEFAULT_TENANT;
-  const actorId = request.headers.get('x-coach-os-actor') ?? DEFAULT_ACTOR;
-  return { tenantId, actorId };
+/** Extrait l'identité depuis les en-têtes. Le serveur REST n'invente
+ *  plus de défaut : sans `x-coach-os-tenant` / `x-coach-os-actor` /
+ *  `x-coach-os-role`, on REFUSE (étape 2, campagne 2026-08-14). */
+function ctxFromHeaders(request: Request): { ok: true; ctx: ToolContext; source: 'full' | 'demo' } | { ok: false; status: number; body: unknown } {
+  const identity = resolveIdentity({
+    tenantId: request.headers.get('x-coach-os-tenant') ?? undefined,
+    actorId: request.headers.get('x-coach-os-actor') ?? undefined,
+    role: request.headers.get('x-coach-os-role') ?? undefined,
+  });
+  if (!identity.ok) {
+    return {
+      ok: false,
+      status: 401,
+      body: {
+        ok: false,
+        error: `Identité refusée : ${identity.error}`,
+        missing: identity.missing,
+      },
+    };
+  }
+  return { ok: true, ctx: identity.ctx, source: identity.source };
 }
 
 /** Manifest OpenAPI-ish. Renvoie name, description, category et schema
@@ -120,9 +138,65 @@ export function toolHandler(toolName: string) {
     }
     const parsed = parseArgs(tool, raw);
     if (!parsed.ok) return json(400, { ok: false, error: parsed.error });
+    const id = ctxFromHeaders(request);
+    if (!id.ok) {
+      // Identité rejetée. 401 + envelope identique au reste, pour que
+      // les clients existants lisent ok:false sans surprise.
+      return json(id.status, id.body);
+    }
     try {
-      const ctx = ctxFromHeaders(request);
-      const result = await tool.execute(parsed.args, ctx);
+      const perm = await assertPermission(id.ctx, tool, parsed.args as Record<string, unknown>);
+      if (!perm.ok) {
+        // Audit log (NOUVEAU 2026-08-15). On trace les refus de
+        // permission aussi bien que les succès.
+        try {
+          void appendEvent({
+            tenantId: id.ctx.tenantId,
+            actorId: id.ctx.actorId,
+            actorRole: id.ctx.role,
+            action: 'observer.event',
+            targetType: 'tool',
+            targetId: toolName,
+            metadata: {
+              adapter: 'rest',
+              category: tool.category,
+              ok: false,
+              error: `permission_refused:${perm.code}`,
+            },
+            observerSource: 'external',
+            ipAddress: request.headers.get('x-forwarded-for') ?? null,
+            userAgent: request.headers.get('user-agent') ?? null,
+          });
+        } catch { /* no-throw */ }
+        return json(403, {
+          ok: false,
+          error: `Permission refusée : ${perm.error}`,
+          code: perm.code,
+        });
+      }
+      const result = await tool.execute(parsed.args, id.ctx);
+
+      // Audit log (NOUVEAU 2026-08-15). appendEvent ne lève JAMAIS.
+      try {
+        void appendEvent({
+          tenantId: id.ctx.tenantId,
+          actorId: id.ctx.actorId,
+          actorRole: id.ctx.role,
+          action: 'observer.event',
+          targetType: 'tool',
+          targetId: toolName,
+          metadata: {
+            adapter: 'rest',
+            category: tool.category,
+            ok: result.ok,
+            ...(result.ok ? {} : { error: result.error }),
+          },
+          observerSource: 'external',
+          ipAddress: request.headers.get('x-forwarded-for') ?? null,
+          userAgent: request.headers.get('user-agent') ?? null,
+        });
+      } catch { /* no-throw */ }
+
       // 200 dans tous les cas : le contrat est que l'enveloppe { ok, ..., error }
       // dicte la vérité, pas le code HTTP. Un 200 peut contenir ok:false si
       // l'outil a refusé (validation applicative). 500 = panne serveur.

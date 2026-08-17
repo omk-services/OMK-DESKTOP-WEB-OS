@@ -11,6 +11,10 @@
 import { list } from '../registry';
 import { readTypeName, getObjectShape } from './zod-introspect';
 import type { ToolDefinition } from '../types';
+// Note : skill ne touche pas à l'identité — c'est une génération de
+// fichiers statiques (SKILL.md), sans ToolContext. La résolution
+// d'identité vit dans ../identity et est consommée par les surfaces
+// qui exécutent (mcp, rest, cli, in-app).
 
 export interface SkillFile {
   /** Chemin relatif à la racine du plugin / dossier skills/. */
@@ -163,7 +167,7 @@ function describeExamples(tool: ToolDefinition): string {
     'scenario.approve': ['```bash', 'coach-os scenario.approve p_abc123', '```'],
     'scenario.reject': ['```bash', 'coach-os scenario.reject p_abc123 --reason "doublon"', '```'],
   };
-  return (samples[tool.name] ?? ['```bash', `coach-os ${tool.name} --help # pas d\'exemple canonique fourni`, '```']).join('\n');
+  return (samples[tool.name] ?? ['```bash', `coach-os ${tool.name} --help # pas d'exemple canonique fourni`, '```']).join('\n');
 }
 
 function describeErrors(tool: ToolDefinition): string {

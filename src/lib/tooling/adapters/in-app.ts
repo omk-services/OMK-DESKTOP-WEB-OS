@@ -23,6 +23,10 @@
 // forme deja attendue par src/agent/tools.ts, sans le modifier ».
 
 import type { ToolContext, ToolDefinition, ToolResult } from '../types';
+// Note : la résolution d'identité (resolveIdentity, ../identity) est
+// appliquée par chaque binding in-app quand le runtime navigateur
+// appelle l'outil. Le présent module n'invente pas de défaut : sans
+// binding enregistré, l'outil n'est pas exposé.
 
 /** Type miroir de `src/agent/scenarios.ts` Applicator. On ne dépend
  *  pas du module client (qui lit `import.meta.env`, indispo en

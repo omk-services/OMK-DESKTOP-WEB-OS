@@ -12,6 +12,8 @@
 import { z } from 'zod';
 import { defineTool } from '../defineTool';
 import { getProposal, listProposals } from '../serverStore';
+import { htmlApprobations } from '../ui/approbations';
+import type { ToolContext } from '../types';
 
 const zProposalId = z.string().min(1).describe('Identifiant de la proposition (préfixe p_).');
 
@@ -24,8 +26,18 @@ export const scenarioList = defineTool({
     limit: z.number().int().positive().max(200).optional().describe('Plafond (défaut 50).'),
   }),
   displayName: () => 'Lister les propositions',
-  execute: async (args) => {
-    const props = (await listProposals()).slice(0, args.limit ?? 50);
+  // MCP Apps : cet outil rend une INTERFACE, pas un bloc de texte. L'hote
+  // precharge la page et l'affiche dans la conversation ; les boutons
+  // rappellent scenario.approve / scenario.reject par le canal sécurisé.
+  // Aucune origine externe autorisee — voir ui/approbations.ts.
+  ui: {
+    id: 'approbations',
+    title: "File d'approbation",
+    html: htmlApprobations,
+    csp: { connectSrc: [], resourceSrc: [] },
+  },
+  execute: async (args, ctx: ToolContext) => {
+    const props = (await listProposals(ctx.tenantId)).slice(0, args.limit ?? 50);
     return {
       ok: true,
       data: {
@@ -33,6 +45,7 @@ export const scenarioList = defineTool({
         proposals: props.map((p) => ({
           id: p.id,
           scenarioId: p.scenarioId,
+          tenantId: p.tenantId,
           toolName: p.toolName,
           displayName: p.displayName,
           actorId: p.actorId,
@@ -53,8 +66,8 @@ export const scenarioRead = defineTool({
     proposalId: zProposalId,
   }),
   displayName: (args) => `Lire proposition ${args.proposalId}`,
-  execute: async (args) => {
-    const prop = await getProposal(args.proposalId);
+  execute: async (args, ctx: ToolContext) => {
+    const prop = await getProposal(ctx.tenantId, args.proposalId);
     if (!prop) return { ok: false, error: `Proposition introuvable : "${args.proposalId}".` };
     return { ok: true, data: prop };
   },
@@ -74,8 +87,8 @@ export const scenarioApprove = defineTool({
     rationale: z.string().optional().describe('Justification humaine (optionnelle).'),
   }),
   displayName: (args) => `Approuver ${args.proposalId}`,
-  execute: async (args) => {
-    const prop = await getProposal(args.proposalId);
+  execute: async (args, ctx: ToolContext) => {
+    const prop = await getProposal(ctx.tenantId, args.proposalId);
     if (!prop) return { ok: false, error: `Proposition introuvable : "${args.proposalId}".` };
     return {
       ok: true,
@@ -99,8 +112,8 @@ export const scenarioReject = defineTool({
     reason: z.string().optional().describe('Raison du rejet (optionnelle).'),
   }),
   displayName: (args) => `Rejeter ${args.proposalId}`,
-  execute: async (args) => {
-    const prop = await getProposal(args.proposalId);
+  execute: async (args, ctx: ToolContext) => {
+    const prop = await getProposal(ctx.tenantId, args.proposalId);
     if (!prop) return { ok: false, error: `Proposition introuvable : "${args.proposalId}".` };
     return {
       ok: true,

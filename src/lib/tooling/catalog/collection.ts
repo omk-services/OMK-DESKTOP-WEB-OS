@@ -23,13 +23,13 @@ export const collectionList = defineTool({
   category: 'lecture',
   schema: z.object({}),
   displayName: () => 'Lister les collections',
-  execute: async () => {
-    const cols = listCollections().map((c) => ({
+  execute: async (_args, ctx: ToolContext) => {
+    const cols = listCollections(ctx.tenantId).map((c) => ({
       id: c.id,
       name: c.name,
       singular: c.singular,
       titleField: c.titleField,
-      itemCount: listItems(c.id).length,
+      itemCount: listItems(ctx.tenantId, c.id).length,
     }));
     return { ok: true, data: { count: cols.length, collections: cols } };
   },
@@ -45,10 +45,10 @@ export const collectionRead = defineTool({
     limit: z.number().int().positive().max(500).optional().describe('Plafond du nombre d\'items rendus (défaut 100).'),
   }),
   displayName: (args) => `Lire ${args.collectionId}`,
-  execute: async (args) => {
-    const def = getCollection(args.collectionId);
+  execute: async (args, ctx: ToolContext) => {
+    const def = getCollection(ctx.tenantId, args.collectionId);
     if (!def) return { ok: false, error: `Collection inconnue : "${args.collectionId}".` };
-    const items = listItems(args.collectionId).slice(0, args.limit ?? 100);
+    const items = listItems(ctx.tenantId, args.collectionId).slice(0, args.limit ?? 100);
     return {
       ok: true,
       data: {
@@ -75,8 +75,8 @@ export const collectionSearch = defineTool({
     limit: z.number().int().positive().max(50).optional().describe('Plafond du nombre de hits (défaut 20).'),
   }),
   displayName: (args) => `Chercher "${args.query}"`,
-  execute: async (args) => {
-    const hits = searchItems(args.query, args.limit ?? 20);
+  execute: async (args, ctx: ToolContext) => {
+    const hits = searchItems(ctx.tenantId, args.query, args.limit ?? 20);
     return { ok: true, data: { query: args.query, count: hits.length, hits } };
   },
 });
@@ -90,15 +90,17 @@ export const collectionCreate = defineTool({
     collectionId: zCollectionId,
     fields: z.record(z.string(), z.unknown()).describe('Champs de l\'item. Doit inclure le titleField.'),
     rationale: z.string().optional().describe('Pourquoi cette création (affichée dans la file).'),
-    actorId: z.string().optional().describe('Identifiant de l\'agent qui propose (par défaut "agent:cli").'),
+    // Pas de args.actorId : c'est ctx.actorId, validé par la résolution
+    // d'identité, qui fait foi. Permettre à l'appelant de poser son
+    // propre actorId réintroduit W09 (forge de l'auteur affiché dans
+    // la file d'approbation).
   }),
   displayName: (args) => {
-    const def = getCollection(args.collectionId);
-    const title = String(args.fields[def?.titleField ?? 'title'] ?? '');
-    return def ? `Créer ${def.singular} : ${title}` : `Créer dans ${args.collectionId}`;
+    const title = String(args.fields['title'] ?? '');
+    return title ? `Créer : ${title}` : `Créer dans ${args.collectionId}`;
   },
   execute: async (args, ctx: ToolContext): Promise<{ ok: true; data: ProposalRef } | { ok: false; error: string }> => {
-    const def = getCollection(args.collectionId);
+    const def = getCollection(ctx.tenantId, args.collectionId);
     if (!def) return { ok: false, error: `Collection inconnue : "${args.collectionId}".` };
     const titleField = args.fields[def.titleField];
     if (titleField === undefined || titleField === null || titleField === '') {
@@ -108,13 +110,13 @@ export const collectionCreate = defineTool({
     const displayName = def
       ? `Créer ${def.singular} : ${String(titleField)}`
       : `Créer dans ${args.collectionId}`;
-    const record = await deposeProposal({
+    const record = await deposeProposal(ctx.tenantId, {
       scenarioId,
       toolName: 'collection.create',
       args: { collectionId: args.collectionId, fields: args.fields },
       displayName,
       rationale: args.rationale,
-      actorId: args.actorId ?? ctx.actorId,
+      actorId: ctx.actorId,
     });
     return { ok: true, data: { scenarioId: record.scenarioId, proposalId: record.id } };
   },
@@ -130,24 +132,24 @@ export const collectionUpdate = defineTool({
     id: z.string().min(1).describe('Identifiant de l\'item à modifier.'),
     patch: z.record(z.string(), z.unknown()).describe('Patch à appliquer.'),
     rationale: z.string().optional(),
-    actorId: z.string().optional(),
+    // Pas de args.actorId (cf. W09 — voir collection.create).
   }),
   displayName: (args) => `Modifier ${args.collectionId}#${args.id}`,
   execute: async (args, ctx: ToolContext) => {
-    const def = getCollection(args.collectionId);
+    const def = getCollection(ctx.tenantId, args.collectionId);
     if (!def) return { ok: false, error: `Collection inconnue : "${args.collectionId}".` };
-    const items = listItems(args.collectionId);
+    const items = listItems(ctx.tenantId, args.collectionId);
     const target = items.find((it) => String(it.id) === args.id);
     if (!target) return { ok: false, error: `Item introuvable : "${args.id}" dans "${args.collectionId}".` };
     const titleField = target[def.titleField];
     const scenarioId = `scn_${ctx.tenantId}_${Date.now().toString(36)}`;
-    const record = await deposeProposal({
+    const record = await deposeProposal(ctx.tenantId, {
       scenarioId,
       toolName: 'collection.update',
       args: { collectionId: args.collectionId, id: args.id, patch: args.patch },
       displayName: `Modifier ${def.singular} : ${String(titleField ?? args.id)}`,
       rationale: args.rationale,
-      actorId: args.actorId ?? ctx.actorId,
+      actorId: ctx.actorId,
     });
     return { ok: true, data: { scenarioId: record.scenarioId, proposalId: record.id } };
   },
@@ -162,24 +164,24 @@ export const collectionDelete = defineTool({
     collectionId: zCollectionId,
     id: z.string().min(1).describe('Identifiant de l\'item à supprimer.'),
     rationale: z.string().optional(),
-    actorId: z.string().optional(),
+    // Pas de args.actorId (cf. W09 — voir collection.create).
   }),
   displayName: (args) => `Supprimer ${args.collectionId}#${args.id}`,
   execute: async (args, ctx: ToolContext) => {
-    const def = getCollection(args.collectionId);
+    const def = getCollection(ctx.tenantId, args.collectionId);
     if (!def) return { ok: false, error: `Collection inconnue : "${args.collectionId}".` };
-    const items = listItems(args.collectionId);
+    const items = listItems(ctx.tenantId, args.collectionId);
     const target = items.find((it) => String(it.id) === args.id);
     if (!target) return { ok: false, error: `Item introuvable : "${args.id}" dans "${args.collectionId}".` };
     const titleField = target[def.titleField];
     const scenarioId = `scn_${ctx.tenantId}_${Date.now().toString(36)}`;
-    const record = await deposeProposal({
+    const record = await deposeProposal(ctx.tenantId, {
       scenarioId,
       toolName: 'collection.delete',
       args: { collectionId: args.collectionId, id: args.id },
       displayName: `Supprimer ${def.singular} : ${String(titleField ?? args.id)}`,
       rationale: args.rationale,
-      actorId: args.actorId ?? ctx.actorId,
+      actorId: ctx.actorId,
     });
     return { ok: true, data: { scenarioId: record.scenarioId, proposalId: record.id } };
   },

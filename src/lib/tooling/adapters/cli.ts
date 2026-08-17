@@ -10,10 +10,10 @@
 import { parseArgs, toolResultToShort } from '../defineTool';
 import { get, list } from '../registry';
 import { registerAll } from '../catalog/index.js';
+import { resolveIdentity } from '../identity';
+import { assertPermission } from '../permissions';
+import { appendEvent } from '../../audit/logger';
 import type { ToolContext, ToolDefinition } from '../types';
-
-const DEFAULT_TENANT = 'demo';
-const DEFAULT_ACTOR = 'agent:cli';
 
 export interface CliRunOptions {
   argv: string[];
@@ -25,6 +25,9 @@ export interface CliRunOptions {
   tenantId?: string;
   /** En-tête `x-coach-os-actor` posée par --actor. */
   actorId?: string;
+  /** Rôle de l'acteur (option CLI --role). La couche permissions
+   *  (étape 3) consomme cette valeur. */
+  role?: string;
 }
 
 export interface CliRunResult {
@@ -100,6 +103,11 @@ export function runCli(opts: CliRunOptions): Promise<CliRunResult> {
       i++;
       continue;
     }
+    if (tok === '--role') {
+      opts.role = argv[++i];
+      i++;
+      continue;
+    }
     if (tok.startsWith('--')) {
       const eq = tok.indexOf('=');
       const key = eq >= 0 ? tok.slice(2, eq) : tok.slice(2);
@@ -128,18 +136,59 @@ export function runCli(opts: CliRunOptions): Promise<CliRunResult> {
   if (!parsed.ok) {
     return Promise.resolve({ code: 1, stdout: '', stderr: parsed.error });
   }
-  const ctx: ToolContext = {
-    tenantId: opts.tenantId ?? DEFAULT_TENANT,
-    actorId: opts.actorId ?? DEFAULT_ACTOR,
-  };
-  return Promise.resolve(tool.execute(parsed.args, ctx)).then(
-    (result) => formatResult(result, opts.output ?? 'json'),
-    (err: unknown) => ({
+  const identity = resolveIdentity({
+    tenantId: opts.tenantId,
+    actorId: opts.actorId,
+    role: opts.role,
+  });
+  if (!identity.ok) {
+    return Promise.resolve({
       code: 1,
       stdout: '',
-      stderr: `Erreur interne : ${err instanceof Error ? err.message : String(err)}`,
-    }),
-  );
+      stderr: `Identité refusée : ${identity.error}`,
+    });
+  }
+  const ctx: ToolContext = identity.ctx;
+  return (async () => {
+    const perm = await assertPermission(ctx, tool, parsed.args as Record<string, unknown>);
+    if (!perm.ok) {
+      return {
+        code: 1 as const,
+        stdout: '',
+        stderr: `Permission refusée (${perm.code}) : ${perm.error}`,
+      };
+    }
+    try {
+      const result = await tool.execute(parsed.args, ctx);
+
+      // Audit log (NOUVEAU 2026-08-15). appendEvent ne lève JAMAIS.
+      try {
+        void appendEvent({
+          tenantId: ctx.tenantId,
+          actorId: ctx.actorId,
+          actorRole: ctx.role,
+          action: 'observer.event',
+          targetType: 'tool',
+          targetId: tool.name,
+          metadata: {
+            adapter: 'cli',
+            category: tool.category,
+            ok: result.ok,
+            ...(result.ok ? {} : { error: result.error }),
+          },
+          observerSource: 'external',
+        });
+      } catch { /* no-throw */ }
+
+      return formatResult(result, opts.output ?? 'json');
+    } catch (err) {
+      return {
+        code: 1 as const,
+        stdout: '',
+        stderr: `Erreur interne : ${err instanceof Error ? err.message : String(err)}`,
+      };
+    }
+  })();
 }
 
 /** z est utilisé dans le typage : on l'importe ici pour rester proche
@@ -195,8 +244,9 @@ function helpText(): CliRunResult {
     '  --brief       sortie courte (une ligne)',
     '  --detailed    sortie JSON complète',
     '  --json {...}  passe des args JSON complexes',
-    '  --tenant ID   pose le tenant (défaut : demo)',
-    '  --actor  ID   pose l\'acteur (défaut : agent:cli)',
+    '  --tenant ID   pose le tenant (obligatoire hors mode démo)',
+    '  --actor  ID   pose l\'acteur (obligatoire hors mode démo)',
+    '  --role   R    pose le rôle : owner | admin | member | guest',
     '',
     'Outils disponibles : `coach-os tools list`',
     '',

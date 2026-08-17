@@ -17,3 +17,5 @@ export * as cliAdapter from './adapters/cli';
 export * as skillAdapter from './adapters/skill';
 export * as inAppAdapter from './adapters/in-app';
 export * as serverStore from './serverStore';
+export * as identity from './identity';
+export * as permissions from './permissions';

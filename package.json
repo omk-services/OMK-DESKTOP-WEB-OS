@@ -17,6 +17,7 @@
     "typecheck:api": "tsc -p api/tsconfig.json --noEmit",
     "tooling:build": "node scripts/build-tooling.mjs",
     "tooling:skills": "node scripts/build-skills.mjs",
+    "tooling:harness": "node scripts/build-harness.mjs",
     "tooling:verify": "node scripts/verify.mjs"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@ai-sdk/google": "^4.0.37",
     "@ai-sdk/openai": "^4.0.34",
     "@ai-sdk/react": "^4.0.59",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@supabase/supabase-js": "^2.110.8",
     "ai": "^7.0.56",
     "lucide-react": "^1.25.0",
@@ -36,7 +38,6 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
@@ -51,5 +52,14 @@
     "typescript": "~6.0.2",
     "vite": "^8.1.1",
     "vitest": "^4.1.10"
-  }
+  },
+  "files": [
+    "dist",
+    "cli",
+    "mcp",
+    "coach-os-plugin",
+    "server.js",
+    "README.md",
+    "INSTALL.md"
+  ]
 }

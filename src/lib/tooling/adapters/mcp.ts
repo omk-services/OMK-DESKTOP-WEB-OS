@@ -13,15 +13,18 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { parseArgs } from '../defineTool';
 import { get, list } from '../registry';
 import { zodToInputSchema } from './mcp-schema.js';
+import { metaUi, listerRessourcesUi, lireRessourceUi } from './mcp-apps.js';
 import { registerAll } from '../catalog/index.js';
+import { resolveIdentity } from '../identity';
+import { assertPermission } from '../permissions';
+import { appendEvent } from '../../audit/logger';
 import type { ToolContext } from '../types';
-
-const DEFAULT_TENANT = 'demo';
-const DEFAULT_ACTOR = 'agent:mcp';
 
 /** Construit un server MCP prêt à l'emploi. Exporté à part pour les
  *  tests ; le serveur final l'instancie et le branche sur StdioServerTransport. */
@@ -35,18 +38,41 @@ export function buildMcpServer(): Server {
     {
       capabilities: {
         tools: {},
+        // MCP Apps : les interfaces sont servies comme des ressources `ui://`.
+        // Sans cette capacite declaree, l'hote ne demandera jamais la page et
+        // l'outil retombera silencieusement sur son rendu texte.
+        resources: {},
       },
     },
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
-      tools: list().map((tool) => ({
-        name: tool.name,
-        description: tool.description,
-        inputSchema: zodToInputSchema(tool.schema),
-      })),
+      tools: list().map((tool) => {
+        const meta = metaUi(tool);
+        return {
+          name: tool.name,
+          description: tool.description,
+          inputSchema: zodToInputSchema(tool.schema),
+          // `_meta.ui.resourceUri` est ce qui distingue un outil-fonction d'un
+          // outil-interface. Absent quand l'outil n'a pas d'UI : un `_meta`
+          // vide ferait croire a l'hote qu'une page existe.
+          ...(meta ? { _meta: meta } : {}),
+        };
+      }),
     };
+  });
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: listerRessourcesUi(),
+  }));
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
+    const contenu = lireRessourceUi(req.params.uri);
+    if (!contenu) {
+      throw new Error(`Ressource inconnue : "${req.params.uri}".`);
+    }
+    return { contents: [contenu] };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
@@ -75,18 +101,78 @@ export function buildMcpServer(): Server {
         isError: true,
       };
     }
-    const ctx: ToolContext = {
+    const identity = resolveIdentity({
       tenantId:
-        (args && typeof args === 'object' && '__tenantId' in args
-          ? String((args as { __tenantId?: unknown }).__tenantId)
-          : null) ?? DEFAULT_TENANT,
+        args && typeof args === 'object' && '__tenantId' in args
+          ? (args as { __tenantId?: unknown }).__tenantId
+          : undefined,
       actorId:
-        (args && typeof args === 'object' && '__actorId' in args
-          ? String((args as { __actorId?: unknown }).__actorId)
-          : null) ?? DEFAULT_ACTOR,
-    };
+        args && typeof args === 'object' && '__actorId' in args
+          ? (args as { __actorId?: unknown }).__actorId
+          : undefined,
+      role:
+        args && typeof args === 'object' && '__role' in args
+          ? (args as { __role?: unknown }).__role
+          : undefined,
+    });
+    if (!identity.ok) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              ok: false,
+              error: `Identité refusée par le serveur MCP : ${identity.error}`,
+              missing: identity.missing,
+            }),
+          },
+        ],
+        isError: true,
+      };
+    }
+    const ctx: ToolContext = identity.ctx;
+    const permission = await assertPermission(ctx, tool, parsed.args as Record<string, unknown>);
+    if (!permission.ok) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              ok: false,
+              error: `Permission refusée : ${permission.error}`,
+              code: permission.code,
+            }),
+          },
+        ],
+        isError: true,
+      };
+    }
     try {
       const result = await tool.execute(parsed.args, ctx);
+
+      // Audit log (NOUVEAU 2026-08-15). On log chaque appel d'outil —
+      // succès ou échec — pour la traçabilité. Le résultat métier
+      // reste dans `result` ; on rend isError selon ok:false.
+      try {
+        void appendEvent({
+          tenantId: ctx.tenantId,
+          actorId: ctx.actorId,
+          actorRole: ctx.role,
+          action: 'observer.event', // Action générique d'appel d'outil via MCP — voir audit/event.ts.
+          targetType: 'tool',
+          targetId: name,
+          metadata: {
+            adapter: 'mcp',
+            category: tool.category,
+            ok: result.ok,
+            ...(result.ok ? {} : { error: result.error }),
+          },
+          observerSource: 'external',
+        });
+      } catch {
+        /* appendEvent est no-throw ; filet supplémentaire */
+      }
+
       // Conformité MCP : on rend du texte (JSON) avec un flag isError
       // si l'outil a renvoyé ok:false.
       return {

@@ -26,6 +26,12 @@ export interface ToolContext {
   tenantId: string;
   /** Identifiant de l'agent qui appelle (humain, agent:cle, etc.). */
   actorId: string;
+  /** Rôle de l'acteur vis-à-vis du tenant. La couche permissions
+   *  (étape 3) croise cette valeur avec la catégorie de l'outil.
+   *  Valeurs usuelles : 'owner' (tous droits, auto-approuve OK),
+   *  'admin' (tous droits), 'member' (ne peut pas auto-approuver),
+   *  'guest' (lecture seule). */
+  role: 'owner' | 'admin' | 'member' | 'guest';
 }
 
 /** Forme du retour avant que l'adaptateur ne l'enveloppe. Les adaptateurs
@@ -77,4 +83,10 @@ export interface ToolDefinition<TSchema extends z.ZodTypeAny = z.ZodTypeAny, TOu
    *  d'écrire directement. Les adaptateurs ne lisent pas cette nuance :
    *  c'est l'executeur qui sait. */
   execute: ToolExecutor<TSchema, TOut>;
+  /**
+   * Interface MCP Apps, optionnelle. Presente = l'hote peut rendre une page
+   * HTML interactive au lieu d'un bloc de texte. Absente = l'outil se
+   * comporte exactement comme avant sur les six autres surfaces.
+   */
+  ui?: import('./adapters/mcp-apps').ToolUi;
 }
