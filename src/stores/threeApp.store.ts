@@ -141,9 +141,18 @@ const SEEDS: ThreeApp[] = [
     name: 'Tearable UI',
     category: 'Demo',
     level: 'easy',
-    // threejs.org/examples/?q=tearable — page complete, pas iframe vers
-    // un sous-cadre. L'exemple embarque ses assets en relatif.
-    iframeUrl: 'https://threejs.org/examples/?q=tearable#webgl_physics_cloth',
+    // Le `?q=tearable` a ete RETIRE le 2026-08-17, et c'est le sujet.
+    //
+    // `?q=` est le filtre de recherche de la galerie threejs.org. AUCUN
+    // exemple ne s'appelle « tearable » — celui qu'on vise est
+    // `webgl_physics_cloth`. Le filtre ne rendait donc aucun resultat, la
+    // barre laterale s'affichait vide, et l'app paraissait cassee alors que
+    // la page chargeait parfaitement. Effacer la recherche a la main faisait
+    // reapparaitre les 300 exemples : c'est ce qui a mis la puce a l'oreille.
+    //
+    // Le `#webgl_physics_cloth` suffit : il selectionne l'exemple sans
+    // amputer la galerie.
+    iframeUrl: 'https://threejs.org/examples/#webgl_physics_cloth',
     installedAt: new Date('2026-08-15T10:00:00Z').toISOString(),
   },
   {
