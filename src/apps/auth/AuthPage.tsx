@@ -57,6 +57,15 @@ export function AuthPage({ onAuthenticated }: AuthPageProps): import('react').Re
               data: {
                 level: selectedLevel,
                 project: TENANT_LEVELS.find((l) => l.id === selectedLevel)?.project,
+                // On aligne les cles sur ce que Google depose de son cote
+                // (`full_name`, `name`) pour qu'un compte cree par courriel
+                // et un compte cree par Google soient lisibles pareil en
+                // aval. Sans ca, l'application devrait connaitre le
+                // fournisseur pour savoir ou chercher le nom.
+                first_name: v.firstName,
+                last_name: v.lastName,
+                full_name: `${v.firstName} ${v.lastName}`.trim(),
+                name: `${v.firstName} ${v.lastName}`.trim(),
               },
             },
           });

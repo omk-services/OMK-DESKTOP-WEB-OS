@@ -19,7 +19,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { motion } from 'motion/react';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User } from 'lucide-react';
 
 export type AuthMode = 'signin' | 'signup';
 
@@ -29,6 +29,15 @@ export interface AuthCardValues {
   /** Niveau d'entree (voir authProviders.ts). Non pertinent pour la
    *  connexion, requis pour l'inscription. */
   level: 'architect' | 'coach';
+  /** Identite, saisie a l'inscription uniquement. Vide en connexion :
+   *  a ce moment-la le compte existe deja et porte deja son nom.
+   *
+   *  Ces deux champs existent pour que l'inscription par courriel rende
+   *  la meme chose que l'inscription par Google, qui fournit `name`
+   *  d'office. Sans eux, un compte cree par courriel n'avait aucun nom
+   *  et l'application n'avait rien a afficher. */
+  firstName: string;
+  lastName: string;
 }
 
 export interface AuthCardProps {
@@ -45,6 +54,8 @@ export interface AuthCardProps {
 }
 
 interface FieldErrors {
+  firstName?: string;
+  lastName?: string;
   email?: string;
   password?: string;
   confirm?: string;
@@ -52,16 +63,30 @@ interface FieldErrors {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-function validate(mode: AuthMode, email: string, password: string, confirm: string): FieldErrors {
+interface RawValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirm: string;
+}
+
+function validate(mode: AuthMode, v: RawValues): FieldErrors {
   const e: FieldErrors = {};
-  if (!email.trim()) e.email = 'Le courriel est requis.';
-  else if (!EMAIL_RE.test(email.trim())) e.email = 'Ce courriel ne ressemble pas a une adresse valide.';
-  if (!password) e.password = 'Le mot de passe est requis.';
-  else if (mode === 'signup' && password.length < 12) e.password = 'Le mot de passe doit faire au moins 12 caracteres.';
-  else if (mode === 'signin' && password.length < 8) e.password = 'Le mot de passe doit faire au moins 8 caracteres.';
+  // L'identite n'est demandee qu'a l'inscription : en connexion, le
+  // compte existe deja et porte deja son nom.
   if (mode === 'signup') {
-    if (!confirm) e.confirm = 'Confirme ton mot de passe.';
-    else if (confirm !== password) e.confirm = 'Les deux mots de passe ne correspondent pas.';
+    if (!v.firstName.trim()) e.firstName = 'Le prenom est requis.';
+    if (!v.lastName.trim()) e.lastName = 'Le nom est requis.';
+  }
+  if (!v.email.trim()) e.email = 'Le courriel est requis.';
+  else if (!EMAIL_RE.test(v.email.trim())) e.email = 'Ce courriel ne ressemble pas a une adresse valide.';
+  if (!v.password) e.password = 'Le mot de passe est requis.';
+  else if (mode === 'signup' && v.password.length < 12) e.password = 'Le mot de passe doit faire au moins 12 caracteres.';
+  else if (mode === 'signin' && v.password.length < 8) e.password = 'Le mot de passe doit faire au moins 8 caracteres.';
+  if (mode === 'signup') {
+    if (!v.confirm) e.confirm = 'Confirme ton mot de passe.';
+    else if (v.confirm !== v.password) e.confirm = 'Les deux mots de passe ne correspondent pas.';
   }
   return e;
 }
@@ -74,15 +99,17 @@ export function AuthCard({
   loading = false,
   errorMessage = null,
 }: AuthCardProps): import('react').ReactNode {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirm?: boolean }>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof FieldErrors, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const errors = validate(mode, email, password, confirm);
+  const errors = validate(mode, { firstName, lastName, email, password, confirm });
   const showError = (k: keyof FieldErrors): string | undefined =>
     (submitted || touched[k]) ? errors[k] : undefined;
 
@@ -90,7 +117,13 @@ export function AuthCard({
     e.preventDefault();
     setSubmitted(true);
     if (Object.keys(errors).length > 0 || loading) return;
-    await onSubmit({ email: email.trim().toLowerCase(), password, level: defaultLevel });
+    await onSubmit({
+      email: email.trim().toLowerCase(),
+      password,
+      level: defaultLevel,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    });
   };
 
   return (
@@ -154,6 +187,66 @@ export function AuthCard({
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        {/* Identite — inscription uniquement. Placee avant le courriel
+            pour que l'ordre de tabulation suive l'ordre de lecture. */}
+        {mode === 'signup' && (
+          <div className="flex gap-3">
+            {([
+              {
+                cle: 'firstName' as const,
+                id: 'auth-firstname',
+                label: 'Prenom',
+                valeur: firstName,
+                poser: setFirstName,
+                autoComplete: 'given-name',
+                placeholder: 'Amadou',
+              },
+              {
+                cle: 'lastName' as const,
+                id: 'auth-lastname',
+                label: 'Nom',
+                valeur: lastName,
+                poser: setLastName,
+                autoComplete: 'family-name',
+                placeholder: 'Kone',
+              },
+            ]).map((champ) => (
+              <div key={champ.cle} className="flex flex-col gap-1.5 flex-1 min-w-0">
+                <label htmlFor={champ.id} className="text-xs font-semibold text-stone-700">
+                  {champ.label}
+                </label>
+                <div
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl border"
+                  style={{
+                    borderColor: showError(champ.cle) ? '#dc2626' : 'rgba(15,23,42,0.12)',
+                    background: 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  <User className="w-4 h-4 text-stone-400 shrink-0" aria-hidden />
+                  <input
+                    id={champ.id}
+                    type="text"
+                    autoComplete={champ.autoComplete}
+                    value={champ.valeur}
+                    onChange={(e) => champ.poser(e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, [champ.cle]: true }))}
+                    disabled={loading}
+                    placeholder={champ.placeholder}
+                    aria-invalid={Boolean(showError(champ.cle))}
+                    aria-describedby={showError(champ.cle) ? `${champ.id}-err` : undefined}
+                    className="flex-1 min-w-0 bg-transparent outline-none text-sm text-stone-900 placeholder:text-stone-400 disabled:opacity-60"
+                  />
+                </div>
+                {showError(champ.cle) && (
+                  <p id={`${champ.id}-err`} className="flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="w-3 h-3 shrink-0" /> {showError(champ.cle)}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Champ courriel */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="auth-email" className="text-xs font-semibold text-stone-700">
