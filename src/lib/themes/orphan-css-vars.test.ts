@@ -105,22 +105,35 @@ function collectConsumers(): string[] {
   return uniq(names);
 }
 
-/** Extrait les noms SET par `applyThemeTokens` sur src/lib/themes/store.ts
- *  lignes 62-104. Renvoie les noms SANS prefixe `--`. */
+/** Extrait les noms SET par `applyThemeTokens` sur src/lib/themes/store.ts.
+ *  Renvoie les noms SANS prefixe `--`.
+ *
+ *  La sonde delimite le CORPS de la fonction, pas une fenetre de lignes en
+ *  dur. La version precedente lisait les lignes 62-104 : quand la fonction a
+ *  glisse a la ligne 73 et que le bloc des 9 alias est passe en 109-118, la
+ *  sonde a cesse de les voir et a accuse le store de les avoir perdus — alors
+ *  qu'ils y sont toujours. Un instrument qui rate sa cible doit echouer
+ *  bruyamment, jamais retomber sur un repli silencieux. */
 function collectStoreWriters(): string[] {
   const src = fs.readFileSync(STORE_FILE, 'utf8');
   const lines = src.split('\n');
-  let startIdx: number;
-  let endIdx: number;
-  if (lines.length >= 104) {
-    startIdx = 61; // ligne 62 (0-indexed)
-    endIdx = 104;  // ligne 104 incluse
-  } else {
-    // Fallback : balayer tout le fichier. La story 1 gele store.ts.
-    startIdx = 0;
-    endIdx = lines.length;
+  const startIdx = lines.findIndex((l) => l.includes('export function applyThemeTokens('));
+  if (startIdx === -1) {
+    throw new Error(
+      `Sonde cassee : 'export function applyThemeTokens(' introuvable dans ${STORE_FILE}. ` +
+        'La fonction a ete renommee ou deplacee — corriger la sonde, pas le test.'
+    );
   }
-  const block = lines.slice(startIdx, endIdx).join('\n');
+  // Le corps se termine a la premiere accolade fermante en colonne 0.
+  // `trimEnd()` : le depot est en CRLF, la ligne vaut '}\r' et non '}'.
+  const relEnd = lines.slice(startIdx + 1).findIndex((l) => l.trimEnd() === '}');
+  if (relEnd === -1) {
+    throw new Error(
+      `Sonde cassee : fin du corps de applyThemeTokens introuvable dans ${STORE_FILE}.`
+    );
+  }
+  const endIdx = startIdx + 1 + relEnd;
+  const block = lines.slice(startIdx, endIdx + 1).join('\n');
   const names: string[] = [];
   for (const m of block.matchAll(STORE_WRITER_RE)) {
     names.push(m[1]);
@@ -128,17 +141,29 @@ function collectStoreWriters(): string[] {
   return uniq(names);
 }
 
-/** Extrait les noms DECLARES dans `:root` / `[data-theme]` de src/index.css.
- *  Renvoie les noms SANS prefixe `--`. */
+/** Extrait les noms DECLARES dans `:root` / `[data-theme]` de TOUS les
+ *  fichiers scannes. Renvoie les noms SANS prefixe `--`.
+ *
+ *  La sonde ne lisait que `src/index.css`. Depuis, deux autres surfaces
+ *  declarent des variables et etaient donc denoncees a tort :
+ *    - `src/landing/styles.css` — la landing porte sa propre palette
+ *      `--landing-*`, hors du namespace `--theme-*` du bureau ;
+ *    - `src/lib/tooling/ui/approbations.ts` — CSS-in-TS auto-suffisant
+ *      (`--papier`, `--encre`, ...), ou l'ecrivain et le lecteur sont dans
+ *      le meme fichier.
+ *  On scanne la meme liste que les consommateurs : ce qui est lu est ecrit
+ *  au meme endroit, donc les deux collectes doivent voir le meme perimetre. */
 function collectCssWriters(): string[] {
-  const src = fs.readFileSync(INDEX_CSS, 'utf8');
-  const blocks: string[] = [];
-  for (const m of src.matchAll(ROOT_BLOCK_RE)) blocks.push(m[1]);
-  for (const m of src.matchAll(DATA_THEME_BLOCK_RE)) blocks.push(m[1]);
   const names: string[] = [];
-  for (const body of blocks) {
-    for (const d of body.matchAll(DECL_RE)) {
-      names.push(d[1]);
+  for (const file of listSrcFiles()) {
+    const src = fs.readFileSync(file, 'utf8');
+    const blocks: string[] = [];
+    for (const m of src.matchAll(ROOT_BLOCK_RE)) blocks.push(m[1]);
+    for (const m of src.matchAll(DATA_THEME_BLOCK_RE)) blocks.push(m[1]);
+    for (const body of blocks) {
+      for (const d of body.matchAll(DECL_RE)) {
+        names.push(d[1]);
+      }
     }
   }
   return uniq(names);
