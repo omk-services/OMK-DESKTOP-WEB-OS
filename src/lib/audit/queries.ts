@@ -1,6 +1,6 @@
 // src/lib/audit/queries.ts
 // Lecture de l'audit log. Côté lecture uniquement : la RLS Supabase
-// garantit que seuls les owners du tenant voient les events.
+// garantit que seuls les owners voient les events.
 //
 // Trois modes de lecture :
 //   1. listAuditEvents(tenantId) — fichier brut, par fenêtre de temps.
@@ -10,6 +10,13 @@
 // En mode démo (Supabase non configuré), les queries lisent le buffer
 // in-memory du logger. C'est ce qui rend la UI utilisable en local
 // sans Supabase.
+//
+// Canon 2026-08-17 : `audit_events.org_id` est désormais un uuid. Le
+// slug `tenantId` passé à la fonction reste utilisé pour filtrer le
+// buffer in-memory ; côté Supabase, on lit l'org réelle depuis le
+// claim JWT (cf. logger.ts pour la même logique côté écriture). Si le
+// claim est absent, la requête renvoie [] — la RLS aurait fait pareil,
+// mais on évite le round-trip et le bruit côté console.
 
 import { supabaseConfigured } from '../supabase';
 import { listInMemoryEvents, type InMemoryAuditEvent } from './logger';
@@ -81,7 +88,11 @@ export async function listAuditEvents(
 
   // Lecture Supabase : la RLS filtre côté serveur. Si l'appelant n'est
   // pas owner du tenant, il recevra [] et c'est le bon comportement.
+  // Canon 2026-08-17 : on filtre par `org_id` (uuid) lu dans le claim
+  // JWT, pas par `tenant_id` (slug) qui n'existe plus.
   try {
+    const orgId = await readOrgIdClaim();
+    if (orgId === null) return [];
     const client = (await import('../supabase')).supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
@@ -98,7 +109,7 @@ export async function listAuditEvents(
     };
     // Construction impérative pour rester portable sur les types du SDK.
     let q = client.from('audit_events').select('*');
-    q = q.eq('tenant_id', tenantId) as typeof q;
+    q = q.eq('org_id', orgId) as typeof q;
     q = q.order('created_at', { ascending: false }) as typeof q;
     const finalQ = (q as unknown as { limit: (n: number) => Promise<{
       data: Array<Record<string, unknown>> | null;
@@ -108,7 +119,11 @@ export async function listAuditEvents(
     if (error || !data) return [];
     return data.map((row) => ({
       id: String(row.id ?? ''),
-      tenantId: String(row.tenant_id ?? tenantId),
+      // `tenantId` côté UI garde le slug local du caller (utile pour
+      // les filtres in-memory et le cloisonnement cache). Côté DB,
+      // l'identité réelle est dans `row.org_id`, qu'on n'expose pas
+      // (uuid ≠ concept UI).
+      tenantId: String(row.org_id ?? tenantId),
       actorId: (row.actor_id as string | null) ?? null,
       actorRole: (row.actor_role as string | null) ?? null,
       action: String(row.action ?? 'observer.event') as AuditAction,
@@ -157,4 +172,41 @@ export function rowFromEvent(rec: EventRecord, id: string, createdAt: string): A
     observerSource: rec.observerSource ?? null,
     createdAt,
   };
+}
+
+/** Lit le claim `org_id` du JWT courant. Renvoie `null` si :
+ *  - Supabase n'est pas configuré ;
+ *  - la session est absente ;
+ *  - le claim est omis par le hook (utilisateur sans adhésion active) ;
+ *  - le claim est mal formé (pas un uuid de 36 caractères).
+ *  Symétrique de la fonction du même nom dans `logger.ts` — dupliquée
+ *  pour que `queries.ts` reste indépendant du logger en best-effort.
+ *  Les deux convergent vers le même format uuid (cf. canon 2026-08-17). */
+async function readOrgIdClaim(): Promise<string | null> {
+  try {
+    const auth = ((await import('../supabase')).supabase as unknown as {
+      auth: {
+        getSession: () => Promise<{
+          data: { session: { access_token?: string } | null };
+        }>;
+      };
+    }).auth;
+    const { data } = await auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payloadSeg = parts[1];
+    if (!payloadSeg) return null;
+    const padded = payloadSeg.replace(/-/g, '+').replace(/_/g, '/')
+      + '==='.slice((payloadSeg.length + 3) % 4);
+    const json = typeof atob === 'function'
+      ? atob(padded)
+      : Buffer.from(padded, 'base64').toString('utf-8');
+    const payload = JSON.parse(json) as Record<string, unknown>;
+    const claim = payload.org_id;
+    return typeof claim === 'string' && claim.length === 36 ? claim : null;
+  } catch {
+    return null;
+  }
 }

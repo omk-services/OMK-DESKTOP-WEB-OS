@@ -108,12 +108,27 @@ function pushInMemory(rec: EventRecord): InMemoryAuditEvent {
   return evt;
 }
 
-/** INSERT asynchrone vers Supabase. Best-effort. Ne lève jamais. */
+/** INSERT asynchrone vers Supabase. Best-effort. Ne lève jamais.
+ *
+ *  Canon 2026-08-17 : `audit_events.org_id` est désormais un uuid, pas
+ *  un slug. La valeur envoyée est lue depuis le claim JWT
+ *  `custom_access_token_hook` — l'auteur de l'event n'a aucune raison
+ *  de connaître son propre `org_id`, et le claim est la source de
+ *  vérité côté serveur. `rec.tenantId` reste la clé de partition
+ *  LOCALE du buffer in-memory ; on ne l'envoie PAS à Supabase. */
 async function insertSupabase(rec: EventRecord): Promise<{ ok: boolean; reason?: string }> {
   if (!supabaseConfigured) return { ok: false, reason: 'supabase not configured' };
+  // Lecture paresseuse du claim. Si la session n'a pas d'org active,
+  // l'INSERT échouera côté RLS (policy `audit_events_member_insert`),
+  // ce qui donne exactement la sémantique voulue : refus silencieux
+  // en mode best-effort, mais observable en console.
+  const orgId = await readOrgIdClaim();
+  if (orgId === null) {
+    return { ok: false, reason: 'org_id claim absent (no active membership)' };
+  }
   try {
     const row = {
-      tenant_id: rec.tenantId,
+      org_id: orgId,
       actor_id: rec.actorId,
       actor_role: rec.actorRole,
       action: rec.action,
@@ -142,6 +157,42 @@ async function insertSupabase(rec: EventRecord): Promise<{ ok: boolean; reason?:
     // eslint-disable-next-line no-console
     console.warn('[audit] insert threw:', err instanceof Error ? err.message : String(err));
     return { ok: false, reason: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/** Lit le claim `org_id` du JWT courant. Renvoie `null` si :
+ *  - Supabase n'est pas configuré ;
+ *  - la session est absente ;
+ *  - le claim est omis par le hook (utilisateur sans adhésion active) ;
+ *  - le claim est mal formé (pas un uuid).
+ *  L'appelant doit traiter `null` comme « on ne peut pas écrire
+ *  côté DB » sans pour autant faire échouer l'audit (best-effort). */
+async function readOrgIdClaim(): Promise<string | null> {
+  try {
+    const auth = (supabase as unknown as {
+      auth: {
+        getSession: () => Promise<{
+          data: { session: { access_token?: string } | null };
+        }>;
+      };
+    }).auth;
+    const { data } = await auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payloadSeg = parts[1];
+    if (!payloadSeg) return null;
+    const padded = payloadSeg.replace(/-/g, '+').replace(/_/g, '/')
+      + '==='.slice((payloadSeg.length + 3) % 4);
+    const json = typeof atob === 'function'
+      ? atob(padded)
+      : Buffer.from(padded, 'base64').toString('utf-8');
+    const payload = JSON.parse(json) as Record<string, unknown>;
+    const claim = payload.org_id;
+    return typeof claim === 'string' && claim.length === 36 ? claim : null;
+  } catch {
+    return null;
   }
 }
 

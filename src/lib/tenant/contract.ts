@@ -47,8 +47,37 @@ import type { CmsCollectionDef, CmsItem } from '../cms/types';
  *  legacy store working under this tenant until the migration flag flips. */
 export const TENANT_DEFAULT = '__default__' as const;
 
-/** A real tenant id — opaque to the front, opaque to Supabase RLS. */
+/** A real tenant id — opaque to the front, opaque to Supabase RLS.
+ *  TenantId = slug local (clé de partition `localStorage`, partitions du
+ *  store CMS, `storage-scope.ts`). Ce n'est PAS un identifiant côté DB :
+ *  le côté DB utilise `OrgId` (uuid), voir plus bas. */
 export type TenantId = string & { readonly __brand: 'TenantId' };
+
+/** Org id (uuid) — identité d'une organisation en base, canon 2026-08-17.
+ *  Distinct de `TenantId` : les deux notions se ressemblent (toutes deux
+ *  désignent « l'organisation courante ») mais vivent dans des espaces
+ *  disjoints. `TenantId` reste légitime côté navigateur pour partitionner
+ *  le cache ; `OrgId` est ce qu'on envoie à Supabase (clé étrangère,
+ *  claim JWT, filtre RLS). Brand distincté ⇒ le compilateur refuse de
+ *  passer l'un pour l'autre. */
+export type OrgId = string & { readonly __brand: 'OrgId' };
+
+/** Format uuid v4 (lower, hex). Tolère la casse parce que le cast
+ *  Postgres `::uuid` accepte les deux. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Prédicat : la chaîne ressemble à un uuid. N'effectue pas de lookup
+ *  base — c'est un test de forme, pas d'existence. */
+export function isValidOrgId(s: string): s is OrgId {
+  return UUID_RE.test(s);
+}
+
+/** Convertit un `string` en `OrgId` typé. Ne fait PAS de validation de
+ *  forme — pour ça, voir `isValidOrgId`. À utiliser quand on est sûr
+ *  de la source (claim JWT, réponse Supabase typée). */
+export function toOrgId(raw: string): OrgId {
+  return raw as OrgId;
+}
 
 /** Shape every tenant context provider must return. */
 export interface TenantContext {
@@ -299,12 +328,26 @@ export const MEMBERSHIP_ROLES: readonly MembershipRole[] = ['owner', 'admin', 'm
 export const MEMBERSHIP_STATUSES: readonly MembershipStatus[] = ['pending', 'active', 'revoked'] as const;
 
 /** Une ligne de la jonction user ↔ tenant. Source de vérité côté API,
- *  miroir de la table `public.memberships` côté DB. */
+ *  miroir de la table `public.memberships` côté DB.
+ *
+ *  Les deux identifiants cohabitent volontairement :
+ *  - `tenantId` (slug) = clé de partition locale, posée par le backend
+ *    in-memory pour cloisonner le cache ;
+ *  - `orgId` (uuid) = identité réelle en base, posée par le backend
+ *    Supabase à partir du claim JWT. Optionnelle parce que le backend
+ *    in-memory n'a pas d'uuid à fournir. */
 export interface MembershipRecord {
   /** UUID côté DB. */
   id: string;
-  /** Tenant id (slug kebab, conforme `TENANT_KEY_RE`). Côté DB : `org_id`. */
+  /** Tenant id (slug kebab, conforme `TENANT_KEY_RE`). Clé de partition
+   *  LOCALE — n'est PAS utilisée pour les requêtes Supabase. Voir
+   *  `orgId` pour l'identité côté DB. */
   tenantId: TenantId;
+  /** Org id (uuid) — identité en base (`memberships.org_id`). Toujours
+   *  défini pour les rows venues de Supabase, `undefined` pour le
+   *  backend in-memory. Optionnel pour ne pas casser les tests
+   *  qui seedent des records purement locaux. */
+  orgId?: OrgId;
   /** User id (UUID Supabase). */
   userId: string;
   role: MembershipRole;
