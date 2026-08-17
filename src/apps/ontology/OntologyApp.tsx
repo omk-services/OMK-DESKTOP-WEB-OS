@@ -90,27 +90,38 @@ export function validate(
   contracts: Readonly<Record<EntityId, ContractLike | undefined>>,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+  // Nommes plutot qu'eparpilles : le meme nombre apparaissait a quatre endroits,
+  // et il a fallu quatre corrections pour en changer un seul le 2026-08-13.
 
-  // Compte canonique : 12 entites, 12 contrats, 15-25 relations.
-  if (entities.length !== 12) {
+  // Compte canonique : 13 entites, 13 contrats, 15-32 relations.
+  //
+  // Porte de 12 a 13 le 2026-08-13, avec l'arrivee de `BusinessDomain` — les
+  // sept domaines du Business Pulse et leurs strateges DC, transcrits du canon
+  // SDD-006 §5 de Geordi. Les 7 relations d'autorite (`owns`, `serves`) portent
+  // la plage haute de 25 a 32.
+  //
+  // Ces trois nombres sont ecrits en dur A DESSEIN : c'est un garde-fou qui doit
+  // hurler quand quelqu'un ajoute une entite sans y penser. Les changer est une
+  // decision d'architecture — et elle se documente ici, pas dans un commit muet.
+  if (entities.length !== ATTENDU_ENTITES) {
     issues.push({
       kind: 'count',
-      message: `Compte d'entites different de 12 : observe ${entities.length}.`,
+      message: `Compte d'entites different de ${ATTENDU_ENTITES} : observe ${entities.length}.`,
     });
   }
 
   // Comptes.
   const contractCount = entities.reduce((acc, e) => acc + (contracts[e.id] ? 1 : 0), 0);
-  if (contractCount !== 12) {
+  if (contractCount !== ATTENDU_ENTITES) {
     issues.push({
       kind: 'count',
-      message: `Compte de contrats different de 12 : observe ${contractCount}.`,
+      message: `Compte de contrats different de ${ATTENDU_ENTITES} : observe ${contractCount}.`,
     });
   }
-  if (relations.length < 15 || relations.length > 25) {
+  if (relations.length < RELATIONS_MIN || relations.length > RELATIONS_MAX) {
     issues.push({
       kind: 'count',
-      message: `Compte de relations hors plage 15-25 : observe ${relations.length}.`,
+      message: `Compte de relations hors plage ${RELATIONS_MIN}-${RELATIONS_MAX} : observe ${relations.length}.`,
     });
   }
 
@@ -180,6 +191,11 @@ export function validate(
  *  invariants declares dans `ontology.test.ts` (story 1) ; l'app les
  *  *reexecute* cote UI, ne les importe pas (l'app n'a pas le droit
  *  d'ouvrir les modules internes — c'est la fermeture). */
+/** Comptes canoniques du registre. Voir le commentaire dans validateRegistry(). */
+export const ATTENDU_ENTITES = 13;
+export const RELATIONS_MIN = 15;
+export const RELATIONS_MAX = 32;
+
 export function validateRegistry(): ValidationIssue[] {
   const entities = listEntities();
 
@@ -499,7 +515,7 @@ export function OntologyApp() {
           <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
             <ThemedSectionHead
               title="Entites metier"
-              subtitle="Les 12 types du registre — cliquables pour voir leurs attributs types."
+              subtitle="Les 13 types du registre — cliquables pour voir leurs attributs types."
             />
             <div className="pt-1">
               <ScopeToggle />

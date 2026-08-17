@@ -45,7 +45,50 @@ export interface EntityDef {
   attributes: readonly EntityAttribute[];
 }
 
-/** Union close des 12 identifiants — verifier dans le test que la liste reste de taille 12. */
+/**
+ * Les HUIT domaines du Business Pulse, leur proprietaire B2 (DC) et leur
+ * escouade (Marvel).
+ *
+ * SOURCE CANONIQUE, verifiee le 2026-08-13 :
+ * `ASpace_OS_V3/20_Life_OS/24_PARA_Enterprise/Business_Pulse_B3_Notion_Canon_Lore_Index.md`
+ *
+ * ATTENTION AU PIEGE QUI A DEJA COUTE UNE PASSE. Une premiere version de ce
+ * registre a ete transcrite de `SDD-006_business-pulse-l2-pyramide.md` §5,
+ * trouve dans Geordi. **Ce SDD est perime** : il ne connait que SEPT domaines
+ * et ignore Sales / Illuminati / John Jones. Le dossier `src/apps/sales/`
+ * existait pourtant deja dans ce depot — le code etait en avance sur le
+ * document que j'avais pris pour le canon.
+ *
+ * Regle qui en decoule : **le canon vit dans V3, pas dans les SDD de Geordi.**
+ * Les SDD sont une couche d'archive ; les lire comme une source de verite
+ * ramene une ontologie de 2026-06 dans un depot de 2026-08.
+ *
+ * Les noms d'escouade sont ceux du Lore Index, pas leur traduction francaise :
+ * `Guardians`, `Fantastic4`, `KangDynasty`, `Eternals`, `XMen`. Une escouade
+ * renommee en passant est une escouade qu'on ne retrouvera pas dans Notion.
+ */
+export const DOMAINES_BUSINESS = [
+  { id: 'growth',     stratege: 'Superman',                     portee: 'Growth & Acquisition', squad: 'Guardians' },
+  { id: 'sales',      stratege: 'John Jones / Martian Manhunter', portee: 'Sales',              squad: 'Illuminati' },
+  { id: 'product',    stratege: 'Flash',                        portee: 'Product & Delivery',   squad: 'Avengers' },
+  { id: 'operations', stratege: 'Batman',                       portee: 'Ops & Stabilite',      squad: 'Fantastic4' },
+  { id: 'it-rd',      stratege: 'Cyborg',                       portee: 'IT & Infrastructure',  squad: 'KangDynasty' },
+  { id: 'finance',    stratege: 'Wonder Woman',                 portee: 'Finance & Cashflow',   squad: 'Thunderbolts' },
+  { id: 'people',     stratege: 'Green Lantern',                portee: 'People & Culture',     squad: 'XMen' },
+  { id: 'legal',      stratege: 'Aquaman',                      portee: 'Legal & Compliance',   squad: 'Eternals' },
+] as const;
+
+export type DomaineBusinessId = (typeof DOMAINES_BUSINESS)[number]['id'];
+
+/**
+ * Union close des 13 identifiants — verifier dans le test que la liste reste
+ * de taille 13.
+ *
+ * Passee de 12 a 13 le 2026-08-13 par decision d'architecture : sans
+ * `BusinessDomain`, l'ontologie ne pouvait dire ni **de qui releve** une SOP,
+ * ni **quel domaine** porte un Incident. Douze entites toutes enracinees dans
+ * `Organization` decrivent un locataire, pas une entreprise.
+ */
 export type EntityId =
   | 'Organization'
   | 'Membership'
@@ -58,7 +101,8 @@ export type EntityId =
   | 'Agent'
   | 'Routine'
   | 'Incident'
-  | 'Persona';
+  | 'Persona'
+  | 'BusinessDomain';
 
 export const ENTITIES: readonly EntityDef[] = [
   {
@@ -209,6 +253,25 @@ export const ENTITIES: readonly EntityDef[] = [
       { name: 'name', type: 'string', required: true },
       { name: 'tone', type: 'string', required: true },
       { name: 'createdAt', type: 'date', required: true },
+    ],
+  },
+  {
+    id: 'BusinessDomain',
+    label: 'Business Domain',
+    description:
+      'Un des sept domaines du Business Pulse, porte par son stratege DC et execute par son escouade Marvel. Registre canonique : SDD-006 §5 (Geordi).',
+    attributes: [
+      // `id` vaut l'un des sept de DOMAINES_BUSINESS, et c'est aussi le nom du
+      // dossier de l'app correspondante dans `src/apps/`. Un seul mot pour la
+      // donnee et pour l'interface : c'est ce qui evite qu'ils divergent.
+      { name: 'domainId', type: 'string', required: true },
+      { name: 'stratege', type: 'string', required: true },
+      { name: 'portee', type: 'string', required: true },
+      { name: 'squad', type: 'string', required: true },
+      { name: 'organization', type: 'ref', required: true, ref: 'Organization' },
+      // Personnel : ce que le coach pense de la sante du domaine avant que ca
+      // ne devienne un Incident publie. Meme patron que `privateSignal`.
+      { name: 'lecturePrivee', type: 'string', required: false, scope: 'personal' },
     ],
   },
 ];

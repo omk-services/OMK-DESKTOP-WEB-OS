@@ -27,9 +27,9 @@ describe('OntologyApp — module', () => {
     expect(typeof validate).toBe('function');
   });
 
-  it('(b) listEntities() retourne 12 entites', () => {
+  it('(b) listEntities() retourne 13 entites', () => {
     const entities = listEntities();
-    expect(entities).toHaveLength(12);
+    expect(entities).toHaveLength(13);
   });
 
   it('(c) validateRegistry() retourne 0 incoherence sur le registre actuel', () => {
@@ -113,7 +113,7 @@ describe('validate() — branches individuelles (PATCH 3)', () => {
     expect(issues, issues.map((i) => i.message).join(' ; ')).toEqual([]);
   });
 
-  it('compte d entites different de 12 -> au moins une issue `count`', () => {
+  it('compte d entites different de 13 -> au moins une issue `count`', () => {
     const s = snapshot();
     const truncated = s.entities.slice(0, 8);
     // 8 entites -> contratCount != 12 aussi, et au moins une relation
@@ -138,7 +138,7 @@ describe('validate() — branches individuelles (PATCH 3)', () => {
     ).toBe(true);
   });
 
-  it('compte de contrats different de 12 -> issue `count`', () => {
+  it('compte de contrats different de 13 -> issue `count`', () => {
     const s = snapshot();
     // On retire un contrat -> contractCount = 11.
     const c = { ...s.contracts };

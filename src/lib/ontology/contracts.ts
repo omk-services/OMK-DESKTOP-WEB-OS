@@ -68,4 +68,8 @@ export const CONTRACTS: Readonly<Record<EntityId, Contract>> = {
     triggers: ['context-needed', 'voice-tuned', 'retired'],
     allowedActions: ['create', 'refine', 'retire', 'clone'],
   },
+  BusinessDomain: {
+    triggers: ['domain-opened', 'strategist-assigned', 'squad-staffed', 'domain-frozen'],
+    allowedActions: ['open', 'assign', 'staff', 'freeze', 'read'],
+  },
 };

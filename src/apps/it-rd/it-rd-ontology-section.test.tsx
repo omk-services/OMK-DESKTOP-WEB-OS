@@ -51,16 +51,16 @@ function getDirname(): string {
 const ACCENT = '#7c3aed';
 
 describe('ItRdApp — section Ontology (story 4)', () => {
-  it('le registre reel expose 12 entites via l API publique', () => {
+  it('le registre reel expose 13 entites via l API publique', () => {
     // Sanity : precondition du test de propagation. Si le registre est
     // degrade a un autre compte, l'assertion suivante (12 labels dans le
     // DOM) echouera d'elle-meme, mais on garde cette verif isolee pour
     // un message d'erreur plus diagnostique.
     const entities = listEntities();
-    expect(entities).toHaveLength(12);
+    expect(entities).toHaveLength(13);
   });
 
-  it('rend la grille des 12 entites sans `only` ni `showRelationCount`', () => {
+  it('rend la grille des 13 entites sans `only` ni `showRelationCount`', () => {
     // Exactement les memes props que la closure inline dans ItRdApp.tsx
     // sections: AppSection[] (ligne 894-905). Une main qui introduit un
     // filtre `only` ici, ou qui passe un accent different de celui d'it-rd,
@@ -68,7 +68,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
     const html = renderToStaticMarkup(
       <OntologySection
         accent={ACCENT}
-        title="Les 12 entites du registre"
+        title="Les 13 entites du registre"
         subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
       />,
     );
@@ -93,7 +93,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
     const html = renderToStaticMarkup(
       <OntologySection
         accent={ACCENT}
-        title="Les 12 entites du registre"
+        title="Les 13 entites du registre"
         subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
       />,
     );
@@ -132,7 +132,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
     ).toBe(false);
   });
 
-  it('le 13e label fantome ne se glisse pas dans le DOM', () => {
+  it('le 14e label fantome ne se glisse pas dans le DOM', () => {
     // Anti-regression : si une main ajoutait un id en dur dans la
     // section, on le verrait ici comme un label qui n'est pas dans
     // `listEntities()`. On extrait tous les `data-entity-id` du DOM et
@@ -140,7 +140,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
     const html = renderToStaticMarkup(
       <OntologySection
         accent={ACCENT}
-        title="Les 12 entites du registre"
+        title="Les 13 entites du registre"
         subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
       />,
     );
@@ -150,7 +150,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
       idsInDom.add(m[1]);
     }
     const idsInRegistry = new Set<string>(listEntities().map((e) => e.id as string));
-    expect(idsInDom.size, 'le DOM ne doit pas contenir plus de 12 cartes').toBe(12);
+    expect(idsInDom.size, 'le DOM ne doit pas contenir plus de 13 cartes').toBe(13);
     for (const id of idsInDom) {
       expect(
         idsInRegistry.has(id as EntityId),
@@ -171,7 +171,7 @@ describe('ItRdApp — section Ontology (story 4)', () => {
     const html = renderToStaticMarkup(
       <OntologySection
         accent={ACCENT}
-        title="Les 12 entites du registre"
+        title="Les 13 entites du registre"
         subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
       />,
     );

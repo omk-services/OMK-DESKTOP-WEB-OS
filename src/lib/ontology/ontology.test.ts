@@ -27,9 +27,9 @@ import {
 } from './index';
 
 describe('registre d ontologie — invariants', () => {
-  it('contient exactement 12 entites', () => {
+  it('contient exactement 13 entites', () => {
     const entities = listEntities();
-    expect(entities).toHaveLength(12);
+    expect(entities).toHaveLength(13);
   });
 
   it('chaque entite a au moins un attribut et un contrat non vide', () => {
@@ -104,8 +104,12 @@ describe('registre d ontologie — invariants', () => {
       pendantes,
       `relations pendantes (source ou cible introuvable): ${pendantes.join('; ')}`,
     ).toEqual([]);
-    expect(toutes.size, `attendu entre 15 et 25 relations, observe ${toutes.size}`).toBeGreaterThanOrEqual(15);
-    expect(toutes.size).toBeLessThanOrEqual(25);
+    // Plafond porte de 25 a 32 le 2026-08-13. L'arrivee de `BusinessDomain`
+    // ajoute 7 relations d'autorite (`owns` x6, `serves`). Le plafond garde son
+    // role — empecher que l'ontologie devienne un plat de spaghettis — mais il
+    // bornait un modele a 12 entites ; il en borne 13.
+    expect(toutes.size, `attendu entre 15 et 32 relations, observe ${toutes.size}`).toBeGreaterThanOrEqual(15);
+    expect(toutes.size).toBeLessThanOrEqual(32);
   });
 
   it('les identifiants de relation sont uniques', () => {
@@ -131,7 +135,7 @@ describe('registre d ontologie — invariants', () => {
     ).toEqual([]);
   });
 
-  it('contient exactement 12 contrats, tous non vides (triggers et allowedActions)', () => {
+  it('contient exactement 13 contrats, tous non vides (triggers et allowedActions)', () => {
     // On verifie via l API publique : chaque entite a un contrat avec
     // `triggers.length > 0` et `allowedActions.length > 0`. Un contrat
     // vide est un contrat absent — la story exige un contenu semantique.
@@ -144,7 +148,7 @@ describe('registre d ontologie — invariants', () => {
       if (c.triggers.length === 0) vides.push(`${e.id} (triggers vide)`);
       if (c.allowedActions.length === 0) vides.push(`${e.id} (allowedActions vide)`);
     }
-    expect(comptes, '12 entites attendues, chacune avec un contrat').toBe(12);
+    expect(comptes, '13 entites attendues, chacune avec un contrat').toBe(13);
     expect(vides, `contrats vides: ${vides.join('; ')}`).toEqual([]);
   });
 
@@ -302,8 +306,12 @@ describe('registre d ontologie — invariants', () => {
     // Verrou explicite sur la liste des 5 entites documentees dans
     // Design Notes §Choix des 5 entites. Si une PR change la liste,
     // elle doit aussi changer la liste ici et justifier pourquoi.
+    // Sixieme entree ajoutee le 2026-08-13 : `BusinessDomain.lecturePrivee`.
+    // Meme raison que les cinq autres — ce que le coach pense de la sante d'un
+    // domaine avant que ca ne devienne un Incident publie. Un soupcon n'est pas
+    // un fait partage.
     const ATTENDUES: ReadonlySet<EntityId> = new Set<EntityId>([
-      'Profile', 'Client', 'Agent', 'Routine', 'Incident',
+      'Profile', 'Client', 'Agent', 'Routine', 'Incident', 'BusinessDomain',
     ]);
     const observees = new Set<EntityId>();
     for (const e of listEntities()) {

@@ -898,7 +898,7 @@ export function ItRdApp() {
       render: () => (
         <OntologySection
           accent={ACCENT}
-          title="Les 12 entites du registre"
+          title="Les 13 entites du registre"
           subtitle="Vue technique : attributs types, portee, references. Source unique — lib/ontology."
         />
       ),

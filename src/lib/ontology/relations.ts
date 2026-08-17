@@ -56,4 +56,23 @@ export const RELATIONS: readonly Relation[] = [
 
   // Client : consomme les Offerings cataloguees
   { id: 'client-engages-offerings', source: 'Client', target: 'Offering', verb: 'engages', cardinality: 'n-n' },
+
+  // ── BusinessDomain — l'axe qui manquait (2026-08-13) ────────────────────
+  //
+  // Les vingt relations ci-dessus sont toutes STRUCTURELLES : `has`, `binds`,
+  // `manages`, `executes`, `runs`, `acquires`, `incarnates`, `projects`,
+  // `guides`, `requires`, `mitigates`, `triggers`, `engages`. Aucune ne dit
+  // **de qui releve** une chose. L'ontologie savait qui execute quoi, jamais
+  // sous quelle autorite.
+  //
+  // C'est ce qui rendait le canon DC de SDD-006 inexploitable : sept apps
+  // portaient un stratege dans leur interface, et aucune donnee ne le savait.
+  { id: 'org-has-domains', source: 'Organization', target: 'BusinessDomain', verb: 'has', cardinality: '1-n' },
+  { id: 'domain-owns-sops', source: 'BusinessDomain', target: 'SOP', verb: 'owns', cardinality: '1-n' },
+  { id: 'domain-owns-runbooks', source: 'BusinessDomain', target: 'Runbook', verb: 'owns', cardinality: '1-n' },
+  { id: 'domain-owns-routines', source: 'BusinessDomain', target: 'Routine', verb: 'owns', cardinality: '1-n' },
+  { id: 'domain-owns-incidents', source: 'BusinessDomain', target: 'Incident', verb: 'owns', cardinality: '1-n' },
+  { id: 'domain-owns-offerings', source: 'BusinessDomain', target: 'Offering', verb: 'owns', cardinality: '1-n' },
+  // Un agent sert un ou plusieurs domaines — l'escouade Marvel du SDD §6.
+  { id: 'agent-serves-domains', source: 'Agent', target: 'BusinessDomain', verb: 'serves', cardinality: 'n-n' },
 ];
