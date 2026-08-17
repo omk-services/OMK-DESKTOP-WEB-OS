@@ -10,7 +10,7 @@
 import { parseArgs, toolResultToShort } from '../defineTool';
 import { get, list } from '../registry';
 import { registerAll } from '../catalog/index.js';
-import { resolveIdentity } from '../identity';
+import { resolveIdentityWithMembership } from '../identity';
 import { assertPermission } from '../permissions';
 import { appendEvent } from '../../audit/logger';
 import type { ToolContext, ToolDefinition } from '../types';
@@ -136,20 +136,27 @@ export function runCli(opts: CliRunOptions): Promise<CliRunResult> {
   if (!parsed.ok) {
     return Promise.resolve({ code: 1, stdout: '', stderr: parsed.error });
   }
-  const identity = resolveIdentity({
-    tenantId: opts.tenantId,
-    actorId: opts.actorId,
-    role: opts.role,
-  });
-  if (!identity.ok) {
-    return Promise.resolve({
-      code: 1,
-      stdout: '',
-      stderr: `Identité refusée : ${identity.error}`,
-    });
-  }
-  const ctx: ToolContext = identity.ctx;
+  // Résolution d'identité : whitelist + membership (FIX_1_identite 2026-08-17).
+  // Avant cette passe, le rôle déclaré par `--role` était cru sur parole :
+  // n'importe quel shell pouvait passer `--role owner` et la matrice
+  // `permissions.ts` le validait sans recours. Désormais, le rôle effectif
+  // vient de la table `memberships` via `resolveIdentityWithMembership`,
+  // qui REFUSE en production quand `setMembershipLookup()` n'a pas été
+  // branché au démarrage. Cf. identity.ts:204 et RAPPORT_C §4.1.
   return (async () => {
+    const identity = await resolveIdentityWithMembership({
+      tenantId: opts.tenantId,
+      actorId: opts.actorId,
+      role: opts.role,
+    });
+    if (!identity.ok) {
+      return {
+        code: 1 as const,
+        stdout: '',
+        stderr: `Identité refusée : ${identity.error}`,
+      };
+    }
+    const ctx: ToolContext = identity.ctx;
     const perm = await assertPermission(ctx, tool, parsed.args as Record<string, unknown>);
     if (!perm.ok) {
       return {

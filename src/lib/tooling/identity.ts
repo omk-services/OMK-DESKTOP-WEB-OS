@@ -36,11 +36,31 @@
 //     est chargée de **relire** le rôle côté `memberships`. Elle
 //     accepte un `MembershipLookup` injectable — par défaut aucun
 //     (pour rester testable sans Supabase). Côté serveur V2 ce
-//     lookup sera branché sur Supabase.
+//     lookup est branché sur Supabase via `setMembershipLookup()`
+//     au démarrage.
 //
 //  6. La cloison reste souveraine : la relit membership utilise
 //     **toujours** `tenantId` côté appelant. Un role issu d'un
 //     autre tenant ne traverse pas.
+//
+// CONTRAT (campagne 2026-08-17 — FIX_1_identite, fermeture W03)
+//
+//  7. **Échec fermé en production.** Sans `setMembershipLookup()`,
+//     `resolveIdentityWithMembership` REFUSE en production (pas de
+//     repli silencieux sur l'input). Sans cette règle, l'identité
+//     restait forgeable : un appelant pouvait déclarer `--role owner`
+//     (CLI), `__role: "owner"` (MCP), ou `x-coach-os-role: owner` (REST)
+//     sans que personne ne le contredise. Mesuré dans RAPPORT_C §4.1.
+//
+//  8. **Le rôle effectif vient de la membership, jamais de l'input.**
+//     Si l'appelant déclare `owner` et que la table `memberships`
+//     dit `member`, c'est `member` qui s'applique. La couche
+//     `permissions.ts` opère sur ce rôle, pas sur la déclaration.
+//
+//  9. **Mode démo explicite, jamais déclenchable par le réseau.**
+//     `COACH_OS_DEMO_MODE=1` reste le seul moyen d'activer le mode
+//     démo (court-circuit du lookup). Lu dans `process.env` par
+//     `isDemoMode()`, jamais dans un input réseau.
 
 import type { ToolContext } from './types';
 import type { MembershipRole, TenantId } from '../tenant/contract';
@@ -195,8 +215,23 @@ export function getMembershipLookup(): MembershipLookup | null {
 /** Variante enrichie : après la résolution whitelist, on relit
  *  la **membership active** côté `memberships`. Le rôle résultant
  *  prime sur le rôle porté par l'input : c'est la **cloison** qui
- *  parle, pas l'adaptateur. Si plusieurs actives existent (état
- *  incohérent), refus. Si aucune active, refus. */
+ *  parle, pas l'adaptateur.
+ *
+ *  Politique de fermeture (campagne 2026-08-17, FIX_1_identite) :
+ *   - En mode démo (`COACH_OS_DEMO_MODE=1`), on garde la résolution
+ *     whitelist. Le mode démo est permissif mais **explicite** : il
+ *     n'est déclenchable QUE par variable d'environnement, jamais
+ *     par un input réseau (header, JSON-RPC args, flag CLI).
+ *   - En production, sans `lookup` configuré (i.e. `setMembershipLookup`
+ *     jamais appelé au démarrage du serveur), REFUS. Sinon l'appelant
+ *     pourrait à nouveau proclamer n'importe quel rôle.
+ *   - Si le lookup jette (réseau, base absente, RLS qui bloque), REFUS
+ *     explicite — pas de repli silencieux en `guest`.
+ *   - Si la table `memberships` ne rend rien pour le couple
+ *     (actorId, tenantId), REFUS.
+ *
+ *  Le rôle retourné prime sur l'input : un appelant qui déclare
+ *  `owner` alors que la table dit `member` se voit appliquer `member`. */
 export type ResolvedIdentityWithMembership =
   | { ok: true; ctx: ToolContext; source: 'full' | 'demo' | 'membership'; roleSource: 'input' | 'membership' }
   | { ok: false; error: string; missing: ReadonlyArray<'tenantId' | 'actorId' | 'role' | 'membership'> };
@@ -213,18 +248,46 @@ export async function resolveIdentityWithMembership(
       missing: base.missing,
     };
   }
-  // Mode démo : on garde la résolution whitelist. La relit
-  // membership est incompatible avec ce mode (pas de DB).
-  if (base.source === 'demo' || !lookup) {
+  // Mode démo : on garde la résolution whitelist. Court-circuité ICI,
+  // avant toute vérification de présence du lookup, pour que les tests
+  // sans DB puissent tourner sans setup. Le seul moyen de basculer
+  // en démo est `process.env.COACH_OS_DEMO_MODE === '1'` — lu dans
+  // `isDemoMode()` — donc impossible depuis un input réseau. C'est
+  // l'env qui parle, pas le fait que l'input soit complet ou non :
+  // si l'appelant a tout fourni mais que l'env est '1', on est en démo.
+  if (isDemoMode()) {
     return {
       ok: true,
       ctx: base.ctx,
-      source: base.source,
+      source: 'demo',
       roleSource: 'input',
     };
   }
 
-  const role = await lookup.activeRoleFor(base.ctx.actorId, base.ctx.tenantId as TenantId);
+  // Production : pas de lookup configuré → REFUS. La résolution
+  // whitelist seule ne protège rien (l'appelant déclare son propre
+  // rôle). C'est précisément le défaut mesuré en W03 et documenté
+  // dans RAPPORT_C §4.1.
+  if (!lookup) {
+    return {
+      ok: false,
+      error: `Lookup membership non configuré : appel refusé en production. setMembershipLookup() doit être invoqué au démarrage du serveur (voir src/lib/auth/memberships.ts).`,
+      missing: ['membership'],
+    };
+  }
+
+  let role: MembershipRole | null;
+  try {
+    role = await lookup.activeRoleFor(base.ctx.actorId, base.ctx.tenantId as TenantId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      error: `Lookup membership a échoué (${msg}) : appel refusé en production.`,
+      missing: ['membership'],
+    };
+  }
+
   if (role === null) {
     return {
       ok: false,

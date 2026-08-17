@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { parseArgs } from '../defineTool';
 import { get, list } from '../registry';
 import { readTypeName, unwrapAll, getObjectShape } from './zod-introspect';
-import { resolveIdentity } from '../identity';
+import { resolveIdentityWithMembership } from '../identity';
 import { assertPermission } from '../permissions';
 import { appendEvent } from '../../audit/logger';
 import type { ToolContext, ToolDefinition } from '../types';
@@ -29,11 +29,29 @@ function json(status: number, body: unknown): Response {
   });
 }
 
-/** Extrait l'identité depuis les en-têtes. Le serveur REST n'invente
- *  plus de défaut : sans `x-coach-os-tenant` / `x-coach-os-actor` /
- *  `x-coach-os-role`, on REFUSE (étape 2, campagne 2026-08-14). */
-function ctxFromHeaders(request: Request): { ok: true; ctx: ToolContext; source: 'full' | 'demo' } | { ok: false; status: number; body: unknown } {
-  const identity = resolveIdentity({
+/** Extrait l'identité depuis les en-têtes ET la relit côté `memberships`
+ *  (FIX_1_identite 2026-08-17). Avant cette passe, le rôle déclaré par
+ *  `x-coach-os-role` était cru sur parole : n'importe quel client
+ *  pouvait proclamer `owner` et la matrice `permissions.ts` le validait
+ *  sans recours. Désormais, le rôle effectif vient de
+ *  `resolveIdentityWithMembership`, qui REFUSE en production quand
+ *  `setMembershipLookup()` n'a pas été branché au démarrage.
+ *
+ *  Codes d'erreur :
+ *  - 401 si l'identité whitelist est incomplète, si le lookup jette,
+ *    si aucune membership active n'est trouvée, ou si aucun lookup
+ *    n'est configuré. Tous ces cas sont des échecs d'identité, pas
+ *    de permission : le client doit corriger ses en-têtes (ou
+ *    l'opérateur doit brancher le lookup avant de servir du trafic).
+ *  - 403 reste réservé à `assertPermission` quand le rôle effectif
+ *    est valide mais ne couvre pas la catégorie de l'outil. */
+export async function ctxFromHeaders(
+  request: Request,
+): Promise<
+  | { ok: true; ctx: ToolContext; source: 'full' | 'demo' | 'membership' }
+  | { ok: false; status: number; body: unknown }
+> {
+  const identity = await resolveIdentityWithMembership({
     tenantId: request.headers.get('x-coach-os-tenant') ?? undefined,
     actorId: request.headers.get('x-coach-os-actor') ?? undefined,
     role: request.headers.get('x-coach-os-role') ?? undefined,
@@ -138,7 +156,7 @@ export function toolHandler(toolName: string) {
     }
     const parsed = parseArgs(tool, raw);
     if (!parsed.ok) return json(400, { ok: false, error: parsed.error });
-    const id = ctxFromHeaders(request);
+    const id = await ctxFromHeaders(request);
     if (!id.ok) {
       // Identité rejetée. 401 + envelope identique au reste, pour que
       // les clients existants lisent ok:false sans surprise.

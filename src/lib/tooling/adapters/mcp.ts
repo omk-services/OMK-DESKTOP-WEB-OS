@@ -21,7 +21,7 @@ import { get, list } from '../registry';
 import { zodToInputSchema } from './mcp-schema.js';
 import { metaUi, listerRessourcesUi, lireRessourceUi } from './mcp-apps.js';
 import { registerAll } from '../catalog/index.js';
-import { resolveIdentity } from '../identity';
+import { resolveIdentityWithMembership } from '../identity';
 import { assertPermission } from '../permissions';
 import { appendEvent } from '../../audit/logger';
 import type { ToolContext } from '../types';
@@ -101,7 +101,7 @@ export function buildMcpServer(): Server {
         isError: true,
       };
     }
-    const identity = resolveIdentity({
+    const identity = await resolveIdentityWithMembership({
       tenantId:
         args && typeof args === 'object' && '__tenantId' in args
           ? (args as { __tenantId?: unknown }).__tenantId
