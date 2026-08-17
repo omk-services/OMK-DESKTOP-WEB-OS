@@ -1,0 +1,20 @@
+**FIX_1_identite — terminé.** Tests périmètre **30/30 verts**.
+
+**Ce que j'ai trouvé sur disque** (cf. §1 du rapport) : le passage précédent avait écrit `identity.ts`, `cli.ts`, `mcp.ts`, et 27 tests dont 26 passaient. `rest.ts` n'était pas touché.
+
+**Contradiction tranchée** (§2) : le test `mode démo sans aucun lookup → accepte` attendait `true` mais recevait `false`. Le code utilisait `if (base.source === 'demo')` qui ne se déclenche jamais quand `resolveIdentity` rend `source: 'full'` (les 3 champs fournis). Le commentaire de l'auteur précédent disait en toutes lettres « lu dans `isDemoMode()` » — j'ai aligné le code sur le commentaire. Vérifié que `process.env` n'est atteignable par aucun input réseau (REST/MCP/CLI), donc le mode démo reste défendable.
+
+**Câblage de `rest.ts`** (§3) : `resolveIdentity` → `resolveIdentityWithMembership`, `ctxFromHeaders` rendu async, type de retour élargi à `'full' | 'demo' | 'membership'`. Call site dans `toolHandler` ajusté. Code HTTP uniforme à 401 pour tous les refus d'identité.
+
+**3 tests verrous REST** (§4) ajoutés en bas de `identity.test.ts` :
+1. REST déclare `owner`, lookup rend `member` → rôle effectif `member` ;
+2. REST, lookup muet → 401 ;
+3. REST, lookup non configuré → 401 avec message pointant `setMembershipLookup()`.
+
+Le test 3 est le verrou opérationnel : rouge tant que personne n'a branché le lookup DB au démarrage du serveur.
+
+**`assertMembershipRolePresent`** (§5) : pas câblé. Le seul caller restant de `resolveIdentity` whitelist est `in-app` (session Supabase déjà validée serveur-side). Câbler cette garde ajouterait du bruit sans valeur.
+
+**Ce qui reste hors périmètre** (§6) : implémenter le `MembershipLookup` Supabase et l'invoquer au démarrage des trois serveurs. C'est le boulot des agents qui touchent `src/lib/auth/` et `api/`.
+
+Rapport : `_briefs/2026-08-17_CORRECTIFS_M3/RAPPORT_FIX_1.md`. Modifications sur disque, non committées (conformément au brief).

@@ -1,0 +1,20 @@
+Le brief FIX-7 est complété. Voici le résumé de ce qui a été fait, dans le périmètre exclusif (`src/lib/cms/seed.ts`, `src/apps/legal/`, `src/apps/people/`) :
+
+**Constat** : 8 collections consommées par `legal/` (`legal_ai_act_checks`, `legal_frameworks`, `legal_controls`, `legal_compliance_policies`, `legal_evidence`, `legal_risks`, `legal_vendors`, `legal_gaps`) et 6 par `people/` (`personas`, `memory`, `codex`, `content`, `approval_decisions`, `squads`) étaient déclarées dans des seeds locaux. Si un consumer chargeait la vue sans passer par l'app — test, code-splitting, frozen-on-leave — `addItem(…)` répondait « Collection inconnue » et le `?? []` rendait le défaut silencieux.
+
+**Actions** :
+- Centralisé les 14 déclarations dans `src/lib/cms/seed.ts` (37 collections au total au lieu de 23).
+- Ajouté un hook `useCmsCollectionStatus` et un composant `<UnknownCollectionBanner>` dans chaque app pour distinguer « registre inconnu » de « registre connu et vide ».
+- Remplacé les 17 lectures `?? []` muettes dans legal/ et people/ par ces hooks discriminants.
+- Verrouillé l'invariant avec deux tests (`src/apps/legal/seed-collections.test.ts` + `src/apps/people/seed-collections.test.ts`) qui extraient statiquement les IDs consommés et échouent avec la liste des manquants si quelqu'un consomme une collection non déclarée dans le central.
+
+**Vérification** :
+```
+Test Files  2 passed (2)
+Tests  2 passed (2)
+```
+
+`oxlint` propre sur le périmètre (zéro warning).
+
+**Livrables** :
+- `_briefs/2026-08-17_CORRECTIFS_M3/RAPPORT_FIX_7.md` — rapport complet (~280 lignes) avec inventaire exhaustif des 26 apps, justifications, et signalement des 9 apps hors périmètre qui ont le même défaut (operations, it-rd, tasks, sales, finance, growth, product, audit, settings) — candidats à un FIX-7-bis.

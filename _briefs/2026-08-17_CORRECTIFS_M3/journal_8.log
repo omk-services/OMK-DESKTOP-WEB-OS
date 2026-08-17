@@ -1,0 +1,18 @@
+Travail terminé. Voici le résumé :
+
+**Fichiers créés** (4 dans le périmètre officiel + 1 rapport) :
+- `src/stores/migrationDefensive.ts` — helper partagé (`defensiveMigrate`, `defensiveMerge`, `decodeVersionedEnvelope`)
+- `src/stores/migrationDefensive.test.ts` — contrat du helper
+- `src/stores/migrationDefensive.stores.test.ts` — par store
+- `src/stores/migrationDefensive.integration.test.ts` — bout en bout Zustand
+- `_briefs/2026-08-17_CORRECTIFS_M3/RAPPORT_FIX_8.md` — rapport
+
+**9 stores patchés** : `appVisibility`, `canvasFx`, `desktopLayout`, `threeApp`, `dock`, `shell`, `tenant`, `themes/store`, `saas-builder/ledger.store`. Chacun a `version: 1`, `migrate` qui jette les charges trop anciennes ou malformées, et `merge` qui valide champ par champ.
+
+**55 tests passants** (3 fichiers, en `--maxWorkers=1`), lint propre, typecheck propre.
+
+**Deux cas tordus gérés** :
+- **`tenant.store.ts`** : le bridge `auth-scope-bridge.ts` lit la clé `coach-os:activeTenantId` comme bare string (hors périmètre). Solution : clé `VERSION_KEY` séparée, sans toucher au format lu par le bridge.
+- **`shell.store.ts`** : passe `SCHEMA_VERSION` de `'0.1.0'` (string) à `1` (number) pour s'aligner sur le helper. Une charge héritée est écartée par le helper (le `typeof !== 'number'` la fait tomber), le bureau repart vide.
+
+**Le cloisonnement par compte** (`storage-scope.ts`) est intact — le `merge` opère sur la charge déjà scopée, ne touche pas aux clés, ne sait rien du user/tenant.
