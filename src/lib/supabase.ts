@@ -1,17 +1,34 @@
+/// <reference types="vite/client" />
 /** Supabase client singleton — Coach OS Phase 1.
+ *
+ *  La référence `vite/client` ci-dessus est nécessaire, et locale au fichier
+ *  à dessein : `api/tsconfig.json` ne charge pas les types client de Vite —
+ *  ces fonctions tournent dans Node. Sans elle, `tsc -p api/tsconfig.json`
+ *  rend `TS2339: Property 'env' does not exist on type 'ImportMeta'` sur ce
+ *  module, qu'il compile parce que les routes `api/v1/*` l'importent.
+ *  L'élargir dans le tsconfig serveur donnerait les types DOM à du code Node.
  *  Mirrors the Life OS pattern: a thin client, used by the CMS repository for
  *  hydrate/upsert. Safe to import even with no env vars set (client just won't
  *  authenticate — callers must treat every call as best-effort). */
 import { createClient } from '@supabase/supabase-js';
-import { viteEnv, estNavigateur } from './env';
+import { estNavigateur } from './env';
 
-// `viteEnv` plutot que `import.meta.env` directement : ce module est importe
-// transitivement par les routes `api/v1/*`, qui tournent dans Node. La-bas
-// `import.meta.env` vaut `undefined`, et lire une propriete dessus jetait un
-// TypeError AVANT la premiere ligne de la route — d'ou le 500 opaque
-// `FUNCTION_INVOCATION_FAILED` en production.
-const url = viteEnv('VITE_SUPABASE_URL');
-const anonKey = viteEnv('VITE_SUPABASE_ANON_KEY');
+// ACCES STATIQUE OBLIGATOIRE — ne pas passer par un helper.
+//
+// Vite remplace le motif LITTERAL `import.meta.env.VITE_XXX` par sa valeur au
+// build du client. Un acces dynamique (`env[cle]`, ou un helper qui aliase
+// `import.meta`) casse ce remplacement : la variable disparait du bundle et
+// l'app demarre en croyant Supabase non configure. C'est exactement ce qui
+// s'est produit le 2026-08-17 — l'ecran de connexion affichait « Supabase non
+// configure », aucun compte ne fonctionnait, et seul le mode demo restait.
+//
+// L'optional chaining protege Node : `api/v1/*` importe ce module
+// transitivement, et la-bas `import.meta.env` vaut `undefined`. Le `?.` rend
+// `undefined` au lieu de jeter, sans empecher Vite d'inliner.
+//
+// Le test `src/lib/supabase.inlining.test.ts` verrouille la propriete.
+const url = import.meta.env?.VITE_SUPABASE_URL as string | undefined;
+const anonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 // `supabaseConfigured` est faux si l'URL ou la cle manquent. On detecte aussi
 // les URL manifestement fantaisistes (placeholder) pour eviter qu'un build

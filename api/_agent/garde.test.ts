@@ -170,26 +170,48 @@ describe('garde sur les routes ajoutees en FIX_3', () => {
     });
   });
 
-  describe('/api/agent/roster', () => {
-    it('REFUSE en production sans jeton', () => {
+  describe('/api/agent/roster — VOLONTAIREMENT NON GARDEE', () => {
+    // Ces tests verrouillent l'INVERSE de ce que FIX_3 avait pose, et c'est
+    // deliberé.
+    //
+    // FIX_3 avait garde cette route en supposant que « le client n'en a
+    // besoin qu'apres authentification ». La production a demontre le
+    // contraire : le bureau affichait « Roster HTTP 503 » au chargement.
+    // Les appelants sont `AssistantOverlay.tsx:68` et
+    // `AssistantSettings.tsx:84` — des `fetch()` de navigateur, sans jeton,
+    // qui n'ont aucun moyen d'en presenter un.
+    //
+    // Le test precedent verrouillait donc un comportement qui CASSE le
+    // produit. Un verrou sur une hypothese fausse est pire qu'aucun verrou.
+
+    it('repond 200 sans jeton, en production — le bureau en depend', () => {
       delete process.env.AGENT_API_TOKEN;
       process.env.VERCEL_ENV = 'production';
       const r = gestionnaireRoster(new Request('http://localhost/api/agent/roster'));
-      expect(r.status).toBe(503);
+      expect(
+        r.status,
+        'roster garde = badge « Roster HTTP 503 » sur le bureau au chargement',
+      ).toBe(200);
     });
 
-    it('passe le garde avec le bon jeton en production', () => {
-      process.env.AGENT_API_TOKEN = 'secret-abc';
+    it('ne divulgue PAS les descriptions internes des agents', async () => {
+      delete process.env.AGENT_API_TOKEN;
       process.env.VERCEL_ENV = 'production';
-      const r = gestionnaireRoster(
-        new Request('http://localhost/api/agent/roster', {
-          headers: { authorization: 'Bearer secret-abc' },
-        }),
-      );
-      // Garde passe : on ne tient pas compte du contenu (les backends
-      // sont peut-etre indisponibles en environnement de test).
-      expect(r.status).not.toBe(401);
-      expect(r.status).not.toBe(503);
+      const r = gestionnaireRoster(new Request('http://localhost/api/agent/roster'));
+      const corps = (await r.json()) as { agents: Array<Record<string, unknown>> };
+
+      expect(corps.agents.length).toBeGreaterThan(0);
+      for (const a of corps.agents) {
+        // La route est ouverte : elle ne doit rendre que de quoi dessiner la
+        // liste. Les `description` racontaient l'architecture d'agents
+        // (doctrine, cadences, squads) a n'importe quel visiteur.
+        expect(
+          a,
+          `l agent "${String(a.id)}" expose sa description interne`,
+        ).not.toHaveProperty('description');
+        expect(a).toHaveProperty('id');
+        expect(a).toHaveProperty('available');
+      }
     });
   });
 

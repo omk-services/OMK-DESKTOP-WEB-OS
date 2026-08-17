@@ -4,38 +4,43 @@
 import { listBackendStatuses } from '../_agent/backends.js';
 import { ROSTER, listAgents } from '../_agent/roster.js';
 import { listProviderStatuses } from '../_agent/providers.js';
-import { verifierAcces } from '../_agent/garde.js';
 import { versNode } from '../_agent/adapt.js'
 
-/** Gestionnaire de la route — exporté pour les tests du garde.
+/** Gestionnaire de la route — exporté pour les tests.
  *
- *  Avant ce correctif (FIX_3 2026-08-17) : la route renvoyait 200 sans
- *  aucune vérification d'accès. N'importe qui pouvait lire le roster
- *  complet (noms d'agents, descriptions, modèles, fournisseurs), bien
- *  que sans secret (`available: false` en production). Le client n'en
- *  a besoin qu'après authentification (AssistantOverlay, AssistantSettings),
- *  donc on garde avec `verifierAcces` comme les autres routes. */
-export function gestionnaire(request: Request): Response {
-  const refus = verifierAcces(request);
-  if (refus) {
-    return new Response(
-      JSON.stringify({ error: refus.message }),
-      { status: refus.status, headers: { 'Content-Type': 'application/json' } },
-    );
-  }
-
+ *  HISTORIQUE, ET POURQUOI IL N'Y A PAS DE GARDE ICI
+ *
+ *  FIX_3 (2026-08-17) a posé `verifierAcces` sur cette route, en partant du
+ *  principe que « le client n'en a besoin qu'après authentification ».
+ *  **C'était faux, et la production l'a démontré** : le bureau affichait
+ *  un badge « Roster HTTP 503 » au chargement.
+ *
+ *  Les appelants réels sont `src/agent/AssistantOverlay.tsx:68` et
+ *  `src/apps/settings/AssistantSettings.tsx:84`. Ce sont des `fetch()` de
+ *  navigateur, sans jeton — ils n'ont aucun moyen d'en présenter un.
+ *  Garder cette route revenait à casser le bureau pour protéger une donnée
+ *  qui ne contient aucun secret.
+ *
+ *  LE COMPROMIS ASSUMÉ
+ *
+ *  La route reste ouverte, mais ne rend plus que ce dont l'interface a
+ *  besoin pour dessiner sa liste. Les `description` internes — qui
+ *  racontaient l'architecture d'agents (« USS Cerritos = Lower Deck »,
+ *  cadences, doctrine) — ne sortent plus. Un visiteur non authentifié voit
+ *  des identifiants et des états de disponibilité, pas la conception.
+ *
+ *  RÈGLE GÉNÉRALE À RETENIR : avant de garder une route, vérifier QUI
+ *  l'appelle. Un garde posé sur un appel pré-authentification ne protège
+ *  rien — il casse. */
+export function gestionnaire(_request: Request): Response {
   const backends = listBackendStatuses();
   const providers = listProviderStatuses();
   const agents = listAgents().map((agent) => ({
     id: agent.id,
     name: agent.name,
-    description: agent.description,
     personnageId: agent.personnageId,
     backend: agent.backend,
     provider: agent.provider ?? null,
-    buzzModel: agent.buzzModel ?? null,
-    multicaAgentId: agent.multicaAgentId ?? null,
-    multicaSquadId: agent.multicaSquadId ?? null,
     available: backends.find((b) => b.id === agent.backend)?.available ?? false,
   }));
 

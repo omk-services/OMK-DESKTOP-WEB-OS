@@ -76,23 +76,39 @@ describe('le contexte du test', () => {
 
 describe('interdiction statique — aucune construction Vite sur le chemin serveur', () => {
   for (const rel of CHEMIN_SERVEUR) {
-    it(`${rel} n utilise pas import.meta.env directement`, () => {
+    it(`${rel} n accede jamais a import.meta.env SANS garde`, () => {
       const abs = path.join(RACINE, rel);
       expect(fs.existsSync(abs), `fichier introuvable : ${rel} — liste a mettre a jour`).toBe(true);
 
       const src = fs.readFileSync(abs, 'utf8');
       // On tolère les mentions en commentaire : elles expliquent justement
-      // pourquoi la construction est proscrite ici.
+      // pourquoi la construction est encadrée ici.
       const lignes = src.split('\n').filter((l) => {
         const t = l.trim();
         if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) return false;
         return l.includes('import.meta.env');
       });
 
+      // MAJ 2026-08-17 — cette règle interdisait TOUT `import.meta.env`. Elle
+      // était trop large, et elle a coûté cher : le contournement par un
+      // helper (`viteEnv`) a cassé le remplacement statique de Vite, la
+      // configuration Supabase a disparu du bundle, et plus aucun compte ne
+      // pouvait se connecter en production.
+      //
+      // La vraie règle est plus fine :
+      //   - `import.meta.env.X`  → INTERDIT : jette un TypeError dans Node ;
+      //   - `import.meta.env?.X` → REQUIS pour les variables `VITE_*` que Vite
+      //     doit inliner côté client. Le `?.` rend `undefined` dans Node sans
+      //     jeter, et n'empêche pas le remplacement (vérifié empiriquement :
+      //     un build avec valeur sentinelle la retrouve dans `dist/`).
+      const nonGardees = lignes.filter((l) => !l.includes('import.meta.env?.'));
+
       expect(
-        lignes,
-        `${rel} lit import.meta.env, qui vaut undefined dans une fonction ` +
-        'Vercel. Passer par viteEnv() de src/lib/env.ts.',
+        nonGardees,
+        `${rel} accede a import.meta.env sans optional chaining. ` +
+        'Dans une fonction Vercel, import.meta.env vaut undefined et lire une ' +
+        'propriete dessus jette avant la premiere ligne de la route. ' +
+        'Ecrire import.meta.env?.X — jamais un helper, qui casserait l inlining.',
       ).toEqual([]);
     });
   }
