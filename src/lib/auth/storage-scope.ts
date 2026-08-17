@@ -137,7 +137,35 @@ export function purgeAllCoachOsKeys(): number {
  *  pour le scope courant, et `clear` n'efface QUE les clés scopées au
  *  scope courant (le reste est laissé tel quel — `clear` est rarement
  *  appelé, mais le contrat exige une sémantique). */
-export function createScopedStorage(backend: Storage = localStorage): Storage {
+/** Stockage en mémoire, utilisé quand `localStorage` n'existe pas.
+ *
+ *  Ce n'est pas un confort : c'est ce qui empêche une fonction serverless
+ *  de mourir au chargement. Zustand appelle la fonction passée à
+ *  `createJSONStorage()` à l'ÉVALUATION DU MODULE. Sur Vercel, ce module est
+ *  chargé dans Node, où `localStorage` n'est pas défini — le paramètre par
+ *  défaut jetait donc un `ReferenceError` avant la première ligne de la route,
+ *  et `/api/v1/*` rendait un 500 opaque (`FUNCTION_INVOCATION_FAILED`).
+ *
+ *  Côté serveur, rien ne doit être persisté de toute façon : un magasin
+ *  volatile est la bonne sémantique, pas un pis-aller. */
+function stockageVolatile(): Storage {
+  const m = new Map<string, string>();
+  return {
+    get length() { return m.size; },
+    key: (i) => Array.from(m.keys())[i] ?? null,
+    getItem: (k) => m.get(k) ?? null,
+    setItem: (k, v) => { m.set(k, String(v)); },
+    removeItem: (k) => { m.delete(k); },
+    clear: () => { m.clear(); },
+  } as Storage;
+}
+
+/** Résout le magasin réel au moment de l'APPEL, jamais à l'import. */
+function backendParDefaut(): Storage {
+  return typeof localStorage === 'undefined' ? stockageVolatile() : localStorage;
+}
+
+export function createScopedStorage(backend: Storage = backendParDefaut()): Storage {
   const scopedPrefix = (): string =>
     `${COACH_OS_PREFIX}:${currentScope.userId}:${currentScope.tenantId}:`;
   const wrapper = {
