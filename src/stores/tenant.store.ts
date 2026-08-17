@@ -31,6 +31,7 @@ import {
   type TenantState,
   type TenantActions,
 } from '../lib/tenant/contract';
+import { createScopedStorage } from '../lib/auth/storage-scope';
 
 /** The default tenant for the single-tenant demo seed. Picked deliberately
  *  to match the `demo_coach_*` collections in `cms/seed.ts` and the existing
@@ -38,12 +39,34 @@ import {
  *  and `tasks`. Phase 3 replaces it with a real org id from `memberships`. */
 export const TENANT_DEMO_COACH: TenantId = 'demo-coach' as TenantId;
 
-const STORAGE_KEY = 'coach-os.activeTenantId';
+// FIX-2 (2026-08-17) — clé logique ; le wrapper ajoute `coach-os:<scope>:`.
+// Avant, c'était `coach-os.activeTenantId` (avec un point), incohérent
+// avec les autres clés du projet. Le passage à `:` aligne sur le helper
+// `scopedKey()` qui strippe `coach-os:` avant d'ajouter le scope.
+//
+// FIX-8 (2026-08-17) — versioning. La clé `STORAGE_KEY` porte un tenant
+// brut, lue aussi par `auth-scope-bridge.ts` au login. On ne peut pas
+// la reformater en enveloppe sans toucher au bridge (hors périmètre).
+// Solution : la clé `VERSION_KEY` porte la version du schéma ; sans
+// elle (legacy) ou avec une version antérieure, on retombe sur le
+// tenant par défaut. La clé `STORAGE_KEY` reste inchangée pour le
+// bridge.
+const STORAGE_KEY = 'coach-os:activeTenantId';
+const VERSION_KEY = 'coach-os:activeTenantId.version';
+const SCHEMA_VERSION = 1;
 
 function readPersistedTenant(): TenantId {
   if (typeof window === 'undefined') return TENANT_DEMO_COACH;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    // Si la version est absente ou trop ancienne, on jette la charge
+    // et on retombe sur le tenant par défaut. Le brief est clair :
+    // le défaut est toujours préférable à l'échec.
+    const versionRaw = createScopedStorage().getItem(VERSION_KEY);
+    const version = versionRaw ? Number.parseInt(versionRaw, 10) : 0;
+    if (!Number.isFinite(version) || version < SCHEMA_VERSION) {
+      return TENANT_DEMO_COACH;
+    }
+    const raw = createScopedStorage().getItem(STORAGE_KEY);
     if (raw && raw.length > 0) return raw as TenantId;
   } catch {
     // localStorage blocked — fall back to default
@@ -54,7 +77,10 @@ function readPersistedTenant(): TenantId {
 function persistTenant(next: TenantId): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, next);
+    createScopedStorage().setItem(STORAGE_KEY, next);
+    // On écrit la version en parallèle, pour que la prochaine lecture
+    // n'écarte pas la valeur qu'on vient de poser.
+    createScopedStorage().setItem(VERSION_KEY, String(SCHEMA_VERSION));
   } catch {
     // best-effort — survives private mode and quota errors
   }

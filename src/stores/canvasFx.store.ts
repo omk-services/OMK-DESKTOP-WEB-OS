@@ -24,6 +24,9 @@ import {
   resolveDominantEffect,
   type CanvasEffectId,
 } from '../components/canvasui/v30/theme-canvas-mapping';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { registerPersistedStore } from '../lib/auth/auth-scope-bridge';
+import { defensiveMerge, defensiveMigrate } from './migrationDefensive';
 
 interface CanvasFxState {
   /** appId → CanvasEffectId override. 'auto' = use theme dominant. */
@@ -31,6 +34,34 @@ interface CanvasFxState {
   setAppFx: (appId: string, effectId: CanvasEffectId | 'auto') => void;
   clearAppFx: (appId: string) => void;
   clearAll: () => void;
+}
+
+/** Set des CanvasEffectId connus + 'auto'. On le construit à partir de
+ *  la liste de l'union pour valider la valeur ; un id forgé n'active
+ *  pas un effet fantôme. */
+const KNOWN_FX: ReadonlySet<string> = new Set([
+  'Asciify', 'Bend', 'Blaze', 'Bubble', 'Canvas', 'Cloth', 'Clouds',
+  'DecryptReveal', 'Displacement', 'Droplets', 'FlameWrap', 'ForceField',
+  'Frost', 'Glass', 'Glitch', 'GlyphRain', 'Grid', 'HexFloat', 'Laser',
+  'Liquid', 'Magnify', 'ParticleReveal', 'ParticleScroll', 'Peel',
+  'RetroDither', 'Ripple', 'Shatter', 'VHS',
+  'AsciiObject', 'DitheredObject', 'GlassObject', 'ParticleObject', 'LiquidObject',
+  'auto',
+]);
+
+/** Valide la map d'overrides : `Record<string, CanvasEffectId | 'auto'>`.
+ *  Écarte les appIds pointant sur un effet inconnu ou d'un autre type. */
+function sanitizeAppFxOverrides(value: unknown): Record<string, CanvasEffectId | 'auto'> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, CanvasEffectId | 'auto'> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof v === 'string' && KNOWN_FX.has(v)) {
+      out[k] = v as CanvasEffectId | 'auto';
+    }
+  }
+  return out;
 }
 
 export const useCanvasFxStore = create<CanvasFxState>()(
@@ -51,12 +82,23 @@ export const useCanvasFxStore = create<CanvasFxState>()(
       clearAll: () => set({ appFxOverrides: {} }),
     }),
     {
-      name: 'coach-os-canvas-fx-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'canvas-fx-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       partialize: (state) => ({ appFxOverrides: state.appFxOverrides }),
+      // FIX-8 (2026-08-17) — version + migrate. Cf. migrationDefensive.ts.
+      version: 1,
+      migrate: defensiveMigrate<CanvasFxState>(1),
+      merge: defensiveMerge<CanvasFxState>({
+        validators: { appFxOverrides: sanitizeAppFxOverrides },
+      }),
     },
   ),
 );
+
+registerPersistedStore({
+  name: 'useCanvasFxStore',
+  persist: useCanvasFxStore.persist,
+});
 
 /**
  * Resolve the active signature effect for an app.

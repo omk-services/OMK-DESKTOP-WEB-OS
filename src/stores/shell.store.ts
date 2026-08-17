@@ -9,6 +9,8 @@
  *  `clearNotifications`). The history persists across the session so a
  *  notification fired 20 minutes ago is still readable in the panel. */
 import { create } from 'zustand';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { decodeVersionedEnvelope } from './migrationDefensive';
 
 /* ═══ Types ═══ */
 
@@ -118,8 +120,14 @@ function toastId(): string {
   return `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-const LAYOUT_KEY = 'coach-os-shell-layout-v1';
-const SCHEMA_VERSION = '0.1.0';
+const LAYOUT_KEY = 'shell-layout-v1';
+// FIX-8 (2026-08-17) — la version est désormais numérique pour
+// s'aligner sur le helper `decodeVersionedEnvelope` (qui rejette
+// toute charge avec une version < currentVersion). Une charge
+// héritée avec `version: '0.1.0'` (string) est écartée par le
+// helper (le `typeof v !== 'number'` la fait tomber), et le
+// bureau repart vide — c'est le défaut préférable à l'échec.
+const SCHEMA_VERSION = 1;
 
 /* ═══ Store ═══ */
 
@@ -189,7 +197,9 @@ export const useShellStore = create<ShellState>((set, get) => ({
 
   bootClean: () => {
     try {
-      localStorage.removeItem(LAYOUT_KEY);
+      // On utilise la version locale de le wrapper pour la purge — ça donne
+      // la clé scopée correcte pour le contexte courant.
+      createScopedStorage().removeItem(LAYOUT_KEY);
     } catch {
       // The in-memory reset must still work when storage is unavailable.
     }
@@ -240,7 +250,7 @@ export const useShellStore = create<ShellState>((set, get) => ({
     // for the historical one-window case, where persisting a transient
     // single-window layout is the right thing to do.
     try {
-      localStorage.setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
+      createScopedStorage().setItem(LAYOUT_KEY, JSON.stringify({ version: SCHEMA_VERSION, state: { windows } }));
     } catch {
       // The live layout remains usable when persistence is unavailable.
     }
@@ -248,34 +258,31 @@ export const useShellStore = create<ShellState>((set, get) => ({
 
   restoreLayout: () => {
     try {
-      const raw = localStorage.getItem(LAYOUT_KEY);
+      const raw = createScopedStorage().getItem(LAYOUT_KEY);
       if (!raw) return;
-      const data: unknown = JSON.parse(raw);
-      if (
-        typeof data === 'object'
-        && data !== null
-        && 'version' in data
-        && data.version === SCHEMA_VERSION
-        && 'state' in data
-        && typeof data.state === 'object'
-        && data.state !== null
-        && 'windows' in data.state
-        && Array.isArray(data.state.windows)
-        && data.state.windows.every(isAppWindow)
-      ) {
-        // Brief M (2026-08-11) — silent migration: any window carrying the
-        // old `onboarding` id (persisted before the rename) is rewritten to
-        // `audit` on read. The window is otherwise untouched (position,
-        // size, open state). Without this, a saved layout would restore a
-        // window pointing at an unregistered app and render the "not
-        // registered" dead-end.
-        const migrated = (data.state.windows as Array<{ id?: string }>).map((w) =>
-          w && typeof w === 'object' && w.id === 'onboarding' ? { ...w, id: 'audit' } : w
-        );
-        set({ windows: migrated as typeof data.state.windows });
-      } else {
-        localStorage.removeItem(LAYOUT_KEY);
+      // FIX-8 (2026-08-17) — on lit par le helper de décodage
+      // enveloppé. Une charge trop ancienne ou malformée est écartée
+      // silencieusement (helper rend `undefined`) ; on supprime alors
+      // la clé pour ne pas la relire à chaque tentative.
+      const data = decodeVersionedEnvelope<{ windows: unknown }>(raw, SCHEMA_VERSION);
+      if (!data) {
+        createScopedStorage().removeItem(LAYOUT_KEY);
+        return;
       }
+      if (!Array.isArray(data.windows) || !data.windows.every(isAppWindow)) {
+        createScopedStorage().removeItem(LAYOUT_KEY);
+        return;
+      }
+      // Brief M (2026-08-11) — silent migration: any window carrying the
+      // old `onboarding` id (persisted before the rename) is rewritten to
+      // `audit` on read. The window is otherwise untouched (position,
+      // size, open state). Without this, a saved layout would restore a
+      // window pointing at an unregistered app and render the "not
+      // registered" dead-end.
+      const migrated = (data.windows as Array<{ id?: string }>).map((w) =>
+        w && typeof w === 'object' && w.id === 'onboarding' ? { ...w, id: 'audit' } : w
+      );
+      set({ windows: migrated as AppWindow[] });
     } catch {
       // Corrupted or unavailable storage is ignored.
     }

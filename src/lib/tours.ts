@@ -15,6 +15,7 @@
 
 import usertour from 'usertour.js';
 import { getObservabilityConsent, isObservabilityReady } from './observability';
+import { createScopedStorage } from './auth/storage-scope';
 
 export const TOUR_IDS = {
   WELCOME_SOB:      'welcome-sob',        // T1 — first window-open, SOB overview
@@ -35,7 +36,9 @@ const TOUR_CONTENT_ENV: Record<TourId, string> = {
   [TOUR_IDS.PRIVACY]:         'VITE_USERTOUR_CONTENT_PRIVACY',
 };
 
-const GUARD_PREFIX = 'coach-os:tour-fired:';
+// FIX-2 (2026-08-17) — clé logique `tour-fired:<id>` ; le wrapper
+// ajoute `coach-os:<user>:<tenant>:` pour fermer la fuite inter-comptes.
+const GUARD_PREFIX = 'tour-fired:';
 
 function guardKey(tourId: TourId): string {
   return `${GUARD_PREFIX}${tourId}`;
@@ -43,7 +46,7 @@ function guardKey(tourId: TourId): string {
 
 function readGuard(tourId: TourId): boolean {
   try {
-    return localStorage.getItem(guardKey(tourId)) === 'true';
+    return createScopedStorage().getItem(guardKey(tourId)) === 'true';
   } catch {
     // localStorage unavailable — treat as not-yet-fired so the gate is conservative
     return false;
@@ -52,7 +55,7 @@ function readGuard(tourId: TourId): boolean {
 
 function writeGuard(tourId: TourId): void {
   try {
-    localStorage.setItem(guardKey(tourId), 'true');
+    createScopedStorage().setItem(guardKey(tourId), 'true');
   } catch {
     // best-effort; if storage is unavailable, the SDK will still fire this once
   }
@@ -124,11 +127,15 @@ export async function launchTour(tourId: TourId, options: LaunchTourOptions = {}
 export function resetAllTourGuards(): void {
   try {
     const keys: string[] = [];
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const k = localStorage.key(i);
+    // On itère via le wrapper scopé : seules les clés du scope courant
+    // sont visibles. Si un autre onglet a posé des guards sous un
+    // autre utilisateur, on ne les touche pas.
+    const storage = createScopedStorage();
+    for (let i = 0; i < storage.length; i += 1) {
+      const k = storage.key(i);
       if (k && k.startsWith(GUARD_PREFIX)) keys.push(k);
     }
-    for (const k of keys) localStorage.removeItem(k);
+    for (const k of keys) storage.removeItem(k);
   } catch {
     // best-effort
   }

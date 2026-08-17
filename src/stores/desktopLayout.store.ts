@@ -8,12 +8,19 @@
 //   2. une persistance minuscule (deux entiers par app), pas des floats
 //      qui se dégradent à chaque drag.
 //
-// Clé localStorage : `coach-os-desktop-layout-v1` — préfixe commun aux
-// stores existants (dock.store.ts, appVisibility.store.ts). Une version
-// dans la clé permet de migrer sans casser les sessions en cours.
+// Clé localStorage : `desktop-layout-v1` — passée à un wrapper scopé
+// (cf. `src/lib/auth/storage-scope.ts`) qui la préfixe par
+// `coach-os:<user>:<tenant>:` pour fermer la fuite inter-comptes.
+//
+// FIX-2 (2026-08-17) — bascule du storage scopé. Le nom logique reste
+// court ; le wrapper ajoute le scope. Le store s'enregistre aussi
+// auprès du bridge d'auth pour rehydrate aux transitions.
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { registerPersistedStore } from '../lib/auth/auth-scope-bridge';
+import { defensiveMerge, defensiveMigrate } from './migrationDefensive';
 
 export interface IconSlot {
   /** Colonne dans la grille du bureau, 0 = la plus à gauche. */
@@ -32,6 +39,33 @@ interface DesktopLayoutState {
   clearPosition: (appId: string) => void;
   /** Réinitialise tout le bureau — les icônes reviennent à la pose auto. */
   reset: () => void;
+}
+
+/** Valide une IconSlot : entiers positifs. Une entrée qui n'a pas la
+ *  bonne forme est écartée, jamais corrigée silencieusement (la pose
+ *  auto reprend la main). */
+function sanitizeIconSlot(value: unknown): IconSlot | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  const v = value as { col?: unknown; row?: unknown };
+  if (typeof v.col !== 'number' || !Number.isInteger(v.col) || v.col < 0) return undefined;
+  if (typeof v.row !== 'number' || !Number.isInteger(v.row) || v.row < 0) return undefined;
+  return { col: v.col, row: v.row };
+}
+
+/** Valide la map de positions : on itère les entrées et on écarte
+ *  celles qui ne sont pas des IconSlot valides. */
+function sanitizePositions(value: unknown): Record<string, IconSlot> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, IconSlot> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    const slot = sanitizeIconSlot(v);
+    if (slot) out[k] = slot;
+  }
+  return out;
 }
 
 export const useDesktopLayout = create<DesktopLayoutState>()(
@@ -55,14 +89,25 @@ export const useDesktopLayout = create<DesktopLayoutState>()(
       reset: () => set({ positions: {} }),
     }),
     {
-      name: 'coach-os-desktop-layout-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'desktop-layout-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       // On ne persiste QUE la map. Les fonctions sont reconstruites à
       // chaque hydratation — pas la peine de les sauver.
       partialize: (state) => ({ positions: state.positions }),
+      // FIX-8 (2026-08-17) — version + migrate. Cf. migrationDefensive.ts.
+      version: 1,
+      migrate: defensiveMigrate<DesktopLayoutState>(1),
+      merge: defensiveMerge<DesktopLayoutState>({
+        validators: { positions: sanitizePositions },
+      }),
     },
   ),
 );
+
+registerPersistedStore({
+  name: 'useDesktopLayout',
+  persist: useDesktopLayout.persist,
+});
 
 /** Dimensions d'une case de la grille du bureau. Exportées pour que
  *  `DesktopIcons.tsx` (rendu) et `desktopLayout.test.ts` (vérif du snap)

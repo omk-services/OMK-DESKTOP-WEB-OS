@@ -29,6 +29,7 @@ import {
   ONTOLOGY_SCOPE_STORAGE_KEY,
   type ScopeFilter,
 } from './scope-store';
+import { scopedKey, setScope, clearScope } from '../auth/storage-scope';
 
 /** Mock minimaliste de `localStorage` pour les tests. Le store persistant
  *  de Zustand utilise `getItem` / `setItem` / `removeItem` ; on provide
@@ -225,11 +226,29 @@ describe('scope-store — portee d ontologie', () => {
     expect(parsed.state.version).toBeUndefined();
   });
 
-  it('(e) cle de persistance exactement coach-os-ontology-scope-v1', () => {
-    // Verrou contre la typo silencieuse. Si quelqu'un renomme la
-    // cle, la migration existante casse et le defaut revient
-    // sans que rien ne bronche.
-    expect(ONTOLOGY_SCOPE_STORAGE_KEY).toBe('coach-os-ontology-scope-v1');
+  it('(e) nom logique stable, et cle effective cloisonnee par compte', () => {
+    // Verrou contre la typo silencieuse. Si quelqu'un renomme le nom
+    // logique, la migration existante casse et le defaut revient sans
+    // que rien ne bronche.
+    //
+    // MAJ 2026-08-17 : ce test attendait `coach-os-ontology-scope-v1`,
+    // c'est-a-dire une cle GLOBALE, partagee par tous les comptes du meme
+    // navigateur. C'etait precisement la fuite inter-comptes reproduite a
+    // l'ecran. Le prefixe `coach-os` n'est donc plus dans le nom logique :
+    // il est pose par `scopedKey()`, avec l'utilisateur et le tenant.
+    //
+    // On verrouille les deux moities du contrat, pour qu'un retour en
+    // arriere vers une cle globale echoue ici.
+    expect(ONTOLOGY_SCOPE_STORAGE_KEY).toBe('ontology-scope-v1');
+
+    setScope('u-1', 't-1');
+    const cle = scopedKey(ONTOLOGY_SCOPE_STORAGE_KEY);
+    expect(cle).toBe('coach-os:u-1:t-1:ontology-scope-v1');
+
+    // Deux comptes distincts ne doivent jamais viser la meme case.
+    setScope('u-2', 't-1');
+    expect(scopedKey(ONTOLOGY_SCOPE_STORAGE_KEY)).not.toBe(cle);
+    clearScope();
   });
 
   it('(bonus) reset() ramene au defaut et remet version a 0', () => {

@@ -7,6 +7,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { THEMES, THEME_LIST, CANONICAL_APP_THEMES, type ThemeTokens } from './tokens';
+import { createScopedStorage } from '../auth/storage-scope';
+import { registerPersistedStore } from '../auth/auth-scope-bridge';
+import { defensiveMerge, defensiveMigrate } from '../../stores/migrationDefensive';
 
 interface ThemeStore {
   globalTheme: string;
@@ -19,6 +22,30 @@ interface ThemeStore {
   resolveTheme: (appId: string) => string;
   /** Returns the token object for an app */
   tokensFor: (appId: string) => ThemeTokens;
+}
+
+/** Valide un themeId : doit etre une cle connue de THEMES. Un theme
+ *  forge en string bizarre ne s'applique pas — fallback au defaut. */
+function sanitizeThemeId(value: unknown, fallback: string): string {
+  if (typeof value !== 'string') return fallback;
+  if (!Object.prototype.hasOwnProperty.call(THEMES, value)) return fallback;
+  return value;
+}
+
+/** Valide la map appThemes. Chaque themeId doit etre connu. La sentinelle
+ *  `_v` est conservée telle quelle (elle sert de barrage anti-shallow-equal).
+ *  Une entree avec un themeId inconnu est ecartee. */
+function sanitizeAppThemes(value: unknown): Record<string, string> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof v === 'string' && Object.prototype.hasOwnProperty.call(THEMES, v)) {
+      out[k] = v;
+    }
+  }
+  return out;
 }
 
 export const useThemeStore = create<ThemeStore>()(
@@ -50,9 +77,18 @@ export const useThemeStore = create<ThemeStore>()(
       },
     }),
     {
-      name: 'coach-os-themes-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'themes-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       partialize: (s) => ({ globalTheme: s.globalTheme, appThemes: s.appThemes }),
+      // FIX-8 (2026-08-17) — version + migrate. Cf. migrationDefensive.ts.
+      version: 1,
+      migrate: defensiveMigrate<ThemeStore>(1),
+      merge: defensiveMerge<ThemeStore>({
+        validators: {
+          globalTheme: (v) => sanitizeThemeId(v, 'warm-paper'),
+          appThemes: sanitizeAppThemes,
+        },
+      }),
     }
   )
 );
@@ -137,3 +173,8 @@ export { THEMES, THEME_LIST, CANONICAL_APP_THEMES };
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__coachos = { ...window.__coachos, themes: useThemeStore };
 }
+
+registerPersistedStore({
+  name: 'useThemeStore',
+  persist: useThemeStore.persist,
+});

@@ -24,6 +24,8 @@
  */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { registerPersistedStore } from '../lib/auth/auth-scope-bridge';
 
 /** Une proposition de modification faite par l'agent.
  *
@@ -392,8 +394,8 @@ export const useScenariosStore = create<ScenariosState>()(
       },
     }),
     {
-      name: 'coach-os-scenarios-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'scenarios-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       version: 1,
       // La règle des projets : un état persisté est une entrée NON FIABLE.
       // On répare à la lecture plutôt que de croire aveuglément le blob.
@@ -419,3 +421,8 @@ export const useScenariosStore = create<ScenariosState>()(
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__coachos = { ...window.__coachos, scenarios: useScenariosStore };
 }
+
+registerPersistedStore({
+  name: 'useScenariosStore',
+  persist: useScenariosStore.persist,
+});

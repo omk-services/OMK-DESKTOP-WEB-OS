@@ -28,6 +28,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { CHARACTERS, DEFAULT_CHARACTER_ID } from '../agent/characters';
 import type { PrivacyMode } from '../agent/voice';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { registerPersistedStore } from '../lib/auth/auth-scope-bridge';
 
 export interface ChatTurn {
   id: string;
@@ -311,8 +313,8 @@ export const useAssistantStore = create<AssistantState>()(
       }),
     }),
     {
-      name: 'coach-os-assistant-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'assistant-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       partialize: (s) => ({
         // LEGACY v1 only — la v2 recharge le roster depuis le serveur.
         active: s.active,
@@ -387,3 +389,8 @@ export const useAssistantStore = create<AssistantState>()(
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__coachos = { ...window.__coachos, assistant: useAssistantStore };
 }
+
+registerPersistedStore({
+  name: 'useAssistantStore',
+  persist: useAssistantStore.persist,
+});

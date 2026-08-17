@@ -17,9 +17,10 @@
  */
 
 import { useSyncExternalStore } from 'react';
+import { createScopedStorage } from './auth/storage-scope';
 
-const KEY_DATA = 'coach-os-wallpaper-data-v1';
-const KEY_FIT = 'coach-os-wallpaper-fit-v1';
+const KEY_DATA = 'wallpaper-data-v1';
+const KEY_FIT = 'wallpaper-fit-v1';
 
 export type WallpaperFit = 'cover' | 'contain' | 'repeat';
 
@@ -32,9 +33,10 @@ export function getWallpaper(): { dataUrl: string | null; fit: WallpaperFit } {
   let dataUrl: string | null = null;
   let fit: WallpaperFit = DEFAULT_FIT;
   try {
-    const d = localStorage.getItem(KEY_DATA);
+    const storage = createScopedStorage();
+    const d = storage.getItem(KEY_DATA);
     if (d && d.startsWith('data:image/')) dataUrl = d;
-    const f = localStorage.getItem(KEY_FIT);
+    const f = storage.getItem(KEY_FIT);
     if (f && VALID_FIT.has(f as WallpaperFit)) fit = f as WallpaperFit;
   } catch {
     // localStorage may be unavailable (private browsing, sandboxed iframe)
@@ -66,7 +68,13 @@ function souscrire(e: Ecouteur): () => void {
   // Autre onglet : l'evenement `storage` ne se declenche que pour les AUTRES
   // documents, jamais pour celui qui ecrit — d'ou le `notifier()` ci-dessus.
   const surStockage = (ev: StorageEvent) => {
-    if (ev.key === KEY_DATA || ev.key === KEY_FIT || ev.key === null) notifier();
+    // L'événement `storage` ne fire que pour les AUTRES onglets, et pour
+    // une clé LITTÉRALE. Nos clés sont scopées (préfixées par
+    // `coach-os:<user>:<tenant>:`), donc le nom logique ne matche jamais
+    // directement depuis un autre onglet. On accepte `null` (= clear
+    // global) comme signal de reset et on notifie au cas où le code
+    // applicatif a déclenché un purge total (cas signOut).
+    if (ev.key === null) notifier();
   };
   window.addEventListener('storage', surStockage);
   return () => {
@@ -110,8 +118,9 @@ export function useWallpaper(): { dataUrl: string | null; fit: WallpaperFit } {
  *  actually on disk. */
 export function setWallpaper(dataUrl: string, fit: WallpaperFit): { ok: true } | { ok: false; error: string } {
   try {
-    localStorage.setItem(KEY_DATA, dataUrl);
-    localStorage.setItem(KEY_FIT, fit);
+    const storage = createScopedStorage();
+    storage.setItem(KEY_DATA, dataUrl);
+    storage.setItem(KEY_FIT, fit);
     notifier();
     return { ok: true };
   } catch (err) {
@@ -123,7 +132,7 @@ export function setWallpaper(dataUrl: string, fit: WallpaperFit): { ok: true } |
 /** Persist only the fit selector (no image write). */
 export function setWallpaperFit(fit: WallpaperFit): { ok: true } | { ok: false; error: string } {
   try {
-    localStorage.setItem(KEY_FIT, fit);
+    createScopedStorage().setItem(KEY_FIT, fit);
     notifier();
     return { ok: true };
   } catch (err) {
@@ -135,8 +144,9 @@ export function setWallpaperFit(fit: WallpaperFit): { ok: true } | { ok: false; 
 /** Clear the wallpaper. Frees the entire ~1-4 MB slot. */
 export function clearWallpaper(): void {
   try {
-    localStorage.removeItem(KEY_DATA);
-    localStorage.removeItem(KEY_FIT);
+    const storage = createScopedStorage();
+    storage.removeItem(KEY_DATA);
+    storage.removeItem(KEY_FIT);
   } catch {
     // best-effort
   }

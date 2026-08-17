@@ -12,6 +12,12 @@
 //     stockage direct.
 //   - persist : round-trip localStorage — si l'hydratation échoue, le
 //     bureau revient à sa pose par défaut et c'est invisible.
+//
+// FIX-2 (2026-08-17) — la persistance passe désormais par un wrapper
+// scopé. La clé brute n'est plus `coach-os-desktop-layout-v1` mais le
+// nom logique `desktop-layout-v1`, traduit à l'écriture en
+// `coach-os:<user>:<tenant>:desktop-layout-v1`. On vérifie la valeur
+// via le helper `scopedKey()` plutôt que la chaîne littérale.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -19,12 +25,13 @@ import {
   LARGEUR_CASE,
   useDesktopLayout,
 } from './desktopLayout.store';
+import { scopedKey } from '../lib/auth/storage-scope';
 
 const ORIGINAL_STORAGE = globalThis.localStorage;
 
 beforeEach(() => {
   // Zustand persist lit localStorage au montage. Un store partagé entre
-  // tests garderait l'état du précédent ; on repart d'un store neuf en
+  // tests garderait l'état du précédent ; on repart d un store neuf en
   // vidant la map explicitement. (Le store lui-même est un module-level
   // singleton — il n'est pas recréé par le test runner.)
   useDesktopLayout.getState().reset();
@@ -76,10 +83,11 @@ describe('persistance — round-trip', () => {
   it('les poses survivent à une réinitialisation du store (relit localStorage)', async () => {
     // On pose une icône, puis on recrée le store en l'important à nouveau
     // via le module — Zustand persiste automatiquement à l'écriture, donc
-    // on vérifie la valeur dans localStorage directement.
+    // on vérifie la valeur dans localStorage directement. La clé est
+    // résolue via le helper scopé pour suivre le scope de test.
     useDesktopLayout.getState().setPosition('dashboard', { col: 4, row: 2 });
     // L'écriture est synchrone (Zustand persist écrit à chaque set).
-    const brut = globalThis.localStorage.getItem('coach-os-desktop-layout-v1');
+    const brut = globalThis.localStorage.getItem(scopedKey('desktop-layout-v1'));
     expect(brut).not.toBeNull();
     const parsed = JSON.parse(brut ?? '{}');
     expect(parsed.state?.positions?.dashboard).toEqual({ col: 4, row: 2 });

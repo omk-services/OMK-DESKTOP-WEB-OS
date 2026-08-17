@@ -21,6 +21,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createScopedStorage } from '../lib/auth/storage-scope';
+import { registerPersistedStore } from '../lib/auth/auth-scope-bridge';
+import { defensiveMerge, defensiveMigrate } from './migrationDefensive';
 
 export type ThreeAppLevel = 'easy' | 'hard' | 'expert';
 
@@ -48,6 +51,42 @@ interface ThreeAppState {
   reset: () => void;
 }
 
+/** Valide un ThreeApp. Les champs obligatoires doivent etre du bon
+ *  type ; un iframeUrl forge en non-string n'est pas une URL. */
+function sanitizeThreeApp(value: unknown): ThreeApp | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.slug !== 'string' || v.slug.length === 0) return undefined;
+  if (typeof v.name !== 'string') return undefined;
+  if (typeof v.category !== 'string') return undefined;
+  if (v.level !== 'easy' && v.level !== 'hard' && v.level !== 'expert') return undefined;
+  if (typeof v.installedAt !== 'string') return undefined;
+  const out: ThreeApp = {
+    slug: v.slug,
+    name: v.name,
+    category: v.category,
+    level: v.level,
+    installedAt: v.installedAt,
+  };
+  if (typeof v.iframeUrl === 'string') out.iframeUrl = v.iframeUrl;
+  return out;
+}
+
+/** Valide la map d'apps. Une entree invalide est simplement ecartee. */
+function sanitizeApps(value: unknown): Record<string, ThreeApp> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, ThreeApp> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    const app = sanitizeThreeApp(v);
+    if (app) out[k] = app;
+  }
+  return out;
+}
+
 export const useThreeAppStore = create<ThreeAppState>()(
   persist(
     (set) => ({
@@ -66,8 +105,8 @@ export const useThreeAppStore = create<ThreeAppState>()(
       reset: () => set({ apps: {} }),
     }),
     {
-      name: 'coach-os-three-apps-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'three-apps-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       partialize: (s) => ({ apps: s.apps }),
       // Au premier chargement (storage vide), on pose un mini-programme
       // de demonstration. C'est un seed, pas un forçage : si l'utilisateur
@@ -79,9 +118,20 @@ export const useThreeAppStore = create<ThreeAppState>()(
           state.apps = Object.fromEntries(SEEDS.map((s) => [s.slug, s]));
         }
       },
+      // FIX-8 (2026-08-17) — version + migrate. Cf. migrationDefensive.ts.
+      version: 1,
+      migrate: defensiveMigrate<ThreeAppState>(1),
+      merge: defensiveMerge<ThreeAppState>({
+        validators: { apps: sanitizeApps },
+      }),
     },
   ),
 );
+
+registerPersistedStore({
+  name: 'useThreeAppStore',
+  persist: useThreeAppStore.persist,
+});
 
 /** Seed initial : un exemple 3D (threejs.org) et un workspace (Macro).
  *  Retireable par clic-droit sur l'icone du bureau. */

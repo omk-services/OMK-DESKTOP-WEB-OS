@@ -3,8 +3,15 @@
  *  hasBooted field was wiping the in-memory windows on first paint). Instead
  *  the single boolean `hasBooted` is persisted via a small standalone localStorage
  *  helper, keeping the in-memory windows store and the persisted flag fully
- *  orthogonal. */
+ *  orthogonal.
+ *
+ *  FIX-2 (2026-08-17) — le flag `hasBooted` passe par le wrapper scopé
+ *  (clé logique `demo-coach:boot-flag:v1`, traduite en
+ *  `coach-os:<user>:<tenant>:demo-coach:boot-flag:v1`). Avant, la clé
+ *  brute `demo-coach-boot-flag-v1` n'était pas reconnue par le helper
+ *  de purge à la déconnexion — elle survivait à un signOut. */
 import { create } from 'zustand';
+import { createScopedStorage } from './auth/storage-scope';
 
 export interface DemoAppWindow {
   id: string;
@@ -38,11 +45,11 @@ function nextZ(windows: DemoAppWindow[]): number {
 const DEFAULT_W = 320;
 const DEFAULT_H = 260;
 
-const FLAG_KEY = 'demo-coach-boot-flag-v1';
+const FLAG_KEY = 'demo-coach:boot-flag:v1';
 
 export function hasSeenCitadel(): boolean {
   try {
-    return localStorage.getItem(FLAG_KEY) === 'true';
+    return createScopedStorage().getItem(FLAG_KEY) === 'true';
   } catch {
     return false;
   }
@@ -50,7 +57,7 @@ export function hasSeenCitadel(): boolean {
 
 export function markCitadelSeen(): void {
   try {
-    localStorage.setItem(FLAG_KEY, 'true');
+    createScopedStorage().setItem(FLAG_KEY, 'true');
   } catch {
     // best-effort — localStorage may be unavailable in private browsing
   }

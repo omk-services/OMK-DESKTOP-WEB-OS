@@ -17,6 +17,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createScopedStorage } from '../auth/storage-scope';
+import { registerPersistedStore } from '../auth/auth-scope-bridge';
+import { defensiveMerge, defensiveMigrate } from '../../stores/migrationDefensive';
 
 export type CostConfidence = 'verified' | 'estimated';
 
@@ -72,6 +75,51 @@ function uuid(): string {
   return `${part()}${part()}-${part()}-4${part().slice(1)}-${part()}-${part()}${part()}${part()}`;
 }
 
+/** Valide une entree du ledger. Les champs numeriques ou enum
+ *  invalides sont ecartes ; un champ optionnel (requestId) absent
+ *  reste absent. Le ledger est append-only : on n'invalide pas
+ *  l'historique. Si une entree est corrompue, on la saute et on
+ *  garde les autres — l'utilisateur prefere un ledger abrege a
+ *  une appli qui ne demarre pas. */
+function sanitizeEntry(value: unknown): LedgerEntry | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.id !== 'string' || v.id.length === 0) return undefined;
+  if (typeof v.ts !== 'string') return undefined;
+  if (typeof v.routeId !== 'string') return undefined;
+  if (typeof v.promptSnippet !== 'string') return undefined;
+  if (typeof v.outputPath !== 'string') return undefined;
+  if (typeof v.costUsd !== 'number' || !Number.isFinite(v.costUsd)) return undefined;
+  if (v.costConfidence !== 'verified' && v.costConfidence !== 'estimated') return undefined;
+  if (typeof v.vendor !== 'string') return undefined;
+  const out: LedgerEntry = {
+    id: v.id,
+    ts: v.ts,
+    routeId: v.routeId,
+    promptSnippet: v.promptSnippet,
+    outputPath: v.outputPath,
+    costUsd: v.costUsd,
+    costConfidence: v.costConfidence,
+    vendor: v.vendor,
+  };
+  if (typeof v.requestId === 'string') out.requestId = v.requestId;
+  return out;
+}
+
+/** Valide le tableau d'entrees. Toute entree corrompue est sautee ;
+ *  les autres survivent. */
+function sanitizeEntries(value: unknown): LedgerEntry[] {
+  if (!Array.isArray(value)) return [];
+  const out: LedgerEntry[] = [];
+  for (const v of value) {
+    const entry = sanitizeEntry(v);
+    if (entry) out.push(entry);
+  }
+  return out;
+}
+
 export const useLedgerStore = create<LedgerState>()(
   persist(
     (set, get) => ({
@@ -89,12 +137,23 @@ export const useLedgerStore = create<LedgerState>()(
       reset: () => set({ entries: [] }),
     }),
     {
-      name: 'coach-os-saas-ledger-v1',
-      storage: createJSONStorage(() => localStorage),
+      name: 'saas-ledger-v1',
+      storage: createJSONStorage(() => createScopedStorage()),
       partialize: (s) => ({ entries: s.entries }),
+      // FIX-8 (2026-08-17) — version + migrate. Cf. migrationDefensive.ts.
+      version: 1,
+      migrate: defensiveMigrate<LedgerState>(1),
+      merge: defensiveMerge<LedgerState>({
+        validators: { entries: sanitizeEntries },
+      }),
     },
   ),
 );
+
+registerPersistedStore({
+  name: 'useLedgerStore',
+  persist: useLedgerStore.persist,
+});
 
 /** GETTERS derives — recalcules a chaque appel. SPEC §2.4 / §6.5. */
 export function totalUsd(): number {

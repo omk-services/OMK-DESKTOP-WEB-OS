@@ -33,6 +33,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createScopedStorage } from '../auth/storage-scope';
+import { registerPersistedStore } from '../auth/auth-scope-bridge';
 
 /** Etendue UI 노출 — l'app grand public ne manipule pas `'personal'`. */
 export type ScopeFilter = 'org' | 'all';
@@ -55,7 +57,7 @@ interface OntologyScopeState {
   reset: () => void;
 }
 
-const STORAGE_KEY = 'coach-os-ontology-scope-v1';
+const STORAGE_KEY = 'ontology-scope-v1';
 
 export const useOntologyScopeStore = create<OntologyScopeState>()(
   persist(
@@ -67,7 +69,7 @@ export const useOntologyScopeStore = create<OntologyScopeState>()(
     }),
     {
       name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createScopedStorage()),
       // Cle : on ne persiste QUE le scope. La version est derivee
       // localement au montage : elle n'est pas un fait a conserver.
       partialize: (s) => ({ scope: s.scope }),
@@ -81,6 +83,11 @@ export const useOntologyScopeStore = create<OntologyScopeState>()(
     },
   ),
 );
+
+registerPersistedStore({
+  name: 'useOntologyScopeStore',
+  persist: useOntologyScopeStore.persist,
+});
 
 /**
  * Selector minimal — extrait la valeur de `scope` tout en s'abonnant
