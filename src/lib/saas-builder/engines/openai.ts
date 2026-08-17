@@ -2,6 +2,7 @@
 // Engine OpenAI : gpt-image (OpenAI.images.generate).
 // SPEC §4.2. Cf. generate.py:132.
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule } from './types';
 import { withTimeout } from './types';
 
@@ -15,7 +16,7 @@ export const openaiEngine: EngineModule = {
   output: 'image',
   costUsd: 0.04,
   costConfidence: 'verified',
-  available: () => Boolean(import.meta.env[ENV_KEY]),
+  available: () => viteEnvDefinie(ENV_KEY),
   promptHint:
     'Precis, instruction-like. Sujet et layout en premier, puis attributs. Suit litteralement les instructions spatiales.',
   async run(args, signal) {

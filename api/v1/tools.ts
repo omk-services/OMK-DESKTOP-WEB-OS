@@ -18,7 +18,7 @@
 //   le catalogue à la demande, dans le gestionnaire, après le garde,
 //   et on capture l'erreur pour rendre 503 au lieu de planter.
 
-import { verifierAcces } from '../_agent/garde';
+import { verifierAcces } from '../_agent/garde.js';
 
 /** Tente de charger le catalogue et de produire le manifest.
  *
@@ -33,9 +33,9 @@ async function chargerCatalogue(): Promise<
 > {
   try {
     const [{ registerAll }, { manifestTools }, { list }] = await Promise.all([
-      import('../../src/lib/tooling/catalog'),
-      import('../../src/lib/tooling/adapters/rest'),
-      import('../../src/lib/tooling/registry'),
+      import('../../src/lib/tooling/catalog/index.js'),
+      import('../../src/lib/tooling/adapters/rest.js'),
+      import('../../src/lib/tooling/registry.js'),
     ]);
     registerAll();
     const outils = list();

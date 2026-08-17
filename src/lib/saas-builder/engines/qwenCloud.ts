@@ -2,6 +2,7 @@
 // Engine Qwen Cloud : qwen-image + wan direct (DashScope intl).
 // SPEC §4.2. Cf. generate.py:213 (qwen-image) et generate.py:243 (wan direct).
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule } from './types';
 import { withTimeout } from './types';
 
@@ -15,7 +16,7 @@ export const qwenCloudEngine: EngineModule = {
   output: 'image',
   costUsd: 0.03,
   costConfidence: 'verified',
-  available: () => ENV_KEYS.some((k) => Boolean(import.meta.env[k])),
+  available: () => ENV_KEYS.some((k) => viteEnvDefinie(k)),
   promptHint:
     'Image poster-style, rendu de texte fort. Specifique au modele qwen-image-3.0.',
   async run(args, signal) {

@@ -3,6 +3,7 @@
 // SPEC §4.2. Cf. generate.py:113 (gemini-image) et generate.py:151 (veo).
 // V1 : stub. V2 : client.models.generate_content / generate_videos.
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule } from './types';
 import { withTimeout } from './types';
 
@@ -16,7 +17,7 @@ export const googleEngine: EngineModule = {
   output: 'image', // veo est 'video', determine par routeId
   costUsd: 0.039,
   costConfidence: 'verified', // genai retourne le cout exact
-  available: () => Boolean(import.meta.env[ENV_KEY]),
+  available: () => viteEnvDefinie(ENV_KEY),
   promptHint:
     'Paragraphe descriptif dense. Sujet, composition, eclairage, lentille, palette, mood, style reference. Gemini recompense la densite. Si du texte doit apparaitre dans l\'image, le citer exactement.',
   async run(args, signal) {

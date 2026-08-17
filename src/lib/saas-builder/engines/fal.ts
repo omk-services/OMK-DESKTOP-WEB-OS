@@ -6,6 +6,7 @@
 // jusqu'a ce que fal retourne le cout final ; on le bascule en 'verified'
 // dans le retour si disponible.
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule, GenerateArgs, Generated } from './types';
 import { withTimeout } from './types';
 
@@ -19,7 +20,7 @@ export const falEngine: EngineModule = {
   output: 'image', // peut etre 'video' ; le caller decide via routeId
   costUsd: 0.039, // moyenne ponderee indicative ; voir capabilities.json
   costConfidence: 'estimated',
-  available: () => Boolean(import.meta.env[ENV_KEY]),
+  available: () => viteEnvDefinie(ENV_KEY),
   promptHint:
     'Sujet et action en premiere phrase, puis camera, puis style. Sous 120 mots. Chaque engine fal a ses tags : Kling repond au film grammar (35mm, shallow depth of field), Wan aux style tags.',
   async run(args: GenerateArgs, signal: AbortSignal): Promise<Generated> {

@@ -3,7 +3,7 @@
  *  hydrate/upsert. Safe to import even with no env vars set (client just won't
  *  authenticate — callers must treat every call as best-effort). */
 import { createClient } from '@supabase/supabase-js';
-import { viteEnv } from './env';
+import { viteEnv, estNavigateur } from './env';
 
 // `viteEnv` plutot que `import.meta.env` directement : ce module est importe
 // transitivement par les routes `api/v1/*`, qui tournent dans Node. La-bas
@@ -77,7 +77,7 @@ export const supabase = supabaseConfigured
 // et en cherchant les `ERR_NAME_NOT_RESOLVED`. On l'affiche au boot si
 // l'URL est presente mais manifestement invalide, et a la premiere requete
 // en echec si elle passe par le hook d'instrumentation du store CMS.
-if (typeof window !== 'undefined') {
+if (estNavigateur()) {
   if (!supabaseConfigured && (url || anonKey)) {
     // Une des deux manque OU l'URL est un placeholder. C'est le regime
     // "demonstration locale" : silencieux.

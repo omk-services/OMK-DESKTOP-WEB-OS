@@ -4,6 +4,7 @@
 // Regle de precedence (SPEC §2.2, generate.py:351) : si MiniMax direct
 // ET fal sont dispos, MiniMax direct gagne ($0.25/clip vs $0.28).
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule } from './types';
 import { withTimeout } from './types';
 
@@ -17,7 +18,7 @@ export const minimaxEngine: EngineModule = {
   output: 'video',
   costUsd: 0.25,
   costConfidence: 'verified',
-  available: () => Boolean(import.meta.env[ENV_KEY]),
+  available: () => viteEnvDefinie(ENV_KEY),
   promptHint:
     'Physical verbs. Motion expressive, realisme physique a petit budget. 6s, 768P par defaut.',
   async run(args, signal) {

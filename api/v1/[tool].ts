@@ -16,8 +16,8 @@
 //   le registre est vide — pour cette raison, on enregistre le
 //   catalogue dans le gestionnaire, après le garde, dans un try/catch.
 
-import { toolHandler } from '../../src/lib/tooling/adapters/rest';
-import { verifierAcces } from '../_agent/garde';
+import { toolHandler } from '../../src/lib/tooling/adapters/rest.js';
+import { verifierAcces } from '../_agent/garde.js';
 
 function readToolName(request: Request): string | null {
   // URL-based : /api/v1/<tool>
@@ -33,7 +33,7 @@ function readToolName(request: Request): string | null {
  *  RAPPORT_FIX_5 §3 pour le diagnostic). */
 async function enregistrerCatalogue(): Promise<boolean> {
   try {
-    const { registerAll } = await import('../../src/lib/tooling/catalog');
+    const { registerAll } = await import('../../src/lib/tooling/catalog/index.js');
     registerAll();
     return true;
   } catch {

@@ -59,3 +59,15 @@ export function viteMode(): string {
 export function estDev(): boolean {
   return envBrut().DEV === true;
 }
+
+/** Vrai dans un navigateur, faux dans une fonction serverless.
+ *
+ *  Pourquoi passer par `globalThis` plutôt qu'écrire `typeof window` :
+ *  `api/tsconfig.json` ne charge PAS la lib DOM — c'est voulu, ces fonctions
+ *  tournent dans Node. Le nom `window` y est donc inconnu du vérificateur, et
+ *  même `typeof window` déclenche un `TS2304: Cannot find name 'window'`.
+ *  `globalThis.window` se type sans la lib DOM et se comporte pareil à
+ *  l'exécution. */
+export function estNavigateur(): boolean {
+  return typeof (globalThis as { window?: unknown }).window !== 'undefined';
+}

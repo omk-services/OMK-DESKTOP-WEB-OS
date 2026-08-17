@@ -3,6 +3,7 @@
 // SPEC §4.2. Cf. generate.py:298 (run_kling_direct) et generate.py:281
 // (_kling_jwt, HS256 hand-rolled).
 
+import { viteEnvDefinie } from '../../env';
 import type { EngineModule } from './types';
 import { withTimeout } from './types';
 
@@ -16,7 +17,7 @@ export const klingEngine: EngineModule = {
   output: 'video',
   costUsd: 0.35,
   costConfidence: 'estimated',
-  available: () => ENV_KEYS.every((k) => Boolean(import.meta.env[k])),
+  available: () => ENV_KEYS.every((k) => viteEnvDefinie(k)),
   promptHint:
     'Film grammar : 35mm, shallow depth of field. Camera, action, style. Sous 120 mots.',
   async run(args, signal) {
