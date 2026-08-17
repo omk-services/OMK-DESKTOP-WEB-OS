@@ -272,3 +272,47 @@ export interface LegacyCmsBridge {
 export function useCmsStoreForTenant(): never {
   throw new Error('Tenant contract — useCmsStoreForTenant not implemented (Phase 3).');
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Phase 3 — multi-utilisateurs par tenant (brief 2026-08-15 MEMBERSHIPS)
+ *
+ * Ces types sont exportés pour que le contrat Phase 3 (tenant + users) soit
+ * importable par `src/lib/auth/memberships.ts`, par le store Zustand des
+ * memberships, et par l'UI d'invitation. Ils ne sont **pas** une
+ * implémentation : les corps vivent dans le module `memberships.ts`.
+ *
+ * Règles (cf. brief MEMBERSHIPS) :
+ *   - `tenantId` côté client correspond à `org_id` côté DB.
+ *   - Quatre rôles : 'owner' > 'admin' > 'member' > 'guest'.
+ *   - Trois statuts : 'pending' (invitation pas acceptée), 'active',
+ *     'revoked' (audit préservé).
+ *   - Le membership est la cloison d'isolation : pas d'accès entre
+ *     tenants via le rôle global ; on lit toujours la membership du
+ *     tenant actif.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+export type MembershipRole = 'owner' | 'admin' | 'member' | 'guest';
+
+export type MembershipStatus = 'pending' | 'active' | 'revoked';
+
+export const MEMBERSHIP_ROLES: readonly MembershipRole[] = ['owner', 'admin', 'member', 'guest'] as const;
+export const MEMBERSHIP_STATUSES: readonly MembershipStatus[] = ['pending', 'active', 'revoked'] as const;
+
+/** Une ligne de la jonction user ↔ tenant. Source de vérité côté API,
+ *  miroir de la table `public.memberships` côté DB. */
+export interface MembershipRecord {
+  /** UUID côté DB. */
+  id: string;
+  /** Tenant id (slug kebab, conforme `TENANT_KEY_RE`). Côté DB : `org_id`. */
+  tenantId: TenantId;
+  /** User id (UUID Supabase). */
+  userId: string;
+  role: MembershipRole;
+  status: MembershipStatus;
+  /** User id de l'inviteur, `null` pour le owner fondateur. */
+  invitedBy: string | null;
+  /** ISO 8601. */
+  invitedAt: string;
+  /** ISO 8601 si acceptée, `null` tant que `status === 'pending'`. */
+  acceptedAt: string | null;
+}

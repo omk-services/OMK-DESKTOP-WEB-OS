@@ -7,10 +7,23 @@ import { initObservability } from './lib/observability';
 import { initWindowOpenTracker } from './lib/windowOpenTracker';
 import { useTenantStore } from './stores/tenant.store';
 import { useCmsStore } from './lib/cms/cms.store';
+import { maybeUseSupabaseMembershipBackend } from './lib/auth/backend.supabase';
 import App from './App';
 
 initObservability();
 initWindowOpenTracker();
+
+// Brancher le backend memberships Supabase reel si la config est OK.
+// Si supabase n'est pas configure, le backend in-memory par defaut reste
+// en place (mode demo). Voir _briefs/2026-08-15_MEMBERSHIPS/.
+const supabaseMembershipsActive = maybeUseSupabaseMembershipBackend();
+if (supabaseMembershipsActive) {
+  // eslint-disable-next-line no-console
+  console.info('[memberships] backend Supabase actif');
+} else {
+  // eslint-disable-next-line no-console
+  console.info('[memberships] backend in-memory (Supabase non configure)');
+}
 
 /* Bootstrap the tenant store (Phase 3 multi-tenant, 2026-08-09).
  *

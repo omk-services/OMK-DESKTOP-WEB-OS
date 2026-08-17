@@ -22,24 +22,48 @@ export const supabaseConfigured = Boolean(
     url.startsWith('https://'),
 );
 
+const STUB_ERROR = (op: string): Error =>
+  new Error(`[supabase] ${op} appele sans configuration. Verifier VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.`);
+
+// Client mort-ne : on lui substitue un objet qui rejette toute requete.
+// Les appelants doivent toujours verifier `supabaseConfigured` d'abord,
+// mais si un appelant oublie, mieux vaut une erreur explicite qu'un
+// timeout reseau sur une URL invalide. `signUp`/`signIn*`/`signOut`/
+// `resetPasswordForEmail` RETOURNENT `{ error }` au lieu de throw, parce
+// que `AuthPage.tsx` (et autres appelants) utilisent
+// `if (error) throw error` : un throw ici donnerait "is not a function"
+// en local parce que les methodes etaient absentes de l'ancien stub.
+const STUB_AUTH = {
+  getSession: async () => ({ data: { session: null }, error: null }),
+  onAuthStateChange: () => ({
+    data: { subscription: { unsubscribe: () => undefined } },
+  }),
+  signUp: async () => ({
+    data: { session: null, user: null },
+    error: STUB_ERROR('auth.signUp'),
+  }),
+  signInWithPassword: async () => ({
+    data: { session: null, user: null },
+    error: STUB_ERROR('auth.signInWithPassword'),
+  }),
+  signInWithOAuth: async () => ({
+    data: { provider: null, url: null },
+    error: STUB_ERROR('auth.signInWithOAuth'),
+  }),
+  signOut: async () => ({ error: null }),
+  resetPasswordForEmail: async () => ({
+    data: null,
+    error: STUB_ERROR('auth.resetPasswordForEmail'),
+  }),
+};
+
 export const supabase = supabaseConfigured
   ? createClient(url!, anonKey!)
-  : // Client mort-ne : on lui substitue un objet qui rejette toute requete.
-    // Les appelants doivent toujours verifier `supabaseConfigured` d'abord,
-    // mais si un appelant oublie, mieux vaut une erreur explicite qu'un
-    // timeout reseau sur une URL invalide.
-    ({
+  : ({
       from: () => {
-        throw new Error(
-          '[supabase] client appele sans configuration. Verifier VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.',
-        );
+        throw STUB_ERROR('from()');
       },
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        onAuthStateChange: () => ({
-          data: { subscription: { unsubscribe: () => undefined } },
-        }),
-      },
+      auth: STUB_AUTH,
     } as unknown as ReturnType<typeof createClient>);
 
 // Avertissement console explicite quand la production est mal pointee. Le
