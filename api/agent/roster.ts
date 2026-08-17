@@ -4,9 +4,25 @@
 import { listBackendStatuses } from '../_agent/backends.js';
 import { ROSTER, listAgents } from '../_agent/roster.js';
 import { listProviderStatuses } from '../_agent/providers.js';
+import { verifierAcces } from '../_agent/garde.js';
 import { versNode } from '../_agent/adapt.js'
 
-function gestionnaire(_request: Request): Response {
+/** Gestionnaire de la route — exporté pour les tests du garde.
+ *
+ *  Avant ce correctif (FIX_3 2026-08-17) : la route renvoyait 200 sans
+ *  aucune vérification d'accès. N'importe qui pouvait lire le roster
+ *  complet (noms d'agents, descriptions, modèles, fournisseurs), bien
+ *  que sans secret (`available: false` en production). Le client n'en
+ *  a besoin qu'après authentification (AssistantOverlay, AssistantSettings),
+ *  donc on garde avec `verifierAcces` comme les autres routes. */
+export function gestionnaire(request: Request): Response {
+  const refus = verifierAcces(request);
+  if (refus) {
+    return new Response(
+      JSON.stringify({ error: refus.message }),
+      { status: refus.status, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
 
   const backends = listBackendStatuses();
   const providers = listProviderStatuses();
