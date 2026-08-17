@@ -1,0 +1,15 @@
+{
+  "id": "p_mssucy53_wihq",
+  "scenarioId": "scn_tenant-a_01",
+  "tenantId": "tenant-a",
+  "toolName": "collection.create",
+  "args": {
+    "collectionId": "tasks",
+    "fields": {
+      "label": "A"
+    }
+  },
+  "displayName": "A",
+  "actorId": "agent:a",
+  "createdAt": "2026-08-14T11:06:01.047Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "p_mssucf93_lcoq",
+  "scenarioId": "scn_tenant-b_01",
+  "tenantId": "tenant-b",
+  "toolName": "collection.create",
+  "args": {
+    "collectionId": "tasks",
+    "fields": {
+      "label": "B"
+    }
+  },
+  "displayName": "B",
+  "actorId": "agent:b",
+  "createdAt": "2026-08-14T11:05:36.567Z"
+}

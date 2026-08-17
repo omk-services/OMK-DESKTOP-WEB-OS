@@ -1,0 +1,15 @@
+{
+  "id": "p_mssubv7x_lmnp",
+  "scenarioId": "scn_tenant-a_01",
+  "tenantId": "tenant-a",
+  "toolName": "collection.create",
+  "args": {
+    "collectionId": "tasks",
+    "fields": {
+      "label": "A"
+    }
+  },
+  "displayName": "A",
+  "actorId": "agent:a",
+  "createdAt": "2026-08-14T11:05:10.605Z"
+}

@@ -1,0 +1,241 @@
+{
+  "$schema_note": "Fiches curatées à partir de canvasui.dev/docs/components/<nom> et canvasui.dev/r/<nom>-vanilla.json, capturées 2026-08-13. Schéma différent du registre shadcn copié par l'agent X : ici, fiches synthétiques, pas une copie du registre.",
+  "campagne": "2026-08-11 — production",
+  "brief": "Y — Canvas UI curseurs",
+  "composants": [
+    {
+      "nom": "Bubble",
+      "source_url": "https://canvasui.dev/docs/components/bubble",
+      "registre_url": "https://canvasui.dev/r/bubble-vanilla.json",
+      "poids_ko": 19.6,
+      "ce_que_il_fait": "Gouttelette de verre qui suit le curseur en métaballes et réfracte la page en direct sous elle, avec dispersion, dépoli et reflet irisé.",
+      "depends_de_html_in_canvas": true,
+      "flag_requis": {
+        "url_flag": "chrome://flags/#canvas-draw-element",
+        "exigence_explicite_page": false,
+        "preuve_implicite": "Le code React pose `layoutsubtree=\"true\"` (commenté `// @ts-expect-error experimental html-in-canvas attribute`) et sonde `supportsHtmlInCanvas()` qui vérifie `ctx.drawElementImage` + `canvas.requestPaint`. Le badge « html-in-canvas » apparaît en haut de la section Demo. La page ne cite pas littéralement l'URL `chrome://flags/#canvas-draw-element` — la garde est dans l'API, pas dans le texte."
+      },
+      "repli": "Quand html-in-canvas est absent, la gouttelette s'affiche comme une bulle de savon translucide qui ne réfracte rien. Piloté par la prop `fallbackOpacity` (défaut 1, clampée [0,1]). Le DOM sous-jacent reste intact et interactif.",
+      "dependances": "Aucune (au niveau npm). Runtime : WebGL2 + navigateur compatible html-in-canvas.",
+      "props": [
+        {"name": "size", "type": "number", "default": 30, "unit": "px CSS", "description": "Rayon de la gouttelette au repos"},
+        {"name": "trail", "type": "number", "default": 24, "clamp": "[1, 24]", "description": "Nombre de sphères dans la traînée"},
+        {"name": "follow", "type": "number", "default": 0.5, "clamp": "[0.02, 1]", "description": "Vitesse de suivi du curseur"},
+        {"name": "blend", "type": "number", "default": 14, "clamp": ">= 0.5", "description": "Fusion des métaballes"},
+        {"name": "speed", "type": "number", "default": 2, "clamp": ">= 0", "description": "Vitesse du reflet liquide"},
+        {"name": "refraction", "type": "number", "default": 80, "unit": "px CSS", "description": "Épaisseur optique (analogie IOR 1.33)"},
+        {"name": "dispersion", "type": "number", "default": 1, "clamp": "[0, 3]", "description": "Aberration chromatique"},
+        {"name": "frost", "type": "number", "default": 0, "clamp": "[0, 1]", "description": "Dépoli de la page sous la goutte"},
+        {"name": "shine", "type": "number", "default": 0.25, "clamp": ">= 0", "description": "Intensité du specular"},
+        {"name": "rim", "type": "number", "default": 0.5, "clamp": "[0, 2]", "description": "Bord sombre vitreux"},
+        {"name": "iridescence", "type": "number", "default": 1, "clamp": ">= 0", "description": "Reflet irisé"},
+        {"name": "intensity", "type": "number", "default": 0.9, "clamp": ">= 0", "description": "Luminosité des couleurs"},
+        {"name": "tint", "type": "[number,number,number]", "default": [1, 1, 1], "unit": "RGB 0-1", "description": "Teinte du verre"},
+        {"name": "tintStrength", "type": "number", "default": 0, "clamp": "[0, 1]", "description": "Force de la teinte"},
+        {"name": "colorA", "type": "[number,number,number]", "default": [0.2902, 0.4549, 0.7216], "description": "Couleur 1 du reflet (et de la goutte en repli)"},
+        {"name": "colorB", "type": "[number,number,number]", "default": [0.4118, 0.4118, 0.4157], "description": "Couleur 2 du reflet"},
+        {"name": "fallbackOpacity", "type": "number", "default": 1, "clamp": "[0, 1]", "description": "Opacité de la goutte en mode repli"},
+        {"name": "className", "type": "string", "description": "Classes sur le wrapper"}
+      ],
+      "zone_effet": {
+        "portee": "rayon autour du curseur",
+        "controle": "gl.scissor + pad dérivé de size + refraction + dispersion",
+        "comportement": "L'output canvas couvre tout le wrapper, mais le rendu est cisaillé autour de la traînée. Hors de la traînée, le contenu passe intact."
+      },
+      "texte_lisible_dessous": {
+        "conforme_barre_4_1": true,
+        "preuve": "La page sous la gouttelette est réfractée mais pas altérée — le code échantillonne `drawElementImage(content)` puis applique une déformation UV, pas un opérateur de différence. L'output canvas a `pointerEvents: \"none\"` (cité dans le code), donc la sélection texte du DOM sous-jacent reste active.",
+        "risque_residuel": "À fort `refraction` et `dispersion`, l'iris se dégrade. Aucune dégradation permanente observée — la déformation disparaît dès que le rayon sort du scissor."
+      },
+      "deux_canvas": "Un canvas `source` capture le DOM via `layoutsubtree` ; un canvas `output` rend l'effet. Les deux requis pour le mode natif."
+    },
+    {
+      "nom": "Grid",
+      "source_url": "https://canvasui.dev/docs/components/grid",
+      "registre_url": "https://canvasui.dev/r/grid-vanilla.json",
+      "poids_ko": 24.5,
+      "ce_que_il_fait": "Découpe la page en tuiles 3D. Une onde concentrique part du curseur et soulève les tuiles en passant.",
+      "depends_de_html_in_canvas": true,
+      "flag_requis": {
+        "url_flag": "chrome://flags/#canvas-draw-element",
+        "exigence_explicite_page": false,
+        "preuve_implicite": "Badge « html-in-canvas » + `layoutsubtree` + `useSyncExternalStore(emptySubscribe, supportsHtmlInCanvas, () => false)`. Pas de citation littérale de l'URL du flag."
+      },
+      "repli": "Sans html-in-canvas, les enfants s'affichent dans un `<div>` normal, sans aucun effet. Aucun FX résiduel — c'est une dégradation totale, pas un dégradé.",
+      "dependances": "Aucune.",
+      "props": [
+        {"name": "tileSize", "type": "number", "default": 150, "unit": "px CSS"},
+        {"name": "gap", "type": "number", "default": 0, "unit": "px CSS"},
+        {"name": "cornerRadius", "type": "number", "default": 0, "unit": "px"},
+        {"name": "amplitude", "type": "number", "default": 2.5, "description": "Force globale du déplacement"},
+        {"name": "waveSpeed", "type": "number", "default": 0.5, "unit": "hauteurs écran / s"},
+        {"name": "frequency", "type": "number", "default": 12, "description": "Oscillation spatiale"},
+        {"name": "waveWidth", "type": "number", "default": 0.05, "unit": "fraction hauteur écran"},
+        {"name": "fadeTime", "type": "number", "default": 0.2, "unit": "s"},
+        {"name": "maxLift", "type": "number", "default": 1, "clamp": "[0, 1]"},
+        {"name": "jitter", "type": "number", "default": 0, "clamp": "[0, 1]"},
+        {"name": "liftHeight", "type": "number", "default": 60, "unit": "px CSS"},
+        {"name": "perspective", "type": "number", "default": 1200, "unit": "px CSS"},
+        {"name": "tilt", "type": "number", "default": 1, "clamp": "[0, 1]"},
+        {"name": "shading", "type": "number", "default": 0.05, "description": "Éclairage des cubes"},
+        {"name": "tint", "type": "[number,number,number]", "default": [0, 0.33, 1], "unit": "RGB 0-1"},
+        {"name": "tintStrength", "type": "number", "default": 0.1, "clamp": "[0, 1]"},
+        {"name": "idleRipples", "type": "number", "default": 0, "unit": "s", "description": "Période des ambiances au repos"},
+        {"name": "className", "type": "string"}
+      ],
+      "zone_effet": {
+        "portee": "page entière",
+        "controle": "L'effet couvre tout le wrapper. L'onde part du curseur mais les tuiles peuvent être soulevées partout. Sans `idleRipples=0`, des ondes ambiantes partent au hasard."
+      },
+      "texte_lisible_dessous": {
+        "conforme_barre_4_1": false,
+        "preuve": "L'effet déforme en continu toutes les tuiles qui passent dans l'onde. La déformation est locale à l'onde, mais sa zone couvre l'écran entier (`amplitude=2.5`, `waveWidth=0.05` × hauteur). L'output canvas a `pointerEvents: \"none\"`, donc le texte reste sélectionnable — mais visuellement, à l'apogée de l'onde, les blocs sont soulevés `liftHeight` px avec perspective. La règle §4.1 de la BARRE est : *« Aucun `.fx-canvas` n'a le droit de recouvrir un rectangle de texte. »* Grid n'opère pas dans un rayon autour du curseur ; il opère sur la page entière. **Disqualifié pour hérö avec paragraphe de promesse.**",
+        "risque_residuel": "Sur une section sans texte (bande image, grille de cartes), l'effet reste lisible."
+      },
+      "deux_canvas": "Idem Bubble : source (layoutsubtree) + output."
+    },
+    {
+      "nom": "Liquid",
+      "source_url": "https://canvasui.dev/docs/components/liquid",
+      "registre_url": "https://canvasui.dev/r/liquid-vanilla.json",
+      "poids_ko": 26.3,
+      "ce_que_il_fait": "Simulation de fluide WebGL pilotée par le curseur. Le fluide s'étale, persiste, déforme et teinte la page en couleurs.",
+      "depends_de_html_in_canvas": true,
+      "flag_requis": {
+        "url_flag": "chrome://flags/#canvas-draw-element",
+        "exigence_explicite_page": false,
+        "preuve_implicite": "Badge « html-in-canvas » + `layoutsubtree` + probe `supportsHtmlInCanvas()`. Pas d'URL de flag citée littéralement."
+      },
+      "repli": "Pas décrit textuellement. Le code montre deux branches : native (si support) → effet rendu ; non-native → le contenu apparaît sans la couche fluide. Aucun nœud de repli explicite comme `fallbackOpacity` chez Bubble.",
+      "dependances": "Aucune.",
+      "props": [
+        {"name": "simResolution", "type": "number", "default": 128, "description": "Résolution de la grille de simulation"},
+        {"name": "dyeResolution", "type": "number", "default": 512, "description": "Résolution de la texture de colorant"},
+        {"name": "densityDissipation", "type": "number", "default": 0.96, "description": "Persistance de la traînée (proche de 1 = longtemps)"},
+        {"name": "velocityDissipation", "type": "number", "default": 1, "description": "Persistance du mouvement"},
+        {"name": "pressure", "type": "number", "default": 0.8, "description": "Pression reportée d'une frame à l'autre"},
+        {"name": "pressureIterations", "type": "number", "default": 4, "description": "Itérations du solveur de pression"},
+        {"name": "curl", "type": "number", "default": 1.9, "description": "Force rotationnelle"},
+        {"name": "radius", "type": "number", "default": 0.3, "description": "Rayon du splat curseur"},
+        {"name": "force", "type": "number", "default": 1.1, "description": "Multiplicateur de force"},
+        {"name": "intensity", "type": "number", "default": 2, "description": "Force de la teinte"},
+        {"name": "distortion", "type": "number", "default": 0.4, "description": "Gauchissement du contenu"},
+        {"name": "blend", "type": "number", "default": 5, "description": "Mélange de la couleur fluide"},
+        {"name": "color", "type": "[number,number,number]", "default": [0.145, 0.239, 0.867], "unit": "RGB 0-1"},
+        {"name": "rainbow", "type": "boolean", "default": false, "description": "Tint par direction du flux"},
+        {"name": "className", "type": "string"}
+      ],
+      "zone_effet": {
+        "portee": "rayon autour du curseur",
+        "controle": "Le splat part du curseur avec `radius` × hauteur et persiste via `densityDissipation`. Pas de couche pleine page — l'effet s'éteint quand le pointeur est immobile."
+      },
+      "texte_lisible_dessous": {
+        "conforme_barre_4_1": true,
+        "preuve": "Le shader de display applique `vec2 uv = vUv - fluid.rg * uDistortion * 0.001` puis mélange via `uBlend * 0.01 * clamp(length(fluid), 0, 1)`. La déformation est proportionnelle à la magnitude du flux, donc nulle hors du splat. Output canvas `pointerEvents: \"none\"`. Texte sous-jacent toujours sélectionnable.",
+        "risque_residuel": "À `distortion` fort et `blend` fort, le texte passe sous une couche colorée. Sous les valeurs par défaut, conformité OK."
+      },
+      "deux_canvas": "Source + output. Coût notable : le solveur de pression tourne `pressureIterations` fois par frame."
+    },
+    {
+      "nom": "Magnify",
+      "source_url": "https://canvasui.dev/docs/components/magnify",
+      "registre_url": "https://canvasui.dev/r/magnify-vanilla.json",
+      "poids_ko": 25.0,
+      "ce_que_il_fait": "Lentille scanner qui suit le curseur. Amplifie la page dans un réticule HUD, avec aberrations chromatiques et ondes au clic.",
+      "depends_de_html_in_canvas": true,
+      "flag_requis": {
+        "url_flag": "chrome://flags/#canvas-draw-element",
+        "exigence_explicite_page": false,
+        "preuve_implicite": "Badge « html-in-canvas » + `layoutsubtree` + `supportsHtmlInCanvas()`. Pas d'URL de flag citée."
+      },
+      "repli": "Sans html-in-canvas, le contenu s'affiche dans un `<div style={{ position: \"relative\", width: \"100%\", height: \"100%\", overflow: \"auto\" }}>` non stylé. Pas de lentille, pas de zoom, pas d'effet.",
+      "dependances": "Aucune.",
+      "props": [
+        {"name": "size", "type": "number", "default": 140, "unit": "px"},
+        {"name": "zoom", "type": "number", "default": 1.5, "description": "Facteur d'amplification"},
+        {"name": "scrollZoom", "type": "boolean", "default": false},
+        {"name": "zoomModifier", "type": "\"shift\"|\"alt\"|\"ctrl\"|\"meta\"|\"none\"", "default": "shift"},
+        {"name": "color", "type": "[number,number,number]", "default": [0.8, 0.8, 0.8]},
+        {"name": "follow", "type": "number", "default": 0.25},
+        {"name": "hud", "type": "number", "default": 0.8, "clamp": "[0, 1]"},
+        {"name": "ring", "type": "boolean", "default": true},
+        {"name": "crosshair", "type": "boolean", "default": true},
+        {"name": "ticks", "type": "boolean", "default": true},
+        {"name": "brackets", "type": "boolean", "default": true},
+        {"name": "dot", "type": "boolean", "default": true},
+        {"name": "grid", "type": "boolean", "default": false},
+        {"name": "readout", "type": "boolean", "default": true},
+        {"name": "aberration", "type": "number", "default": 0.8, "clamp": "[0, 1]"},
+        {"name": "haze", "type": "number", "default": 0.2, "clamp": "[0, 1]"},
+        {"name": "ripples", "type": "boolean", "default": true},
+        {"name": "rippleSpeed", "type": "number", "default": 900, "unit": "px/s"},
+        {"name": "rippleWidth", "type": "number", "default": 2, "unit": "px"},
+        {"name": "rippleBendWidth", "type": "number", "default": 100, "unit": "px"},
+        {"name": "rippleBend", "type": "number", "default": 20, "unit": "px"},
+        {"name": "rippleGlow", "type": "number", "default": 1, "clamp": "[0, 2]"},
+        {"name": "rippleLife", "type": "number", "default": 1.4, "unit": "s"},
+        {"name": "className", "type": "string"}
+      ],
+      "zone_effet": {
+        "portee": "disque autour du curseur",
+        "controle": "Le rendu est masqué par `float lensMask = 1.0 - smoothstep(R - 1.5, R, d)` hors du rayon. RIPPLES au clic se propagent vers l'extérieur (rayon croissant avec `rippleLife`)."
+      },
+      "texte_lisible_dessous": {
+        "conforme_barre_4_1": true,
+        "preuve": "L'amplification opère seulement dans la lentille, le reste de la page est non rendue par l'output. Source canvas reste scrollable. Hors de la lentille, le texte est intact. À l'intérieur, le texte est grossi mais il reste du texte — pas une déformation.",
+        "risque_residuel": "Le HUD (réticule, readout, ticks) prend de la place dans la lentille. Sous `hud=1`, du texte de l'UI passe par-dessus la page."
+      },
+      "deux_canvas": "Source + output. À part : écouteurs `pointermove`, `wheel`, `scroll`, `click`."
+    },
+    {
+      "nom": "Shatter",
+      "source_url": "https://canvasui.dev/docs/components/shatter",
+      "registre_url": "https://canvasui.dev/r/shatter-vanilla.json",
+      "poids_ko": 22.7,
+      "ce_que_il_fait": "La page explose en éclats de verre 3D autour du curseur. Les éclats se soulèvent, basculent, flottent, réfractent le contenu sous eux.",
+      "depends_de_html_in_canvas": true,
+      "flag_requis": {
+        "url_flag": "chrome://flags/#canvas-draw-element",
+        "exigence_explicite_page": false,
+        "preuve_implicite": "Badge « html-in-canvas » + `layoutsubtree` + `drawElementImage`. Le commentaire de la fonction renvoie à `if (!native)` qui rend les children normalement. Pas d'URL de flag citée."
+      },
+      "repli": "Branche `if (!native)` du code : `children` rendus directement, sans WebGL. Aucune option comme `fallbackOpacity` chez Bubble — soit l'effet est rendu, soit il ne l'est pas.",
+      "dependances": "Aucune.",
+      "props": [
+        {"name": "radius", "type": "number", "default": 0.4, "unit": "fraction hauteur écran", "description": "Rayon de la lentille"},
+        {"name": "softness", "type": "number", "default": 0.6, "clamp": "[0, 1]", "description": "Bord doux de la lentille"},
+        {"name": "tileSize", "type": "number", "default": 125, "unit": "px CSS"},
+        {"name": "shards", "type": "number", "default": 1, "clamp": "[0, 1]", "description": "Irrégularité (0 = grille parfaite, 1 = éclats)"},
+        {"name": "corner", "type": "number", "default": 0, "unit": "px", "description": "Rayon des coins"},
+        {"name": "lift", "type": "number", "default": 30, "unit": "px", "description": "Hauteur de levage"},
+        {"name": "tilt", "type": "number", "default": 2, "clamp": "[0, 3]"},
+        {"name": "scatter", "type": "number", "default": 5, "unit": "px"},
+        {"name": "perspective", "type": "number", "default": 1500, "unit": "px"},
+        {"name": "gapColor", "type": "[number,number,number]", "default": [0, 0, 0]},
+        {"name": "shadow", "type": "number", "default": 0.5, "clamp": "[0, 2]"},
+        {"name": "shading", "type": "number", "default": 0.5, "clamp": "[0, 2]"},
+        {"name": "refraction", "type": "number", "default": 1.5, "clamp": "[0, 2]"},
+        {"name": "dispersion", "type": "number", "default": 0.3, "clamp": "[0, 1]"},
+        {"name": "floatSpeed", "type": "number", "default": 2, "description": "0 = bloque les éclats"},
+        {"name": "strength", "type": "number", "default": 1, "clamp": "[0, 1]", "description": "Force du levage dans la lentille"},
+        {"name": "baseStrength", "type": "number", "default": 0, "clamp": "[0, 1]", "description": "Levage hors lentille"},
+        {"name": "followSpeed", "type": "number", "default": 3, "description": "Suivi du curseur"}
+      ],
+      "zone_effet": {
+        "portee": "rayon autour du curseur",
+        "controle": "Lentille de rayon `radius` × hauteur écran. Les éclats se soulèvent dans la lentille selon `strength`. `baseStrength` permet de soulever aussi hors lentille."
+      },
+      "texte_lisible_dessous": {
+        "conforme_barre_4_1": "à valider",
+        "preuve": "L'effet est local à la lentille. Au-dessus de `strength=1`, des éclats sont détachés, soulevés, basculés. La page sous l'éclat est réfractée mais pas déformée hors de la lentille. `baseStrength=0` (défaut) — pas d'effet hors curseur. Output canvas `pointerEvents: \"none\"`.",
+        "risque_residuel": "À `baseStrength > 0`, des éclats flottent hors du curseur — la page entière est en mouvement. À éviter pour un hérö avec paragraphe."
+      },
+      "deux_canvas": "Source + output."
+    }
+  ],
+  "reponses_invariance_faq": {
+    "toutes_les_5_pages_redemandent_le_flag": "Non. La page de chaque composant porte un badge « html-in-canvas » et le code utilise `layoutsubtree` / `drawElementImage` / `requestPaint`. Aucune des cinq pages ne cite littéralement l'URL `chrome://flags/#canvas-draw-element`. La page racine de la doc dit seulement : « Components detect support at runtime and degrade gracefully: without it, your content renders as normal HTML and the parts of the effect that can still run, still do. »",
+    "toutes_les_5_sans_dependances_npm": "Oui. `dependencies: []` et `devDependencies: []` pour les cinq `-vanilla.json`. Ces composants ne tirent aucun module npm.",
+    "toutes_les_5_avec_output_pointer_events_none": "Oui, dans tous les cas cités. Le contenu reste interactif sous l'effet."
+  }
+}

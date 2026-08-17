@@ -1,0 +1,4523 @@
+{
+ "ascii-object": {
+  "titre": "AsciiObject",
+  "desc": "Renders any GLB/glTF model, SVG, or image in a floating studio scene as ASCII characters chosen by shape, so glyphs trace the object's edges. Built on three.js.",
+  "deps": [
+   "preact",
+   "solid-js",
+   "three"
+  ],
+  "poids_ko": 45.1,
+  "html_in_canvas": false,
+  "marqueurs": {
+   "drawElementImage": 0,
+   "layoutsubtree": 0,
+   "requestPaint": 0,
+   "supportsHtmlInCanvas": 0,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": true,
+  "webgl": true,
+  "deps_vanilla": [
+   "three"
+  ],
+  "props": [
+   {
+    "nom": "src",
+    "type": "string",
+    "doc": "URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "ascii",
+    "type": "boolean",
+    "doc": "Render the object as ASCII characters. Turn off to see the raw render.",
+    "defaut": "true"
+   },
+   {
+    "nom": "cellSize",
+    "type": "number",
+    "doc": "Height of one character cell in CSS pixels.",
+    "defaut": "10"
+   },
+   {
+    "nom": "cellAspect",
+    "type": "number",
+    "doc": "Width of a character cell relative to its height (0.35 to 1.25).",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "charset",
+    "type": "string",
+    "doc": "Characters the renderer may choose from. Shapes are matched, not just brightness, and a space is always available for empty cells.",
+    "defaut": "PRINTABLE_ASCII"
+   },
+   {
+    "nom": "colored",
+    "type": "boolean",
+    "doc": "Tint each character with the scene color underneath it. Turn off for a single-color look.",
+    "defaut": "true"
+   },
+   {
+    "nom": "color",
+    "type": "string",
+    "doc": "Character color used when colored is off.",
+    "defaut": "\"#ffffff\""
+   },
+   {
+    "nom": "contrast",
+    "type": "number",
+    "doc": "Tone contrast of the character selection. 1 keeps the original tones, higher values deepen shadows.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "edgeContrast",
+    "type": "number",
+    "doc": "How strongly characters snap to edges and contours of the object. 1 turns the effect off.",
+    "defaut": "3"
+   },
+   {
+    "nom": "exposure",
+    "type": "number",
+    "doc": "Brightness multiplier applied before characters are chosen.",
+    "defaut": "1"
+   },
+   {
+    "nom": "invert",
+    "type": "boolean",
+    "doc": "Invert the object tones so dark areas get the dense characters.",
+    "defaut": "false"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Background color behind the characters. Empty string keeps the canvas transparent.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "highlight",
+    "type": "string",
+    "doc": "Accent color of the ring light in the studio environment.",
+    "defaut": "\"#066aff\""
+   },
+   {
+    "nom": "environmentIntensity",
+    "type": "number",
+    "doc": "Brightness of the studio environment lighting.",
+    "defaut": "1"
+   },
+   {
+    "nom": "roughness",
+    "type": "number",
+    "doc": "Roughness override applied to every material (0 to 1). Negative keeps the asset's own values.",
+    "defaut": "-1"
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the longest side of the object in scene units. The camera sits about 4 units away.",
+    "defaut": "3"
+   },
+   {
+    "nom": "xOffset",
+    "type": "number",
+    "doc": "Horizontal offset of the object in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "yOffset",
+    "type": "number",
+    "doc": "Vertical offset of the object in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "floatIntensity",
+    "type": "number",
+    "doc": "Strength of the floating bob animation (0 disables).",
+    "defaut": "2"
+   },
+   {
+    "nom": "rotationIntensity",
+    "type": "number",
+    "doc": "Strength of the idle rocking rotation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the float and rocking animation.",
+    "defaut": "2"
+   },
+   {
+    "nom": "orbit",
+    "type": "boolean",
+    "doc": "Let the user orbit the camera by dragging.",
+    "defaut": "true"
+   },
+   {
+    "nom": "zoom",
+    "type": "boolean",
+    "doc": "Let the user zoom with the scroll wheel or pinch.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotate",
+    "type": "boolean",
+    "doc": "Spin the camera around the object turntable-style.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotateSpeed",
+    "type": "number",
+    "doc": "Turntable speed when autoRotate is on.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fov",
+    "type": "number",
+    "doc": "Camera field of view in degrees.",
+    "defaut": "65"
+   },
+   {
+    "nom": "cameraDistance",
+    "type": "number",
+    "doc": "Camera distance from the center of the object.",
+    "defaut": "4.2"
+   },
+   {
+    "nom": "dracoDecoderPath",
+    "type": "string",
+    "doc": "Base URL of the Draco decoder, fetched only when a model needs it.",
+    "defaut": "\"https://www.gstatic.com/draco/versioned/decoders/1.5.7/\""
+   },
+   {
+    "nom": "onLoad",
+    "type": "(() => void) | null",
+    "doc": "Called after an asset finishes loading.",
+    "defaut": "null"
+   },
+   {
+    "nom": "onError",
+    "type": "((error: unknown) => void) | null",
+    "doc": "Called when an asset fails to load.",
+    "defaut": "null"
+   }
+  ],
+  "n_props": 30
+ },
+ "asciify": {
+  "titre": "Asciify",
+  "desc": "Redraws your page as live ascii characters in a soft radius around the cursor, with real glyph, shade block, and binary ramps. The HTML stays interactive in Chromium and Firefox.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 43.1,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the ascii lens around the cursor, relative to the screen height.",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "softness",
+    "type": "number",
+    "doc": "Edge feather of the lens as a fraction of the radius (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of one glyph pixel in CSS pixels. Characters are 5x5 glyph pixels.",
+    "defaut": "2"
+   },
+   {
+    "nom": "spacing",
+    "type": "number",
+    "doc": "Empty glyph pixels around each character (0 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "charset",
+    "type": "AsciifyCharset",
+    "doc": "Built-in character ramp: real ascii glyphs, shade blocks, or binary digits.",
+    "defaut": "\"ascii\""
+   },
+   {
+    "nom": "glyphs",
+    "type": "number[]",
+    "doc": "Custom ramp of packed 5x5 bitmaps (dark to bright), overrides charset.",
+    "defaut": "[]"
+   },
+   {
+    "nom": "background",
+    "type": "[number, number, number] | \"auto\"",
+    "doc": "Paper color behind the glyphs as [r, g, b] in 0-1 range, or \"auto\" to match the page background.",
+    "defaut": "[0"
+   },
+   {
+    "nom": "backgroundOpacity",
+    "type": "number",
+    "doc": "Opacity of the background behind the glyphs (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "contrast",
+    "type": "number",
+    "doc": "Contrast applied to character density before picking a glyph.",
+    "defaut": "1"
+   },
+   {
+    "nom": "brightness",
+    "type": "number",
+    "doc": "Density offset applied before picking a glyph (-1 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "invert",
+    "type": "number",
+    "doc": "Invert character density inside the effect (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "Coverage of asciified cells inside the lens (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "baseStrength",
+    "type": "number",
+    "doc": "Ascii coverage across the whole screen, outside the lens (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "followSpeed",
+    "type": "number",
+    "doc": "How quickly the lens follows the cursor. Higher is snappier.",
+    "defaut": "3"
+   },
+   {
+    "nom": "glow",
+    "type": "number",
+    "doc": "Soft phosphor glow around the text dots (0 to 1).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Soft chromatic aberration toward the lens edge (0 to 1).",
+    "defaut": "0.75"
+   }
+  ],
+  "n_props": 16
+ },
+ "bend": {
+  "titre": "Bend",
+  "desc": "Folds the top and bottom of your page over virtual edges as you scroll, like scrolling on the face of a cube. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 30.2,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 5,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "zone",
+    "type": "number",
+    "doc": "Height of the folded region at each edge in CSS pixels.",
+    "defaut": "240"
+   },
+   {
+    "nom": "angle",
+    "type": "number",
+    "doc": "Maximum fold angle in degrees, reached away from the scroll ends. 90 is a cube edge.",
+    "defaut": "80"
+   },
+   {
+    "nom": "rounding",
+    "type": "number",
+    "doc": "Radius in CSS pixels of the circular arc that rounds each fold crease. 0 keeps a sharp cube edge. Clamped to the zone height.",
+    "defaut": "150"
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Perspective focal length in CSS pixels. Smaller values pinch the folded edges harder.",
+    "defaut": "700"
+   },
+   {
+    "nom": "direction",
+    "type": "\"out\" | \"in\"",
+    "doc": "\"out\" folds the edges away from the viewer like the outside of a cube, \"in\" tilts them toward the viewer.",
+    "defaut": "\"in\""
+   },
+   {
+    "nom": "ease",
+    "type": "number",
+    "doc": "Scroll distance in CSS pixels over which an edge flattens near its scroll end.",
+    "defaut": "240"
+   },
+   {
+    "nom": "smoothing",
+    "type": "number",
+    "doc": "Seconds the bend takes to settle after a scroll. 0 snaps instantly.",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "top",
+    "type": "boolean",
+    "doc": "Bend the top edge.",
+    "defaut": "true"
+   },
+   {
+    "nom": "bottom",
+    "type": "boolean",
+    "doc": "Bend the bottom edge.",
+    "defaut": "true"
+   },
+   {
+    "nom": "tumble",
+    "type": "number",
+    "doc": "Overscroll tip strength (0 to 1). Rubber-banding past a scroll end tips the whole face over that edge. 0 disables.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "tilt",
+    "type": "number",
+    "doc": "Pointer tilt strength (0 to 1). The face leans subtly toward the cursor. 0 disables.",
+    "defaut": "0.5"
+   }
+  ],
+  "n_props": 11
+ },
+ "blaze": {
+  "titre": "Blaze",
+  "desc": "Fire sparks, smoke, and heat distortion rising from the bottom of your page. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 20.6,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "height",
+    "type": "number",
+    "doc": "Height of the blaze zone as a fraction of the screen (0 to 1).",
+    "defaut": "0.97"
+   },
+   {
+    "nom": "distortion",
+    "type": "number",
+    "doc": "Strength of the heat distortion bending the content.",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "distortionScale",
+    "type": "number",
+    "doc": "Scale of the heat distortion noise. Higher means finer ripples.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Animation speed multiplier for the whole effect.",
+    "defaut": "1"
+   },
+   {
+    "nom": "sparks",
+    "type": "number",
+    "doc": "Brightness of the rising sparks. 0 disables them.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "sparkDensity",
+    "type": "number",
+    "doc": "How tightly packed the sparks are. Higher also makes them smaller.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "sparkSize",
+    "type": "number",
+    "doc": "Size of the individual sparks.",
+    "defaut": "1"
+   },
+   {
+    "nom": "layers",
+    "type": "number",
+    "doc": "Number of spark layers stacked for depth (1 to 10).",
+    "defaut": "4"
+   },
+   {
+    "nom": "smoke",
+    "type": "number",
+    "doc": "Intensity of the smoke. 0 disables it.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "glow",
+    "type": "number",
+    "doc": "Warm ambient glow near the bottom edge.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "sparkColor",
+    "type": "[number, number, number]",
+    "doc": "Spark color as [r, g, b] in 0-1 range.",
+    "defaut": "[1"
+   },
+   {
+    "nom": "smokeColor",
+    "type": "[number, number, number]",
+    "doc": "Smoke and glow color as [r, g, b] in 0-1 range.",
+    "defaut": "[1"
+   }
+  ],
+  "n_props": 12
+ },
+ "bubble": {
+  "titre": "Bubble",
+  "desc": "A glassy droplet that trails the cursor as blending metaballs and refracts the live page beneath it, with dispersion, frost, and an iridescent sheen. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 19.6,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 0,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "",
+    "defaut": "30"
+   },
+   {
+    "nom": "trail",
+    "type": "number",
+    "doc": "",
+    "defaut": "24"
+   },
+   {
+    "nom": "follow",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "blend",
+    "type": "number",
+    "doc": "",
+    "defaut": "14"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "",
+    "defaut": "2"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "",
+    "defaut": "80"
+   },
+   {
+    "nom": "dispersion",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   },
+   {
+    "nom": "frost",
+    "type": "number",
+    "doc": "",
+    "defaut": "0"
+   },
+   {
+    "nom": "shine",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "rim",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "iridescence",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   },
+   {
+    "nom": "intensity",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.9"
+   },
+   {
+    "nom": "tint",
+    "type": "[number, number, number]",
+    "doc": "",
+    "defaut": "[1"
+   },
+   {
+    "nom": "tintStrength",
+    "type": "number",
+    "doc": "",
+    "defaut": "0"
+   },
+   {
+    "nom": "colorA",
+    "type": "[number, number, number]",
+    "doc": "",
+    "defaut": "[0.2902"
+   },
+   {
+    "nom": "colorB",
+    "type": "[number, number, number]",
+    "doc": "",
+    "defaut": "[0.4118"
+   },
+   {
+    "nom": "fallbackOpacity",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 17
+ },
+ "canvas": {
+  "titre": "Canvas",
+  "desc": "Paints your page onto woven artist canvas, with fiber texture, paper tint, grain, a dotted halftone screen, and a soft intro crossfade. Text stays crisp and readable. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 29.7,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "threadSize",
+    "type": "number",
+    "doc": "Height of one woven thread in CSS pixels.",
+    "defaut": "2"
+   },
+   {
+    "nom": "threadWidth",
+    "type": "number",
+    "doc": "Width of the dark seams between threads (0 to 1).",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "texture",
+    "type": "number",
+    "doc": "How strongly the woven texture shades the paint (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "tint",
+    "type": "[number, number, number]",
+    "doc": "Canvas paper color as [r, g, b] in 0-1 range.",
+    "defaut": "[0.84"
+   },
+   {
+    "nom": "tintStrength",
+    "type": "number",
+    "doc": "How much the paper color warms the painting (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Amount of photographic grain worked into the paint (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "halftone",
+    "type": "number",
+    "doc": "Amount of dotted halftone screen applied to the painting (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "dotSize",
+    "type": "number",
+    "doc": "Size of the halftone screen dots in CSS pixels.",
+    "defaut": "6"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "Overall mix between the raw page (0) and the painting (1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "relief",
+    "type": "number",
+    "doc": "How far wet paint stands off the weave, lit in 3D (0 to 1).",
+    "defaut": "0.45"
+   },
+   {
+    "nom": "gloss",
+    "type": "number",
+    "doc": "Sheen on fresh paint. Wet strokes catch the light, dry ones go matte (0 to 1).",
+    "defaut": "0.35"
+   },
+   {
+    "nom": "bristle",
+    "type": "number",
+    "doc": "Definition of the bristle grooves combed through each stroke (0 to 1).",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "dry",
+    "type": "number",
+    "doc": "Seconds a stroke takes to level back into the canvas.",
+    "defaut": "2.5"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the brush, relative to the screen height.",
+    "defaut": "0.08"
+   },
+   {
+    "nom": "intro",
+    "type": "number",
+    "doc": "Duration of the intro fade-in of the painting effect in seconds. 0 skips it.",
+    "defaut": "1.6"
+   },
+   {
+    "nom": "followSpeed",
+    "type": "number",
+    "doc": "How quickly the brush follows the cursor. Higher is snappier.",
+    "defaut": "3"
+   }
+  ],
+  "n_props": 16
+ },
+ "cloth": {
+  "titre": "Cloth",
+  "desc": "Hangs your live HTML on a piece of fabric rippling in the wind, with softly lit folds. Cursor strokes send waves across the cloth. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 28.4,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "pin",
+    "type": "ClothPin",
+    "doc": "Edge the cloth hangs from. The opposite side swings free.",
+    "defaut": "\"top\""
+   },
+   {
+    "nom": "wind",
+    "type": "number",
+    "doc": "Wind force driving the fabric (0 lets the waves die down).",
+    "defaut": "3"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Playback speed of the cloth motion.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "amplitude",
+    "type": "number",
+    "doc": "Height of the fabric folds in CSS pixels.",
+    "defaut": "30"
+   },
+   {
+    "nom": "drape",
+    "type": "number",
+    "doc": "How many CSS pixels the cloth billows toward the viewer on a gust.",
+    "defaut": "40"
+   },
+   {
+    "nom": "brush",
+    "type": "number",
+    "doc": "Strength of the waves the cursor brushes across the fabric (0 disables).",
+    "defaut": "2.05"
+   },
+   {
+    "nom": "brushSize",
+    "type": "number",
+    "doc": "Radius of the cursor's influence in CSS pixels.",
+    "defaut": "150"
+   },
+   {
+    "nom": "damping",
+    "type": "number",
+    "doc": "How quickly waves settle (higher calms the fabric faster).",
+    "defaut": "1"
+   },
+   {
+    "nom": "light",
+    "type": "number",
+    "doc": "Strength of the directional lighting on the folds (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "sheen",
+    "type": "number",
+    "doc": "Strength of the soft sheen on fold crests (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "shadow",
+    "type": "number",
+    "doc": "Opacity of the contact shadow under the fabric (0 to 1).",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "cornerRadius",
+    "type": "number",
+    "doc": "Corner radius of the fabric in CSS pixels.",
+    "defaut": "20"
+   },
+   {
+    "nom": "backing",
+    "type": "[number, number, number] | \"auto\"",
+    "doc": "Fabric color behind transparent content as RGB in the 0 to 1 range, or \"auto\" to sample the page background.",
+    "defaut": "\"auto\""
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Perspective focal length in CSS pixels. Lower exaggerates the 3D depth.",
+    "defaut": "1200"
+   }
+  ],
+  "n_props": 14
+ },
+ "clouds": {
+  "titre": "Clouds",
+  "desc": "Procedural fog that drifts over your page and blurs what it covers. Cursor movement parts the clouds. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 23.3,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 0,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "cover",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "density",
+    "type": "number",
+    "doc": "",
+    "defaut": "2.5"
+   },
+   {
+    "nom": "shading",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number] | \"auto\"",
+    "doc": "",
+    "defaut": "\"auto\""
+   },
+   {
+    "nom": "opacity",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.64"
+   },
+   {
+    "nom": "shadow",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.06"
+   },
+   {
+    "nom": "shadowOffsetX",
+    "type": "number",
+    "doc": "",
+    "defaut": "200"
+   },
+   {
+    "nom": "shadowOffsetY",
+    "type": "number",
+    "doc": "",
+    "defaut": "-10"
+   },
+   {
+    "nom": "shadowSoftness",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   },
+   {
+    "nom": "wind",
+    "type": "number",
+    "doc": "",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "windRadius",
+    "type": "number",
+    "doc": "",
+    "defaut": "350"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "",
+    "defaut": "0"
+   },
+   {
+    "nom": "fogBlur",
+    "type": "number",
+    "doc": "",
+    "defaut": "0"
+   },
+   {
+    "nom": "quality",
+    "type": "number",
+    "doc": "",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 16
+ },
+ "decrypt-reveal": {
+  "titre": "DecryptReveal",
+  "desc": "Renders your page as real ASCII cipher text that decodes back into crisp UI around the cursor behind a flickering wavefront. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 33.2,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Decrypt radius around the cursor in CSS pixels.",
+    "defaut": "400"
+   },
+   {
+    "nom": "softness",
+    "type": "number",
+    "doc": "Feather of the decrypt edge as a fraction of the radius (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "cell",
+    "type": "number",
+    "doc": "Glyph cell height in CSS pixels (4 to 40).",
+    "defaut": "10"
+   },
+   {
+    "nom": "aspect",
+    "type": "number",
+    "doc": "Width of a glyph cell relative to its height (0.35 to 1.25).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "charset",
+    "type": "string",
+    "doc": "Characters the cipher is written in. Order does not matter, shapes are matched automatically.",
+    "defaut": "PRINTABLE_ASCII"
+   },
+   {
+    "nom": "colored",
+    "type": "number",
+    "doc": "How much glyphs keep the color of the UI beneath them, 0 is monochrome (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "color",
+    "type": "string",
+    "doc": "Cipher color as any CSS color. Used for monochrome glyphs and the decrypt edge tint.",
+    "defaut": "\"#4ade80\""
+   },
+   {
+    "nom": "brightness",
+    "type": "number",
+    "doc": "Brightness of the cipher glyphs (0.2 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "legibility",
+    "type": "number",
+    "doc": "Minimum contrast the cipher keeps against the background, so subtle UI stays readable while encrypted (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "contrast",
+    "type": "number",
+    "doc": "Contrast of the glyph shape matching. Higher picks bolder characters (0.3 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "exposure",
+    "type": "number",
+    "doc": "Exposure applied to the UI before it is matched to glyphs (0.2 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "scramble",
+    "type": "number",
+    "doc": "Fraction of idle cipher cells that keep mutating (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "scrambleSpeed",
+    "type": "number",
+    "doc": "Cipher mutations per second (0 to 30).",
+    "defaut": "6"
+   },
+   {
+    "nom": "edgeWidth",
+    "type": "number",
+    "doc": "Width of the decrypting flicker band as a fraction of the radius (0 to 1).",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "edgeFlicker",
+    "type": "number",
+    "doc": "How violently characters flicker while they decrypt (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "edgeGlow",
+    "type": "number",
+    "doc": "Brightness surge of glyphs on the decrypt wavefront (0 to 3).",
+    "defaut": "2"
+   },
+   {
+    "nom": "edgeTint",
+    "type": "number",
+    "doc": "How strongly the wavefront tints toward the cipher color (0 to 1).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration of the revealed UI at the decrypt edge in CSS pixels.",
+    "defaut": "10"
+   },
+   {
+    "nom": "passthrough",
+    "type": "number",
+    "doc": "How much of the real UI shows through the cipher (0 to 1). 0 keeps the page fully encrypted.",
+    "defaut": "0.15"
+   },
+   {
+    "nom": "threshold",
+    "type": "number",
+    "doc": "Contrast against the background above which a cell counts as UI and earns a glyph.",
+    "defaut": "0.025"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Color of the backdrop behind the content, as any CSS color. Used to tell UI pixels apart from empty space.",
+    "defaut": "\"#000000\""
+   },
+   {
+    "nom": "smoothing",
+    "type": "number",
+    "doc": "Seconds the decrypt circle takes to catch up with the cursor. Higher feels more damped.",
+    "defaut": "0.2"
+   }
+  ],
+  "n_props": 22
+ },
+ "displacement": {
+  "titre": "Displacement",
+  "desc": "Warps your live HTML on a displacement grid that ripples away from the cursor, with chromatic fringing and film grain in the disturbed areas. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 17.9,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "grid",
+    "type": "number",
+    "doc": "Cells across the width of the wrapped area (4 to 100).",
+    "defaut": "50"
+   },
+   {
+    "nom": "cellAspect",
+    "type": "number",
+    "doc": "Width to height ratio of each cell (0.25 to 4). 1 is a perfect square.",
+    "defaut": "1"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the cursor influence as a fraction of the grid (0.02 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "How hard cursor movement pushes cells around (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "threshold",
+    "type": "number",
+    "doc": "Minimum cursor speed in CSS pixels per second before cells react. 0 reacts to any movement.",
+    "defaut": "1000"
+   },
+   {
+    "nom": "relaxation",
+    "type": "number",
+    "doc": "How slowly cells return to rest, per frame (0.5 to 0.99).",
+    "defaut": "0.9"
+   },
+   {
+    "nom": "shift",
+    "type": "number",
+    "doc": "Multiplier on how far displaced cells shift the content (0 to 4).",
+    "defaut": "1"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration inside each displaced cell (0 to 3).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Film grain over displaced cells (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "grainSize",
+    "type": "number",
+    "doc": "Grain speck size multiplier (0.5 to 4).",
+    "defaut": "1"
+   },
+   {
+    "nom": "grainSpeed",
+    "type": "number",
+    "doc": "Grain animation speed (0 to 4).",
+    "defaut": "1"
+   },
+   {
+    "nom": "scramble",
+    "type": "number",
+    "doc": "Random cell scramble on load that relaxes into place (0 to 3).",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 12
+ },
+ "dithered-object": {
+  "titre": "DitheredObject",
+  "desc": "Renders any GLB/glTF model, SVG, or image in a floating studio scene through a 1-bit Bayer, halftone, or Floyd–Steinberg dither. Built on three.js.",
+  "deps": [
+   "preact",
+   "solid-js",
+   "three"
+  ],
+  "poids_ko": 40.1,
+  "html_in_canvas": false,
+  "marqueurs": {
+   "drawElementImage": 0,
+   "layoutsubtree": 0,
+   "requestPaint": 0,
+   "supportsHtmlInCanvas": 0,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": true,
+  "webgl": true,
+  "deps_vanilla": [
+   "three"
+  ],
+  "props": [
+   {
+    "nom": "src",
+    "type": "string",
+    "doc": "URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "method",
+    "type": "DitherMethod",
+    "doc": "Dither pattern: an ordered Bayer grid, clustered halftone dots, or Floyd-Steinberg error diffusion.",
+    "defaut": "\"bayer\""
+   },
+   {
+    "nom": "gridSize",
+    "type": "number",
+    "doc": "Size of the dither cells in CSS pixels.",
+    "defaut": "4"
+   },
+   {
+    "nom": "pixelSizeRatio",
+    "type": "number",
+    "doc": "Extra pixelation applied on top of the grid size (1 to 10).",
+    "defaut": "1"
+   },
+   {
+    "nom": "grayscale",
+    "type": "boolean",
+    "doc": "Collapse the scene to grayscale before dithering.",
+    "defaut": "true"
+   },
+   {
+    "nom": "invert",
+    "type": "boolean",
+    "doc": "Invert the final colors.",
+    "defaut": "false"
+   },
+   {
+    "nom": "dither",
+    "type": "boolean",
+    "doc": "Enable the dither pass. Turn off to see the raw render.",
+    "defaut": "true"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Background color behind the object. Empty string keeps the canvas transparent.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "highlight",
+    "type": "string",
+    "doc": "Accent color of the ring light in the studio environment.",
+    "defaut": "\"#066aff\""
+   },
+   {
+    "nom": "environmentIntensity",
+    "type": "number",
+    "doc": "Brightness of the studio environment lighting.",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "roughness",
+    "type": "number",
+    "doc": "Roughness override applied to every material (0 to 1). Negative keeps the asset's own values.",
+    "defaut": "-1"
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the longest side of the object in scene units. The camera sits about 4 units away.",
+    "defaut": "3"
+   },
+   {
+    "nom": "xOffset",
+    "type": "number",
+    "doc": "Horizontal offset of the object in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "yOffset",
+    "type": "number",
+    "doc": "Vertical offset of the object in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "floatIntensity",
+    "type": "number",
+    "doc": "Strength of the floating bob animation (0 disables).",
+    "defaut": "2"
+   },
+   {
+    "nom": "rotationIntensity",
+    "type": "number",
+    "doc": "Strength of the idle rocking rotation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the float and rocking animation.",
+    "defaut": "2"
+   },
+   {
+    "nom": "orbit",
+    "type": "boolean",
+    "doc": "Let the user orbit the camera by dragging.",
+    "defaut": "true"
+   },
+   {
+    "nom": "zoom",
+    "type": "boolean",
+    "doc": "Let the user zoom with the scroll wheel or pinch.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotate",
+    "type": "boolean",
+    "doc": "Spin the camera around the object turntable-style.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotateSpeed",
+    "type": "number",
+    "doc": "Turntable speed when autoRotate is on.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fov",
+    "type": "number",
+    "doc": "Camera field of view in degrees.",
+    "defaut": "65"
+   },
+   {
+    "nom": "cameraDistance",
+    "type": "number",
+    "doc": "Camera distance from the center of the object.",
+    "defaut": "4.2"
+   },
+   {
+    "nom": "dracoDecoderPath",
+    "type": "string",
+    "doc": "Base URL of the Draco decoder, fetched only when a model needs it.",
+    "defaut": "\"https://www.gstatic.com/draco/versioned/decoders/1.5.7/\""
+   },
+   {
+    "nom": "onLoad",
+    "type": "(() => void) | null",
+    "doc": "Called after an asset finishes loading.",
+    "defaut": "null"
+   },
+   {
+    "nom": "onError",
+    "type": "((error: unknown) => void) | null",
+    "doc": "Called when an asset fails to load.",
+    "defaut": "null"
+   }
+  ],
+  "n_props": 26
+ },
+ "droplets": {
+  "titre": "Droplets",
+  "desc": "Rain droplets that run down the screen and refract your page behind them. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 23.4,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "intensity",
+    "type": "number",
+    "doc": "How much rain falls, from a light drizzle to a downpour (0 to 1.25).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Animation speed multiplier.",
+    "defaut": "1"
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the droplet pattern. Higher means smaller drops.",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "dropWidth",
+    "type": "number",
+    "doc": "Width of the droplets and their trails.",
+    "defaut": "1"
+   },
+   {
+    "nom": "dropLength",
+    "type": "number",
+    "doc": "How elongated the falling droplets are.",
+    "defaut": "1"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "How strongly droplets refract the content behind them.",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "blur",
+    "type": "number",
+    "doc": "Background blur outside the droplets, like a fogged up window.",
+    "defaut": "0"
+   },
+   {
+    "nom": "vignette",
+    "type": "number",
+    "doc": "Darkens the edges of the canvas (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "fallSpeed",
+    "type": "number",
+    "doc": "How fast the running drops slide down.",
+    "defaut": "1"
+   },
+   {
+    "nom": "wiggle",
+    "type": "number",
+    "doc": "Horizontal wiggle of the running drops.",
+    "defaut": "1"
+   },
+   {
+    "nom": "staticDrops",
+    "type": "number",
+    "doc": "Multiplier for the small static droplets.",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "interactive",
+    "type": "boolean",
+    "doc": "Wipe drops off the glass with the pointer.",
+    "defaut": "true"
+   },
+   {
+    "nom": "interactionRadius",
+    "type": "number",
+    "doc": "Radius of the cursor wipe, relative to the screen height.",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "interactionStrength",
+    "type": "number",
+    "doc": "How strongly the cursor wipes drops off the glass (0 to 1).",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "interactionDistortion",
+    "type": "number",
+    "doc": "How much the wipe distorts the content behind it.",
+    "defaut": "3"
+   },
+   {
+    "nom": "tint",
+    "type": "[number, number, number]",
+    "doc": "Tint color layered over the content as [r, g, b] in 0-1 range.",
+    "defaut": "[1"
+   },
+   {
+    "nom": "tintStrength",
+    "type": "number",
+    "doc": "Strength of the tint (0 to 1).",
+    "defaut": "0"
+   }
+  ],
+  "n_props": 17
+ },
+ "flame-wrap": {
+  "titre": "FlameWrap",
+  "desc": "Wraps any element in a perfectly aligned border of fire: flames rise from the top edge, the outline glows molten, sparks fly, and the content shimmers with heat. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 23.4,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "Flame color as [r, g, b] in 0-1 range.",
+    "defaut": "[0.31"
+   },
+   {
+    "nom": "intensity",
+    "type": "number",
+    "doc": "Overall brightness of the fire (0 to 3).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "height",
+    "type": "number",
+    "doc": "Reach of the flames above the top edge in CSS pixels.",
+    "defaut": "170"
+   },
+   {
+    "nom": "spread",
+    "type": "number",
+    "doc": "Reach of the glow on the sides and bottom in CSS pixels.",
+    "defaut": "8"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Corner radius of the burning outline in CSS pixels. Match your content.",
+    "defaut": "40"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Animation speed multiplier for the whole effect.",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Flame detail from 0 (broad licks) to 1 (fine licks).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "turbulence",
+    "type": "number",
+    "doc": "Amplitude of the turbulence waves shaping the flames (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "turbulenceScale",
+    "type": "number",
+    "doc": "Frequency multiplier of the turbulence waves (0.2 to 3).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "turbulenceReach",
+    "type": "number",
+    "doc": "How far from the edges the heat warps the content, in CSS pixels.",
+    "defaut": "25"
+   },
+   {
+    "nom": "sparks",
+    "type": "number",
+    "doc": "Brightness of the spark highlights (0 to 3). 0 disables them.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "sparkSize",
+    "type": "number",
+    "doc": "Size multiplier for individual sparks (0.2 to 3).",
+    "defaut": "0.35"
+   },
+   {
+    "nom": "sparkDensity",
+    "type": "number",
+    "doc": "How many sparks fly at once (0.3 to 2.5).",
+    "defaut": "1"
+   },
+   {
+    "nom": "sparkSpeed",
+    "type": "number",
+    "doc": "How fast sparks rise and flicker (0.1 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "rim",
+    "type": "number",
+    "doc": "Strength of the molten glow hugging the edges (0 to 3).",
+    "defaut": "2.5"
+   },
+   {
+    "nom": "melt",
+    "type": "number",
+    "doc": "How far the flames eat into the content silhouette in CSS pixels.",
+    "defaut": "4.5"
+   },
+   {
+    "nom": "distortion",
+    "type": "number",
+    "doc": "Heat shimmer displacement of the content near the edges in CSS pixels.",
+    "defaut": "10"
+   },
+   {
+    "nom": "smoke",
+    "type": "number",
+    "doc": "Amount of smoke drifting off the flames (0 to 2).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "ember",
+    "type": "number",
+    "doc": "Brightness of the glowing ember line on the burnt edges (0 to 2).",
+    "defaut": "2"
+   },
+   {
+    "nom": "scorch",
+    "type": "number",
+    "doc": "Darkness of the charred band on the content edges (0 to 2).",
+    "defaut": "0"
+   }
+  ],
+  "n_props": 20
+ },
+ "force-field": {
+  "titre": "ForceField",
+  "desc": "Projects an energy shield lattice over your live HTML. The cursor charges cells as it crosses them and every click detonates a shockwave ripple that refracts the page beneath, with bloom, grain, and a burning reveal dissolve. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 41.5,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "shape",
+    "type": "ForceFieldShape",
+    "doc": "Cell shape of the energy lattice.",
+    "defaut": ""
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "Field color as [r, g, b] in 0-1 range.",
+    "defaut": ""
+   },
+   {
+    "nom": "edgeColor",
+    "type": "[number, number, number]",
+    "doc": "Color of the dissolve edge glow as [r, g, b] in 0-1 range.",
+    "defaut": ""
+   },
+   {
+    "nom": "opacity",
+    "type": "number",
+    "doc": "Overall field opacity (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "cellScale",
+    "type": "number",
+    "doc": "Cells across the shorter screen axis (4 to 80).",
+    "defaut": ""
+   },
+   {
+    "nom": "lineWidth",
+    "type": "number",
+    "doc": "Thickness of the lattice lines (0.005 to 0.2).",
+    "defaut": ""
+   },
+   {
+    "nom": "gridOpacity",
+    "type": "number",
+    "doc": "Brightness of the lattice grid (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "gridReveal",
+    "type": "ForceFieldGridReveal",
+    "doc": "How the lattice is revealed: always visible, near the cursor, by click ripples, or both.",
+    "defaut": ""
+   },
+   {
+    "nom": "gridRevealStrength",
+    "type": "number",
+    "doc": "Brightness of the revealed lattice in hover/click/both modes (0 to 3).",
+    "defaut": ""
+   },
+   {
+    "nom": "gridRevealRadius",
+    "type": "number",
+    "doc": "Radius of the hover reveal in CSS pixels (60 to 800).",
+    "defaut": ""
+   },
+   {
+    "nom": "gridFade",
+    "type": "number",
+    "doc": "Fade smoothness of the reveal edge (0.02 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "flashSpeed",
+    "type": "number",
+    "doc": "Random per-cell flash speed (0 to 4).",
+    "defaut": ""
+   },
+   {
+    "nom": "flashIntensity",
+    "type": "number",
+    "doc": "Random per-cell flash brightness (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "flowScale",
+    "type": "number",
+    "doc": "Scale of the drifting energy noise (0.5 to 12).",
+    "defaut": ""
+   },
+   {
+    "nom": "flowSpeed",
+    "type": "number",
+    "doc": "Drift speed of the energy noise (0 to 4).",
+    "defaut": ""
+   },
+   {
+    "nom": "flowIntensity",
+    "type": "number",
+    "doc": "Brightness of the energy noise (0 to 4).",
+    "defaut": ""
+   },
+   {
+    "nom": "edgeGlow",
+    "type": "number",
+    "doc": "Glow creeping in from the screen edges, the fresnel analog (0 to 4).",
+    "defaut": ""
+   },
+   {
+    "nom": "edgeFalloff",
+    "type": "number",
+    "doc": "How far the edge glow reaches into the screen (0.02 to 0.6).",
+    "defaut": ""
+   },
+   {
+    "nom": "reveal",
+    "type": "number",
+    "doc": "Reveal progress. 1 is fully materialized, 0 is gone (noise dissolve).",
+    "defaut": ""
+   },
+   {
+    "nom": "dissolveScale",
+    "type": "number",
+    "doc": "Scale of the dissolve noise (0.5 to 12).",
+    "defaut": ""
+   },
+   {
+    "nom": "dissolveWidth",
+    "type": "number",
+    "doc": "Width of the burning dissolve edge (0.005 to 0.2).",
+    "defaut": ""
+   },
+   {
+    "nom": "dissolveGlow",
+    "type": "number",
+    "doc": "Brightness of the dissolve edge (0 to 12).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleSpeed",
+    "type": "number",
+    "doc": "Expansion speed of click ripples in screens per second (0.1 to 4).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleWidth",
+    "type": "number",
+    "doc": "Ring thickness of click ripples (0.01 to 0.4).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleBlend",
+    "type": "number",
+    "doc": "How softly ripple rings feather into the page, 0 is tight, 1 is airy (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleDuration",
+    "type": "number",
+    "doc": "Lifetime of one ripple in seconds (0.3 to 5).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleIntensity",
+    "type": "number",
+    "doc": "Brightness of ripples and impact flashes (0 to 8).",
+    "defaut": ""
+   },
+   {
+    "nom": "rippleMaxRadius",
+    "type": "number",
+    "doc": "Max radius a ripple can reach, in screens (0.1 to 2).",
+    "defaut": ""
+   },
+   {
+    "nom": "impactRadius",
+    "type": "number",
+    "doc": "Radius of the cell flash burst around an impact (0 to 0.5).",
+    "defaut": ""
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "How much ripples push the page outward and warp the lattice (0 to 60).",
+    "defaut": ""
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration inside refracted rings (0 to 8).",
+    "defaut": ""
+   },
+   {
+    "nom": "haze",
+    "type": "number",
+    "doc": "Living heat-haze shimmer that warps the page beneath the field (0 to 2).",
+    "defaut": ""
+   },
+   {
+    "nom": "pageReact",
+    "type": "number",
+    "doc": "Lattice reacts to the page: cells over bright content glow brighter (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "tint",
+    "type": "number",
+    "doc": "Tints the page toward the field color, like looking through the shield (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "hoverGlow",
+    "type": "number",
+    "doc": "Glow following the cursor (0 to 3).",
+    "defaut": ""
+   },
+   {
+    "nom": "hoverRadius",
+    "type": "number",
+    "doc": "Radius of the cursor glow in CSS pixels (40 to 600).",
+    "defaut": ""
+   },
+   {
+    "nom": "hoverCharge",
+    "type": "number",
+    "doc": "Cells light up when the cursor crosses them (0 to 2).",
+    "defaut": ""
+   },
+   {
+    "nom": "hideOnHover",
+    "type": "boolean",
+    "doc": "Fade the field out around the cursor instead of intensifying it.",
+    "defaut": ""
+   },
+   {
+    "nom": "dim",
+    "type": "number",
+    "doc": "How much the page dims beneath the field (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "bloom",
+    "type": "number",
+    "doc": "Bloom amount applied to bright field energy (0 to 3).",
+    "defaut": ""
+   },
+   {
+    "nom": "bloomThreshold",
+    "type": "number",
+    "doc": "Bloom brightness cutoff (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Animated film grain over the field (0 to 1).",
+    "defaut": ""
+   },
+   {
+    "nom": "clickRipples",
+    "type": "boolean",
+    "doc": "Spawn ripples on click (default true).",
+    "defaut": ""
+   },
+   {
+    "nom": "onHit",
+    "type": "(x: number, y: number) => void",
+    "doc": "Called with the impact position in CSS pixels after each click.",
+    "defaut": ""
+   }
+  ],
+  "n_props": 44
+ },
+ "frost": {
+  "titre": "Frost",
+  "desc": "Covers your page in a frozen pane of ice with refraction and frost grain. Hovering melts a hole through the frost, which freezes back over. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 37.3,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 5,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "frost",
+    "type": "number",
+    "doc": "Base frozen coverage added on top of the frost pattern (0-1).",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "Multiplier on the frost noise pattern. Higher freezes more of the pane.",
+    "defaut": "0.7"
+   },
+   {
+    "nom": "contrast",
+    "type": "number",
+    "doc": "Contrast of the frost noise pattern.",
+    "defaut": "3"
+   },
+   {
+    "nom": "crispness",
+    "type": "number",
+    "doc": "Contrast of the final frost mask. Higher gives crisper frost edges.",
+    "defaut": "1"
+   },
+   {
+    "nom": "highlight",
+    "type": "number",
+    "doc": "How much sparkling highlight grain mixes into the frost (0-1).",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "highlightStrength",
+    "type": "number",
+    "doc": "How strongly highlights tint toward white (0-1).",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "haze",
+    "type": "number",
+    "doc": "Base blur haze mixed over the content, even outside thick frost (0-1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "tintThin",
+    "type": "[number, number, number]",
+    "doc": "Frost color where the layer is thin, as [r, g, b] in 0-1 range.",
+    "defaut": "[0.82"
+   },
+   {
+    "nom": "tintThick",
+    "type": "[number, number, number]",
+    "doc": "Frost color where the layer is thick, as [r, g, b] in 0-1 range.",
+    "defaut": "[0.92"
+   },
+   {
+    "nom": "tintStrength",
+    "type": "number",
+    "doc": "How much the frost tint colors the frozen areas (0-1).",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "saturation",
+    "type": "number",
+    "doc": "Saturation multiplier applied to the frosted content.",
+    "defaut": "1.2"
+   },
+   {
+    "nom": "brightness",
+    "type": "number",
+    "doc": "Brightness multiplier applied to the frosted content.",
+    "defaut": "0.85"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "How far the icy surface bends light. 0 disables refraction.",
+    "defaut": "1"
+   },
+   {
+    "nom": "ior",
+    "type": "number",
+    "doc": "Index of refraction of the ice. Water ice is about 1.31.",
+    "defaut": "1.31"
+   },
+   {
+    "nom": "detail",
+    "type": "number",
+    "doc": "Strength of the fine surface detail in the refraction.",
+    "defaut": "2"
+   },
+   {
+    "nom": "textureScale",
+    "type": "number",
+    "doc": "Scale of the icy relief pattern. Higher is larger features.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fresnel",
+    "type": "number",
+    "doc": "Fresnel boost at grazing angles (0-2).",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "meltRadius",
+    "type": "number",
+    "doc": "Radius of the melt spot under the cursor (0-1, fraction of height).",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "meltNoise",
+    "type": "number",
+    "doc": "Irregularity of the melt edge. 0 is a clean circle.",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "meltStrength",
+    "type": "number",
+    "doc": "How quickly hovering melts the frost (0-1).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "refreeze",
+    "type": "number",
+    "doc": "How fast melted areas freeze back over. 0 never refreezes.",
+    "defaut": "2"
+   },
+   {
+    "nom": "edgeFade",
+    "type": "number",
+    "doc": "Keeps the edges of the pane frozen. 0 lets everything melt.",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "meltEdges",
+    "type": "boolean",
+    "doc": "Lets the frozen borders of the pane melt too.",
+    "defaut": "true"
+   },
+   {
+    "nom": "introDuration",
+    "type": "number",
+    "doc": "Seconds for the frost to grow in from the edges on load. 0 disables.",
+    "defaut": "2.5"
+   },
+   {
+    "nom": "opacity",
+    "type": "number",
+    "doc": "Overall opacity of the frost layer (0-1). Lower shows more content.",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "shimmer",
+    "type": "number",
+    "doc": "Animated twinkle of the highlight grain (0-1). 0 is static.",
+    "defaut": "0"
+   },
+   {
+    "nom": "quality",
+    "type": "number",
+    "doc": "Resolution multiplier for the blur passes (0.25-1).",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 27
+ },
+ "glass": {
+  "titre": "Glass",
+  "desc": "A cursor-following glass lens that refracts your page like real glass, with a crystal ball zoom over target elements. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 19.9,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "shape",
+    "type": "\"circle\" | \"square\" | \"rectangle\"",
+    "doc": "Lens shape.",
+    "defaut": "\"circle\""
+   },
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Lens size (radius, or half height for rectangles) in CSS pixels.",
+    "defaut": "120"
+   },
+   {
+    "nom": "aspect",
+    "type": "number",
+    "doc": "Width to height ratio of the rectangle shape (1 to 3).",
+    "defaut": "1.7"
+   },
+   {
+    "nom": "corner",
+    "type": "number",
+    "doc": "Corner radius for square and rectangle shapes in CSS pixels.",
+    "defaut": "32"
+   },
+   {
+    "nom": "ior",
+    "type": "number",
+    "doc": "Index of refraction of the glass (1 to 2). Higher bends light more.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "edge",
+    "type": "number",
+    "doc": "Fraction of the lens that stays optically flat before the rim (0 to 1).",
+    "defaut": "0.7"
+   },
+   {
+    "nom": "bevel",
+    "type": "number",
+    "doc": "How sharply the rim curves away (1 to 10).",
+    "defaut": "4"
+   },
+   {
+    "nom": "depth",
+    "type": "number",
+    "doc": "Optical depth in CSS pixels: how far the glass floats above the page.",
+    "defaut": "250"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration strength at the rim (0 to 3). 0 disables it.",
+    "defaut": "1"
+   },
+   {
+    "nom": "blur",
+    "type": "number",
+    "doc": "Frosted blur of the glass face (0 = optically clear, up to 4).",
+    "defaut": "0"
+   },
+   {
+    "nom": "reflection",
+    "type": "number",
+    "doc": "Strength of the fresnel reflection on the rim (0 to 2). 0 disables it.",
+    "defaut": "1"
+   },
+   {
+    "nom": "shine",
+    "type": "number",
+    "doc": "* Specular rim highlight (0 to 2). Keeps the lens visible even over plain * backgrounds where clear glass would otherwise be invis",
+    "defaut": "0.01"
+   },
+   {
+    "nom": "zoom",
+    "type": "number",
+    "doc": "Magnification while hovering a target element (1 to 3).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "targets",
+    "type": "string",
+    "doc": "CSS selector for elements that trigger the crystal ball zoom.",
+    "defaut": "\"[data-glass-target]\""
+   },
+   {
+    "nom": "follow",
+    "type": "number",
+    "doc": "How quickly the lens follows the cursor (0 to 1). 1 snaps to it.",
+    "defaut": "0.2"
+   }
+  ],
+  "n_props": 15
+ },
+ "glass-object": {
+  "titre": "GlassObject",
+  "desc": "Turns any GLB/glTF model, SVG, or image into a floating liquid-glass object with real refraction, chromatic dispersion, frost, and tinted absorption, lit by a studio environment. Built on three.js.",
+  "deps": [
+   "preact",
+   "solid-js",
+   "three"
+  ],
+  "poids_ko": 37.6,
+  "html_in_canvas": false,
+  "marqueurs": {
+   "drawElementImage": 0,
+   "layoutsubtree": 0,
+   "requestPaint": 0,
+   "supportsHtmlInCanvas": 0,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": true,
+  "webgl": true,
+  "deps_vanilla": [
+   "three"
+  ],
+  "props": [
+   {
+    "nom": "src",
+    "type": "string",
+    "doc": "URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "ior",
+    "type": "number",
+    "doc": "Index of refraction of the glass (1 to 2.33).",
+    "defaut": "1.75"
+   },
+   {
+    "nom": "thickness",
+    "type": "number",
+    "doc": "Thickness of the glass volume in scene units. Drives how strongly light bends.",
+    "defaut": "4"
+   },
+   {
+    "nom": "roughness",
+    "type": "number",
+    "doc": "Surface roughness (0 to 1). Higher values frost the glass.",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "dispersion",
+    "type": "number",
+    "doc": "Chromatic dispersion of the refraction (0 to 2). Splits light into rainbow fringes like real glass.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "clearcoat",
+    "type": "number",
+    "doc": "Clearcoat layer on top of the glass (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "tint",
+    "type": "string",
+    "doc": "Tint color of the glass volume as any CSS color. Empty string keeps the glass clear.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "tintDensity",
+    "type": "number",
+    "doc": "How strongly the tint absorbs light through the volume.",
+    "defaut": "2"
+   },
+   {
+    "nom": "depth",
+    "type": "number",
+    "doc": "Extrusion depth of 2D assets (SVG or image) as a fraction of their longest side.",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "bevel",
+    "type": "number",
+    "doc": "Edge rounding of extruded 2D assets (0 to 1). Higher values melt the edges into a liquid lip.",
+    "defaut": "1"
+   },
+   {
+    "nom": "highlight",
+    "type": "string",
+    "doc": "Accent color of the ring light in the studio environment.",
+    "defaut": "\"#066aff\""
+   },
+   {
+    "nom": "environmentIntensity",
+    "type": "number",
+    "doc": "Brightness of the studio environment lighting.",
+    "defaut": "1"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Background color behind the glass. Empty string keeps the canvas transparent.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "backgroundImage",
+    "type": "string",
+    "doc": "URL of an image shown as a backdrop behind the glass, cover-fit to the view. The glass samples and refracts it. Empty string disab",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the longest side of the asset in scene units. The camera sits about 4 units away.",
+    "defaut": "3"
+   },
+   {
+    "nom": "xOffset",
+    "type": "number",
+    "doc": "Horizontal offset of the asset in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "yOffset",
+    "type": "number",
+    "doc": "Vertical offset of the asset in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "floatIntensity",
+    "type": "number",
+    "doc": "Strength of the floating bob animation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "rotationIntensity",
+    "type": "number",
+    "doc": "Strength of the idle rocking rotation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the float and rocking animation.",
+    "defaut": "2"
+   },
+   {
+    "nom": "orbit",
+    "type": "boolean",
+    "doc": "Let the user orbit the camera by dragging.",
+    "defaut": "true"
+   },
+   {
+    "nom": "zoom",
+    "type": "boolean",
+    "doc": "Let the user zoom with the scroll wheel or pinch.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotate",
+    "type": "boolean",
+    "doc": "Spin the camera around the asset turntable-style.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotateSpeed",
+    "type": "number",
+    "doc": "Turntable speed when autoRotate is on.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fov",
+    "type": "number",
+    "doc": "Camera field of view in degrees.",
+    "defaut": "55"
+   },
+   {
+    "nom": "cameraDistance",
+    "type": "number",
+    "doc": "Camera distance from the center of the asset.",
+    "defaut": "4"
+   },
+   {
+    "nom": "dracoDecoderPath",
+    "type": "string",
+    "doc": "Base URL of the Draco decoder, fetched only when a model needs it.",
+    "defaut": "\"https://www.gstatic.com/draco/versioned/decoders/1.5.7/\""
+   },
+   {
+    "nom": "onLoad",
+    "type": "(() => void) | null",
+    "doc": "Called after an asset finishes loading.",
+    "defaut": "null"
+   },
+   {
+    "nom": "onError",
+    "type": "((error: unknown) => void) | null",
+    "doc": "Called when an asset fails to load.",
+    "defaut": "null"
+   }
+  ],
+  "n_props": 29
+ },
+ "glitch": {
+  "titre": "Glitch",
+  "desc": "Broadcast glitch bursts that tear the page into shifted slices with RGB splits, corrupted blocks, and analog noise, then settle back to a clean read. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 13.2,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "intensity",
+    "type": "number",
+    "doc": "Overall strength of the glitch (0 to 2).",
+    "defaut": "1"
+   },
+   {
+    "nom": "interval",
+    "type": "number",
+    "doc": "Seconds between glitch bursts. 0 keeps the glitch running constantly.",
+    "defaut": "3"
+   },
+   {
+    "nom": "duration",
+    "type": "number",
+    "doc": "How long each burst lasts in seconds.",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "slices",
+    "type": "number",
+    "doc": "Number of horizontal slices the tear snaps to. Lower is chunkier.",
+    "defaut": "24"
+   },
+   {
+    "nom": "shift",
+    "type": "number",
+    "doc": "How far the torn slices shift sideways, in CSS pixels.",
+    "defaut": "30"
+   },
+   {
+    "nom": "rgbShift",
+    "type": "number",
+    "doc": "Chromatic RGB split during bursts, in CSS pixels.",
+    "defaut": "4"
+   },
+   {
+    "nom": "blocks",
+    "type": "number",
+    "doc": "Amount of corrupted block artifacts during bursts (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "noise",
+    "type": "number",
+    "doc": "Analog noise and scanline flicker during bursts (0 to 1).",
+    "defaut": "0.35"
+   }
+  ],
+  "n_props": 8
+ },
+ "glyph-rain": {
+  "titre": "GlyphRain",
+  "desc": "Rains glowing glyph streams over your live HTML while every drop head casts a real pool of light onto the page beneath, with embossed relief shading. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 27.2,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "charset",
+    "type": "string",
+    "doc": "Characters used for the falling glyphs. Deduplicated into a glyph atlas.",
+    "defaut": "DEFAULT_CHARSET"
+   },
+   {
+    "nom": "cell",
+    "type": "number",
+    "doc": "Size of one glyph cell in CSS pixels (8 to 64).",
+    "defaut": "15"
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "Rain color as [r, g, b] in 0-1 range.",
+    "defaut": "[0.267"
+   },
+   {
+    "nom": "headColor",
+    "type": "[number, number, number]",
+    "doc": "Color of the bright head glyph as [r, g, b] in 0-1 range.",
+    "defaut": "[0.169"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Fall speed in screen heights per second (0.05 to 3).",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "speedVariance",
+    "type": "number",
+    "doc": "Per-column speed variation (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "density",
+    "type": "number",
+    "doc": "Fraction of drops that spawn each cycle (0 to 1).",
+    "defaut": "0.15"
+   },
+   {
+    "nom": "trail",
+    "type": "number",
+    "doc": "Length multiplier for the fading trails (0.2 to 3).",
+    "defaut": "0.65"
+   },
+   {
+    "nom": "glow",
+    "type": "number",
+    "doc": "Brightness of the drop heads and the light they cast (0 to 3).",
+    "defaut": "1.75"
+   },
+   {
+    "nom": "mutate",
+    "type": "number",
+    "doc": "How fast glyphs mutate into other characters (0 to 4).",
+    "defaut": "0"
+   },
+   {
+    "nom": "flicker",
+    "type": "number",
+    "doc": "Random brightness flicker of the streaks (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "layers",
+    "type": "number",
+    "doc": "Parallax rain layers behind the front one (1 to 3).",
+    "defaut": "2"
+   },
+   {
+    "nom": "dim",
+    "type": "number",
+    "doc": "How much the unlit page dims (0 to 1). 0 keeps it fully readable.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "light",
+    "type": "number",
+    "doc": "Strength of the light the drops shine onto the page (0 to 3).",
+    "defaut": "2.8"
+   },
+   {
+    "nom": "lightRadius",
+    "type": "number",
+    "doc": "Radius of each drop's light pool in CSS pixels (20 to 600).",
+    "defaut": "240"
+   },
+   {
+    "nom": "lightHeight",
+    "type": "number",
+    "doc": "How high above the page the lights float, in CSS pixels. Higher is softer.",
+    "defaut": "172"
+   },
+   {
+    "nom": "relief",
+    "type": "number",
+    "doc": "Embossed 3D shading of the page under the lights (0 to 2).",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "stir",
+    "type": "number",
+    "doc": "How strongly the cursor stirs the rain as it passes (0 to 1). 0 disables it.",
+    "defaut": "0.7"
+   },
+   {
+    "nom": "stirRadius",
+    "type": "number",
+    "doc": "How far the stirring reaches to either side of the cursor, in CSS pixels.",
+    "defaut": "260"
+   },
+   {
+    "nom": "settle",
+    "type": "number",
+    "doc": "Seconds the stirred wake takes to settle back to its own rhythm.",
+    "defaut": "0.9"
+   }
+  ],
+  "n_props": 20
+ },
+ "grid": {
+  "titre": "Grid",
+  "desc": "Splits your page into a grid of 3D tiles that ripple in waves around the cursor. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 24.5,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "tileSize",
+    "type": "number",
+    "doc": "Size of each grid tile in CSS pixels.",
+    "defaut": "150"
+   },
+   {
+    "nom": "gap",
+    "type": "number",
+    "doc": "Gap between tiles in CSS pixels.",
+    "defaut": "0"
+   },
+   {
+    "nom": "cornerRadius",
+    "type": "number",
+    "doc": "Corner radius of each tile in CSS pixels.",
+    "defaut": "0"
+   },
+   {
+    "nom": "amplitude",
+    "type": "number",
+    "doc": "Overall strength of the wave displacement.",
+    "defaut": "2.5"
+   },
+   {
+    "nom": "waveSpeed",
+    "type": "number",
+    "doc": "How fast the wavefront expands, in screen heights per second.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "frequency",
+    "type": "number",
+    "doc": "Spatial oscillation of the wave. Higher means more ripples per wave.",
+    "defaut": "12"
+   },
+   {
+    "nom": "waveWidth",
+    "type": "number",
+    "doc": "Width of the wave ring as a fraction of the screen height.",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "fadeTime",
+    "type": "number",
+    "doc": "Seconds for a wave to fade to roughly a third of its strength.",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "maxLift",
+    "type": "number",
+    "doc": "Maximum lift a tile can reach (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "jitter",
+    "type": "number",
+    "doc": "Per-tile randomness in how tiles respond to the wave (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "liftHeight",
+    "type": "number",
+    "doc": "How high a fully lifted cube rises, in CSS pixels.",
+    "defaut": "60"
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Camera distance in CSS pixels, like CSS perspective. Lower is more dramatic.",
+    "defaut": "1200"
+   },
+   {
+    "nom": "tilt",
+    "type": "number",
+    "doc": "How much the camera vanishing point leans toward the cursor (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "shading",
+    "type": "number",
+    "doc": "Strength of the lighting on cube tops and side walls.",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "tint",
+    "type": "[number, number, number]",
+    "doc": "Color lifted tiles blend toward as [r, g, b] in 0-1 range.",
+    "defaut": "[0"
+   },
+   {
+    "nom": "tintStrength",
+    "type": "number",
+    "doc": "How strongly lifted tiles take on the tint color (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "idleRipples",
+    "type": "number",
+    "doc": "Seconds between ambient ripples when the cursor is idle. 0 disables.",
+    "defaut": "0"
+   }
+  ],
+  "n_props": 17
+ },
+ "hex-float": {
+  "titre": "HexFloat",
+  "desc": "Renders the live page onto a floor of shiny beveled hex tiles that lean back in perspective, bob gently, and rise toward the cursor. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 49.3,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Width of each hex tile in CSS pixels.",
+    "defaut": "160"
+   },
+   {
+    "nom": "gap",
+    "type": "number",
+    "doc": "Seam between tiles in CSS pixels.",
+    "defaut": "0"
+   },
+   {
+    "nom": "bevel",
+    "type": "number",
+    "doc": "Width of the shiny beveled rim in CSS pixels.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "tilt",
+    "type": "number",
+    "doc": "Backward lean of the page in degrees (-30 to 30). Positive tilts the top away.",
+    "defaut": "24"
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Camera closeness (0 to 1). Higher exaggerates the perspective of the tilt.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "float",
+    "type": "number",
+    "doc": "How far tiles bob up and down as they float (0 to 1). 0 keeps them still.",
+    "defaut": "0"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Speed of the floating motion. 1 is normal speed.",
+    "defaut": "1"
+   },
+   {
+    "nom": "shine",
+    "type": "number",
+    "doc": "Intensity of the specular glints on rims and tile faces (0 to 2).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "lift",
+    "type": "number",
+    "doc": "How strongly tiles rise along the edges of the fluid reading window (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Size of the fluid splats the cursor injects, in CSS pixels. Sets the reading window's scale.",
+    "defaut": "1200"
+   },
+   {
+    "nom": "flow",
+    "type": "number",
+    "doc": "How strongly cursor movement pushes the fluid around (0 to 3).",
+    "defaut": "0"
+   },
+   {
+    "nom": "swirl",
+    "type": "number",
+    "doc": "Vorticity of the fluid (0 to 15). Higher makes the window's trail curl into eddies.",
+    "defaut": "0"
+   },
+   {
+    "nom": "trail",
+    "type": "number",
+    "doc": "How long the fluid trail lingers before healing (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "iridescence",
+    "type": "number",
+    "doc": "Strength of the iridescent hue shift on highlights (0 to 2). 0 keeps highlights neutral.",
+    "defaut": "1"
+   },
+   {
+    "nom": "bloom",
+    "type": "number",
+    "doc": "Bloom glow around bright highlights (0 to 1). 0 skips the pass entirely.",
+    "defaut": "0"
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Animated film grain over the final image (0 to 1). 0 skips the pass entirely.",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "gapColor",
+    "type": "[number, number, number] | \"auto\"",
+    "doc": "Seam color as [r, g, b] in 0-1 range, or \"auto\" to derive a dark seam from the page background.",
+    "defaut": "\"auto\""
+   }
+  ],
+  "n_props": 17
+ },
+ "laser": {
+  "titre": "Laser",
+  "desc": "Hides everything below a glowing laser beam near the bottom of the viewport. Scrolling prints new content in from behind it. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 19.8,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Animation speed of the beam wave, flicker, and sparkle. 1 is normal.",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "offset",
+    "type": "number",
+    "doc": "Distance of the beam from the bottom edge in CSS pixels.",
+    "defaut": "140"
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "Laser glow color as RGB in the 0 to 1 range.",
+    "defaut": "[0.05"
+   },
+   {
+    "nom": "thickness",
+    "type": "number",
+    "doc": "Thickness of the white-hot beam core in CSS pixels.",
+    "defaut": "6"
+   },
+   {
+    "nom": "core",
+    "type": "number",
+    "doc": "Intensity of the white beam core (0 to 2). 0 removes it.",
+    "defaut": "1"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Reach of the colored glow around the beam in CSS pixels.",
+    "defaut": "20"
+   },
+   {
+    "nom": "glow",
+    "type": "number",
+    "doc": "Brightness of the colored glow (0 to 3). 0 removes it.",
+    "defaut": "2"
+   },
+   {
+    "nom": "wave",
+    "type": "number",
+    "doc": "Amplitude of the slow beam waviness in CSS pixels.",
+    "defaut": "10"
+   },
+   {
+    "nom": "width",
+    "type": "number",
+    "doc": "Beam length as a fraction of the content width (0 to 1).",
+    "defaut": "0.55"
+   },
+   {
+    "nom": "flicker",
+    "type": "number",
+    "doc": "Random intensity flicker of the beam (0 to 1).",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "reveal",
+    "type": "number",
+    "doc": "Height of the hot reveal band above the beam in CSS pixels.",
+    "defaut": "400"
+   },
+   {
+    "nom": "heat",
+    "type": "number",
+    "doc": "How strongly freshly revealed content glows (0 to 1.5).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "shimmer",
+    "type": "number",
+    "doc": "Heat shimmer displacement of freshly revealed content in CSS pixels.",
+    "defaut": "12"
+   },
+   {
+    "nom": "sparkle",
+    "type": "number",
+    "doc": "Animated sparkle texture inside the reveal band (0 to 2).",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "reactivity",
+    "type": "number",
+    "doc": "How much scrolling boosts the beam and the reveal glow (0 to 3).",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 15
+ },
+ "liquid": {
+  "titre": "Liquid",
+  "desc": "A pointer-driven WebGL fluid simulation over your page. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 26.3,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "simResolution",
+    "type": "number",
+    "doc": "Resolution of the simulation grid.",
+    "defaut": "128"
+   },
+   {
+    "nom": "dyeResolution",
+    "type": "number",
+    "doc": "Resolution of the fluid trail texture.",
+    "defaut": "512"
+   },
+   {
+    "nom": "densityDissipation",
+    "type": "number",
+    "doc": "How much the trail persists each frame (closer to 1 lasts longer).",
+    "defaut": "0.96"
+   },
+   {
+    "nom": "velocityDissipation",
+    "type": "number",
+    "doc": "How much motion persists each frame (closer to 1 lasts longer).",
+    "defaut": "1"
+   },
+   {
+    "nom": "pressure",
+    "type": "number",
+    "doc": "How much pressure carries over between frames.",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "pressureIterations",
+    "type": "number",
+    "doc": "Pressure solver iterations.",
+    "defaut": "4"
+   },
+   {
+    "nom": "curl",
+    "type": "number",
+    "doc": "Rotational force added back into the flow.",
+    "defaut": "1.9"
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the pointer splat.",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "force",
+    "type": "number",
+    "doc": "Force multiplier applied on pointer movement.",
+    "defaut": "1.1"
+   },
+   {
+    "nom": "intensity",
+    "type": "number",
+    "doc": "Strength of the color tint left by the flow.",
+    "defaut": "2"
+   },
+   {
+    "nom": "distortion",
+    "type": "number",
+    "doc": "How strongly the flow warps the content.",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "blend",
+    "type": "number",
+    "doc": "How much of the fluid color blends over the content.",
+    "defaut": "5"
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "Trail color as [r, g, b] in 0-1 range. Ignored when rainbow is on.",
+    "defaut": "[0.145"
+   },
+   {
+    "nom": "rainbow",
+    "type": "boolean",
+    "doc": "Color the trail from the flow direction instead of a fixed color.",
+    "defaut": "false"
+   }
+  ],
+  "n_props": 14
+ },
+ "liquid-object": {
+  "titre": "LiquidObject",
+  "desc": "Renders any GLB/glTF model, SVG, or image in a studio environment, then drags it through an invisible GPU fluid that swirls under the cursor and splits the light into chromatic fringes. Built on three.js.",
+  "deps": [
+   "preact",
+   "solid-js",
+   "three"
+  ],
+  "poids_ko": 62.4,
+  "html_in_canvas": false,
+  "marqueurs": {
+   "drawElementImage": 0,
+   "layoutsubtree": 0,
+   "requestPaint": 0,
+   "supportsHtmlInCanvas": 0,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": true,
+  "webgl": true,
+  "deps_vanilla": [
+   "three"
+  ],
+  "props": [
+   {
+    "nom": "src",
+    "type": "string",
+    "doc": "URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "distortion",
+    "type": "number",
+    "doc": "How far the liquid drags the object as it flows.",
+    "defaut": "2"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Strength of the chromatic lens fringe in a soft radius around the cursor.",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Amount of animated film grain. Subtle across the frame, strongest inside the cursor lens.",
+    "defaut": "1"
+   },
+   {
+    "nom": "sheen",
+    "type": "number",
+    "doc": "Brightness of the light glinting off the moving liquid.",
+    "defaut": "1.6"
+   },
+   {
+    "nom": "cursorSize",
+    "type": "number",
+    "doc": "Size of the area the cursor disturbs.",
+    "defaut": "1"
+   },
+   {
+    "nom": "cursorForce",
+    "type": "number",
+    "doc": "How hard the cursor pushes the liquid.",
+    "defaut": "1"
+   },
+   {
+    "nom": "persistence",
+    "type": "number",
+    "doc": "How long the ripples keep flowing after the cursor stops.",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "swirl",
+    "type": "number",
+    "doc": "How much the flow curls into swirls and eddies.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "iridescence",
+    "type": "number",
+    "doc": "Strength of the rainbow shimmer that appears where the liquid flows.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "splash",
+    "type": "number",
+    "doc": "Strength of the liquid burst fired when the canvas is clicked or tapped (0 disables).",
+    "defaut": "1.2"
+   },
+   {
+    "nom": "ambient",
+    "type": "number",
+    "doc": "Amount of slow idle drift that keeps the surface alive while the cursor is away.",
+    "defaut": "1"
+   },
+   {
+    "nom": "wobble",
+    "type": "number",
+    "doc": "How much the object tilts and bounces like jelly in response to the cursor.",
+    "defaut": "0"
+   },
+   {
+    "nom": "gloss",
+    "type": "number",
+    "doc": "Surface finish of extruded 2D assets, from matte to mirror. Models keep their own materials.",
+    "defaut": "0.65"
+   },
+   {
+    "nom": "metallic",
+    "type": "number",
+    "doc": "How metallic the asset reads. 0 keeps the original material finish, 1 turns it to polished metal.",
+    "defaut": "0.15"
+   },
+   {
+    "nom": "tint",
+    "type": "string",
+    "doc": "Tint multiplied over the asset colors. Empty string keeps the original colors.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "depth",
+    "type": "number",
+    "doc": "Extrusion depth of 2D assets (SVG or image) as a fraction of their longest side.",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "bevel",
+    "type": "number",
+    "doc": "Edge rounding of extruded 2D assets (0 to 1). Higher values melt the edges into a liquid lip.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "highlight",
+    "type": "string",
+    "doc": "Accent color of the ring light in the studio environment.",
+    "defaut": "\"#ffffff\""
+   },
+   {
+    "nom": "environmentIntensity",
+    "type": "number",
+    "doc": "Brightness of the studio environment lighting.",
+    "defaut": "1"
+   },
+   {
+    "nom": "brightness",
+    "type": "number",
+    "doc": "Brightness multiplier applied to the final image.",
+    "defaut": "1"
+   },
+   {
+    "nom": "saturation",
+    "type": "number",
+    "doc": "Color saturation of the final image. 1 keeps the original colors, 0 is grayscale.",
+    "defaut": "1.2"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Background color behind the object. Empty string keeps the canvas transparent.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the longest side of the asset in scene units. The camera sits about 4 units away.",
+    "defaut": "3"
+   },
+   {
+    "nom": "xOffset",
+    "type": "number",
+    "doc": "Horizontal offset of the asset in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "yOffset",
+    "type": "number",
+    "doc": "Vertical offset of the asset in scene units.",
+    "defaut": "-0.2"
+   },
+   {
+    "nom": "floatIntensity",
+    "type": "number",
+    "doc": "Strength of the floating bob animation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "rotationIntensity",
+    "type": "number",
+    "doc": "Strength of the idle rocking rotation (0 disables).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the float and rocking animation.",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "orbit",
+    "type": "boolean",
+    "doc": "Let the user orbit the camera by dragging.",
+    "defaut": "true"
+   },
+   {
+    "nom": "zoom",
+    "type": "boolean",
+    "doc": "Let the user zoom with the scroll wheel or pinch.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotate",
+    "type": "boolean",
+    "doc": "Spin the camera around the asset turntable-style.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotateSpeed",
+    "type": "number",
+    "doc": "Turntable speed when autoRotate is on.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fov",
+    "type": "number",
+    "doc": "Camera field of view in degrees.",
+    "defaut": "60"
+   },
+   {
+    "nom": "cameraDistance",
+    "type": "number",
+    "doc": "Camera distance from the center of the asset.",
+    "defaut": "4"
+   },
+   {
+    "nom": "dracoDecoderPath",
+    "type": "string",
+    "doc": "Base URL of the Draco decoder, fetched only when a model needs it.",
+    "defaut": "\"https://www.gstatic.com/draco/versioned/decoders/1.5.7/\""
+   },
+   {
+    "nom": "onLoad",
+    "type": "(() => void) | null",
+    "doc": "Called after an asset finishes loading.",
+    "defaut": "null"
+   },
+   {
+    "nom": "onError",
+    "type": "((error: unknown) => void) | null",
+    "doc": "Called when an asset fails to load.",
+    "defaut": "null"
+   }
+  ],
+  "n_props": 38
+ },
+ "magnify": {
+  "titre": "Magnify",
+  "desc": "A sci-fi scanner lens that follows the cursor and magnifies the live page inside a configurable HUD reticle, with chromatic aberration haze and click ripples that bend the page. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 25.0,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Lens radius in CSS pixels.",
+    "defaut": "140"
+   },
+   {
+    "nom": "zoom",
+    "type": "number",
+    "doc": "Magnification inside the lens (1 to 4).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "scrollZoom",
+    "type": "boolean",
+    "doc": "Let the wheel or trackpad adjust the magnification while zoomModifier is held.",
+    "defaut": "false"
+   },
+   {
+    "nom": "zoomModifier",
+    "type": "ZoomModifier",
+    "doc": "Key held to zoom instead of scroll. \"none\" captures every wheel event over the content.",
+    "defaut": "\"shift\""
+   },
+   {
+    "nom": "color",
+    "type": "[number, number, number]",
+    "doc": "HUD accent color as RGB in the 0 to 1 range. Tints the reticle, readout, and ripple outline.",
+    "defaut": "[0.8"
+   },
+   {
+    "nom": "follow",
+    "type": "number",
+    "doc": "How quickly the lens follows the cursor (0 to 1). 1 snaps to it.",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "hud",
+    "type": "number",
+    "doc": "Overall HUD intensity (0 to 1). 0 hides every reticle element.",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "ring",
+    "type": "boolean",
+    "doc": "Show the outer ring.",
+    "defaut": "true"
+   },
+   {
+    "nom": "crosshair",
+    "type": "boolean",
+    "doc": "Show the crosshair lines through the center.",
+    "defaut": "true"
+   },
+   {
+    "nom": "ticks",
+    "type": "boolean",
+    "doc": "Show the tick marks around the ring.",
+    "defaut": "true"
+   },
+   {
+    "nom": "brackets",
+    "type": "boolean",
+    "doc": "Show the corner brackets inside the lens.",
+    "defaut": "true"
+   },
+   {
+    "nom": "dot",
+    "type": "boolean",
+    "doc": "Show the center dot.",
+    "defaut": "true"
+   },
+   {
+    "nom": "grid",
+    "type": "boolean",
+    "doc": "Show a faint measurement grid inside the lens.",
+    "defaut": "false"
+   },
+   {
+    "nom": "readout",
+    "type": "boolean",
+    "doc": "Show the data readout beside the lens.",
+    "defaut": "true"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration split inside the lens (0 to 3). 0 disables it.",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "haze",
+    "type": "number",
+    "doc": "Dreamy insight haze inside the lens (0 to 1). Softens and lifts the magnified content.",
+    "defaut": "0.2"
+   },
+   {
+    "nom": "ripples",
+    "type": "boolean",
+    "doc": "Emit a ripple across the page on click.",
+    "defaut": "true"
+   },
+   {
+    "nom": "rippleSpeed",
+    "type": "number",
+    "doc": "How fast the ripple wavefront travels, in CSS pixels per second.",
+    "defaut": "900"
+   },
+   {
+    "nom": "rippleWidth",
+    "type": "number",
+    "doc": "Thickness of the colored ripple outline in CSS pixels.",
+    "defaut": "2"
+   },
+   {
+    "nom": "rippleBendWidth",
+    "type": "number",
+    "doc": "Width of the band the ripple bends, in CSS pixels.",
+    "defaut": "100"
+   },
+   {
+    "nom": "rippleBend",
+    "type": "number",
+    "doc": "How many CSS pixels the ripple bends the page.",
+    "defaut": "20"
+   },
+   {
+    "nom": "rippleGlow",
+    "type": "number",
+    "doc": "Strength of the colored ripple outline (0 to 2). 0 hides it.",
+    "defaut": "1"
+   },
+   {
+    "nom": "rippleLife",
+    "type": "number",
+    "doc": "Seconds a ripple lives before it fades out.",
+    "defaut": "1.4"
+   }
+  ],
+  "n_props": 23
+ },
+ "particle-object": {
+  "titre": "ParticleObject",
+  "desc": "Rebuilds any GLB/glTF model, SVG, or image as a cloud of particles that the cursor pushes, swirls, and springs back into shape. Built on three.js.",
+  "deps": [
+   "preact",
+   "solid-js",
+   "three"
+  ],
+  "poids_ko": 33.6,
+  "html_in_canvas": false,
+  "marqueurs": {
+   "drawElementImage": 0,
+   "layoutsubtree": 0,
+   "requestPaint": 0,
+   "supportsHtmlInCanvas": 0,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": true,
+  "webgl": true,
+  "deps_vanilla": [
+   "three"
+  ],
+  "props": [
+   {
+    "nom": "src",
+    "type": "string",
+    "doc": "URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "count",
+    "type": "number",
+    "doc": "Number of particles the asset is rebuilt from.",
+    "defaut": "14000"
+   },
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Particle size in CSS pixels at the model's distance.",
+    "defaut": "2.4"
+   },
+   {
+    "nom": "sizeVariance",
+    "type": "number",
+    "doc": "Random per-particle size variation (0 to 1).",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "color",
+    "type": "string",
+    "doc": "Override color as any CSS color. Empty string keeps the asset's own colors.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the cursor's push field in CSS pixels.",
+    "defaut": "110"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "How hard the cursor pushes particles away.",
+    "defaut": "1"
+   },
+   {
+    "nom": "swirl",
+    "type": "number",
+    "doc": "Tangential curl of the push (0 to 2). Particles spiral around the cursor instead of only fleeing it.",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "spring",
+    "type": "number",
+    "doc": "How quickly displaced particles spring back home.",
+    "defaut": "1"
+   },
+   {
+    "nom": "damping",
+    "type": "number",
+    "doc": "Velocity damping (0 to 1). Lower values keep particles wobbling longer.",
+    "defaut": "0.35"
+   },
+   {
+    "nom": "drift",
+    "type": "number",
+    "doc": "Idle shimmer of the resting particles (0 disables).",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Background color behind the particles. Empty string keeps the canvas transparent.",
+    "defaut": "\"\""
+   },
+   {
+    "nom": "scale",
+    "type": "number",
+    "doc": "Size of the longest side of the asset in scene units. The camera sits about 4 units away.",
+    "defaut": "3"
+   },
+   {
+    "nom": "xOffset",
+    "type": "number",
+    "doc": "Horizontal offset of the asset in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "yOffset",
+    "type": "number",
+    "doc": "Vertical offset of the asset in scene units.",
+    "defaut": "0"
+   },
+   {
+    "nom": "floatIntensity",
+    "type": "number",
+    "doc": "Strength of the floating bob animation (0 disables).",
+    "defaut": "2"
+   },
+   {
+    "nom": "rotationIntensity",
+    "type": "number",
+    "doc": "Strength of the idle rocking rotation (0 disables).",
+    "defaut": "1"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the float and rocking animation.",
+    "defaut": "2"
+   },
+   {
+    "nom": "orbit",
+    "type": "boolean",
+    "doc": "Let the user orbit the camera by dragging.",
+    "defaut": "true"
+   },
+   {
+    "nom": "zoom",
+    "type": "boolean",
+    "doc": "Let the user zoom with the scroll wheel or pinch.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotate",
+    "type": "boolean",
+    "doc": "Spin the camera around the asset turntable-style.",
+    "defaut": "false"
+   },
+   {
+    "nom": "autoRotateSpeed",
+    "type": "number",
+    "doc": "Turntable speed when autoRotate is on.",
+    "defaut": "2"
+   },
+   {
+    "nom": "fov",
+    "type": "number",
+    "doc": "Camera field of view in degrees.",
+    "defaut": "65"
+   },
+   {
+    "nom": "cameraDistance",
+    "type": "number",
+    "doc": "Camera distance from the center of the asset.",
+    "defaut": "4.2"
+   },
+   {
+    "nom": "dracoDecoderPath",
+    "type": "string",
+    "doc": "Base URL of the Draco decoder, fetched only when a model needs it.",
+    "defaut": "\"https://www.gstatic.com/draco/versioned/decoders/1.5.7/\""
+   },
+   {
+    "nom": "onLoad",
+    "type": "(() => void) | null",
+    "doc": "Called after an asset finishes loading.",
+    "defaut": "null"
+   },
+   {
+    "nom": "onError",
+    "type": "((error: unknown) => void) | null",
+    "doc": "Called when an asset fails to load.",
+    "defaut": "null"
+   }
+  ],
+  "n_props": 27
+ },
+ "particle-reveal": {
+  "titre": "ParticleReveal",
+  "desc": "Renders your page as fine grayscale dust that merges back into crisp UI around the cursor. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 16.5,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Reveal radius around the cursor in CSS pixels.",
+    "defaut": "500"
+   },
+   {
+    "nom": "softness",
+    "type": "number",
+    "doc": "Feather of the reveal edge as a fraction of the radius (0 to 1).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Particle grain size in CSS pixels.",
+    "defaut": "1"
+   },
+   {
+    "nom": "scatter",
+    "type": "number",
+    "doc": "How far grains wander from their home pixel in CSS pixels. Bright content spawns the farthest specks.",
+    "defaut": "25"
+   },
+   {
+    "nom": "drift",
+    "type": "number",
+    "doc": "Speed of the idle grain shimmer (0 freezes the dust).",
+    "defaut": "1"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "Chromatic aberration strength at the reveal edge in CSS pixels.",
+    "defaut": "40"
+   },
+   {
+    "nom": "bend",
+    "type": "number",
+    "doc": "How strongly unrevealed content smears around the reveal edge in CSS pixels.",
+    "defaut": "50"
+   },
+   {
+    "nom": "fade",
+    "type": "number",
+    "doc": "How strongly dust specks stand out from the background (0 to 1).",
+    "defaut": "0.85"
+   },
+   {
+    "nom": "threshold",
+    "type": "number",
+    "doc": "Contrast against the background above which a pixel counts as UI and dissolves into dust. Pixels close to the background color are",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "background",
+    "type": "string",
+    "doc": "Color of the backdrop behind the content, as any CSS color. Used to tell UI pixels apart from empty space.",
+    "defaut": "\"#000000\""
+   },
+   {
+    "nom": "smoothing",
+    "type": "number",
+    "doc": "Seconds the reveal takes to catch up with the cursor. Higher feels more damped.",
+    "defaut": "0.25"
+   }
+  ],
+  "n_props": 11
+ },
+ "particle-scroll": {
+  "titre": "ParticleScroll",
+  "desc": "Dissolves everything below a chosen line into drifting sand that reassembles as you scroll. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 22.3,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 5,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "point",
+    "type": "number",
+    "doc": "Viewport fraction of the formation line. Content assembles as it scrolls up past this line and dissolves back below it.",
+    "defaut": "0.68"
+   },
+   {
+    "nom": "band",
+    "type": "number",
+    "doc": "Height in CSS pixels of the transition band where particles progressively reassemble.",
+    "defaut": "420"
+   },
+   {
+    "nom": "density",
+    "type": "number",
+    "doc": "Grain spacing in CSS pixels. Smaller values mean finer, denser sand.",
+    "defaut": "2"
+   },
+   {
+    "nom": "size",
+    "type": "number",
+    "doc": "Size of fully scattered dust grains in CSS pixels. Grains grow to cover their cell as they land.",
+    "defaut": "1.25"
+   },
+   {
+    "nom": "spread",
+    "type": "number",
+    "doc": "Maximum distance in CSS pixels particles scatter from their home position.",
+    "defaut": "220"
+   },
+   {
+    "nom": "gravity",
+    "type": "number",
+    "doc": "Downward bias of the scattered cloud (-1 to 1), like sand settling. Negative values lift it.",
+    "defaut": "0.35"
+   },
+   {
+    "nom": "drift",
+    "type": "number",
+    "doc": "Idle float speed of scattered particles (0 to 1). 0 freezes the cloud.",
+    "defaut": "0.7"
+   },
+   {
+    "nom": "swirl",
+    "type": "number",
+    "doc": "Sideways arc in CSS pixels particles take while flying home.",
+    "defaut": "60"
+   },
+   {
+    "nom": "stagger",
+    "type": "number",
+    "doc": "Per-particle randomness of reassembly timing (0 to 1).",
+    "defaut": "0.7"
+   },
+   {
+    "nom": "fade",
+    "type": "number",
+    "doc": "Opacity of fully scattered particles (0 to 1).",
+    "defaut": "0.85"
+   },
+   {
+    "nom": "settle",
+    "type": "number",
+    "doc": "Seconds a row of dust takes to condense into the page once the reveal reaches it.",
+    "defaut": "1.2"
+   },
+   {
+    "nom": "smoothing",
+    "type": "number",
+    "doc": "Seconds the damped scroll takes to catch up with the real scroll. Higher feels more fluid.",
+    "defaut": "0.6"
+   }
+  ],
+  "n_props": 12
+ },
+ "peel": {
+  "titre": "Peel",
+  "desc": "Peels your page back from a chosen edge as the cursor approaches, revealing a second layer underneath. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 20.4,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "side",
+    "type": "PeelSide",
+    "doc": "Edge the content peels from.",
+    "defaut": "\"left\""
+   },
+   {
+    "nom": "mode",
+    "type": "PeelMode",
+    "doc": "How the peel is driven. \"cursor\" peels progressively as the pointer nears the edge, \"hover\" peels fully when the pointer enters th",
+    "defaut": "\"cursor\""
+   },
+   {
+    "nom": "reveal",
+    "type": "number",
+    "doc": "How many CSS pixels of the under layer are exposed at full peel.",
+    "defaut": "250"
+   },
+   {
+    "nom": "zone",
+    "type": "number",
+    "doc": "Width of the strip along the chosen edge that drives the peel, in CSS pixels.",
+    "defaut": "200"
+   },
+   {
+    "nom": "curl",
+    "type": "number",
+    "doc": "Radius of the curl in CSS pixels. Smaller values fold sharper.",
+    "defaut": "300"
+   },
+   {
+    "nom": "bow",
+    "type": "number",
+    "doc": "Extra lift at the middle of the peeling edge in CSS pixels. Negative values bow the sheet inwards.",
+    "defaut": "75"
+   },
+   {
+    "nom": "shade",
+    "type": "number",
+    "doc": "Strength of the curl shading on the lifted sheet (0 to 1).",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "shine",
+    "type": "number",
+    "doc": "Strength of the shine along the peeling edge that follows the cursor (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "shineDistance",
+    "type": "number",
+    "doc": "Distance from the edge at which the shine starts to appear, in CSS pixels. 0 uses the full container span.",
+    "defaut": "1200"
+   },
+   {
+    "nom": "shineColor",
+    "type": "[number, number, number] | \"auto\"",
+    "doc": "Shine color as RGB in the 0 to 1 range, or \"auto\" to follow the page theme: light shine on dark backgrounds, dark shine on light o",
+    "defaut": "\"auto\""
+   },
+   {
+    "nom": "bulge",
+    "type": "number",
+    "doc": "How many CSS pixels the peeled edge bulges toward the cursor.",
+    "defaut": "50"
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Perspective focal length in CSS pixels. Lower values exaggerate the 3D depth.",
+    "defaut": "2000"
+   },
+   {
+    "nom": "smoothing",
+    "type": "number",
+    "doc": "Seconds the peel takes to settle. Higher feels more damped.",
+    "defaut": "0.3"
+   }
+  ],
+  "n_props": 13
+ },
+ "retro-dither": {
+  "titre": "RetroDither",
+  "desc": "A retro dither lens that pixelates and quantizes your page around the cursor. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 23.9,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the dither lens around the cursor, relative to the screen height.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "softness",
+    "type": "number",
+    "doc": "Edge feather of the lens as a fraction of the radius (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "pixelSize",
+    "type": "number",
+    "doc": "Size of the retro pixels in CSS pixels.",
+    "defaut": "2"
+   },
+   {
+    "nom": "levels",
+    "type": "number",
+    "doc": "Number of brightness levels the dither quantizes to.",
+    "defaut": "4"
+   },
+   {
+    "nom": "darkColor",
+    "type": "[number, number, number]",
+    "doc": "Dark end of the palette as [r, g, b] in 0-1 range.",
+    "defaut": "[0"
+   },
+   {
+    "nom": "lightColor",
+    "type": "[number, number, number]",
+    "doc": "Light end of the palette as [r, g, b] in 0-1 range.",
+    "defaut": "[1"
+   },
+   {
+    "nom": "colorize",
+    "type": "number",
+    "doc": "Blend from the content's own colors (0) to the palette (1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "contrast",
+    "type": "number",
+    "doc": "Contrast applied to brightness before dithering.",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "brightness",
+    "type": "number",
+    "doc": "Brightness offset applied before dithering (-1 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "Coverage of the dithered pixels inside the lens (0 to 1).",
+    "defaut": "0.75"
+   },
+   {
+    "nom": "baseStrength",
+    "type": "number",
+    "doc": "Dither coverage across the whole screen, outside the lens (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "invert",
+    "type": "number",
+    "doc": "Invert brightness inside the effect (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "scanlines",
+    "type": "number",
+    "doc": "Intensity of the retro scanline overlay (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "pattern",
+    "type": "\"bayer\" | \"halftone\" | \"hatch\" | \"dash\"",
+    "doc": "Dither pattern used for intermediate levels.",
+    "defaut": "\"bayer\""
+   },
+   {
+    "nom": "trail",
+    "type": "number",
+    "doc": "Phosphor burn-in: the lens leaves a fading ghost along the cursor path (0 to 1).",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "degauss",
+    "type": "number",
+    "doc": "Strength of the degauss ripple triggered on click (0 to 1).",
+    "defaut": "0.8"
+   },
+   {
+    "nom": "followSpeed",
+    "type": "number",
+    "doc": "How quickly the lens follows the cursor. Higher is snappier.",
+    "defaut": "3"
+   }
+  ],
+  "n_props": 17
+ },
+ "ripple": {
+  "titre": "Ripple",
+  "desc": "Water ripples that spread from every click and refract the live page like a pond surface, with dispersion and light glints on the crests. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 15.8,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "amplitude",
+    "type": "number",
+    "doc": "Height of the waves (0 to 3).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "How fast the rings travel outward. 1 is normal speed.",
+    "defaut": "0.65"
+   },
+   {
+    "nom": "wavelength",
+    "type": "number",
+    "doc": "Distance between wave crests in CSS pixels.",
+    "defaut": "80"
+   },
+   {
+    "nom": "rings",
+    "type": "number",
+    "doc": "Number of crests in each wave train (1 to 8).",
+    "defaut": "2"
+   },
+   {
+    "nom": "decay",
+    "type": "number",
+    "doc": "How quickly the waves lose energy (higher dies faster).",
+    "defaut": "1"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "How strongly the waves bend the page content, in CSS pixels.",
+    "defaut": "100"
+   },
+   {
+    "nom": "dispersion",
+    "type": "number",
+    "doc": "Chromatic dispersion splitting colors along the wave slopes (0 to 1).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "shine",
+    "type": "number",
+    "doc": "Intensity of the light glints on the wave crests (0 to 2).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "trigger",
+    "type": "RippleTrigger",
+    "doc": "What spawns ripples. \"click\" on press, \"hover\" also leaves a wake while moving, \"none\" only ambient.",
+    "defaut": "\"click\""
+   },
+   {
+    "nom": "interval",
+    "type": "number",
+    "doc": "Seconds between ambient ripples at random positions. 0 disables them.",
+    "defaut": "0"
+   }
+  ],
+  "n_props": 10
+ },
+ "shatter": {
+  "titre": "Shatter",
+  "desc": "Shatters your page into 3D glass shards that lift, tilt, and float around the cursor, refracting the content beneath them, with perspective and soft shadows. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 22.7,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "radius",
+    "type": "number",
+    "doc": "Radius of the shatter lens around the cursor, relative to the screen height.",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "softness",
+    "type": "number",
+    "doc": "Edge feather of the lens as a fraction of the radius (0 to 1).",
+    "defaut": "0.6"
+   },
+   {
+    "nom": "tileSize",
+    "type": "number",
+    "doc": "Tile size in CSS pixels.",
+    "defaut": "125"
+   },
+   {
+    "nom": "shards",
+    "type": "number",
+    "doc": "Shape irregularity. 0 keeps a perfect square grid, 1 breaks the page into uneven glass shards.",
+    "defaut": "1"
+   },
+   {
+    "nom": "corner",
+    "type": "number",
+    "doc": "Corner rounding of fully lifted tiles in CSS pixels.",
+    "defaut": "0"
+   },
+   {
+    "nom": "lift",
+    "type": "number",
+    "doc": "How high tiles lift off the page in CSS pixels.",
+    "defaut": "30"
+   },
+   {
+    "nom": "tilt",
+    "type": "number",
+    "doc": "How steeply tiles tip out of the page plane (0 to 3).",
+    "defaut": "2"
+   },
+   {
+    "nom": "scatter",
+    "type": "number",
+    "doc": "How far tiles slide sideways while lifted, in CSS pixels.",
+    "defaut": "5"
+   },
+   {
+    "nom": "perspective",
+    "type": "number",
+    "doc": "Perspective distance in CSS pixels. Lower is more dramatic.",
+    "defaut": "1500"
+   },
+   {
+    "nom": "gapColor",
+    "type": "[number, number, number]",
+    "doc": "Color of the void behind lifted tiles as [r, g, b] in 0-1 range.",
+    "defaut": "[0"
+   },
+   {
+    "nom": "shadow",
+    "type": "number",
+    "doc": "Opacity of the drop shadows under lifted tiles (0 to 2).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "shading",
+    "type": "number",
+    "doc": "Strength of the per-tile lighting (0 to 2).",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "refraction",
+    "type": "number",
+    "doc": "How strongly lifted shards refract the content beneath them, like glass (0 to 2).",
+    "defaut": "1.5"
+   },
+   {
+    "nom": "dispersion",
+    "type": "number",
+    "doc": "Chromatic fringing of the refraction (0 to 1). 0 keeps it color-true.",
+    "defaut": "0.3"
+   },
+   {
+    "nom": "floatSpeed",
+    "type": "number",
+    "doc": "Speed of the floating tile motion. 0 freezes the tiles.",
+    "defaut": "2"
+   },
+   {
+    "nom": "strength",
+    "type": "number",
+    "doc": "How fully tiles lift inside the lens (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "baseStrength",
+    "type": "number",
+    "doc": "Lift amount across the whole screen, outside the lens (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "followSpeed",
+    "type": "number",
+    "doc": "How quickly the lens follows the cursor. Higher is snappier.",
+    "defaut": "3"
+   }
+  ],
+  "n_props": 18
+ },
+ "vhs": {
+  "titre": "VHS",
+  "desc": "Plays your page back like a worn VHS tape, with tape wave, head-switch noise, chroma bleed, and grain. The HTML stays interactive. No dependencies.",
+  "deps": [
+   "preact",
+   "solid-js"
+  ],
+  "poids_ko": 16.9,
+  "html_in_canvas": true,
+  "marqueurs": {
+   "drawElementImage": 4,
+   "layoutsubtree": 1,
+   "requestPaint": 4,
+   "supportsHtmlInCanvas": 1,
+   "texElementImage2D": 0,
+   "copyElementImageToTexture": 0
+  },
+  "three": false,
+  "webgl": true,
+  "deps_vanilla": [],
+  "props": [
+   {
+    "nom": "speed",
+    "type": "number",
+    "doc": "Playback speed of the tape artifacts. 1 is normal speed.",
+    "defaut": "0.5"
+   },
+   {
+    "nom": "wave",
+    "type": "number",
+    "doc": "Strength of the slow horizontal tape wave (0 to 3).",
+    "defaut": "1"
+   },
+   {
+    "nom": "jitter",
+    "type": "number",
+    "doc": "Strength of the fine per-line horizontal jitter (0 to 3).",
+    "defaut": "0.25"
+   },
+   {
+    "nom": "crease",
+    "type": "number",
+    "doc": "Strength of the travelling tape crease band (0 to 3).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "switching",
+    "type": "number",
+    "doc": "Strength of the head-switching noise at the bottom (0 to 3).",
+    "defaut": "0.05"
+   },
+   {
+    "nom": "switchingHeight",
+    "type": "number",
+    "doc": "Height of the head-switching band as a fraction of the screen.",
+    "defaut": "0.02"
+   },
+   {
+    "nom": "bloom",
+    "type": "number",
+    "doc": "Strength of the horizontal glow bleed (0 to 1).",
+    "defaut": "0.4"
+   },
+   {
+    "nom": "aberration",
+    "type": "number",
+    "doc": "RGB channel misalignment in CSS pixels.",
+    "defaut": "2"
+   },
+   {
+    "nom": "acBeat",
+    "type": "number",
+    "doc": "Strength of the slow brightness beat rolling down the frame (0 to 1).",
+    "defaut": "1"
+   },
+   {
+    "nom": "grain",
+    "type": "number",
+    "doc": "Amount of animated static grain (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "scanlines",
+    "type": "number",
+    "doc": "Intensity of the CRT scanline overlay (0 to 1).",
+    "defaut": "0.1"
+   },
+   {
+    "nom": "vignette",
+    "type": "number",
+    "doc": "Darkening toward the frame corners (0 to 1).",
+    "defaut": "0"
+   },
+   {
+    "nom": "barrel",
+    "type": "number",
+    "doc": "CRT tube curvature bending the frame inward (0 to 1). 0 disables.",
+    "defaut": "0"
+   },
+   {
+    "nom": "saturation",
+    "type": "number",
+    "doc": "Color saturation. 1 keeps the content's colors, 0 is grayscale.",
+    "defaut": "1"
+   },
+   {
+    "nom": "exposure",
+    "type": "number",
+    "doc": "Extra brightness multiplier applied at the end.",
+    "defaut": "1"
+   }
+  ],
+  "n_props": 15
+ }
+}
