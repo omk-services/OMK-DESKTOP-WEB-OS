@@ -13,8 +13,10 @@ import { ItRdApp } from '../apps/it-rd/ItRdApp';
 import { ClientsApp } from '../apps/clients/ClientsApp';
 import { TasksApp } from '../apps/tasks/TasksApp';
 import { MarketplaceApp } from '../apps/marketplace/MarketplaceApp';
-import { AppStoreApp } from '../apps/app-store/AppStoreApp';
-import { SaaSBuilderApp } from '../apps/saas-builder/SaaSBuilderApp';
+// AppStoreApp et SaaSBuilderApp ne sont plus importes : les deux apps sont
+// bloquees plus bas. Les composants restent dans le depot, intacts ; pour
+// rouvrir une app, remettre son import ici et son composant sur la ligne
+// `registerApp` correspondante.
 import { ProductApp } from '../apps/product/ProductApp';
 import { GrowthApp } from '../apps/growth/GrowthApp';
 import { SalesApp } from '../apps/sales/SalesApp';
@@ -26,6 +28,7 @@ import { AuditApp } from '../apps/audit/AuditApp';
 import { DesignApp } from '../apps/design/DesignApp';
 import { OntologyApp } from '../apps/ontology/OntologyApp';
 import { CognitionApp } from '../apps/cognition/CognitionApp';
+import { creerPageEnConstruction } from '../apps/en-construction/EnConstructionApp';
 
 registerApp({ id: 'dashboard',   name: 'Dashboard',            icon: LayoutDashboard, accent: '#059669', description: 'Ecosystem Vitals — the home view',              component: DashboardApp });
 registerApp({ id: 'people',      name: 'People / Agents',      icon: UserCog,         accent: '#0891b2', description: 'Your team and the agents on the People domain',  component: PeopleApp });
@@ -34,13 +37,47 @@ registerApp({ id: 'it-rd',       name: 'IT / R&D',             icon: Cpu,       
 registerApp({ id: 'clients',     name: 'Clients',              icon: Contact,         accent: '#2563eb', description: 'Accounts, onboarding and churn risk',            component: ClientsApp });
 registerApp({ id: 'tasks',       name: 'Tasks',                icon: CheckSquare,     accent: '#0d9488', description: 'What needs you today',                           component: TasksApp });
 registerApp({ id: 'marketplace', name: 'Marketplace',          icon: Store,           accent: '#db2777', description: 'Sandboxed integrations',                         component: MarketplaceApp });
-// App Store — vitrine des mini-programmes 3D (Easy/Hard/Expert).
-// Inspire de la sidebar gauche de macro.com : meme forme, futur
-// Sandbox Gateway des 8 domaines G1-G8 sur le meme squelette.
-registerApp({ id: 'app-store',    name: 'App Store',             icon: AppWindow,       accent: '#7c3aed', description: '3D mini-programmes (Easy / Hard / Expert)',       component: AppStoreApp });
-// SaaS builder — inspire de Bench Studio. SPEC_SAAS_BUILDER_V1.md.
-// Produit des AppSpec JSON, les publie dans App Store via 'saas.appSpec.publish'.
-registerApp({ id: 'saas-builder', name: 'SaaS Builder',          icon: Hammer,          accent: '#7c3aed', description: 'Genere des AppSpec JSON (Bench Studio-inspired)', component: SaaSBuilderApp });
+// ---------------------------------------------------------------------------
+// App Store et SaaS Builder sont BLOQUES (2026-08-17).
+//
+// Le blocage se pose ici, sur le `component` du manifeste, parce que c'est
+// le seul point de passage : toute ouverture, d'ou qu'elle vienne (icone du
+// bureau, dock, menu Apps, `openApp` appele par une autre app), rend ce que
+// le registre declare. Masquer un bouton d'entree n'aurait ferme qu'une
+// porte sur plusieurs.
+//
+// Effet voulu : la sidebar « Sections » disparait avec le reste. Elle est
+// rendue a l'interieur de chaque app, pas par la coquille de fenetre.
+//
+// Le blocage est une decision de mise a disposition, pas une suppression de
+// code : `AppStoreApp.tsx` et `SaaSBuilderApp.tsx` sont intacts. Pour rouvrir
+// une app, remettre son import en tete de fichier et son composant sur la
+// ligne `registerApp` correspondante.
+//
+// Pourquoi chacune est bloquee :
+//   - App Store : le niveau « Easy » embarque une URL externe dans un
+//     iframe. Mesure du 2026-08-17 sur 8 cibles : sept refusent
+//     l'embarquement par un tiers (X-Frame-Options ou frame-ancestors).
+//     Aucun correctif cote client n'existe.
+//   - SaaS Builder : les AppSpec produites pointent vers
+//     `https://placeholder.invalid/<slug>.html`. `.invalid` est un TLD
+//     reserve (RFC 2606) qui ne resout jamais. L'app produit une
+//     specification ; rien ne construit ni n'heberge le HTML.
+// ---------------------------------------------------------------------------
+registerApp({ id: 'app-store',    name: 'App Store',             icon: AppWindow,       accent: '#7c3aed', description: '3D mini-programmes (Easy / Hard / Expert)',       component: creerPageEnConstruction({
+  nom: 'App Store',
+  raison:
+    "Les outils qu'on voulait y embarquer refusent de s'afficher dans une " +
+    "fenetre d'un autre site. On revoit la maniere de les integrer avant " +
+    "de rouvrir l'app.",
+}) });
+registerApp({ id: 'saas-builder', name: 'SaaS Builder',          icon: Hammer,          accent: '#7c3aed', description: 'Genere des AppSpec JSON (Bench Studio-inspired)', component: creerPageEnConstruction({
+  nom: 'SaaS Builder',
+  raison:
+    "L'atelier sait decrire une application, mais rien ne la construit ni " +
+    "ne l'heberge encore. Tant que ce maillon manque, ce qui en sort ne " +
+    "s'ouvre pas.",
+}) });
 registerApp({ id: 'product',     name: 'Product',              icon: Boxes,           accent: '#9333ea', description: 'Roadmap, backlog, releases',                     component: ProductApp });
 registerApp({ id: 'growth',      name: 'Growth',               icon: Sprout,          accent: '#16a34a', description: 'Funnel, channels, experiments',                  component: GrowthApp });
 registerApp({ id: 'sales',       name: 'Sales OS',             icon: Handshake,       accent: '#ea580c', description: 'Pipeline, deals, forecast',                      component: SalesApp });
