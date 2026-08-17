@@ -3,9 +3,15 @@
  *  hydrate/upsert. Safe to import even with no env vars set (client just won't
  *  authenticate — callers must treat every call as best-effort). */
 import { createClient } from '@supabase/supabase-js';
+import { viteEnv } from './env';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+// `viteEnv` plutot que `import.meta.env` directement : ce module est importe
+// transitivement par les routes `api/v1/*`, qui tournent dans Node. La-bas
+// `import.meta.env` vaut `undefined`, et lire une propriete dessus jetait un
+// TypeError AVANT la premiere ligne de la route — d'ou le 500 opaque
+// `FUNCTION_INVOCATION_FAILED` en production.
+const url = viteEnv('VITE_SUPABASE_URL');
+const anonKey = viteEnv('VITE_SUPABASE_ANON_KEY');
 
 // `supabaseConfigured` est faux si l'URL ou la cle manquent. On detecte aussi
 // les URL manifestement fantaisistes (placeholder) pour eviter qu'un build
