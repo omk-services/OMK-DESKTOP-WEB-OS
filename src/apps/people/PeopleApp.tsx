@@ -25,10 +25,11 @@ import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { PeopleItemDetail } from './PeopleItemDetail';
-import { useCmsStore } from '../../lib/cms/cms.store';
 import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ApprovalsView } from './ApprovalsView';
+import { useCmsCollectionStatus } from './useCmsCollectionStatus';
+import { UnknownCollectionBanner } from './UnknownCollectionBanner';
 import { useScenariosStore } from '../../stores/scenarios.store';
 
 registerItemDetail('people', PeopleItemDetail);
@@ -473,9 +474,13 @@ function Fleet({ onAgentClick }: { onAgentClick: (agent: FleetAgent) => void }) 
 
 function Content() {
   const contentDrill = useCollectionDrill('content', 'Content');
-  const contentCount = useCmsStore((s) => s.items['content']?.length ?? 0);
+  // Brief FIX-7 — silence bruyant. Le décompte seul ne dit pas si la
+  // collection existe — un 0 peut venir d'un registre absent.
+  const contentRead = useCmsCollectionStatus('content');
+  const contentCount = contentRead.items.length;
   return (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="content" status={contentRead.status} appName="People" />
       <SectionHead
         title="Content library"
         subtitle="Per-agent docs · versioned by date"
@@ -1019,12 +1024,19 @@ export function PeopleApp() {
   const memoryDrill = useCollectionDrill('memory', 'Mémoire');
   const codexDrill = useCollectionDrill('codex', 'Codex');
   const contentDrill = useCollectionDrill('content', 'Content');
-  const teamCount = useCmsStore(s => s.items['team']?.length ?? 0);
-  const agentsCount = useCmsStore(s => s.items['people_agents']?.length ?? 0);
-  const personasCount = useCmsStore(s => s.items['personas']?.length ?? 0);
-  const memoryCount = useCmsStore(s => s.items['memory']?.length ?? 0);
-  const codexCount = useCmsStore(s => s.items['codex']?.length ?? 0);
-  const contentCount = useCmsStore(s => s.items['content']?.length ?? 0);
+  // Brief FIX-7 — silence bruyant. Six collections consommées ici, chacune
+  // avec son discriminant (`status: 'registered' | 'unknown'`) pour qu'un
+  // défaut de registre ne se déguise pas en section vide.
+  const teamRead = useCmsCollectionStatus('team');
+  const agentsRead = useCmsCollectionStatus('people_agents');
+  const personasRead = useCmsCollectionStatus('personas');
+  const memoryRead = useCmsCollectionStatus('memory');
+  const codexRead = useCmsCollectionStatus('codex');
+  const teamCount = teamRead.items.length;
+  const agentsCount = agentsRead.items.length;
+  const personasCount = personasRead.items.length;
+  const memoryCount = memoryRead.items.length;
+  const codexCount = codexRead.items.length;
   const [detail, setDetail] = useState<PeopleDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
 
@@ -1069,7 +1081,8 @@ export function PeopleApp() {
 
   const Team = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="team" status={teamRead.status} appName="People" />
         <SectionHead title="Team" subtitle="Your human squad (X-Men doctrine)" action={<Badge tone="accent">{teamCount} members</Badge>} />
         <CollectionRepeater collectionId="team" onOpen={teamDrill.open} />
       </div>
@@ -1078,7 +1091,8 @@ export function PeopleApp() {
 
   const Agents = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="people_agents" status={agentsRead.status} appName="People" />
         <SectionHead title="Agents" subtitle="AI workers on the People domain" action={<Badge tone="accent">{agentsCount} configured</Badge>} />
         <CollectionRepeater collectionId="people_agents" onOpen={agentsDrill.open} />
       </div>
@@ -1087,7 +1101,8 @@ export function PeopleApp() {
 
   const Personas = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="personas" status={personasRead.status} appName="People" />
         <SectionHead
           title="Personas"
           subtitle="Premier-class profiles drawn from real sources. The anchor makes the difference — a persona without one is an invention."
@@ -1100,7 +1115,8 @@ export function PeopleApp() {
 
   const Memoire = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="memory" status={memoryRead.status} appName="People" />
         <SectionHead
           title="Mémoire"
           subtitle="Curated organisational memory. Raw memory is a dump — what matters here is what has been checked."
@@ -1113,7 +1129,8 @@ export function PeopleApp() {
 
   const Codex = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="codex" status={codexRead.status} appName="People" />
         <SectionHead
           title="Codex"
           subtitle="Patterns that have proven themselves. A success repeated once is an anecdote; a method is a success repeated enough."

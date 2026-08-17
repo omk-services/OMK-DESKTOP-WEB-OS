@@ -12,6 +12,8 @@ import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { LegalItemDetail } from './LegalItemDetail';
+import { useCmsCollectionStatus } from './useCmsCollectionStatus';
+import { UnknownCollectionBanner } from './UnknownCollectionBanner';
 import { seedLegalCms } from './seed';
 import { ComplianceDashboard } from './ComplianceDashboard';
 import { ProwlerImport } from './ProwlerImport';
@@ -19,6 +21,11 @@ import { ProboAnchor } from './ProboAnchor';
 import { SovereigntyTiers } from './SovereigntyTiers';
 
 registerItemDetail('legal', LegalItemDetail);
+// `seedLegalCms()` est désormais un no-op : Brief FIX-7 a consolidé les
+// 8 déclarations de `legal/seed.ts` dans `src/lib/cms/seed.ts`. Conserver
+// l'appel préserve les chemins d'import existants (HMR, tests) et documente
+// la transition ; registerCollection est idempotent, deux appels ne cassent
+// rien.
 seedLegalCms();
 
 const ACCENT = '#64748b';
@@ -27,9 +34,24 @@ export function LegalApp() {
   const addToast = useShellStore(s => s.addToast);
   const contractsDrill = useCollectionDrill('contracts', 'Contracts');
   const policiesDrill = useCollectionDrill('policies', 'Policies');
-  const contracts = useCmsStore(s => s.items['contracts']) ?? [];
-  const policies = useCmsStore(s => s.items['policies']) ?? [];
-  const checks = useCmsStore(s => s.items['legal_ai_act_checks']) ?? [];
+  // Brief FIX-7 — silence bruyant. On lit `items` ET `collections` pour
+  // distinguer « registre inconnu » (défaut) de « registre connu et vide »
+  // (état neutre). Les huit collections consommées par cette app ont
+  // chacune leur bannière — déclarée dans le même LegalApp car les
+  // sous-sections sont des fonctions définies en closure.
+  const contractsRead = useCmsCollectionStatus('contracts');
+  const policiesRead = useCmsCollectionStatus('policies');
+  const checksRead = useCmsCollectionStatus('legal_ai_act_checks');
+  const legalFrameworksRead = useCmsCollectionStatus('legal_frameworks');
+  const legalControlsRead = useCmsCollectionStatus('legal_controls');
+  const legalCompliancePoliciesRead = useCmsCollectionStatus('legal_compliance_policies');
+  const legalEvidenceRead = useCmsCollectionStatus('legal_evidence');
+  const legalRisksRead = useCmsCollectionStatus('legal_risks');
+  const legalVendorsRead = useCmsCollectionStatus('legal_vendors');
+  const legalGapsRead = useCmsCollectionStatus('legal_gaps');
+  const contracts = contractsRead.items;
+  const policies = policiesRead.items;
+  const checks = checksRead.items;
   const updateItem = useCmsStore(s => s.updateItem);
   const [detail, setDetail] = useState<LegalDetailItem | null>(null);
   const { setDetail: setWindowDetail } = useWindowPage();
@@ -158,6 +180,11 @@ export function LegalApp() {
           <Badge tone={cleared === checks.length ? 'ok' : 'warn'}>{cleared} / {checks.length}</Badge>
         </div>
       </div>
+      <UnknownCollectionBanner
+        collectionId="legal_ai_act_checks"
+        status={checksRead.status}
+        appName="Legal"
+      />
       <Card>
         <div className="divide-y divide-[var(--hairline)]">
           {checks.map(c => {
@@ -190,7 +217,8 @@ export function LegalApp() {
 
   const Contracts = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="contracts" status={contractsRead.status} appName="Legal" />
         <SectionHead title="Contracts" subtitle="Engagement letters & DPAs" />
         <CollectionRepeater collectionId="contracts" onOpen={openContract} />
       </div>
@@ -199,7 +227,8 @@ export function LegalApp() {
 
   const Policies = () => {
     return (
-      <div className="p-7">
+      <div className="p-7 flex flex-col gap-3">
+        <UnknownCollectionBanner collectionId="policies" status={policiesRead.status} appName="Legal" />
         <SectionHead title="Policies" subtitle="Published to clients" />
         <CollectionRepeater collectionId="policies" onOpen={openPolicy} />
       </div>
@@ -207,49 +236,56 @@ export function LegalApp() {
   };
 
   const Frameworks = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_frameworks" status={legalFrameworksRead.status} appName="Legal" />
       <SectionHead title="Cadres" subtitle="Les référentiels que la pratique vise (SOC 2, ISO 27001, RGPD, NIS 2…)." />
       <CollectionRepeater collectionId="legal_frameworks" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const Controls = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_controls" status={legalControlsRead.status} appName="Legal" />
       <SectionHead title="Contrôles" subtitle="Les exigences par cadre — code, owner, statut, preuves rattachées." />
       <CollectionRepeater collectionId="legal_controls" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const CompPolicies = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_compliance_policies" status={legalCompliancePoliciesRead.status} appName="Legal" />
       <SectionHead title="Politiques internes" subtitle="Politiques versionnées, owner, date de revue." />
       <CollectionRepeater collectionId="legal_compliance_policies" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const Evidence = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_evidence" status={legalEvidenceRead.status} appName="Legal" />
       <SectionHead title="Preuves" subtitle="Documents, captures, rapports qui attestent qu'un contrôle tient." />
       <CollectionRepeater collectionId="legal_evidence" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const Risks = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_risks" status={legalRisksRead.status} appName="Legal" />
       <SectionHead title="Risques" subtitle="Probabilité × impact, mitigation, owner." />
       <CollectionRepeater collectionId="legal_risks" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const Vendors = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_vendors" status={legalVendorsRead.status} appName="Legal" />
       <SectionHead title="Fournisseurs" subtitle="Le registre de sous-traitance — exigence RGPD." />
       <CollectionRepeater collectionId="legal_vendors" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
   );
 
   const Gaps = () => (
-    <div className="p-7">
+    <div className="p-7 flex flex-col gap-3">
+      <UnknownCollectionBanner collectionId="legal_gaps" status={legalGapsRead.status} appName="Legal" />
       <SectionHead
         title="Écarts"
         subtitle="Ce qui n'est pas conforme. Source : revue manuelle, ou import Prowler (Outils)."

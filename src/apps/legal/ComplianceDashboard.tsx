@@ -17,10 +17,11 @@
  *  Tailwind palette classes. Trust accent (#0f172a) where meaning
  *  demands it (the score bar fill on the "current" tier).
  */
-import { useCmsStore } from '../../lib/cms/cms.store';
 import { Card, StatCard, Badge } from '../_ui/kit';
 import { ProgressRow } from '../_ui/widgets';
 import { AlertTriangle, ShieldAlert, FileWarning, CalendarClock, ShieldOff, FileText } from 'lucide-react';
+import { useCmsCollectionStatus } from './useCmsCollectionStatus';
+import { UnknownCollectionBanner } from './UnknownCollectionBanner';
 
 const APP_ACCENT = '#0f172a';
 
@@ -51,13 +52,38 @@ function frameworkScore(
 }
 
 export function ComplianceDashboard() {
-  const frameworks = useCmsStore((s) => s.items['legal_frameworks'] ?? []);
-  const controls = useCmsStore((s) => s.items['legal_controls'] ?? []);
-  const compliancePolicies = useCmsStore((s) => s.items['legal_compliance_policies'] ?? []);
-  const evidence = useCmsStore((s) => s.items['legal_evidence'] ?? []);
-  const risks = useCmsStore((s) => s.items['legal_risks'] ?? []);
-  const vendors = useCmsStore((s) => s.items['legal_vendors'] ?? []);
-  const gaps = useCmsStore((s) => s.items['legal_gaps'] ?? []);
+  // Brief FIX-7 — silence bruyant. Chacune des sept collections consommées
+  // est lue avec son discriminant (`status: 'registered' | 'unknown'`), et
+  // passe par un bandeau explicite quand le registre central ne la porte
+  // pas. Sans ce geste, un seed qui oublie `legal_vendors` (par exemple)
+  // afficherait « Fournisseurs sans DPA : 0 » sans rien dire du registre.
+  const frameworksRead = useCmsCollectionStatus('legal_frameworks');
+  const controlsRead = useCmsCollectionStatus('legal_controls');
+  const compliancePoliciesRead = useCmsCollectionStatus('legal_compliance_policies');
+  const evidenceRead = useCmsCollectionStatus('legal_evidence');
+  const risksRead = useCmsCollectionStatus('legal_risks');
+  const vendorsRead = useCmsCollectionStatus('legal_vendors');
+  const gapsRead = useCmsCollectionStatus('legal_gaps');
+  const frameworks = frameworksRead.items;
+  const controls = controlsRead.items;
+  const compliancePolicies = compliancePoliciesRead.items;
+  const evidence = evidenceRead.items;
+  const risks = risksRead.items;
+  const vendors = vendorsRead.items;
+  const gaps = gapsRead.items;
+
+  // Collection IDs consomme par le dashboard (utilisees pour le bandeau
+  // d'erreur de chaque section ci-dessous). Gardees en memoire pour qu'un
+  // ajout futur de collection saute aux yeux dans la liste des bandeaux.
+  const readByCollection = {
+    legal_frameworks: frameworksRead,
+    legal_controls: controlsRead,
+    legal_compliance_policies: compliancePoliciesRead,
+    legal_evidence: evidenceRead,
+    legal_risks: risksRead,
+    legal_vendors: vendorsRead,
+    legal_gaps: gapsRead,
+  } as const;
 
   const scores = frameworkScore(frameworks, controls);
   const totalControls = controls.length;
@@ -101,6 +127,24 @@ export function ComplianceDashboard() {
         <Badge tone={globalPct >= 80 ? 'ok' : globalPct >= 50 ? 'warn' : 'danger'}>
           {doneControls} / {totalControls}
         </Badge>
+      </div>
+
+      {/*
+       * Brief FIX-7 — silence bruyant. On affiche un bandeau par collection
+       * consommée qui n'a pas été déclarée dans le registre central. L'ordre
+       * suit l'apparition des collections dans le dashboard (de haut en bas),
+       * pour qu'un humain qui regarde l'écran sache tout de suite quelle
+       * métrique est menteuse.
+       */}
+      <div className="flex flex-col gap-2">
+        {Object.entries(readByCollection).map(([id, read]) => (
+          <UnknownCollectionBanner
+            key={id}
+            collectionId={id}
+            status={read.status}
+            appName="Legal"
+          />
+        ))}
       </div>
 
       {/* Top row — at a glance */}

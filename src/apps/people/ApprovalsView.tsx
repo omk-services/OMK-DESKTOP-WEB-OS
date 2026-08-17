@@ -29,6 +29,8 @@ import { useThemeStore } from '../../lib/themes/store';
 import { THEME_META } from '../../lib/themes/tokens';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
+import { useCmsCollectionStatus } from './useCmsCollectionStatus';
+import { UnknownCollectionBanner } from './UnknownCollectionBanner';
 import { FLEET_AGENTS } from './fleet';
 import {
   linkScenarioToAgent,
@@ -44,7 +46,12 @@ function shortDate(ts: number): string {
  *  Fleet (B3 operational agents) + People agents (RH/méta) — both can
  *  deposit proposals into a scenario. Order is stable for the dropdown. */
 function useAgentOptions(): { code: string; name: string; source: 'fleet' | 'people' }[] {
-  const peopleAgents = useCmsStore((s) => s.items['people_agents'] ?? []);
+  // Brief FIX-7 — silence bruyant. Si la collection people_agents n'est
+  // pas dans le registre, le dropdown tombe à [fleet] sans rien dire.
+  // On lit le discriminant via le hook ; le bandeau global est rendu
+  // au-dessus de la file d'approbation, pas dans la liste.
+  const peopleAgentsRead = useCmsCollectionStatus('people_agents');
+  const peopleAgents = peopleAgentsRead.items;
   const fleet = FLEET_AGENTS.map((a) => ({ code: a.code, name: a.name, source: 'fleet' as const }));
   const people = peopleAgents.map((it) => ({
     code: String(it.codename ?? it.id),
@@ -889,6 +896,14 @@ export function ApprovalsView() {
   const pendingCount = order.filter((id) => scenarios[id]?.status === 'pending').length;
   const draftCount = order.filter((id) => scenarios[id]?.status === 'draft').length;
 
+  // Brief FIX-7 — silence bruyant. La file d'approbation écrit dans
+  // `approval_decisions` à chaque approve/reject. Si la collection
+  // n'existe pas, `addItem` répond « Collection inconnue » à chaque
+  // action et la décision est perdue. On annonce le défaut avant que
+  // l'utilisateur ne clique.
+  const approvalDecisionsRead = useCmsCollectionStatus('approval_decisions');
+  const agentsAvailableRead = useCmsCollectionStatus('people_agents');
+
   if (openScenario) {
     return (
       <div data-approvals-view data-mode="detail" className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
@@ -899,6 +914,16 @@ export function ApprovalsView() {
 
   return (
     <div data-approvals-view data-mode="queue" className="p-7 h-full flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+      <UnknownCollectionBanner
+        collectionId="approval_decisions"
+        status={approvalDecisionsRead.status}
+        appName="People"
+      />
+      <UnknownCollectionBanner
+        collectionId="people_agents"
+        status={agentsAvailableRead.status}
+        appName="People"
+      />
       <SectionHead
         title="Approvals"
         subtitle="L'agent propose, vous tranchez. Ship or kill, en 10 minutes."

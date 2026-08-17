@@ -26,6 +26,8 @@ import { Upload, CheckCircle2, FileWarning } from 'lucide-react';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
 import { Card } from '../_ui/kit';
+import { useCmsCollectionStatus } from './useCmsCollectionStatus';
+import { UnknownCollectionBanner } from './UnknownCollectionBanner';
 
 interface ProwlerFinding {
   CheckID?: string;
@@ -56,7 +58,12 @@ function extractFindings(raw: unknown): ProwlerFinding[] {
 
 export function ProwlerImport() {
   const addItem = useCmsStore((s) => s.addItem);
-  const gaps = useCmsStore((s) => s.items['legal_gaps'] ?? []);
+  // Brief FIX-7 — silence bruyant. Si la collection cible n'est pas dans le
+  // registre central, l'import va répondre « Collection inconnue :
+  // "legal_gaps" » à chaque fichier. On le dit à l'utilisateur *avant* qu'il
+  // ne clique, via un bandeau explicite.
+  const gapsRead = useCmsCollectionStatus('legal_gaps');
+  const gaps = gapsRead.items;
   const addToast = useShellStore((s) => s.addToast);
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -136,6 +143,11 @@ export function ProwlerImport() {
   return (
     <Card title="Import Prowler">
       <div className="px-5 py-4 flex flex-col gap-3">
+        <UnknownCollectionBanner
+          collectionId="legal_gaps"
+          status={gapsRead.status}
+          appName="Legal"
+        />
         <p className="text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
           Déposez un export JSON de Prowler (CLI&nbsp;: <code>prowler aws -M json</code>). Chaque finding
           <code style={{ marginLeft: 4 }}>FAIL</code> devient un écart dans la collection « Écarts ». Les doublons sont ignorés.
