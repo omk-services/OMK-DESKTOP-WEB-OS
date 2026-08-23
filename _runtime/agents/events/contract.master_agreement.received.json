@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract.master_agreement.received",
+  "title": "Un contrat signe est depose dans 00_Summers_CEO/03_Master_Agreements/",
+  "description": "Declencheur canonique du domaine Legal (triplet 36). Emis par le connecteur systeme de fichiers. C'est le seul evenement qui sort Aquaman de dormance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["chemin", "nom_fichier", "detecte_a", "taille_octets"],
+  "properties": {
+    "chemin": {
+      "type": "string",
+      "description": "Chemin absolu du fichier depose",
+      "pattern": "03_Master_Agreements"
+    },
+    "nom_fichier": { "type": "string", "minLength": 1 },
+    "detecte_a": { "type": "string", "format": "date-time" },
+    "taille_octets": { "type": "integer", "minimum": 1 },
+    "segment_id": {
+      "type": "string",
+      "description": "Segment client nomme. Discipline CEO-Bench : 90 % des depenses des agents performants ciblent un segment nomme, contre 43 % pour les faibles. Un engagement sans segment est traçable mais signale."
+    }
+  }
+}

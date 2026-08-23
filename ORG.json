@@ -1,0 +1,681 @@
+{
+  "entreprise": "Coach OS",
+  "date": "2026-08-02",
+  "canon": "ADR-CANON-001 (8 B2 + 8 squads B3 + 53 B3)",
+  "cascade": "B1 rock mensuel -> B2 4 sprints/mois -> B3 5 scrums/semaine",
+  "b1": {
+    "nom": "Summers",
+    "titre": "CEO",
+    "role_emyth": "Entrepreneur",
+    "artefact": "ROCKS.md",
+    "cycle": "mensuel",
+    "dossier": "00_Summers_CEO",
+    "agent_canon": "b1-summers-nexus-omk-bos"
+  },
+  "b2": [
+    {
+      "n": 1,
+      "domaine": "RH & Méta Gouvernance",
+      "vp": "Green Lantern",
+      "squad": "X-Men",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen",
+      "agent_canon": "b2-01-greenlantern-people",
+      "dormant": false,
+      "veto": "tout recrutement — humain ou agent — sans mandat écrit et sans critère de sortie",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "ProfessorX",
+          "charge": "Recruiting",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/01_ProfessorX_Recruiting",
+          "agent_canon": "b3-1-professorx"
+        },
+        {
+          "n": 2,
+          "nom": "Cyclops",
+          "charge": "Onboarding",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/02_Cyclops_Onboarding",
+          "agent_canon": "b3-1-cyclops"
+        },
+        {
+          "n": 3,
+          "nom": "JeanGrey",
+          "charge": "Culture",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/03_JeanGrey_Culture",
+          "agent_canon": "b3-1-jeangrey"
+        },
+        {
+          "n": 4,
+          "nom": "Wolverine",
+          "charge": "PerfReviews",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/04_Wolverine_PerfReviews",
+          "agent_canon": "b3-1-wolverine"
+        },
+        {
+          "n": 5,
+          "nom": "Storm",
+          "charge": "OpsLeadership",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/05_Storm_OpsLeadership",
+          "agent_canon": "b3-1-storm"
+        },
+        {
+          "n": 6,
+          "nom": "Beast",
+          "charge": "TechRecruiting",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/06_Beast_TechRecruiting",
+          "agent_canon": "b3-1-beast"
+        },
+        {
+          "n": 7,
+          "nom": "Nightcrawler",
+          "charge": "DistributedOnboarding",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/07_Nightcrawler_DistributedOnboarding",
+          "agent_canon": "b3-1-nightcrawler"
+        },
+        {
+          "n": 8,
+          "nom": "Rogue",
+          "charge": "SkillTransfer",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/01_RH_Meta_Gouvernance_GreenLantern_XMen/squad/08_Rogue_SkillTransfer",
+          "agent_canon": "b3-1-rogue"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "domaine": "Opérations en Loops",
+      "vp": "Batman",
+      "squad": "Fantastic Four",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/02_Operations_en_Loops_Batman_Fantastic4",
+      "agent_canon": "b2-02-batman-ops",
+      "dormant": false,
+      "veto": "toute procédure qui n'a pas de condition d'arrêt écrite",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "MrFantastic",
+          "charge": "ProcessDesign",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/02_Operations_en_Loops_Batman_Fantastic4/squad/01_MrFantastic_ProcessDesign",
+          "agent_canon": "b3-2-mrfantastic"
+        },
+        {
+          "n": 2,
+          "nom": "InvisibleWoman",
+          "charge": "Coordination",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/02_Operations_en_Loops_Batman_Fantastic4/squad/02_InvisibleWoman_Coordination",
+          "agent_canon": "b3-2-invisiblewoman"
+        },
+        {
+          "n": 3,
+          "nom": "HumanTorch",
+          "charge": "Incidents",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/02_Operations_en_Loops_Batman_Fantastic4/squad/03_HumanTorch_Incidents",
+          "agent_canon": "b3-2-humantorch"
+        },
+        {
+          "n": 4,
+          "nom": "TheThing",
+          "charge": "Execution",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/02_Operations_en_Loops_Batman_Fantastic4/squad/04_TheThing_Execution",
+          "agent_canon": "b3-2-thething"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "domaine": "Productization des Besoins",
+      "vp": "Flash",
+      "squad": "Avengers",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers",
+      "agent_canon": "b2-03-flash-product",
+      "dormant": false,
+      "veto": "toute offre dont la valeur dépend d'une personne nommée",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "CaptainAmerica",
+          "charge": "Vision",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/01_CaptainAmerica_Vision",
+          "agent_canon": "b3-3-captainamerica"
+        },
+        {
+          "n": 2,
+          "nom": "IronMan",
+          "charge": "Architecture",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/02_IronMan_Architecture",
+          "agent_canon": "b3-3-ironman"
+        },
+        {
+          "n": 3,
+          "nom": "Thor",
+          "charge": "PowerFeatures",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/03_Thor_PowerFeatures",
+          "agent_canon": "b3-3-thor"
+        },
+        {
+          "n": 4,
+          "nom": "Hulk",
+          "charge": "QA",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/04_Hulk_QA",
+          "agent_canon": "b3-3-hulk"
+        },
+        {
+          "n": 5,
+          "nom": "BlackWidow",
+          "charge": "Specs",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/05_BlackWidow_Specs",
+          "agent_canon": "b3-3-blackwidow"
+        },
+        {
+          "n": 6,
+          "nom": "Hawkeye",
+          "charge": "UX",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/06_Hawkeye_UX",
+          "agent_canon": "b3-3-hawkeye"
+        },
+        {
+          "n": 7,
+          "nom": "ScarletWitch",
+          "charge": "DesignSystem",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/03_Productization_des_Besoins_Flash_Avengers/squad/07_ScarletWitch_DesignSystem",
+          "agent_canon": "b3-3-scarletwitch"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "domaine": "Sales & Cognition",
+      "vp": "Martian Manhunter",
+      "squad": "Illuminati",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati",
+      "agent_canon": "b2-05-johnjones-sales",
+      "dormant": false,
+      "veto": "toute proposition envoyée avant qu'un problème client ait été reformulé et validé par le client",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "BlackBolt",
+          "charge": "Closer",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/01_BlackBolt_Closer",
+          "agent_canon": "b3-4-blackbolt"
+        },
+        {
+          "n": 2,
+          "nom": "IronMan",
+          "charge": "Demo",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/02_IronMan_Demo",
+          "agent_canon": "b3-4-ironman"
+        },
+        {
+          "n": 3,
+          "nom": "MrFantastic",
+          "charge": "Discovery",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/03_MrFantastic_Discovery",
+          "agent_canon": "b3-4-mrfantastic"
+        },
+        {
+          "n": 4,
+          "nom": "Namor",
+          "charge": "Negotiation",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/04_Namor_Negotiation",
+          "agent_canon": "b3-4-namor"
+        },
+        {
+          "n": 5,
+          "nom": "ProfessorX",
+          "charge": "BuyerRead",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/05_ProfessorX_BuyerRead",
+          "agent_canon": "b3-4-professorx"
+        },
+        {
+          "n": 6,
+          "nom": "DoctorStrange",
+          "charge": "Forecasting",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/04_Sales_et_Cognition_MartianManhunter_Illuminati/squad/06_DoctorStrange_Forecasting",
+          "agent_canon": "b3-4-doctorstrange"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "domaine": "People & Brand",
+      "vp": "Superman",
+      "squad": "Guardians",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians",
+      "agent_canon": "b2-04-superman-growth",
+      "dormant": false,
+      "veto": "toute prise de parole publique qui promet un résultat que la delivery ne tient pas",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "StarLord",
+          "charge": "Story",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/01_StarLord_Story",
+          "agent_canon": "b3-5-starlord"
+        },
+        {
+          "n": 2,
+          "nom": "Rocket",
+          "charge": "Auto",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/02_Rocket_Auto",
+          "agent_canon": "b3-5-rocket"
+        },
+        {
+          "n": 3,
+          "nom": "Gamora",
+          "charge": "Target",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/03_Gamora_Target",
+          "agent_canon": "b3-5-gamora"
+        },
+        {
+          "n": 4,
+          "nom": "Drax",
+          "charge": "Closing",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/04_Drax_Closing",
+          "agent_canon": "b3-5-drax"
+        },
+        {
+          "n": 5,
+          "nom": "Groot",
+          "charge": "Content",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/05_Groot_Content",
+          "agent_canon": "b3-5-groot"
+        },
+        {
+          "n": 6,
+          "nom": "Mantis",
+          "charge": "VoC",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/05_People_et_Brand_Superman_Guardians/squad/06_Mantis_VoC",
+          "agent_canon": "b3-5-mantis"
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "domaine": "Finance & ROI",
+      "vp": "Wonder Woman",
+      "squad": "Thunderbolts",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts",
+      "agent_canon": "b2-07-wonderwoman-finance",
+      "dormant": false,
+      "veto": "toute dépense récurrente sans date de revue et sans métrique de retour",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "BuckyBarnes",
+          "charge": "Cashflow",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/01_BuckyBarnes_Cashflow",
+          "agent_canon": "b3-6-buckybarnes"
+        },
+        {
+          "n": 2,
+          "nom": "YelenaBelova",
+          "charge": "Forecasting",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/02_YelenaBelova_Forecasting",
+          "agent_canon": "b3-6-yelenabelova"
+        },
+        {
+          "n": 3,
+          "nom": "RedGuardian",
+          "charge": "Reporting",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/03_RedGuardian_Reporting",
+          "agent_canon": "b3-6-redguardian"
+        },
+        {
+          "n": 4,
+          "nom": "Ghost",
+          "charge": "CostOpt",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/04_Ghost_CostOpt",
+          "agent_canon": "b3-6-ghost"
+        },
+        {
+          "n": 5,
+          "nom": "Taskmaster",
+          "charge": "Repro",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/05_Taskmaster_Repro",
+          "agent_canon": "b3-6-taskmaster"
+        },
+        {
+          "n": 6,
+          "nom": "USAgent",
+          "charge": "Compliance",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/06_Finance_et_ROI_WonderWoman_Thunderbolts/squad/06_USAgent_Compliance",
+          "agent_canon": "b3-6-usagent"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "domaine": "R&D & IT",
+      "vp": "Cyborg",
+      "squad": "Kang Dynasty",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty",
+      "agent_canon": "b2-06-cyborg-it",
+      "dormant": false,
+      "veto": "tout fournisseur cloud-only sans chemin de sortie documenté",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "KangPrime",
+          "charge": "Infra",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/01_KangPrime_Infra",
+          "agent_canon": "b3-7-kangprime"
+        },
+        {
+          "n": 2,
+          "nom": "IronLad",
+          "charge": "Provisioning",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/02_IronLad_Provisioning",
+          "agent_canon": "b3-7-ironlad"
+        },
+        {
+          "n": 3,
+          "nom": "ScarletCenturion",
+          "charge": "Security",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/03_ScarletCenturion_Security",
+          "agent_canon": "b3-7-scarletcenturion"
+        },
+        {
+          "n": 4,
+          "nom": "Immortus",
+          "charge": "Capacity",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/04_Immortus_Capacity",
+          "agent_canon": "b3-7-immortus"
+        },
+        {
+          "n": 5,
+          "nom": "VictorTimely",
+          "charge": "CICD",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/05_VictorTimely_CICD",
+          "agent_canon": "b3-7-victortimely"
+        },
+        {
+          "n": 6,
+          "nom": "RamaTut",
+          "charge": "Backup",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/07_RD_et_IT_Cyborg_KangDynasty/squad/06_RamaTut_Backup",
+          "agent_canon": "b3-7-ramatut"
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "domaine": "Legal & Compliance",
+      "vp": "Aquaman",
+      "squad": "Eternals",
+      "role_emyth": "Manager",
+      "artefact": "SPRINTS.md",
+      "cycle": "4 sprints/mois",
+      "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals",
+      "agent_canon": "b2-08-aquaman-legal",
+      "dormant": true,
+      "veto": "toute prestation démarrée sans accord écrit sur le périmètre et la propriété du livrable",
+      "b3": [
+        {
+          "n": 1,
+          "nom": "Ikaris",
+          "charge": "Strategy",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/01_Ikaris_Strategy",
+          "agent_canon": "b3-8-ikaris"
+        },
+        {
+          "n": 2,
+          "nom": "Sersi",
+          "charge": "Jurisdiction",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/02_Sersi_Jurisdiction",
+          "agent_canon": "b3-8-sersi"
+        },
+        {
+          "n": 3,
+          "nom": "Ajak",
+          "charge": "Mediation",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/03_Ajak_Mediation",
+          "agent_canon": "b3-8-ajak"
+        },
+        {
+          "n": 4,
+          "nom": "Kingo",
+          "charge": "PublicComms",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/04_Kingo_PublicComms",
+          "agent_canon": "b3-8-kingo"
+        },
+        {
+          "n": 5,
+          "nom": "Phastos",
+          "charge": "Templates",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/05_Phastos_Templates",
+          "agent_canon": "b3-8-phastos"
+        },
+        {
+          "n": 6,
+          "nom": "Sprite",
+          "charge": "IP",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/06_Sprite_IP",
+          "agent_canon": "b3-8-sprite"
+        },
+        {
+          "n": 7,
+          "nom": "Druig",
+          "charge": "Negotiation",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/07_Druig_Negotiation",
+          "agent_canon": "b3-8-druig"
+        },
+        {
+          "n": 8,
+          "nom": "Thena",
+          "charge": "Litigation",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/08_Thena_Litigation",
+          "agent_canon": "b3-8-thena"
+        },
+        {
+          "n": 9,
+          "nom": "Gilgamesh",
+          "charge": "Enforcement",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/09_Gilgamesh_Enforcement",
+          "agent_canon": "b3-8-gilgamesh"
+        },
+        {
+          "n": 10,
+          "nom": "Makkari",
+          "charge": "Velocity",
+          "role_emyth": "Technicien",
+          "artefact": "SCRUMS.md",
+          "cycle": "5 scrums/semaine",
+          "dossier": "04_Business_Domains/08_Legal_et_Compliance_Aquaman_Eternals/squad/10_Makkari_Velocity",
+          "agent_canon": "b3-8-makkari"
+        }
+      ]
+    }
+  ],
+  "totaux": {
+    "b1": 1,
+    "b2": 8,
+    "b3": 53
+  },
+  "paperclip": {
+    "companyId": "1c6e1a3b-7cc0-49ec-8de4-a501e219f37c",
+    "companyName": "Coach OS",
+    "adapterType": "claude_local",
+    "environmentId": "9fa96211-3e29-41f6-979c-2ce9630da451",
+    "modele": "MiniMax-M3[1m]",
+    "agents": 62,
+    "plafond_parallelisme": "2-3 agents claude_local simultanes (mesure 2026-08-02)"
+  }
+}

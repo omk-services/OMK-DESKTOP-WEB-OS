@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "legal.scope.needs_review",
+  "title": "Un perimetre contractuel demande une revue Legal",
+  "description": "Emis par aquaman-intake apres extraction. Consomme par aquaman-scope-check. Porte l'inventaire de ce qui a ete trouve ET de ce qui manque : c'est l'absence qui declenche le veto, pas la presence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contrat_ref", "perimetre_ecrit", "proprietaire_livrable", "cause_par"],
+  "properties": {
+    "contrat_ref": { "type": "string", "minLength": 1 },
+    "perimetre_ecrit": {
+      "type": "boolean",
+      "description": "Un perimetre ecrit existe-t-il dans le document ? Le veto canonique d'Aquaman porte sur l'engagement sans perimetre ecrit."
+    },
+    "proprietaire_livrable": {
+      "type": "boolean",
+      "description": "La propriete du livrable est-elle stipulee ?"
+    },
+    "surfaces_touchees": {
+      "type": "array",
+      "description": "Parmi les sept surfaces juridiques du domaine",
+      "items": {
+        "enum": ["compliance", "contract_risk", "privacy", "ip", "claims", "terms", "defensibility"]
+      }
+    },
+    "manques": {
+      "type": "array",
+      "description": "Ce qui devrait figurer et ne figure pas. Un tableau vide est une affirmation, pas un defaut de lecture.",
+      "items": { "type": "string" }
+    },
+    "cause_par": {
+      "type": "string",
+      "description": "Identifiant de l'evenement declencheur. Le journal est causal : aucun evenement n'est orphelin."
+    }
+  }
+}

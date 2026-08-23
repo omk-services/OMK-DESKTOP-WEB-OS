@@ -1,0 +1,153 @@
+{
+  "$comment": "Registre des harnais. Ajouter un harnais = ajouter une entree ici. AUCUN code ne change. C'est la condition de l'agnosticite : un switch sur le nom du harnais serait l'inverse d'un adaptateur.",
+  "$schema_entree": {
+    "id": "identifiant stable, kebab-case",
+    "libelle": "nom affiche",
+    "invocation": { "type": "cli | http | ws | sdk | desktop", "cible": "binaire, URL ou point d'entree" },
+    "capacites": "liste parmi le vocabulaire canonique ci-dessous",
+    "surfaces": "protocoles que ce harnais parle nativement",
+    "statut": "mesure | declare | suppose",
+    "mesure_le": "date ISO si statut=mesure, sinon null"
+  },
+  "$capacites_canoniques": [
+    "tool_call", "file_edit", "shell", "browser", "subagents",
+    "streaming", "vision", "voice", "cron", "webhook", "long_context"
+  ],
+
+  "harnesses": [
+    {
+      "id": "claude-code",
+      "libelle": "Claude Code",
+      "invocation": { "type": "cli", "cible": "C:/Users/amado/AppData/Roaming/npm/claude" },
+      "capacites": ["tool_call", "file_edit", "shell", "subagents", "streaming", "long_context"],
+      "surfaces": ["mcp"],
+      "statut": "mesure",
+      "mesure_le": "2026-08-23",
+      "note": "v2.1.143. Slots de modele OPUS/SONNET/HAIKU + ANTHROPIC_CUSTOM_MODEL_OPTION. Les sous-agents heritent de la config de session."
+    },
+    {
+      "id": "codex",
+      "libelle": "Codex CLI",
+      "invocation": { "type": "cli", "cible": "codex" },
+      "capacites": ["tool_call", "file_edit", "shell", "streaming"],
+      "surfaces": ["mcp"],
+      "statut": "mesure",
+      "mesure_le": "2026-08-21",
+      "note": "codex-cli 0.130.0-alpha.5, detecte par omniroute status."
+    },
+    {
+      "id": "hermes-agent",
+      "libelle": "Hermes Agent",
+      "invocation": { "type": "desktop", "cible": "Hermes Desktop Native" },
+      "capacites": ["tool_call", "subagents", "webhook"],
+      "surfaces": ["mcp", "a2a"],
+      "statut": "declare",
+      "mesure_le": null,
+      "note": "Installe (omniroute status). Mode Bot cible pour les agents Kernel migres depuis Multica. Invocation exacte a mesurer."
+    },
+    {
+      "id": "multica",
+      "libelle": "Multica",
+      "invocation": { "type": "http", "cible": "https://api.multica.ai" },
+      "capacites": ["subagents", "cron", "webhook"],
+      "surfaces": ["rest"],
+      "statut": "mesure",
+      "mesure_le": "2026-08-21",
+      "note": "57 agents vivants dans le workspace, couches A1/A2/A3 + S. La couche B a ete archivee volontairement."
+    },
+    {
+      "id": "openclaw",
+      "libelle": "OpenClaw",
+      "invocation": { "type": "cli", "cible": "openclaw" },
+      "capacites": ["tool_call", "file_edit", "shell"],
+      "surfaces": ["mcp"],
+      "statut": "mesure",
+      "mesure_le": "2026-08-21",
+      "note": "OpenClaw 2026.5.18, detecte par omniroute status."
+    },
+    {
+      "id": "antigravity",
+      "libelle": "Antigravity",
+      "invocation": { "type": "desktop", "cible": "antigravity" },
+      "capacites": ["tool_call", "file_edit", "browser"],
+      "surfaces": ["mcp"],
+      "statut": "declare",
+      "mesure_le": null
+    },
+    {
+      "id": "cursor",
+      "libelle": "Cursor",
+      "invocation": { "type": "desktop", "cible": "cursor" },
+      "capacites": ["tool_call", "file_edit", "shell"],
+      "surfaces": ["mcp", "acp"],
+      "statut": "declare",
+      "mesure_le": null
+    },
+    {
+      "id": "open-code",
+      "libelle": "OpenCode",
+      "invocation": { "type": "cli", "cible": "opencode" },
+      "capacites": ["tool_call", "file_edit", "shell"],
+      "surfaces": ["mcp", "acp"],
+      "statut": "declare",
+      "mesure_le": null,
+      "note": "Non installe au 2026-08-21 (omniroute status)."
+    },
+    {
+      "id": "buzz",
+      "libelle": "Buzz",
+      "invocation": { "type": "desktop", "cible": ".buzz" },
+      "capacites": ["subagents", "voice"],
+      "surfaces": ["rest"],
+      "statut": "declare",
+      "mesure_le": null,
+      "note": "Cible declaree pour les agents Life OS."
+    },
+    {
+      "id": "prime-agent",
+      "libelle": "Prime Agent",
+      "invocation": { "type": "sdk", "cible": "prime-agent" },
+      "capacites": ["tool_call", "subagents"],
+      "surfaces": ["a2a"],
+      "statut": "suppose",
+      "mesure_le": null,
+      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche."
+    },
+    {
+      "id": "j-code",
+      "libelle": "J Code",
+      "invocation": { "type": "cli", "cible": "jcode" },
+      "capacites": ["tool_call", "file_edit"],
+      "surfaces": ["mcp"],
+      "statut": "suppose",
+      "mesure_le": null
+    },
+    {
+      "id": "d-code",
+      "libelle": "D Code",
+      "invocation": { "type": "cli", "cible": "dcode" },
+      "capacites": ["tool_call", "file_edit"],
+      "surfaces": ["mcp"],
+      "statut": "suppose",
+      "mesure_le": null
+    },
+    {
+      "id": "paperclip",
+      "libelle": "Paperclip",
+      "invocation": { "type": "sdk", "cible": "paperclip" },
+      "capacites": ["tool_call"],
+      "surfaces": ["mcp"],
+      "statut": "suppose",
+      "mesure_le": null
+    },
+    {
+      "id": "ori",
+      "libelle": "ORI",
+      "invocation": { "type": "sdk", "cible": "ori" },
+      "capacites": ["tool_call", "voice"],
+      "surfaces": ["a2a", "agui"],
+      "statut": "suppose",
+      "mesure_le": null
+    }
+  ]
+}

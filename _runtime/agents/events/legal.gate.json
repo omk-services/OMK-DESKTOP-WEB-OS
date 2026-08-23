@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "legal.gate",
+  "title": "Verdict de portique du domaine Legal",
+  "description": "Emis par aquaman-gate. Trois statuts canoniques. En etat SHADOW_ACTIVE le verdict porte shadow=true et n'engage pas la responsabilite ; en etat ACTIVE il est opposable et arrete la production aval.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contrat_ref", "statut", "motif", "shadow", "cause_par", "decide_a"],
+  "properties": {
+    "contrat_ref": { "type": "string", "minLength": 1 },
+    "statut": {
+      "enum": ["LEGAL_READY", "NEEDS_REVIEW", "BLOCKED_RISK"],
+      "description": "LEGAL_READY : perimetre tenu, claims sures, IP et privacy nets. NEEDS_REVIEW : surface a examiner. BLOCKED_RISK : exposition non geree, arret."
+    },
+    "motif": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Un motif ecrit et factuel. Un veto legitime est categoriel, verifiable et non negociable : sans motif ecrit il n'est pas opposable."
+    },
+    "shadow": {
+      "type": "boolean",
+      "description": "true tant que le premier livrable Business Done n'a pas ete signe. Un verdict shadow est produit et journalise mais n'engage pas."
+    },
+    "surfaces_verifiees": {
+      "type": "array",
+      "items": {
+        "enum": ["compliance", "contract_risk", "privacy", "ip", "claims", "terms", "defensibility"]
+      }
+    },
+    "cause_par": { "type": "string" },
+    "decide_a": { "type": "string", "format": "date-time" }
+  }
+}
