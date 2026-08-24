@@ -1,9 +1,0 @@
-Brief H terminé. Récapitulatif :
-
-**Récursion RLS** — `20260811000006_rls_recursion.sql` appliquée sur INTERN. Avant : HTTP 500 + `42P17`. Après : HTTP 200 + `[]`. Deux policies corrigées (`memberships_same_org_read` → `user_id = auth.uid()`, `organizations_member_read` → `id = jwt_org_id()`). Filet anti-récursion intégré dans la migration pour qu'une future régression soit refusée à l'application.
-
-**Visiteur anonyme** — Option 1 confirmée : le mode démo ne touche jamais Supabase, le seed local suffit. Code déjà livré par agent D ; documenté dans `VERIFICATION_RLS.md` §8.
-
-**Page OAuth callback** — `src/apps/auth/OAuthCallback.tsx` créée avec 3 états (waiting / success / error) et 4 sources d'erreur couvertes. Branchée dans `App.tsx` via `isOAuthCallbackPath()` — 7 lignes au total, totalement additif.
-
-**Vérification finale** : 0 erreur TypeScript sur mes fichiers, test curl confirme `HTTP 200 []` sur `/rest/v1/organizations`, rapport écrit dans `_briefs/2026-08-11_production/RAPPORT_H_RLS.md`.

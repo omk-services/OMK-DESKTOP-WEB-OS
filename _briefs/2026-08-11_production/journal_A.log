@@ -1,9 +1,0 @@
-Brief A terminé. Résumé :
-
-**Tache 1 — confinement de l'avatar** : corrigé. Le bug racine n'était pas celui pressenti : l'avatar n'était pas du tout ancré à `agent.position.x`. Le conteneur flex avec bulle-en-premier mettait l'avatar à `agent.position.x + ~292px`. J'ai restructuré le JSX : avatar à `agent.position.x`, bulle en `position: absolute` avec flip calculé au rendu (`placeBubbleLeft` / `placeBubbleAbove`). Filet de sécurité `resize` ajouté.
-
-**Tache 2 — Supabase** : `supabaseConfigured` détecte les URLs invalides (placeholder, non-https), client mort-ne retourne une erreur explicite au lieu d'un timeout, `console.warn` au boot si l'URL est configurée mais injoignable. `.env.example` documente les deux projets cibles (INTERN = `sgzbkhqqkqdwhakkyzzm`, CUSTOMERS = `ndvqwcapwcnpdvknxcjw`) et rappelle que `qjrwcdzaebyqponqkiqs` est en pause.
-
-**Preuve** : `tools/avatar-confinement.mjs` joue 3 scénarios (droite, bas, bas-droite) ; tous passent, l'avatar reste cliquable, les captures sont dans `_briefs/2026-08-11_production/captures/`. `tsc --noEmit` : 0 erreur sur le repo.
-
-Rapport écrit dans `_briefs/2026-08-11_production/RAPPORT_A_AVATAR.md`.

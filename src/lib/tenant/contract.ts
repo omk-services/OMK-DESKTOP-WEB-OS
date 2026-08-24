@@ -12,7 +12,7 @@
  * does today. Phase 2 today. Phase 3 unifies, multi-tenant aware.
  *
  * Why signatures only — and not an implementation:
- *   - The audit (AUDIT_FINAL.md) classifies the existing store as
+ *   - The audit (_audit/AUDIT_FINAL.md) classifies the existing store as
  *     NEAR-DONE: the existing CRUD + Supabase dual-write already proves the
  *     pattern. Wiring `tenant_id` end-to-end touches every app, every
  *     collection, every query — that is Phase 3 work, not a one-file patch.

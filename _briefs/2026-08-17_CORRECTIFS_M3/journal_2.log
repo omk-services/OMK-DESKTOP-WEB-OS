@@ -1,9 +1,0 @@
-Travail terminé. **35 tests verts** sur mon périmètre (20 nouveaux + 15 existants préservés), rapport posé.
-
-**Récapitulatif du correctif** :
-- **Mesure 1** : wrapper `Storage` scopé (`createScopedStorage` dans `src/lib/auth/storage-scope.ts`) — chaque store de mon périmètre écrit sous `coach-os:<userId>:<tenantId>:<nom>`. 14 fichiers refactorés.
-- **Mesure 2** : `signOutAndPurge()` + patch global de `supabase.auth.signOut` (filet pour le cas « Supabase rejette »). Bridge d'auth observe `onAuthStateChange` et purge automatiquement à `SIGNED_OUT`.
-- **Tests** : `src/lib/auth/storage-scope.test.ts` couvre les trois contrats du brief (isolation, purge, purge-sur-échec).
-- **Suivi documenté** : réinit de l'état en mémoire à la connexion (limite d'API Zustand, pas un défaut de sécurité), et clés `coach-os*` hors périmètre qui restent à traiter par leurs agents respectifs.
-
-Le rapport complet est dans `_briefs/2026-08-17_CORRECTIFS_M3/RAPPORT_FIX_2.md`.
