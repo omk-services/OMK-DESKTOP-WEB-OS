@@ -1,34 +1,24 @@
-# Blueprint Render pour Ori — meta-harnais de Summers (B1).
+# Ori n'a PAS de mode serveur — verifie le 2026-08-24 contre la doc officielle
+# OpenRouter (openrouter.ai/docs/guides/ori/harness) :
 #
-# Ori est le seul harnais du registre a declarer `deploiement: [render, vps, local]`
-# (_runtime/bridge/harnesses.json). Ce fichier ne deploie qu'Ori — Prime-Agent et
-# Hermes+Bot Mode vont sur VPS bare metal (voir deploy/vps-bare-metal/), pas ici,
-# tant que le multi-tenant n'exige pas de les isoler par instance separee.
+#   "Each command starts the real agent CLI on your machine."
 #
-# STATUT DE CE FICHIER : declare, non mesure. Je n'ai pas de sous-commande Ori
-# confirmee pour un mode serveur persistant (`ori serve` est un nom suppose, pas
-# verifie contre une documentation Ori reelle dans cette session). Avant le
-# premier deploy, remplacer `startCommand` par la vraie commande — ne pas la
-# lancer telle quelle en pensant qu'elle est testee.
+# `ori claude`, `ori codex`, `ori hermes`, etc. lancent la vraie CLI de
+# l'agent en premier plan, configuree pour parler a OpenRouter — ce n'est
+# pas un daemon qui repond a des requetes. L'authentification passe par
+# OAuth PKCE avec ouverture de navigateur (`ori login`), ce qui ne
+# fonctionne pas dans un service headless sans intervention humaine au
+# premier lancement.
+#
+# Consequence : Ori n'est PAS deployable comme "meta-gateway persistant" sur
+# Render. C'est un outil de SESSION — invoque quand un humain (ou un process
+# supervise) travaille depuis une machine (local ou VPS via SSH), pas un
+# service qui tourne en arriere-plan pour router le trafic des 8 domaines.
+#
+# Ce fichier est laisse vide de service Render intentionnellement. Si un
+# besoin reel de deploiement cloud apparait pour un agent specifique (par
+# exemple Codex, qui expose --full-auto pour un mode moins interactif selon
+# la doc), il faudra un blueprint dedie a CET agent — pas a Ori comme
+# facade, et avec le mode d'authentification de CET agent verifie separement.
 
-services:
-  - type: pserv
-    name: ori-gateway
-    runtime: node
-    plan: starter
-    region: oregon
-    branch: main
-    rootDir: _runtime/bridge
-    buildCommand: |
-      curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash
-    # A CONFIRMER — voir avertissement en tete de fichier.
-    startCommand: ori serve --port $PORT
-    envVars:
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: ORI_ROLE
-        value: meta-gateway-summers
-      - key: NODE_ENV
-        value: production
-    autoDeploy: false
-    healthCheckPath: /health
+services: []

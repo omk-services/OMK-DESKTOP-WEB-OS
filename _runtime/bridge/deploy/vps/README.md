@@ -1,9 +1,15 @@
-# VPS bare metal — Ori, Prime-Agent, Hermes+Bot Mode
+# VPS — Ori, Prime-Agent, Hermes+Bot Mode
 
-Sans Docker, sans CapRover, sans Coolify, sans Dokploy — décision explicite du
-2026-08-24. Trois processus systemd, imbriqués : Ori en meta-harnais, qui peut
-lancer Prime-Agent et Hermes selon `couvre` dans `harnesses.json` ; Hermes en
-Bot Mode comme QG de collaboration inter-agents.
+Trois processus systemd, imbriqués : Ori en meta-harnais, qui peut lancer
+Prime-Agent et Hermes selon `couvre` dans `harnesses.json` ; Hermes en Bot
+Mode comme QG de collaboration inter-agents.
+
+> Correction du 2026-08-24 : la contrainte "bare metal, sans Docker/CapRover/
+> Coolify/Dokploy" visait le **poste local** (voir `../local/README.md`), pas
+> la VPS. Ici, systemd reste le choix par defaut parce que c'est le plus
+> simple pour trois processus CLI de longue duree — pas parce qu'un
+> orchestrateur de conteneurs est exclu. Si tu veux Docker/Coolify/CapRover
+> sur cette VPS plus tard, rien ici ne s'y oppose structurellement.
 
 ## Périmètre actuel — un seul admin
 
@@ -18,27 +24,26 @@ pour l'app web, pas ici.
 
 | Service | Commande d'install | Statut |
 |---|---|---|
-| Ori | `curl -fsSL https://openrouter.ai/labs/ori/install.sh \| bash` | **declare** — présente dans `harnesses.json`, jamais exécutée sur Linux dans cette session |
-| Hermes Agent | inconnue sur Linux — connue seulement en venv Python Windows (`AppData/Local/hermes/hermes-agent/venv`) | **suppose** — à trouver sur `hermes-agent.nousresearch.com` avant d'installer |
-| Prime-Agent | inconnue — type `sdk` dans le registre, jamais sondé avec succès | **suppose** — aucune source d'installation confirmée. Ne pas inventer une URL ; la trouver toi-même sur le dépôt officiel avant de lancer `install.sh` |
+| Ori | `curl -fsSL https://openrouter.ai/labs/ori/install.sh \| bash` | **declare** — présente dans `harnesses.json` (doc officielle OpenRouter), jamais exécutée sur Linux dans cette session |
+| Hermes Agent | `curl -fsSL https://hermes-agent.nousresearch.com/install.sh \| bash` | **declare** — URL confirmée par l'utilisateur le 2026-08-24, jamais exécutée dans cette session |
+| Prime-Agent | `curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh \| sh` | **declare** — URL confirmée par l'utilisateur le 2026-08-24, jamais exécutée dans cette session |
 
-**Ne rien lancer en aveugle.** Les deux `.sh` de ce dossier s'arrêtent avec un
-message explicite si la variable d'environnement source n'est pas fournie —
-volontairement, pour ne pas laisser un `curl | bash` taper une URL fausse.
+Les trois URLs viennent d'une source humaine cette fois (pas devinées) — mais
+aucune n'a encore tourné réellement sur cette VPS. `declare`, pas `mesure`,
+tant que l'installation n'a pas été vérifiée en vrai.
 
 ## Ordre d'installation
 
 ```bash
-# 1. Ori — la commande est confirmee dans le registre
 bash 01-install-ori.sh
+bash 02-install-hermes.sh
+bash 03-install-prime-agent.sh
 
-# 2. Hermes — ecrase HERMES_INSTALL_URL par la vraie url avant de lancer
-HERMES_INSTALL_URL="https://..." bash 02-install-hermes.sh
+# Verifier ou chaque binaire s'est installe avant d'ecrire les unites systemd
+which ori hermes prime-agent
 
-# 3. Prime-Agent — meme regle
-PRIME_AGENT_INSTALL_URL="https://..." bash 03-install-prime-agent.sh
-
-# 4. Activer les trois services
+# Activer les trois services (corriger le chemin ExecStart si which differe
+# de /usr/local/bin — voir le commentaire dans chaque .service)
 sudo cp systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now ori.service hermes-bot.service prime-agent.service

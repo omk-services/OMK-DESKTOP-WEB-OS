@@ -11,7 +11,9 @@ EnvironmentFile=/etc/coach-os/hermes.env
 # A CONFIRMER : le flag exact du Bot Mode n'est pas verifie dans cette
 # session — voir hermes-agent.nousresearch.com/docs/user-guide/bot-mode.
 # La doc parle de agent.bot_mode_protocol dans config.yaml, pas d'un flag CLI.
-ExecStart=/home/coach-os/.hermes-agent/venv/bin/hermes --config /etc/coach-os/hermes-config.yaml
+# Chemin binaire suppose (install.sh pose generalement dans ~/.local/bin) —
+# verifier `which hermes` apres 02-install-hermes.sh et corriger si besoin.
+ExecStart=/usr/local/bin/hermes --config /etc/coach-os/hermes-config.yaml
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

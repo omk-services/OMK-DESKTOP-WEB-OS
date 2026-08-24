@@ -8,11 +8,11 @@ Type=simple
 User=coach-os
 Environment=PYTHONUNBUFFERED=1
 EnvironmentFile=/etc/coach-os/prime-agent.env
-# A CONFIRMER integralement : Prime-Agent n'a jamais ete sonde avec succes
-# dans ce registre (statut "suppose"). La commande de lancement ci-dessous
-# est une supposition a partir du schema des autres harnais SDK, pas une
-# valeur mesuree.
-ExecStart=/home/coach-os/.prime-agent/venv/bin/prime-agent run
+# A CONFIRMER : la sous-commande de lancement persistant n'est pas verifiee
+# dans cette session — l'URL d'install l'est (Prime Intellect, 2026-08-24),
+# pas le mode d'execution en service. Verifier `prime-agent --help` apres
+# 03-install-prime-agent.sh.
+ExecStart=/usr/local/bin/prime-agent run
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
