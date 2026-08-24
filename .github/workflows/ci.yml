@@ -1,0 +1,79 @@
+name: CI
+
+# Un franchisé qui clone ce dépôt doit obtenir, sans connaissance tacite, le
+# même verdict que cette pipeline. Chaque étape échoue bruyamment — aucune
+# n'est autorisée à masquer un échec pour faire passer le vert.
+#
+# Ordre délibéré : install -> typecheck -> test -> build -> bancs runtime.
+# C'est l'ordre qui aurait attrapé les 54 erreurs `tsc` avant qu'elles ne
+# vivent des mois dans le dépôt sans que personne ne les voie — `vite build`
+# ne typecheck pas, donc le typecheck doit être une étape séparée et
+# obligatoire, avant le build.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (version .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies (lockfile strict)
+        run: npm ci
+
+      # PIÈGE CONNU : `npx tsc --noEmit -p tsconfig.json` est un FAUX POSITIF
+      # (exit 0, zéro ligne) — tsconfig.json racine n'est qu'une solution de
+      # références (`references`, `files: []`). Il ne type-checke rien par
+      # lui-même. La vraie commande est `npm run typecheck` (`tsc -b`), qui
+      # suit les références vers tsconfig.app.json et tsconfig.node.json.
+      - name: Typecheck (app + node) — tsc -b
+        run: npm run typecheck
+
+      # `api/` tourne sous Node (process.env, sous-processus, Buffer) et n'est
+      # couvert par AUCUNE des références du tsconfig.json racine. Sans cette
+      # étape séparée, `tsc -b` rend "propre" pendant que le build Vercel
+      # découvre des `Cannot find name 'process'` après coup.
+      - name: Typecheck (api/)
+        run: npm run typecheck:api
+
+      # Le pool `vitest` par défaut (forks) peut faire crasher des workers en
+      # silence dans certains environnements (observé ici : une exécution a
+      # perdu 6 fichiers de test sur un crash de worker tout en rendant un
+      # exit code 0). `--pool=threads` est la configuration reproductible ;
+      # elle est câblée dans le script npm `test`, pas seulement ici.
+      - name: Tests (vitest --pool=threads)
+        run: npm test
+
+      # `vite build` NE typecheck PAS. C'est la cause racine mesurée : 54
+      # erreurs tsc ont vécu dans le dépôt parce que cette étape passait au
+      # vert sans jamais lire un type. Elle reste utile en aval du typecheck,
+      # pour attraper les erreurs de build pur (imports manquants à
+      # l'exécution, assets, config Vite).
+      - name: Build (vite build)
+        run: npm run build
+
+      # Bancs du runtime — non couverts par vitest, invisibles sans cette
+      # étape. Comptes attendus : 27 / 20 / 39 / 16 réussites, 0 échec.
+      - name: Bench — kernel (27 tests)
+        run: npm run bench:kernel
+
+      - name: Bench — bridge (20 tests)
+        run: npm run bench:bridge
+
+      - name: Bench — adapters (39 tests)
+        run: npm run bench:adapters
+
+      - name: Bench — rbac (16 tests)
+        run: npm run bench:rbac

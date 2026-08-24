@@ -19,19 +19,35 @@ PostHog-light palette with a paper-garden wallpaper.
 
 ## Local development
 
+Full step-by-step setup (clone to first `--sante` check) lives in
+[`INSTALL.md`](./INSTALL.md) — it documents two already-paid traps (a
+false-positive `tsc` command, and a flaky default `vitest` pool) so nobody
+re-discovers them. Short version:
+
 ```bash
 npm install
+cp .env.example .env.local   # fill in your Supabase keys
 npm run dev
 ```
 
-Copy `.env.local.example` (create one from your Supabase project keys) to `.env.local`:
+Node version is pinned in [`.nvmrc`](./.nvmrc).
 
+## Verify / CI
+
+```bash
+npm run verify
 ```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_ANON_KEY=...
-```
+
+Runs, in order: `typecheck` (`tsc -b` — the only command that actually
+type-checks; `npx tsc --noEmit -p tsconfig.json` alone is a silent
+false-positive), `typecheck:api`, `test` (vitest with `--pool=threads`),
+`build`, and the four runtime benches (`_runtime/kernel.mjs`,
+`_runtime/bridge/{bridge,adapters,rbac-test}.mjs`). This is exactly what
+[`.github/workflows/ci.yml`](./.github/workflows/ci.yml) runs on every push
+and pull request.
 
 ## Docs
 
+- [`INSTALL.md`](./INSTALL.md) — full local setup, verification, and known traps
 - [`MIGRATION_SUPABASE.md`](./MIGRATION_SUPABASE.md) — data-layer migration plan, 3-stage tenancy model
 - [`PHASE0_RECEIPT.md`](./PHASE0_RECEIPT.md) — Supabase Phase 0 provisioning receipt

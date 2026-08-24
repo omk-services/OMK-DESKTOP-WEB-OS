@@ -11,14 +11,20 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --pool=threads",
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "typecheck:api": "tsc -p api/tsconfig.json --noEmit",
     "tooling:build": "node scripts/build-tooling.mjs",
     "tooling:skills": "node scripts/build-skills.mjs",
     "tooling:harness": "node scripts/build-harness.mjs",
-    "tooling:verify": "node scripts/verify.mjs"
+    "tooling:verify": "node scripts/verify.mjs",
+    "bench:kernel": "node _runtime/kernel.mjs --autotest",
+    "bench:bridge": "node _runtime/bridge/bridge.mjs --autotest",
+    "bench:adapters": "node _runtime/bridge/adapters.mjs --autotest",
+    "bench:rbac": "node _runtime/bridge/rbac-test.mjs",
+    "bench": "npm run bench:kernel && npm run bench:bridge && npm run bench:adapters && npm run bench:rbac",
+    "verify": "npm run typecheck && npm run typecheck:api && npm test && npm run build && npm run bench"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.34",
@@ -35,6 +41,7 @@
     "react-dom": "^19.2.7",
     "three": "^0.185.1",
     "usertour.js": "^0.0.24",
+    "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
