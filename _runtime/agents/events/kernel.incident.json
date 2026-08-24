@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kernel.incident",
+  "title": "Un cycle de la boucle --watch a leve une exception",
+  "description": "Emis par le noyau quand un cycle de surveillance echoue. Le principe : une exception isolee ne doit jamais arreter le runtime perpetuel — elle est journalisee comme incident, puis la boucle continue au cycle suivant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["origine", "erreur", "survenu_a"],
+  "properties": {
+    "origine": { "type": "string", "minLength": 1, "description": "Ou l'exception a ete capturee, ex. watch-cycle." },
+    "erreur": { "type": "string", "minLength": 1, "description": "Message et pile d'appel de l'exception." },
+    "survenu_a": { "type": "string", "format": "date-time" }
+  }
+}

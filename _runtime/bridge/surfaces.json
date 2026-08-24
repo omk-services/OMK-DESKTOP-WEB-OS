@@ -1,6 +1,5 @@
 {
   "$comment": "Surfaces de protocole. Elles ne sont PAS concurrentes : elles occupent des etages differents de la pile. Les aligner cote a cote dans une liste de dix protocoles masque exactement ce qui compte — qui parle a qui.",
-
   "$etages": {
     "outil": "l'agent atteint une capacite externe",
     "agent": "un agent parle a un autre agent",
@@ -8,7 +7,6 @@
     "interface": "l'agent rend une interface a un humain",
     "paiement": "l'agent engage une valeur"
   },
-
   "surfaces": [
     {
       "id": "mcp",
@@ -16,7 +14,11 @@
       "etage": "outil",
       "direction": "agent -> outil",
       "transport": "stdio | http | ws",
-      "expose": ["tools", "resources", "prompts"],
+      "expose": [
+        "tools",
+        "resources",
+        "prompts"
+      ],
       "statut": "mesure",
       "note": "Deja porte par l'adaptateur Coach OS. Cote serveur : l'outil vit hors de la page."
     },
@@ -26,7 +28,9 @@
       "etage": "outil",
       "direction": "client -> service",
       "transport": "http",
-      "expose": ["endpoints versionnes"],
+      "expose": [
+        "endpoints versionnes"
+      ],
       "statut": "mesure",
       "note": "Pas un protocole d'agent : le socle sur lequel les autres se posent. Un harnais qui ne parle que REST est pilotable, mais il ne negocie rien — pas de capacites, pas de session. C'est le cas de Multica, mesure le 2026-08-21."
     },
@@ -36,7 +40,9 @@
       "etage": "outil",
       "direction": "agent -> page web",
       "transport": "api navigateur",
-      "expose": ["tools declares par la page elle-meme"],
+      "expose": [
+        "tools declares par la page elle-meme"
+      ],
       "statut": "declare",
       "reference": "https://github.com/GoogleChromeLabs/webmcp-tools",
       "note": "Le complement manquant de MCP. MCP expose des outils cote serveur ; WebMCP laisse une PAGE declarer ses propres outils a l'agent, en imperatif ou en declaratif. Sans lui, un agent qui doit agir dans une UI tierce retombe sur le pilotage par pixels. Outillage disponible : extension d'inspection, CLI d'evaluation, polyfill JS, 15+ demos."
@@ -47,7 +53,11 @@
       "etage": "client",
       "direction": "editeur -> agent",
       "transport": "json-rpc",
-      "expose": ["initialize", "negociation de protocolVersion et capabilities", "session"],
+      "expose": [
+        "initialize",
+        "negociation de protocolVersion et capabilities",
+        "session"
+      ],
       "statut": "mesure",
       "reference": "https://github.com/agentclientprotocol/agent-client-protocol",
       "note": "Version stable 1, schemas en v1 et v2. C'est l'inverse de MCP dans le sens du flux : ici le CLIENT pilote l'AGENT. C'est la surface qui rend un harnais interchangeable — un editeur qui parle ACP parle a n'importe quel agent ACP."
@@ -58,7 +68,11 @@
       "etage": "agent",
       "direction": "agent <-> agent",
       "transport": "http | ws",
-      "expose": ["carte d'agent", "delegation de tache", "negociation"],
+      "expose": [
+        "carte d'agent",
+        "delegation de tache",
+        "negociation"
+      ],
       "statut": "declare",
       "note": "L'etage ou les huit VP se parlent sans passer par le CEO."
     },
@@ -68,7 +82,10 @@
       "etage": "interface",
       "direction": "agent -> humain",
       "transport": "sse | ws",
-      "expose": ["evenements d'interface", "etat streame"],
+      "expose": [
+        "evenements d'interface",
+        "etat streame"
+      ],
       "statut": "declare",
       "note": "Ce que l'humain voit d'un agent qui travaille. Sans cette surface, le lights-out est aveugle pour l'arbitre."
     },
@@ -78,7 +95,9 @@
       "etage": "interface",
       "direction": "agent -> composant",
       "transport": "ws",
-      "expose": ["composants rendus par l'agent"],
+      "expose": [
+        "composants rendus par l'agent"
+      ],
       "statut": "suppose",
       "note": "Distinct d'AG-UI : ici l'agent COMPOSE l'interface au lieu de la commenter."
     },
@@ -88,7 +107,9 @@
       "etage": "outil",
       "direction": "agent <-> contexte partage",
       "transport": "http",
-      "expose": ["contexte portable entre harnais"],
+      "expose": [
+        "contexte portable entre harnais"
+      ],
       "statut": "suppose",
       "note": "Candidat pour porter la memoire du runtime entre deux harnais. A mesurer avant de s'y engager."
     },
@@ -98,9 +119,120 @@
       "etage": "paiement",
       "direction": "agent -> rail de paiement",
       "transport": "http",
-      "expose": ["intention de paiement", "mandat", "preuve"],
+      "expose": [
+        "intention de paiement",
+        "mandat",
+        "preuve"
+      ],
       "statut": "suppose",
       "note": "SURFACE SOUS VETO. Aucun agent n'engage de valeur sans mandat humain signe. Le bridge la declare pour la router, jamais pour l'autoriser seul."
+    },
+    {
+      "id": "acp-ibm",
+      "libelle": "ACP (IBM) — Agent Communication Protocol",
+      "etage": "agent",
+      "direction": "agent <-> agent",
+      "transport": "http",
+      "expose": [
+        "interfaces",
+        "cycle de vie"
+      ],
+      "statut": "declare",
+      "note": "HOMONYME. Ne pas confondre avec acp (Agent Client Protocol, etage client). Celui-ci couvre le CYCLE DE VIE : declare, provisionne, actif, suspendu, retire."
+    },
+    {
+      "id": "agp",
+      "libelle": "Agent Gateway Protocol",
+      "etage": "outil",
+      "direction": "agent -> systeme externe",
+      "transport": "http",
+      "expose": [
+        "transformation",
+        "traduction",
+        "controle d acces"
+      ],
+      "statut": "declare",
+      "note": "Couvre ce que MCP suppose acquis : un systeme externe qui ne parle aucun protocole d agent. Refus par defaut."
+    },
+    {
+      "id": "tap",
+      "libelle": "Tool Abstraction Protocol",
+      "etage": "outil",
+      "direction": "orchestrateur -> outil",
+      "transport": "json",
+      "expose": [
+        "idempotence",
+        "cout",
+        "rejouabilite"
+      ],
+      "statut": "declare",
+      "note": "MCP transporte, TAP decrit. Porte la metadonnee qui decide si un retry est sur."
+    },
+    {
+      "id": "oap",
+      "libelle": "Open Agent Protocol",
+      "etage": "agent",
+      "direction": "framework <-> framework",
+      "transport": "json",
+      "expose": [
+        "vocabulaire pivot"
+      ],
+      "statut": "declare",
+      "note": "Interoperabilite au niveau du VOCABULAIRE, la ou le bridge la traite au niveau du harnais."
+    },
+    {
+      "id": "rdf-agent",
+      "libelle": "RDF-Agent",
+      "etage": "outil",
+      "direction": "agent <-> graphe",
+      "transport": "sparql",
+      "expose": [
+        "triplets",
+        "endpoint SPARQL"
+      ],
+      "statut": "mesure",
+      "note": "Le depot porte deja ~2 520 triplets Turtle que la distillation ne cite jamais. Cet adaptateur relie les deux couches."
+    },
+    {
+      "id": "agentos",
+      "libelle": "AgentOS",
+      "etage": "agent",
+      "direction": "runtime -> processus",
+      "transport": "interne",
+      "expose": [
+        "ordonnancement",
+        "bridage",
+        "dependances"
+      ],
+      "statut": "declare",
+      "note": "Decrit un PROCESSUS, pas un appel. Le vocabulaire dont le lights-out a besoin."
+    },
+    {
+      "id": "tdf",
+      "libelle": "Task Definition Format",
+      "etage": "agent",
+      "direction": "planificateur -> tache",
+      "transport": "json",
+      "expose": [
+        "objectif",
+        "contraintes",
+        "metrique"
+      ],
+      "statut": "declare",
+      "note": "MCP dit comment, TAP dit a quel cout, TDF dit POURQUOI. Rend un Rock executable."
+    },
+    {
+      "id": "fcp",
+      "libelle": "Function Call Protocol",
+      "etage": "outil",
+      "direction": "modele -> fonction",
+      "transport": "json",
+      "expose": [
+        "appel strict",
+        "schema durci"
+      ],
+      "statut": "declare",
+      "note": "strict:true interdit toute propriete hors schema : un modele qui invente echoue tot."
     }
   ]
 }

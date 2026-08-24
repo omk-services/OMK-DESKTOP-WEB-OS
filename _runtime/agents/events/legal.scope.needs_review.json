@@ -28,6 +28,10 @@
       "description": "Ce qui devrait figurer et ne figure pas. Un tableau vide est une affirmation, pas un defaut de lecture.",
       "items": { "type": "string" }
     },
+    "incertain": {
+      "type": "boolean",
+      "description": "true quand l'extraction lexicale n'est pas fiable sur ce document : substantiel, se presentant comme un contrat, mais aucun synonyme connu de perimetre/propriete ne matche. Rend visible le doute plutot que de le masquer en absence categorique."
+    },
     "cause_par": {
       "type": "string",
       "description": "Identifiant de l'evenement declencheur. Le journal est causal : aucun evenement n'est orphelin."

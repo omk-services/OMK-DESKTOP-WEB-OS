@@ -3,151 +3,550 @@
   "$schema_entree": {
     "id": "identifiant stable, kebab-case",
     "libelle": "nom affiche",
-    "invocation": { "type": "cli | http | ws | sdk | desktop", "cible": "binaire, URL ou point d'entree" },
+    "invocation": {
+      "type": "cli | http | ws | sdk | desktop",
+      "cible": "binaire, URL ou point d'entree"
+    },
     "capacites": "liste parmi le vocabulaire canonique ci-dessous",
     "surfaces": "protocoles que ce harnais parle nativement",
     "statut": "mesure | declare | suppose",
-    "mesure_le": "date ISO si statut=mesure, sinon null"
+    "mesure_le": "date ISO si statut=mesure, sinon null",
+    "routeur": "vrai si ce harnais en lance d autres",
+    "couvre": "harnais que ce routeur sait lancer",
+    "deploiement": "cibles ou ce harnais tourne : render, vps, local"
   },
   "$capacites_canoniques": [
-    "tool_call", "file_edit", "shell", "browser", "subagents",
-    "streaming", "vision", "voice", "cron", "webhook", "long_context"
+    "tool_call",
+    "file_edit",
+    "shell",
+    "browser",
+    "subagents",
+    "streaming",
+    "vision",
+    "voice",
+    "cron",
+    "webhook",
+    "long_context"
   ],
-
   "harnesses": [
     {
       "id": "claude-code",
       "libelle": "Claude Code",
-      "invocation": { "type": "cli", "cible": "C:/Users/amado/AppData/Roaming/npm/claude" },
-      "capacites": ["tool_call", "file_edit", "shell", "subagents", "streaming", "long_context"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "cli",
+        "cible": "C:/Users/amado/AppData/Roaming/npm/claude"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell",
+        "subagents",
+        "streaming",
+        "long_context"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "mesure",
       "mesure_le": "2026-08-23",
-      "note": "v2.1.143. Slots de modele OPUS/SONNET/HAIKU + ANTHROPIC_CUSTOM_MODEL_OPTION. Les sous-agents heritent de la config de session."
+      "note": "v2.1.143. Slots de modele OPUS/SONNET/HAIKU + ANTHROPIC_CUSTOM_MODEL_OPTION. Les sous-agents heritent de la config de session. | sonde 2026-08-23 : joignable (chemin absolu present)",
+      "lancable_par": [
+        "ori"
+      ],
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:/Users/amado/AppData/Roaming/npm/claude",
+        "motif": "chemin absolu present",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "codex",
       "libelle": "Codex CLI",
-      "invocation": { "type": "cli", "cible": "codex" },
-      "capacites": ["tool_call", "file_edit", "shell", "streaming"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "cli",
+        "cible": "codex"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell",
+        "streaming"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "mesure",
-      "mesure_le": "2026-08-21",
-      "note": "codex-cli 0.130.0-alpha.5, detecte par omniroute status."
+      "mesure_le": "2026-08-23",
+      "note": "codex-cli 0.130.0-alpha.5, detecte par omniroute status. | sonde 2026-08-23 : joignable, codex-cli 0.130.0-alpha.5 (trouve dans C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin)",
+      "lancable_par": [
+        "ori"
+      ],
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe",
+        "motif": "trouve dans C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin",
+        "version": "codex-cli 0.130.0-alpha.5",
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "hermes-agent",
       "libelle": "Hermes Agent",
-      "invocation": { "type": "desktop", "cible": "Hermes Desktop Native" },
-      "capacites": ["tool_call", "subagents", "webhook"],
-      "surfaces": ["mcp", "a2a"],
-      "statut": "declare",
-      "mesure_le": null,
-      "note": "Installe (omniroute status). Mode Bot cible pour les agents Kernel migres depuis Multica. Invocation exacte a mesurer."
+      "invocation": {
+        "type": "cli",
+        "cible": "hermes"
+      },
+      "capacites": [
+        "tool_call",
+        "subagents",
+        "webhook"
+      ],
+      "surfaces": [
+        "mcp",
+        "a2a"
+      ],
+      "statut": "mesure",
+      "mesure_le": "2026-08-23",
+      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\"Hermes Desktop Native\") etait un libelle, pas un identifiant invocable. `hermes` (venv Python, C:/Users/amado/AppData/Local/hermes/hermes-agent/venv/Scripts/hermes) est deja sur le PATH et repond a --version. Mode Bot cible pour les agents Kernel migres depuis Multica. | sonde 2026-08-23 : joignable, Hermes Agent v0.15.1 (2026.5.29) (trouve dans C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts)",
+      "lancable_par": [
+        "ori"
+      ],
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\hermes.exe",
+        "motif": "trouve dans C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts",
+        "version": "Hermes Agent v0.15.1 (2026.5.29)",
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "multica",
       "libelle": "Multica",
-      "invocation": { "type": "http", "cible": "https://api.multica.ai" },
-      "capacites": ["subagents", "cron", "webhook"],
-      "surfaces": ["rest"],
+      "invocation": {
+        "type": "http",
+        "cible": "https://api.multica.ai"
+      },
+      "capacites": [
+        "subagents",
+        "cron",
+        "webhook"
+      ],
+      "surfaces": [
+        "rest"
+      ],
       "statut": "mesure",
-      "mesure_le": "2026-08-21",
-      "note": "57 agents vivants dans le workspace, couches A1/A2/A3 + S. La couche B a ete archivee volontairement."
+      "mesure_le": "2026-08-23",
+      "note": "57 agents vivants dans le workspace, couches A1/A2/A3 + S. La couche B a ete archivee volontairement. | sonde 2026-08-23 : joignable (hote repond, code 404)",
+      "sonde": {
+        "joignable": true,
+        "chemin": "https://api.multica.ai",
+        "motif": "hote repond, code 404",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "openclaw",
       "libelle": "OpenClaw",
-      "invocation": { "type": "cli", "cible": "openclaw" },
-      "capacites": ["tool_call", "file_edit", "shell"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "cli",
+        "cible": "openclaw"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "mesure",
-      "mesure_le": "2026-08-21",
-      "note": "OpenClaw 2026.5.18, detecte par omniroute status."
+      "mesure_le": "2026-08-23",
+      "note": "OpenClaw 2026.5.18, detecte par omniroute status. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\AppData\\Roaming\\npm)",
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\AppData\\Roaming\\npm\\openclaw",
+        "motif": "trouve dans C:\\Users\\amado\\AppData\\Roaming\\npm",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "antigravity",
       "libelle": "Antigravity",
-      "invocation": { "type": "desktop", "cible": "antigravity" },
-      "capacites": ["tool_call", "file_edit", "browser"],
-      "surfaces": ["mcp"],
-      "statut": "declare",
-      "mesure_le": null
+      "invocation": {
+        "type": "desktop",
+        "cible": "antigravity"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "browser"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
+      "statut": "suppose",
+      "mesure_le": null,
+      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "cursor",
       "libelle": "Cursor",
-      "invocation": { "type": "desktop", "cible": "cursor" },
-      "capacites": ["tool_call", "file_edit", "shell"],
-      "surfaces": ["mcp", "acp"],
-      "statut": "declare",
-      "mesure_le": null
+      "invocation": {
+        "type": "desktop",
+        "cible": "cursor"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell"
+      ],
+      "surfaces": [
+        "mcp",
+        "acp"
+      ],
+      "statut": "suppose",
+      "mesure_le": null,
+      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "open-code",
       "libelle": "OpenCode",
-      "invocation": { "type": "cli", "cible": "opencode" },
-      "capacites": ["tool_call", "file_edit", "shell"],
-      "surfaces": ["mcp", "acp"],
-      "statut": "declare",
+      "invocation": {
+        "type": "cli",
+        "cible": "opencode"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell"
+      ],
+      "surfaces": [
+        "mcp",
+        "acp"
+      ],
+      "statut": "suppose",
       "mesure_le": null,
-      "note": "Non installe au 2026-08-21 (omniroute status)."
+      "note": "Non installe au 2026-08-21 (omniroute status). | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "lancable_par": [
+        "ori"
+      ],
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "buzz",
       "libelle": "Buzz",
-      "invocation": { "type": "desktop", "cible": ".buzz" },
-      "capacites": ["subagents", "voice"],
-      "surfaces": ["rest"],
-      "statut": "declare",
-      "mesure_le": null,
-      "note": "Cible declaree pour les agents Life OS."
+      "invocation": {
+        "type": "cli",
+        "cible": "buzz"
+      },
+      "capacites": [
+        "subagents",
+        "voice"
+      ],
+      "surfaces": [
+        "rest"
+      ],
+      "statut": "mesure",
+      "mesure_le": "2026-08-23",
+      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\".buzz\", un dossier de donnees, pas un binaire) a ete remplacee par `buzz`, le vrai executable trouve dans C:/Users/amado/bin/buzz.cmd (deja sur le PATH, repond aux appels). | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\bin\\buzz.cmd",
+        "motif": "trouve dans C:\\Users\\amado\\bin",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "prime-agent",
       "libelle": "Prime Agent",
-      "invocation": { "type": "sdk", "cible": "prime-agent" },
-      "capacites": ["tool_call", "subagents"],
-      "surfaces": ["a2a"],
+      "invocation": {
+        "type": "sdk",
+        "cible": "prime-agent"
+      },
+      "capacites": [
+        "tool_call",
+        "subagents"
+      ],
+      "surfaces": [
+        "a2a"
+      ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche."
+      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche. | sonde 2026-08-23 : type sdk, non sondable en ligne de commande",
+      "lancable_par": [
+        "ori"
+      ],
+      "sonde": {
+        "joignable": null,
+        "chemin": null,
+        "motif": "type sdk, non sondable en ligne de commande",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "j-code",
       "libelle": "J Code",
-      "invocation": { "type": "cli", "cible": "jcode" },
-      "capacites": ["tool_call", "file_edit"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "cli",
+        "cible": "jcode"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "suppose",
-      "mesure_le": null
+      "mesure_le": null,
+      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "d-code",
       "libelle": "D Code",
-      "invocation": { "type": "cli", "cible": "dcode" },
-      "capacites": ["tool_call", "file_edit"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "cli",
+        "cible": "dcode"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "suppose",
-      "mesure_le": null
+      "mesure_le": null,
+      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "paperclip",
       "libelle": "Paperclip",
-      "invocation": { "type": "sdk", "cible": "paperclip" },
-      "capacites": ["tool_call"],
-      "surfaces": ["mcp"],
+      "invocation": {
+        "type": "sdk",
+        "cible": "paperclip"
+      },
+      "capacites": [
+        "tool_call"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "suppose",
-      "mesure_le": null
+      "mesure_le": null,
+      "note": " | sonde 2026-08-23 : type sdk, non sondable en ligne de commande",
+      "sonde": {
+        "joignable": null,
+        "chemin": null,
+        "motif": "type sdk, non sondable en ligne de commande",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     },
     {
       "id": "ori",
-      "libelle": "ORI",
-      "invocation": { "type": "sdk", "cible": "ori" },
-      "capacites": ["tool_call", "voice"],
-      "surfaces": ["a2a", "agui"],
+      "libelle": "Ori Harness (OpenRouter)",
+      "invocation": {
+        "type": "cli",
+        "cible": "ori"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell",
+        "subagents",
+        "streaming",
+        "long_context"
+      ],
+      "surfaces": [
+        "mcp",
+        "rest"
+      ],
+      "statut": "mesure",
+      "mesure_le": "2026-08-23",
+      "routeur": true,
+      "couvre": [
+        "claude-code",
+        "codex",
+        "dsh",
+        "grok",
+        "hermes-agent",
+        "open-code",
+        "pi",
+        "prime-agent"
+      ],
+      "ne_couvre_pas": [
+        "multica",
+        "buzz",
+        "openbot",
+        "paperclip",
+        "ori"
+      ],
+      "deploiement": [
+        "render",
+        "vps",
+        "local"
+      ],
+      "note": "DEFAUT. Lance le CLI d agent deja utilise, sur OpenRouter, avec une seule facture et des garde-fous d organisation. `ori claude`, `ori codex`, `ori dsh`, `ori grok`, `ori hermes`, `ori opencode`, `ori pi`, `ori prime-agent`. Installation : curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash. Ne couvre PAS les harnais de niche : Multica, Buzz, OpenBot restent joignables en direct. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\bin\\ori.cmd",
+        "motif": "trouve dans C:\\Users\\amado\\bin",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
+    },
+    {
+      "id": "dsh",
+      "libelle": "DeepSeek Harness",
+      "invocation": {
+        "type": "cli",
+        "cible": "dsh"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
       "statut": "suppose",
-      "mesure_le": null
+      "mesure_le": null,
+      "lancable_par": [
+        "ori"
+      ],
+      "note": "Bati sur Cordis. Tout y est greffon : adaptateur de modele, registre d outils, boucle d agent. | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
+    },
+    {
+      "id": "grok",
+      "libelle": "Grok Build",
+      "invocation": {
+        "type": "cli",
+        "cible": "grok"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit",
+        "shell"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
+      "statut": "suppose",
+      "mesure_le": null,
+      "lancable_par": [
+        "ori"
+      ],
+      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
+    },
+    {
+      "id": "pi",
+      "libelle": "Pi",
+      "invocation": {
+        "type": "cli",
+        "cible": "pi"
+      },
+      "capacites": [
+        "tool_call",
+        "file_edit"
+      ],
+      "surfaces": [
+        "mcp"
+      ],
+      "statut": "mesure",
+      "mesure_le": "2026-08-23",
+      "lancable_par": [
+        "ori"
+      ],
+      "note": "Cible historique de src/lib/tooling/adapters/harness.ts, qui genere son extension. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "sonde": {
+        "joignable": true,
+        "chemin": "C:\\Users\\amado\\bin\\pi.cmd",
+        "motif": "trouve dans C:\\Users\\amado\\bin",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
+    },
+    {
+      "id": "openbot",
+      "libelle": "Open Bot",
+      "invocation": {
+        "type": "http",
+        "cible": "openbot"
+      },
+      "capacites": [
+        "tool_call",
+        "webhook"
+      ],
+      "surfaces": [
+        "rest"
+      ],
+      "statut": "suppose",
+      "mesure_le": null,
+      "note": "Harnais de niche : hors couverture Ori. | sonde 2026-08-23 : introuvable (URL invalide : openbot)",
+      "sonde": {
+        "joignable": false,
+        "chemin": null,
+        "motif": "URL invalide : openbot",
+        "version": null,
+        "sonde_le": "2026-08-23"
+      }
     }
-  ]
+  ],
+  "$defaut": "ori"
 }

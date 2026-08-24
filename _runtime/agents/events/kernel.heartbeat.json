@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kernel.heartbeat",
+  "title": "Battement de coeur d'un cycle de la boucle --watch",
+  "description": "Emis a chaque cycle de surveillance, portail vide ou non. Preuve que la boucle est vivante et armee : c'est ce qui distingue un domaine DORMANT (arme, en attente) d'un domaine MORT (rien ne tourne). --sante lit le dernier battement pour trancher.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cycle", "depuis_demarrage_ms"],
+  "properties": {
+    "cycle": { "type": "integer", "minimum": 0 },
+    "depuis_demarrage_ms": { "type": "integer", "minimum": 0 },
+    "portail_vide": { "type": "boolean" }
+  }
+}

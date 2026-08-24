@@ -40,3 +40,6 @@ pnpm-lock.yaml
 
 # Brouillons de dispatch Multica — jetables, hors depot.
 .multica-briefs/
+
+# Sortie de banc regeneree a chaque `--autotest` : bruit de diff permanent
+_runtime/.etat/journal.autotest.jsonl
