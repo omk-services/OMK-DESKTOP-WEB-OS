@@ -427,7 +427,13 @@ function autotest() {
   t('complet -> LEGAL_READY', g({ perimetre_ecrit: true, proprietaire_livrable: true }) === 'LEGAL_READY');
 
   console.log('dormance');
-  const n = existsSync(PORTAIL) ? readdirSync(PORTAIL).filter(f => f !== 'README.md').length : 0;
+  // Isole dans %TEMP%, jamais sur le vrai PORTAIL : depuis la signature du
+  // premier Master Agreement (2026-08-24), le portail de production contient
+  // reellement un contrat — un portail vide n'est plus l'etat de PORTAIL,
+  // c'est l'invariant du noyau qu'on teste ici, sur un dossier jetable.
+  const dirVide = join(tmpdir(), `coach-portail-vide-${Date.now()}`, '03_Master_Agreements');
+  mkdirSync(dirVide, { recursive: true });
+  const n = readdirSync(dirVide).filter(f => f !== 'README.md').length;
   t(`portail vide -> aucune activation (${n} contrat)`, n === 0);
 
   console.log('extraction lexicale (negation et incertitude honnete)');
