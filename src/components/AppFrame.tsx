@@ -113,14 +113,6 @@ export function AppFrame({ title, subtitle, icon: Icon, accent, sections, groups
   const appId = windowId ?? title.toLowerCase().replace(/[^a-z0-9-]/g, '-');
   const activeThemeId = useThemeIdFor(appId);
 
-  // Override d'effet canvas choisi dans Settings > Canvas FX. Le picker ecrivait
-  // dans useCanvasFxStore depuis toujours, mais RIEN ne le lisait : le choix
-  // etait persiste puis ignore. C'est le branchement manquant.
-  //
-  // On lit l'override BRUT plutot que le hook useCanvasFxFor du store : celui-ci
-  // retombe sur `getCanvasMapping(undefined).dominant`, c'est-a-dire le dominant
-  // de warm-paper, ce qui imposerait GlyphRain a toutes les apps sans override.
-  // Ici, absence d'override = undefined = resolution par theme inchangee.
   const tokens = useThemeStore((s) => s.tokensFor(appId));
   useEffect(() => {
     if (rootRef.current) applyThemeTokens(rootRef.current, tokens);

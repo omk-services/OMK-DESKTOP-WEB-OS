@@ -5,18 +5,25 @@
  *
  *  Brief FIX-7 : pas d'exception, pas de throw — on *dit* ce qui manque.
  *  Style volontairement sobre (rouge sobre, bordure pointillée) pour
- *  distinguer sans alarmer — l'utilisateur lit, ne panique pas. */
+ *  distinguer sans alarmer — l'utilisateur lit, ne panique pas.
+ *
+ *  Remonté depuis `apps/legal/` et `apps/people/` (doublons identiques sauf
+ *  le chemin du test cité) : aucune des deux apps n'importe de l'autre en
+ *  passant par ici, l'isolement de domaine reste intact. */
 import type { JSX } from 'react';
-import type { CollectionStatus } from './useCmsCollectionStatus';
+
+export type CollectionStatus = 'registered' | 'unknown';
 
 export function UnknownCollectionBanner({
   collectionId,
   status,
   appName,
+  testFilePath,
 }: {
   collectionId: string;
   status: CollectionStatus;
   appName: string;
+  testFilePath: string;
 }): JSX.Element | null {
   if (status === 'registered') return null;
   return (
@@ -34,7 +41,7 @@ export function UnknownCollectionBanner({
         Cette section de l'app <strong>{appName}</strong> est vide parce que la
         collection n'a pas été déclarée dans le registre central
         (<code>src/lib/cms/seed.ts</code>). C'est un défaut à corriger — le test
-        <code> src/apps/legal/seed-collections.test.ts</code> l'attrape à chaque
+        <code> {testFilePath}</code> l'attrape à chaque
         ajout de collection consommée sans déclaration correspondante.
       </div>
     </div>

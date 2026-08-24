@@ -21,7 +21,7 @@ import { Card, StatCard, Badge } from '../_ui/kit';
 import { ProgressRow } from '../_ui/widgets';
 import { AlertTriangle, ShieldAlert, FileWarning, CalendarClock, ShieldOff, FileText } from 'lucide-react';
 import { useCmsCollectionStatus } from './useCmsCollectionStatus';
-import { UnknownCollectionBanner } from './UnknownCollectionBanner';
+import { UnknownCollectionBanner } from '../../components/UnknownCollectionBanner';
 
 const APP_ACCENT = '#0f172a';
 
@@ -143,6 +143,7 @@ export function ComplianceDashboard() {
             collectionId={id}
             status={read.status}
             appName="Legal"
+          testFilePath="src/apps/legal/seed-collections.test.ts"
           />
         ))}
       </div>

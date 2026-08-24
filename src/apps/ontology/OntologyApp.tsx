@@ -35,7 +35,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
-import { ThemedSectionHead } from '../_ui/ontology/ThemedSectionHead';
+import { ThemedSectionHead } from '../../components/ThemedSectionHead';
 import { EntityCard } from '../_ui/ontology/EntityCard';
 import { EntityDetail } from '../_ui/ontology/EntityDetail';
 import { ContractDetail } from '../_ui/ontology/ContractDetail';

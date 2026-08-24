@@ -29,7 +29,7 @@ import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { ApprovalsView } from './ApprovalsView';
 import { useCmsCollectionStatus } from './useCmsCollectionStatus';
-import { UnknownCollectionBanner } from './UnknownCollectionBanner';
+import { UnknownCollectionBanner } from '../../components/UnknownCollectionBanner';
 import { useScenariosStore } from '../../stores/scenarios.store';
 
 registerItemDetail('people', PeopleItemDetail);
@@ -483,7 +483,7 @@ function Content() {
   const contentCount = contentRead.items.length;
   return (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="content" status={contentRead.status} appName="People" />
+      <UnknownCollectionBanner collectionId="content" status={contentRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
       <SectionHead
         title="Content library"
         subtitle="Per-agent docs · versioned by date"
@@ -1085,7 +1085,7 @@ export function PeopleApp() {
   const Team = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="team" status={teamRead.status} appName="People" />
+        <UnknownCollectionBanner collectionId="team" status={teamRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
         <SectionHead title="Team" subtitle="Your human squad (X-Men doctrine)" action={<Badge tone="accent">{teamCount} members</Badge>} />
         <CollectionRepeater collectionId="team" onOpen={teamDrill.open} />
       </div>
@@ -1095,7 +1095,7 @@ export function PeopleApp() {
   const Agents = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="people_agents" status={agentsRead.status} appName="People" />
+        <UnknownCollectionBanner collectionId="people_agents" status={agentsRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
         <SectionHead title="Agents" subtitle="AI workers on the People domain" action={<Badge tone="accent">{agentsCount} configured</Badge>} />
         <CollectionRepeater collectionId="people_agents" onOpen={agentsDrill.open} />
       </div>
@@ -1105,7 +1105,7 @@ export function PeopleApp() {
   const Personas = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="personas" status={personasRead.status} appName="People" />
+        <UnknownCollectionBanner collectionId="personas" status={personasRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
         <SectionHead
           title="Personas"
           subtitle="Premier-class profiles drawn from real sources. The anchor makes the difference — a persona without one is an invention."
@@ -1119,7 +1119,7 @@ export function PeopleApp() {
   const Memoire = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="memory" status={memoryRead.status} appName="People" />
+        <UnknownCollectionBanner collectionId="memory" status={memoryRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
         <SectionHead
           title="Mémoire"
           subtitle="Curated organisational memory. Raw memory is a dump — what matters here is what has been checked."
@@ -1133,7 +1133,7 @@ export function PeopleApp() {
   const Codex = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="codex" status={codexRead.status} appName="People" />
+        <UnknownCollectionBanner collectionId="codex" status={codexRead.status} appName="People" testFilePath="src/apps/people/seed-collections.test.ts" />
         <SectionHead
           title="Codex"
           subtitle="Patterns that have proven themselves. A success repeated once is an anecdote; a method is a success repeated enough."

@@ -27,7 +27,7 @@ import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
 import { Card } from '../_ui/kit';
 import { useCmsCollectionStatus } from './useCmsCollectionStatus';
-import { UnknownCollectionBanner } from './UnknownCollectionBanner';
+import { UnknownCollectionBanner } from '../../components/UnknownCollectionBanner';
 
 interface ProwlerFinding {
   CheckID?: string;
@@ -147,6 +147,7 @@ export function ProwlerImport() {
           collectionId="legal_gaps"
           status={gapsRead.status}
           appName="Legal"
+        testFilePath="src/apps/legal/seed-collections.test.ts"
         />
         <p className="text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
           Déposez un export JSON de Prowler (CLI&nbsp;: <code>prowler aws -M json</code>). Chaque finding

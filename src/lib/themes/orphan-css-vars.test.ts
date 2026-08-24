@@ -233,12 +233,6 @@ const EXCLUSIONS: ReadonlyArray<{ name: string; consumer: string; reason: string
     consumer: 'src/index.css',
     reason: 'constante de mise en page declaree dans :root du meme fichier (ligne 65) et consommee localement (ligne 88)',
   },
-  {
-    name: 'canvasui-cursor',
-    // consomme : src/components/canvasui/v30/Bend/BendVanilla.ts:750 + HexFloat/HexFloatVanilla.ts:1422 — pose a l'execution
-    consumer: 'src/components/canvasui/v30/Bend/BendVanilla.ts + src/components/canvasui/v30/HexFloat/HexFloatVanilla.ts',
-    reason: 'posee a l\'execution par canvas-ui (Bend + HexFloat), jamais par applyThemeTokens ni :root',
-  },
 ];
 
 describe('orphan-css-vars', () => {
@@ -307,10 +301,10 @@ describe('orphan-css-vars', () => {
     const EXPECTED = [
       'ok', 'warn', 'danger',
       'nm-shade', 'nm-glow', 'nm-accent',
-      'topbar-height', 'canvasui-cursor',
+      'topbar-height',
       'sidebar-w', 'theme-font-mono',
     ];
-    expect(EXCLUSIONS.length).toBe(10);
+    expect(EXCLUSIONS.length).toBe(9);
     const actual = EXCLUSIONS.map((e) => e.name).sort();
     expect(actual).toEqual([...EXPECTED].sort());
   });

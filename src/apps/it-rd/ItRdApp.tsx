@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Cpu, FlaskConical, Rocket, Server, Network, ScrollText, Repeat, TrendingDown, LineChart, GitBranch, Plus, CheckCircle2, ChevronRight } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
-import { ThemedSectionHead } from './ThemedSectionHead';
+import { ThemedSectionHead } from '../../components/ThemedSectionHead';
 import { Badge } from '../_ui/kit';
 import { KanbanBoard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';

@@ -30,7 +30,7 @@ import { THEME_META } from '../../lib/themes/tokens';
 import { useCmsStore } from '../../lib/cms/cms.store';
 import { useShellStore } from '../../stores/shell.store';
 import { useCmsCollectionStatus } from './useCmsCollectionStatus';
-import { UnknownCollectionBanner } from './UnknownCollectionBanner';
+import { UnknownCollectionBanner } from '../../components/UnknownCollectionBanner';
 import { FLEET_AGENTS } from './fleet';
 import {
   linkScenarioToAgent,
@@ -918,11 +918,13 @@ export function ApprovalsView() {
         collectionId="approval_decisions"
         status={approvalDecisionsRead.status}
         appName="People"
+      testFilePath="src/apps/people/seed-collections.test.ts"
       />
       <UnknownCollectionBanner
         collectionId="people_agents"
         status={agentsAvailableRead.status}
         appName="People"
+      testFilePath="src/apps/people/seed-collections.test.ts"
       />
       <SectionHead
         title="Approvals"

@@ -71,56 +71,6 @@ describe('appVisibility.store — merge defensif', () => {
   });
 });
 
-type CanvasFx = { appFxOverrides: Record<string, string> };
-const KNOWN_FX = new Set([
-  'Asciify', 'Bend', 'Blaze', 'Bubble', 'Canvas', 'Cloth', 'Clouds',
-  'DecryptReveal', 'Displacement', 'Droplets', 'FlameWrap', 'ForceField',
-  'Frost', 'Glass', 'Glitch', 'GlyphRain', 'Grid', 'HexFloat', 'Laser',
-  'Liquid', 'Magnify', 'ParticleReveal', 'ParticleScroll', 'Peel',
-  'RetroDither', 'Ripple', 'Shatter', 'VHS',
-  'AsciiObject', 'DitheredObject', 'GlassObject', 'ParticleObject', 'LiquidObject',
-  'auto',
-]);
-const mergeCanvasFx = defensiveMerge<CanvasFx>({
-  validators: {
-    appFxOverrides: (v) => {
-      if (typeof v !== 'object' || v === null || Array.isArray(v)) return {};
-      const out: Record<string, string> = {};
-      for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
-        if (typeof val === 'string' && KNOWN_FX.has(val)) out[k] = val;
-      }
-      return out;
-    },
-  },
-});
-
-describe('canvasFx.store — merge defensif', () => {
-  it('cas 3 : effet connu -> respecte', () => {
-    const cur: CanvasFx = { appFxOverrides: {} };
-    const out = mergeCanvasFx({ appFxOverrides: { dashboard: 'GlyphRain' } }, cur);
-    expect(out.appFxOverrides).toEqual({ dashboard: 'GlyphRain' });
-  });
-
-  it('cas 3 : sentinel "auto" -> respecte (cas special)', () => {
-    const cur: CanvasFx = { appFxOverrides: {} };
-    const out = mergeCanvasFx({ appFxOverrides: { dashboard: 'auto' } }, cur);
-    expect(out.appFxOverrides).toEqual({ dashboard: 'auto' });
-  });
-
-  it('cas 2 : effet inconnu -> ignore', () => {
-    const cur: CanvasFx = { appFxOverrides: {} };
-    const out = mergeCanvasFx({ appFxOverrides: { dashboard: 'NotARealEffect' } }, cur);
-    expect(out.appFxOverrides).toEqual({});
-  });
-
-  it('cas 2 : appFxOverrides en string -> defaut', () => {
-    const cur: CanvasFx = { appFxOverrides: { a: 'GlyphRain' } };
-    const out = mergeCanvasFx({ appFxOverrides: 'foo' }, cur);
-    // Le validateur ramene a {}
-    expect(out.appFxOverrides).toEqual({});
-  });
-});
-
 type DesktopLayout = { positions: Record<string, { col: number; row: number }> };
 
 function sanitizeIconSlot(value: unknown): { col: number; row: number } | undefined {

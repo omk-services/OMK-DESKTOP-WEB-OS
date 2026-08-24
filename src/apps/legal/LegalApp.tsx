@@ -13,7 +13,7 @@ import { LegalDetailPage, type LegalDetailItem } from './LegalDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { LegalItemDetail } from './LegalItemDetail';
 import { useCmsCollectionStatus } from './useCmsCollectionStatus';
-import { UnknownCollectionBanner } from './UnknownCollectionBanner';
+import { UnknownCollectionBanner } from '../../components/UnknownCollectionBanner';
 import { seedLegalCms } from './seed';
 import { ComplianceDashboard } from './ComplianceDashboard';
 import { ProwlerImport } from './ProwlerImport';
@@ -184,6 +184,7 @@ export function LegalApp() {
         collectionId="legal_ai_act_checks"
         status={checksRead.status}
         appName="Legal"
+      testFilePath="src/apps/legal/seed-collections.test.ts"
       />
       <Card>
         <div className="divide-y divide-[var(--hairline)]">
@@ -218,7 +219,7 @@ export function LegalApp() {
   const Contracts = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="contracts" status={contractsRead.status} appName="Legal" />
+        <UnknownCollectionBanner collectionId="contracts" status={contractsRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
         <SectionHead title="Contracts" subtitle="Engagement letters & DPAs" />
         <CollectionRepeater collectionId="contracts" onOpen={openContract} />
       </div>
@@ -228,7 +229,7 @@ export function LegalApp() {
   const Policies = () => {
     return (
       <div className="p-7 flex flex-col gap-3">
-        <UnknownCollectionBanner collectionId="policies" status={policiesRead.status} appName="Legal" />
+        <UnknownCollectionBanner collectionId="policies" status={policiesRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
         <SectionHead title="Policies" subtitle="Published to clients" />
         <CollectionRepeater collectionId="policies" onOpen={openPolicy} />
       </div>
@@ -237,7 +238,7 @@ export function LegalApp() {
 
   const Frameworks = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_frameworks" status={legalFrameworksRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_frameworks" status={legalFrameworksRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Cadres" subtitle="Les référentiels que la pratique vise (SOC 2, ISO 27001, RGPD, NIS 2…)." />
       <CollectionRepeater collectionId="legal_frameworks" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -245,7 +246,7 @@ export function LegalApp() {
 
   const Controls = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_controls" status={legalControlsRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_controls" status={legalControlsRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Contrôles" subtitle="Les exigences par cadre — code, owner, statut, preuves rattachées." />
       <CollectionRepeater collectionId="legal_controls" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -253,7 +254,7 @@ export function LegalApp() {
 
   const CompPolicies = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_compliance_policies" status={legalCompliancePoliciesRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_compliance_policies" status={legalCompliancePoliciesRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Politiques internes" subtitle="Politiques versionnées, owner, date de revue." />
       <CollectionRepeater collectionId="legal_compliance_policies" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -261,7 +262,7 @@ export function LegalApp() {
 
   const Evidence = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_evidence" status={legalEvidenceRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_evidence" status={legalEvidenceRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Preuves" subtitle="Documents, captures, rapports qui attestent qu'un contrôle tient." />
       <CollectionRepeater collectionId="legal_evidence" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -269,7 +270,7 @@ export function LegalApp() {
 
   const Risks = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_risks" status={legalRisksRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_risks" status={legalRisksRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Risques" subtitle="Probabilité × impact, mitigation, owner." />
       <CollectionRepeater collectionId="legal_risks" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -277,7 +278,7 @@ export function LegalApp() {
 
   const Vendors = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_vendors" status={legalVendorsRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_vendors" status={legalVendorsRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead title="Fournisseurs" subtitle="Le registre de sous-traitance — exigence RGPD." />
       <CollectionRepeater collectionId="legal_vendors" onOpen={() => { /* dashboard covers drill */ }} />
     </div>
@@ -285,7 +286,7 @@ export function LegalApp() {
 
   const Gaps = () => (
     <div className="p-7 flex flex-col gap-3">
-      <UnknownCollectionBanner collectionId="legal_gaps" status={legalGapsRead.status} appName="Legal" />
+      <UnknownCollectionBanner collectionId="legal_gaps" status={legalGapsRead.status} appName="Legal" testFilePath="src/apps/legal/seed-collections.test.ts" />
       <SectionHead
         title="Écarts"
         subtitle="Ce qui n'est pas conforme. Source : revue manuelle, ou import Prowler (Outils)."
