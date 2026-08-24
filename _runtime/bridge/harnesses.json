@@ -13,7 +13,8 @@
     "mesure_le": "date ISO si statut=mesure, sinon null",
     "routeur": "vrai si ce harnais en lance d autres",
     "couvre": "harnais que ce routeur sait lancer",
-    "deploiement": "cibles ou ce harnais tourne : render, vps, local"
+    "deploiement": "cibles ou ce harnais tourne : render, vps, local",
+    "domaine": "metadonnee pure, non lue par comparerAdaptateurs() ni par le routeur. Affectation d un harnais a un domaine des 8 (ou 00_meta pour Summers/B1). Sert de reference humaine, jamais de switch de code."
   },
   "$capacites_canoniques": [
     "tool_call",
@@ -48,8 +49,9 @@
         "mcp"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "v2.1.143. Slots de modele OPUS/SONNET/HAIKU + ANTHROPIC_CUSTOM_MODEL_OPTION. Les sous-agents heritent de la config de session. | sonde 2026-08-23 : joignable (chemin absolu present)",
+      "mesure_le": "2026-08-24",
+      "note": "v2.1.143. Slots de modele OPUS/SONNET/HAIKU + ANTHROPIC_CUSTOM_MODEL_OPTION. Les sous-agents heritent de la config de session. | sonde 2026-08-24 : joignable (chemin absolu present)",
+      "domaine": "07_RD_IT",
       "lancable_par": [
         "ori"
       ],
@@ -58,7 +60,7 @@
         "chemin": "C:/Users/amado/AppData/Roaming/npm/claude",
         "motif": "chemin absolu present",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -78,8 +80,9 @@
         "mcp"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "codex-cli 0.130.0-alpha.5, detecte par omniroute status. | sonde 2026-08-23 : joignable, codex-cli 0.130.0-alpha.5 (trouve dans C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin)",
+      "mesure_le": "2026-08-24",
+      "note": "codex-cli 0.130.0-alpha.5, detecte par omniroute status. | sonde 2026-08-24 : joignable, codex-cli 0.130.0-alpha.5 (trouve dans C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin)",
+      "domaine": "06_Finance_ROI",
       "lancable_par": [
         "ori"
       ],
@@ -88,7 +91,7 @@
         "chemin": "C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe",
         "motif": "trouve dans C:\\Users\\amado\\AppData\\Local\\OpenAI\\Codex\\bin",
         "version": "codex-cli 0.130.0-alpha.5",
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -108,8 +111,9 @@
         "a2a"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\"Hermes Desktop Native\") etait un libelle, pas un identifiant invocable. `hermes` (venv Python, C:/Users/amado/AppData/Local/hermes/hermes-agent/venv/Scripts/hermes) est deja sur le PATH et repond a --version. Mode Bot cible pour les agents Kernel migres depuis Multica. | sonde 2026-08-23 : joignable, Hermes Agent v0.15.1 (2026.5.29) (trouve dans C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts)",
+      "mesure_le": "2026-08-24",
+      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\"Hermes Desktop Native\") etait un libelle, pas un identifiant invocable. `hermes` (venv Python, C:/Users/amado/AppData/Local/hermes/hermes-agent/venv/Scripts/hermes) est deja sur le PATH et repond a --version. Mode Bot cible pour les agents Kernel migres depuis Multica. QG de reproductibilite inter-domaines (voir 2026-08-24 : Bot Mode = canal A2A pour la collaboration Justice League avant Buzz/Multica/Paperclip/T3 Code). | sonde 2026-08-24 : joignable (trouve dans C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts)",
+      "domaine": "02_Operations",
       "lancable_par": [
         "ori"
       ],
@@ -117,8 +121,8 @@
         "joignable": true,
         "chemin": "C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\hermes.exe",
         "motif": "trouve dans C:\\Users\\amado\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts",
-        "version": "Hermes Agent v0.15.1 (2026.5.29)",
-        "sonde_le": "2026-08-23"
+        "version": null,
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -137,14 +141,14 @@
         "rest"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "57 agents vivants dans le workspace, couches A1/A2/A3 + S. La couche B a ete archivee volontairement. | sonde 2026-08-23 : joignable (hote repond, code 404)",
+      "mesure_le": "2026-08-24",
+      "note": "57 agents vivants dans le workspace, couches A1/A2/A3 + S. La couche B a ete archivee volontairement. | sonde 2026-08-24 : joignable (hote repond, code 404)",
       "sonde": {
         "joignable": true,
         "chemin": "https://api.multica.ai",
         "motif": "hote repond, code 404",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -163,14 +167,14 @@
         "mcp"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "OpenClaw 2026.5.18, detecte par omniroute status. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\AppData\\Roaming\\npm)",
+      "mesure_le": "2026-08-24",
+      "note": "OpenClaw 2026.5.18, detecte par omniroute status. | sonde 2026-08-24 : joignable (trouve dans C:\\Users\\amado\\AppData\\Roaming\\npm)",
       "sonde": {
         "joignable": true,
         "chemin": "C:\\Users\\amado\\AppData\\Roaming\\npm\\openclaw",
         "motif": "trouve dans C:\\Users\\amado\\AppData\\Roaming\\npm",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -190,13 +194,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": " | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -217,13 +221,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": " | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -244,7 +248,8 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": "Non installe au 2026-08-21 (omniroute status). | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": "Non installe au 2026-08-21 (omniroute status). | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "domaine": "04_Sales_Cognition",
       "lancable_par": [
         "ori"
       ],
@@ -253,7 +258,7 @@
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -271,14 +276,14 @@
         "rest"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
-      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\".buzz\", un dossier de donnees, pas un binaire) a ete remplacee par `buzz`, le vrai executable trouve dans C:/Users/amado/bin/buzz.cmd (deja sur le PATH, repond aux appels). | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "mesure_le": "2026-08-24",
+      "note": "Corrige par sondage 2026-08-23 : la cible declaree (\".buzz\", un dossier de donnees, pas un binaire) a ete remplacee par `buzz`, le vrai executable trouve dans C:/Users/amado/bin/buzz.cmd (deja sur le PATH, repond aux appels). | sonde 2026-08-24 : joignable (trouve dans C:\\Users\\amado\\bin)",
       "sonde": {
         "joignable": true,
         "chemin": "C:\\Users\\amado\\bin\\buzz.cmd",
         "motif": "trouve dans C:\\Users\\amado\\bin",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -297,7 +302,8 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche. | sonde 2026-08-23 : type sdk, non sondable en ligne de commande",
+      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche. | sonde 2026-08-24 : type sdk, non sondable en ligne de commande",
+      "domaine": "01_RH_Meta_Gouvernance",
       "lancable_par": [
         "ori"
       ],
@@ -306,7 +312,7 @@
         "chemin": null,
         "motif": "type sdk, non sondable en ligne de commande",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -325,13 +331,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": " | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -350,13 +356,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": " | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -374,13 +380,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": " | sonde 2026-08-23 : type sdk, non sondable en ligne de commande",
+      "note": " | sonde 2026-08-24 : type sdk, non sondable en ligne de commande",
       "sonde": {
         "joignable": null,
         "chemin": null,
         "motif": "type sdk, non sondable en ligne de commande",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -403,7 +409,7 @@
         "rest"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
+      "mesure_le": "2026-08-24",
       "routeur": true,
       "couvre": [
         "claude-code",
@@ -427,13 +433,14 @@
         "vps",
         "local"
       ],
-      "note": "DEFAUT. Lance le CLI d agent deja utilise, sur OpenRouter, avec une seule facture et des garde-fous d organisation. `ori claude`, `ori codex`, `ori dsh`, `ori grok`, `ori hermes`, `ori opencode`, `ori pi`, `ori prime-agent`. Installation : curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash. Ne couvre PAS les harnais de niche : Multica, Buzz, OpenBot restent joignables en direct. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "note": "DEFAUT. Lance le CLI d agent deja utilise, sur OpenRouter, avec une seule facture et des garde-fous d organisation. `ori claude`, `ori codex`, `ori dsh`, `ori grok`, `ori hermes`, `ori opencode`, `ori pi`, `ori prime-agent`. Installation : curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash. Ne couvre PAS les harnais de niche : Multica, Buzz, OpenBot restent joignables en direct. Meta-harnais de Summers (B1) : model gateway OpenRouter qui integre et gere les autres harnais au niveau CEO. | sonde 2026-08-24 : joignable, { (trouve dans C:\\Users\\amado\\bin)",
+      "domaine": "00_Meta_Summers",
       "sonde": {
         "joignable": true,
         "chemin": "C:\\Users\\amado\\bin\\ori.cmd",
         "motif": "trouve dans C:\\Users\\amado\\bin",
-        "version": null,
-        "sonde_le": "2026-08-23"
+        "version": "{",
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -456,13 +463,14 @@
       "lancable_par": [
         "ori"
       ],
-      "note": "Bati sur Cordis. Tout y est greffon : adaptateur de modele, registre d outils, boucle d agent. | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": "Bati sur Cordis. Tout y est greffon : adaptateur de modele, registre d outils, boucle d agent. | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "domaine": "05_People_Acquisition",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -485,13 +493,13 @@
       "lancable_par": [
         "ori"
       ],
-      "note": " | sonde 2026-08-23 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": " | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "absent du PATH et des repertoires connus (68 repertoires sondes)",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -509,17 +517,18 @@
         "mcp"
       ],
       "statut": "mesure",
-      "mesure_le": "2026-08-23",
+      "mesure_le": "2026-08-24",
       "lancable_par": [
         "ori"
       ],
-      "note": "Cible historique de src/lib/tooling/adapters/harness.ts, qui genere son extension. | sonde 2026-08-23 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "note": "Cible historique de src/lib/tooling/adapters/harness.ts, qui genere son extension. | sonde 2026-08-24 : joignable (trouve dans C:\\Users\\amado\\bin)",
+      "domaine": "08_Legal_Compliance",
       "sonde": {
         "joignable": true,
         "chemin": "C:\\Users\\amado\\bin\\pi.cmd",
         "motif": "trouve dans C:\\Users\\amado\\bin",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     },
     {
@@ -538,13 +547,13 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": "Harnais de niche : hors couverture Ori. | sonde 2026-08-23 : introuvable (URL invalide : openbot)",
+      "note": "Harnais de niche : hors couverture Ori. | sonde 2026-08-24 : introuvable (URL invalide : openbot)",
       "sonde": {
         "joignable": false,
         "chemin": null,
         "motif": "URL invalide : openbot",
         "version": null,
-        "sonde_le": "2026-08-23"
+        "sonde_le": "2026-08-24"
       }
     }
   ],

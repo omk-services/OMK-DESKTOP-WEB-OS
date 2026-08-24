@@ -1,0 +1,34 @@
+# Blueprint Render pour Ori — meta-harnais de Summers (B1).
+#
+# Ori est le seul harnais du registre a declarer `deploiement: [render, vps, local]`
+# (_runtime/bridge/harnesses.json). Ce fichier ne deploie qu'Ori — Prime-Agent et
+# Hermes+Bot Mode vont sur VPS bare metal (voir deploy/vps-bare-metal/), pas ici,
+# tant que le multi-tenant n'exige pas de les isoler par instance separee.
+#
+# STATUT DE CE FICHIER : declare, non mesure. Je n'ai pas de sous-commande Ori
+# confirmee pour un mode serveur persistant (`ori serve` est un nom suppose, pas
+# verifie contre une documentation Ori reelle dans cette session). Avant le
+# premier deploy, remplacer `startCommand` par la vraie commande — ne pas la
+# lancer telle quelle en pensant qu'elle est testee.
+
+services:
+  - type: pserv
+    name: ori-gateway
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    rootDir: _runtime/bridge
+    buildCommand: |
+      curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash
+    # A CONFIRMER — voir avertissement en tete de fichier.
+    startCommand: ori serve --port $PORT
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ORI_ROLE
+        value: meta-gateway-summers
+      - key: NODE_ENV
+        value: production
+    autoDeploy: false
+    healthCheckPath: /health

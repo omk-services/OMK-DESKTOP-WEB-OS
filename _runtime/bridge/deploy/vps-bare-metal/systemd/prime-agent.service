@@ -1,0 +1,22 @@
+[Unit]
+Description=Prime-Agent — surveillance 01_RH_Meta_Gouvernance, recursivite sous Ori
+After=network-online.target ori.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=coach-os
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/etc/coach-os/prime-agent.env
+# A CONFIRMER integralement : Prime-Agent n'a jamais ete sonde avec succes
+# dans ce registre (statut "suppose"). La commande de lancement ci-dessous
+# est une supposition a partir du schema des autres harnais SDK, pas une
+# valeur mesuree.
+ExecStart=/home/coach-os/.prime-agent/venv/bin/prime-agent run
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

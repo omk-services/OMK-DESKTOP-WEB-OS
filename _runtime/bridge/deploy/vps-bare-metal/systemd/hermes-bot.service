@@ -1,0 +1,21 @@
+[Unit]
+Description=Hermes Agent — Bot Mode, QG de reproductibilite inter-domaines (02_Operations)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=coach-os
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/etc/coach-os/hermes.env
+# A CONFIRMER : le flag exact du Bot Mode n'est pas verifie dans cette
+# session — voir hermes-agent.nousresearch.com/docs/user-guide/bot-mode.
+# La doc parle de agent.bot_mode_protocol dans config.yaml, pas d'un flag CLI.
+ExecStart=/home/coach-os/.hermes-agent/venv/bin/hermes --config /etc/coach-os/hermes-config.yaml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

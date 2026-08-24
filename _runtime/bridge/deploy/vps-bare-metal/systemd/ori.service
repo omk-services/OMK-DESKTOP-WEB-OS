@@ -1,0 +1,18 @@
+[Unit]
+Description=Ori — meta-harnais de Summers (B1), model gateway OpenRouter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=coach-os
+EnvironmentFile=/etc/coach-os/ori.env
+# A CONFIRMER : sous-commande serveur non verifiee dans cette session.
+ExecStart=/usr/local/bin/ori serve
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
