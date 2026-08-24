@@ -51,7 +51,7 @@ trace:         Aucun document ecrit unique (lettre d'engagement, SOW) —
                qu'assistant executant l'ensemble des operations et des
                relations clients de The OMK Office. Verifiable par
                l'historique des echanges, pas par une signature isolee.
-signé:         <vide — acte du capitaine, jamais depose par un agent>
+signé:         human:Amadou (2026-08-24)
 ```
 
 ## Ce que ce fichier n'est pas
@@ -61,14 +61,12 @@ droit. C'est la formalisation minimale d'un engagement reel, pour que le
 systeme cesse de fonctionner sur une fiction de dormance pendant qu'un
 humain fait manuellement le travail des 8 domaines.
 
-## Ce qui reste a faire, dans l'ordre
+## Signature
 
-1. **Signer** — ligne `signé:`, reservee au capitaine (voir la regle du
-   `README.md` de B2 : *"La dormance est un acte du captain, pas une
-   decision B1"*, le meme principe s'applique ici a l'activation).
-2. Une fois signe, le domaine 8 Legal & Compliance sort de dormance sur
-   une base reelle, et peut commencer a instruire ce dossier au lieu d'un
-   contrat fabrique en `%TEMP%`.
+Signe par le capitaine (`human:Amadou`) le 2026-08-24. Le domaine 8 Legal &
+Compliance sort de dormance sur une base reelle a partir de cette date — il
+peut commencer a instruire ce dossier au lieu d'un contrat fabrique en
+`%TEMP%`.
 
 ## Note sur le saut PaaS an 1 → an 2
 
