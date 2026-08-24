@@ -302,7 +302,7 @@
       ],
       "statut": "suppose",
       "mesure_le": null,
-      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche. | sonde 2026-08-24 : type sdk, non sondable en ligne de commande",
+      "note": "Non mesure. Descripteur pose pour que le bridge le route des qu'il est branche. PISTE NON VERIFIEE (apercu IA Google, 2026-08-24, pas la doc primaire) : Prime Agent aurait un mode `--mode acp` pour parler Agent Client Protocol en JSON-RPC 2.0 sur stdio, ce qui le rendrait enregistrable comme agent ACP custom dans Omnigent. A confirmer contre la doc officielle Prime Intellect avant d'agir dessus — ne pas ajouter `acp` a `surfaces` tant que non mesure. | sonde 2026-08-24 : type sdk, non sondable en ligne de commande",
       "domaine": "01_RH_Meta_Gouvernance",
       "lancable_par": [
         "ori"
@@ -462,7 +462,7 @@
       "lancable_par": [
         "ori"
       ],
-      "note": "Bati sur Cordis. Tout y est greffon : adaptateur de modele, registre d outils, boucle d agent. | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
+      "note": "Bati sur Cordis. Tout y est greffon : adaptateur de modele, registre d outils, boucle d agent. PISTE NON VERIFIEE (apercu IA Google, 2026-08-24, pas la doc primaire) : DSH integrerait ACP via un plugin dedie (nom suppose : dsh-plugin-acp ou deepseek-harness-acp). A confirmer contre la doc Cordis/DSH avant d'agir dessus — ne pas ajouter `acp` a `surfaces` tant que non mesure. | sonde 2026-08-24 : introuvable (absent du PATH et des repertoires connus (68 repertoires sondes))",
       "domaine": "05_People_Acquisition",
       "sonde": {
         "joignable": false,
