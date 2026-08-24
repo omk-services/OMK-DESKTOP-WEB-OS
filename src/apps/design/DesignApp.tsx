@@ -1827,7 +1827,7 @@ export function DesignApp() {
   // « cyber » ici. Aligne.
   const sections: AppSection[] = useMemo(() => [
     { id: 'overview', label: 'Overview', icon: Wand2,
-      render: ({ navigateToSection }) => (
+      render: ({ navigateToSection }: { navigateToSection: (id: string) => void }) => (
         <OverviewPanel
           activeId={activeId === 'overview' ? 'glass' : activeId}
           onPick={(id) => { setActiveId(id); navigateToSection(id); }}

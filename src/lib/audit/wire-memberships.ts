@@ -86,7 +86,10 @@ export function membershipsModuleReady(): boolean {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     if (typeof require !== 'undefined') {
       try {
-        // @ts-expect-error — probing optionnel
+        // Probing optionnel : `require` est maintenant correctement typé
+        // (le module existe sur disque), la directive @ts-expect-error
+        // qu'il fallait ici est devenue inutile — TS la rejette elle-même
+        // (TS2578) si elle ne masque plus d'erreur réelle.
         require('../auth/memberships');
         return true;
       } catch {

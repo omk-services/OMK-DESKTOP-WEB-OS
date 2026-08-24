@@ -17,7 +17,6 @@ import {
   ACCENT, GhostButton, IconChip, KpiTile, LiveDot, Panel, Pill,
   PrimaryButton, SectionTitle, Sparkline,
 } from '../Primitives';
-import { useShellStore } from '../../../../stores/shell.store';
 
 function sparklineForLast12h(): number[] {
   // Sparkline data: cost per hour, then amplified for visual rhythm.

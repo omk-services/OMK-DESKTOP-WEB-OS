@@ -67,7 +67,27 @@ import type { MembershipRole, TenantId } from '../tenant/contract';
 
 export const TENANT_KEY_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 export const ACTOR_KEY_RE = /^[a-zA-Z0-9][a-zA-Z0-9:._-]{0,127}$/;
-export const ROLES = ['owner', 'admin', 'member', 'guest'] as const;
+// CONTRAT (campagne 2026-08-23, FIX_RBAC) — `client` rejoint la whitelist.
+//
+// `rbac.ts` définit `client` depuis le départ (RoleEtendu) mais ce rôle était
+// INATTEIGNABLE par la vraie chaîne d'identité : `isValidRole()` le
+// rejetait avant même d'arriver à la couche permissions. Un modèle de
+// sécurité qui protège un rôle qu'aucun appelant ne peut jamais porter
+// n'est pas un modèle appliqué, c'est une promesse — voir
+// `_audit/AUDIT_RBAC.md` finding #2.
+//
+// Portée réelle de ce changement : `ROLES` (ci-dessous) et `Role` gouvernent
+// la validation de l'INPUT (ce que `resolveIdentity()` accepte). Le champ
+// `ToolContext['role']` (src/lib/tooling/types.ts) reste, lui, figé sur les
+// quatre valeurs historiques — ce fichier est hors du périmètre de ce
+// chantier. Conséquence assumée et documentée dans le rapport
+// `_audit/FIX_RBAC.md` : construire un `ToolContext` avec `role: 'client'`
+// exige un cast local vers `ToolContext['role']` (voir plus bas), parce que
+// le type public n'a pas encore été élargi pour en tenir compte. Le
+// runtime, lui, porte bien la vraie valeur `'client'` — seul le type
+// déclaré du champ ment par omission tant que `types.ts` n'est pas mis à
+// jour dans un chantier séparé.
+export const ROLES = ['owner', 'admin', 'member', 'client', 'guest'] as const;
 export type Role = (typeof ROLES)[number];
 
 export type ResolvedIdentity =
@@ -143,7 +163,14 @@ export function resolveIdentity(inputs: IdentityInputs): ResolvedIdentity {
   if (missing.length === 0) {
     return {
       ok: true,
-      ctx: { tenantId: tenant!, actorId: actor!, role: role! as Role },
+      // `role! as ToolContext['role']` (pas `as Role`) : `Role` porte
+      // désormais `'client'`, un membre que `ToolContext['role']` ne
+      // déclare pas encore (types.ts est hors périmètre ici — voir le
+      // commentaire au-dessus de `ROLES`). Le cast vise directement le
+      // type de champ attendu pour que l'assignation compile sans `any`
+      // ni `@ts-ignore` ; la valeur runtime reste fidèlement 'client'
+      // quand c'est ce que l'appelant a fourni et validé.
+      ctx: { tenantId: tenant!, actorId: actor!, role: role! as ToolContext['role'] },
       source: 'full',
     };
   }
@@ -156,7 +183,8 @@ export function resolveIdentity(inputs: IdentityInputs): ResolvedIdentity {
     const ctx: ToolContext = {
       tenantId: tenant ?? 'demo',
       actorId: actor ?? 'agent:anon',
-      role: (role as Role | null) ?? 'guest',
+      // Même remarque que ci-dessus : cast vers le type de champ réel.
+      role: (role as ToolContext['role'] | null) ?? 'guest',
     };
     return { ok: true, ctx, source: 'demo' };
   }

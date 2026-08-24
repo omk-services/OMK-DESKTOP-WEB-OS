@@ -112,7 +112,9 @@ if (estNavigateur()) {
     // `/auth/v1/health` avec la cle anonyme rend 200 (verifie sur INTERN).
     // La cle est publique par conception : elle est deja embarquee dans le
     // JavaScript livre.
-    void fetch(`${url}/auth/v1/health`, { headers: { apikey: anonKey } })
+    // `supabaseConfigured` (garde ci-dessus) prouve déjà que `anonKey` est
+    // renseignée — même assertion que la construction du client en ligne 84.
+    void fetch(`${url}/auth/v1/health`, { headers: { apikey: anonKey! } })
       .then((r) => {
         if (r.ok) return;
         // eslint-disable-next-line no-console

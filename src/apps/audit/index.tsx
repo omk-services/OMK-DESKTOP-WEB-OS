@@ -7,7 +7,7 @@
 // 7ᵉ section "Journal" qui rend le composant AuditLogViewer, lequel
 // lit la table `audit_events` (RLS: owners uniquement).
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { AuditApp } from './AuditApp';
 import { AuditLogViewer } from '../../components/audit/AuditLogViewer';
 import { useSessionStoreSafe } from './session-hook';

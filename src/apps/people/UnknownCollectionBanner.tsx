@@ -1,6 +1,7 @@
 /** Loud silence — bannière rendue quand une collection n'est pas dans le
  *  registre central. Doublon intentionnel : la copie `people/` reste
  *  autonome, sans import cross-app depuis `legal/`. */
+import type { JSX } from 'react';
 import type { CollectionStatus } from './useCmsCollectionStatus';
 
 export function UnknownCollectionBanner({

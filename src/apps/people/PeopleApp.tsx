@@ -410,6 +410,9 @@ function FleetCard({ agent, onClick, 'data-fleet-card': fleetCardAttr }: { agent
  *  la régression qui a vidé la branche `{detail ? ...}`. Conservé ici à
  *  titre de comparaison (suppression matérielle interdite par la doctrine). */
 function _UnusedLegacyFleetDetail_REMOVED() { return null; }
+// Référencée pour satisfaire `tsc` sans supprimer le code archivé (doctrine
+// ci-dessus : suppression matérielle interdite). Ne change aucun rendu.
+void _UnusedLegacyFleetDetail_REMOVED;
 
 function Fleet({ onAgentClick }: { onAgentClick: (agent: FleetAgent) => void }) {
   const grouped: Array<{ key: 'green-lanterns' | 'xmen'; agents: FleetAgent[] }> = [

@@ -115,7 +115,12 @@ export function CollectionRepeater({
   const [creating, setCreating] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const formRef = useRef<HTMLDivElement>(null);
+  // HTMLFormElement, pas HTMLDivElement : cette ref est attachee au <form> de
+  // creation (plus bas), jamais a un div. Le type mentait sans consequence a
+  // l'execution — `contains()` marche sur n'importe quel Node — mais il rendait
+  // impossible toute verification par le compilateur, et c'est exactement ce
+  // qui a laisse l'erreur vivre jusqu'a ce que le typecheck soit enfin lance.
+  const formRef = useRef<HTMLFormElement>(null);
 
   /* ── Two-step delete confirm state ─────────────────────────────────── */
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);

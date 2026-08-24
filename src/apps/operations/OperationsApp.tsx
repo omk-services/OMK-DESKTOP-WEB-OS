@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, ClipboardList, AlertOctagon, BookText, GraduationCap, FileWarning, ShieldCheck, Workflow, Gauge, GitBranch, Siren, Plus, CheckCircle2, ShieldAlert, GitMerge, Share2 } from 'lucide-react';
+import { BookOpen, ClipboardList, AlertOctagon, Workflow, Gauge, GitBranch, Siren, Plus, CheckCircle2, ShieldAlert, GitMerge, Share2 } from 'lucide-react';
 import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
@@ -10,7 +10,6 @@ import { useWindowPage } from '../../contexts/WindowContext';
 import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
 import { OperationsDetailPage, type OperationsDetailItem } from './OperationsDetailPage';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { OperationsItemDetail } from './OperationsItemDetail';
 import { seedOperationsCms } from './seed';
@@ -19,33 +18,6 @@ seedOperationsCms();
 registerItemDetail('operations', OperationsItemDetail);
 
 const ACCENT = '#4f46e5';
-
-const CATEGORY_ICON: Record<string, React.ReactNode> = {
-  Onboarding: <GraduationCap className="w-5 h-5" />,
-  'Finance ops': <FileWarning className="w-5 h-5" />,
-  Security: <ShieldCheck className="w-5 h-5" />,
-  Support: <BookText className="w-5 h-5" />,
-  Knowledge: <BookOpen className="w-5 h-5" />,
-  Sales: <ClipboardList className="w-5 h-5" />,
-};
-
-const CATEGORY_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'primary' | 'neutral'> = {
-  Onboarding: 'accent',
-  'Finance ops': 'warn',
-  Security: 'danger',
-  Support: 'ok',
-  Knowledge: 'accent',
-  Sales: 'accent',
-};
-
-const CATEGORY_ACCENT: Record<string, string> = {
-  Onboarding: '#3b82f6',
-  'Finance ops': '#f59e0b',
-  Security: '#dc2626',
-  Support: '#16a34a',
-  Knowledge: '#4f46e5',
-  Sales: '#ea580c',
-};
 
 interface ChangeItem extends Record<string, unknown> {
   id: string;
@@ -69,18 +41,6 @@ interface AlertItem extends Record<string, unknown> {
   hypothesis: string;
   trace: string;
 }
-
-const BENCHMARK_TONE: Record<BenchmarkItem['status'], 'ok' | 'warn' | 'danger' | 'neutral'> = {
-  passed: 'ok',
-  failed: 'danger',
-  flaky: 'warn',
-};
-
-const BENCHMARK_ACCENT: Record<BenchmarkItem['status'], string> = {
-  passed: '#16a34a',
-  failed: '#dc2626',
-  flaky: '#f59e0b',
-};
 
 const CHANGE_TONE: Record<ChangeItem['status'], 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
   proposed: 'accent',

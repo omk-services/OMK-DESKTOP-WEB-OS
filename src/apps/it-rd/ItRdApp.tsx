@@ -4,7 +4,7 @@ import { OntologySection } from '../_ui/ontology/OntologySection';
 import { AppFrame, type AppSection } from '../../components/AppFrame';
 import { ThemedSectionHead } from './ThemedSectionHead';
 import { Badge } from '../_ui/kit';
-import { KanbanBoard, KanbanCard } from '../_ui/widgets';
+import { KanbanBoard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { DynamicPageView } from '../../components/cms/DynamicPageView';
@@ -22,14 +22,6 @@ registerItRdSeed();
 
 const ACCENT = '#7c3aed';
 
-const STATE_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral'> = {
-  stable: 'ok',
-  ok: 'ok',
-  drift: 'warn',
-  stopped: 'danger',
-  watch: 'warn',
-};
-
 const DRIFT_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral'> = {
   ok: 'ok',
   watch: 'warn',
@@ -45,11 +37,6 @@ const ACTION_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'accent' | 'neutral
   correction: 'accent',
   rollback: 'danger',
   wake: 'neutral',
-};
-
-const EVAL_TYPE_TONE: Record<string, 'ok' | 'warn' | 'accent' | 'neutral'> = {
-  auto: 'accent',
-  review: 'warn',
 };
 
 export function ItRdApp() {

@@ -171,8 +171,19 @@ describe('whitelists publiées (référence)', () => {
     expect(ACTOR_KEY_RE.test('foo bar')).toBe(false);
     expect(ACTOR_KEY_RE.test('foo/bar')).toBe(false);
   });
-  it('roles : exactement owner, admin, member, guest', () => {
-    expect(ROLES).toEqual(['owner', 'admin', 'member', 'guest']);
+  // Liste de référence, volontairement figée : ce test existe pour qu'un ajout
+  // de rôle soit un GESTE, jamais un effet de bord. Il a fait son travail le
+  // 2026-08-23 en échouant sur l'arrivée de `client`.
+  //
+  // `client` a été ajouté délibérément (campagne FIX_RBAC) : il portait déjà
+  // une matrice de permissions dans `rbac.ts` — workspace en lecture seule,
+  // écriture dans son propre sandbox — mais restait absent de `ROLES`, donc
+  // inatteignable par `resolveIdentity()`. La protection était fictive.
+  //
+  // Son rang s'intercale entre `member` et `guest` : un client a un périmètre
+  // propre, aucune vue sur l'interne.
+  it('roles : exactement owner, admin, member, client, guest', () => {
+    expect(ROLES).toEqual(['owner', 'admin', 'member', 'client', 'guest']);
   });
 });
 

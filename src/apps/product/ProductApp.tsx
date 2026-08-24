@@ -8,10 +8,10 @@
  *  apps that want it, but Product itself uses the standard 2-column layout.
  */
 import { useEffect, useState } from 'react';
-import { Boxes, Map, ListTodo, Tag, ClipboardList, Lightbulb, Package, FileCode, Trophy, Send, Hammer, Sparkles, Plus, ChevronRight } from 'lucide-react';
+import { Boxes, Map, ListTodo, Tag, ClipboardList, FileCode, Trophy, Send, Hammer, Sparkles, Plus, ChevronRight } from 'lucide-react';
 import { AppFrame, SectionHead, type AppSection } from '../../components/AppFrame';
 import { Badge } from '../_ui/kit';
-import { KanbanBoard, KanbanCard } from '../_ui/widgets';
+import { KanbanBoard } from '../_ui/widgets';
 import { useCollectionDrill } from '../../hooks/useCollectionDrill';
 import { CollectionRepeater } from '../../components/cms/CollectionRepeater';
 import { useCmsStore } from '../../lib/cms/cms.store';
@@ -22,7 +22,7 @@ import { ProductDetailPage, type ProductDetailItem } from './ProductDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { ProductItemDetail } from './ProductItemDetail';
 import { CMSCardList } from '../_ui/CMSCardList';
-import { FleetItemCard, FleetItemGrid } from '../_ui/FleetItemCard';
+import { FleetItemGrid } from '../_ui/FleetItemCard';
 import { PRODUCT_CHANNELS, CHANNEL_STATUS_META, CHANNEL_ICON } from './channels';
 import { seedProductCms } from './seed';
 import { useShellStore } from '../../stores/shell.store';
@@ -30,38 +30,11 @@ import { useShellStore } from '../../stores/shell.store';
 registerItemDetail('product', ProductItemDetail);
 seedProductCms();
 
-const STAGE_TONE: Record<string, 'accent' | 'warn' | 'neutral'> = {
-  now: 'accent', next: 'warn', later: 'neutral', backlog: 'neutral',
-};
 const STAGE_ACCENT: Record<string, string> = {
   now: '#9333ea', next: '#c084fc', later: '#a8a29e', backlog: '#737373',
 };
-const STAGE_ICON: Record<string, React.ReactNode> = {
-  now: <Lightbulb className="w-5 h-5" />,
-  next: <Lightbulb className="w-5 h-5" />,
-  later: <Lightbulb className="w-5 h-5" />,
-  backlog: <FileCode className="w-5 h-5" />,
-};
 const SPEC_TONE: Record<string, 'ok' | 'warn' | 'neutral'> = {
   approved: 'ok', review: 'warn', draft: 'neutral',
-};
-
-const TIER_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'neutral' | 'accent'> = {
-  S: 'ok', A: 'accent', B: 'neutral', F: 'danger',
-};
-const TIER_ACCENT: Record<string, string> = {
-  S: '#16a34a', A: '#1d4ed8', B: '#57534e', F: '#dc2626',
-};
-
-const STAGE2_TONE: Record<string, 'ok' | 'warn' | 'accent' | 'primary' | 'neutral'> = {
-  validate: 'accent',
-  presell: 'warn',
-  launch: 'ok',
-  audience: 'primary',
-  productize: 'primary',
-};
-const STAGE2_ACCENT: Record<string, string> = {
-  validate: '#7c3aed', presell: '#f59e0b', launch: '#16a34a', audience: '#0c0a09', productize: '#0c0a09',
 };
 
 const OVERFLOW_TONE: Record<string, 'ok' | 'warn' | 'danger' | 'accent'> = {
@@ -71,13 +44,6 @@ const OVERFLOW_ACCENT: Record<string, string> = {
   ok: '#16a34a', feature: '#7c3aed', client: '#f59e0b', problem: '#dc2626',
 };
 
-const TREND_TONE: Record<string, 'ok' | 'warn' | 'neutral'> = {
-  high: 'ok', med: 'warn', low: 'neutral',
-};
-const TREND_ACCENT: Record<string, string> = {
-  high: '#16a34a', med: '#f59e0b', low: '#a8a29e',
-};
-
 interface ProductItem extends Record<string, unknown> {
   id: string;
   title: string;
@@ -85,42 +51,6 @@ interface ProductItem extends Record<string, unknown> {
   meta: string;
   specStatus?: 'approved' | 'review' | 'draft';
   owner?: string;
-}
-
-interface ReleaseItem extends Record<string, unknown> {
-  id: string;
-  title: string;
-  name?: string;
-  version?: string;
-  shippedAt?: string;
-  shippedRelative?: string;
-  when?: string;
-  status?: 'shipped' | 'draft' | 'archived';
-  changelog?: string;
-  notes?: string;
-}
-
-interface RankingItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  tier: 'S' | 'A' | 'B' | 'F';
-  body: string;
-  score: number;
-  area: string;
-  owner: string;
-  source: string;
-}
-
-interface LaunchItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  stage: 'validate' | 'presell' | 'launch' | 'audience' | 'productize';
-  state: 'done' | 'doing' | 'todo';
-  cohort: string;
-  body: string;
-  eta: string;
-  owner: string;
-  metric: string;
 }
 
 interface MvpItem extends Record<string, unknown> {
@@ -134,18 +64,6 @@ interface MvpItem extends Record<string, unknown> {
   eta: string;
   owner: string;
   successMetric: string;
-}
-
-interface IdeaItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  trend: 'high' | 'med' | 'low';
-  opportunity: 'high' | 'med' | 'low';
-  demand: 'observed' | 'latent' | 'none';
-  economicSize: 'large' | 'mid' | 'small';
-  summary: string;
-  body: string;
-  source: string;
 }
 
 const ACCENT = '#ea580c';

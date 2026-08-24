@@ -250,14 +250,6 @@ function NetworkError({ service, reason, duration }: { service: EmbeddedService;
   );
 }
 
-function ExternalHint({ service }: { service: EmbeddedService }) {
-  return (
-    <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
-      <CheckCircle2 size={10} /> externe
-    </div>
-  );
-}
-
 function ExternalOnly({ service }: { service: EmbeddedService }) {
   return (
     <div className="absolute inset-0 p-5 flex flex-col gap-2 items-start justify-center" data-testid={`embedded-external-${service.id}`}>

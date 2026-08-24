@@ -232,34 +232,42 @@ export function resolveStepTarget(step: TourStep): ResolvedTarget | null {
   return null;
 }
 
+/** Concrete placement a bubble can actually be rendered at. `Anchor` also
+ *  contains `'auto'`, which is a caller *request* ("pick for me"), never a
+ *  resolved placement — `computeBubble` always resolves it to one of these
+ *  four before returning. Narrowing the return type to match keeps the
+ *  compiler honest about what callers can rely on (see `BubbleGeometry` in
+ *  TourOverlay.tsx, which only accepts these four). */
+export type ResolvedPlacement = 'top' | 'bottom' | 'left' | 'right';
+
 /** Compute bubble position from a resolved target. Picks the placement that
  *  keeps the bubble on-screen; honours explicit `anchor` when set. */
 export function computeBubble(target: ResolvedTarget, anchor: Anchor = 'auto'): {
-  top: number; left: number; placement: Anchor; width: number;
+  top: number; left: number; placement: ResolvedPlacement; width: number;
 } {
   const vw = (typeof window !== 'undefined' ? window.innerWidth : 1280);
   const vh = (typeof window !== 'undefined' ? window.innerHeight : 800);
   const { box } = target;
   const explicit = anchor !== 'auto' ? anchor : null;
 
-  const placeTop = (): { top: number; left: number; placement: Anchor; width: number } | null => {
+  const placeTop = (): { top: number; left: number; placement: ResolvedPlacement; width: number } | null => {
     const top = box.top - BUBBLE_GAP - 200;
     const left = Math.max(8, Math.min(box.left + box.width / 2 - BUBBLE_WIDTH / 2, vw - BUBBLE_WIDTH - 8));
     return { top: Math.max(8, top), left, placement: 'top', width: BUBBLE_WIDTH };
   };
-  const placeBottom = (): { top: number; left: number; placement: Anchor; width: number } | null => {
+  const placeBottom = (): { top: number; left: number; placement: ResolvedPlacement; width: number } | null => {
     const top = box.bottom + BUBBLE_GAP;
     const left = Math.max(8, Math.min(box.left + box.width / 2 - BUBBLE_WIDTH / 2, vw - BUBBLE_WIDTH - 8));
     if (top + 200 > vh) return null;
     return { top, left, placement: 'bottom', width: BUBBLE_WIDTH };
   };
-  const placeLeft = (): { top: number; left: number; placement: Anchor; width: number } | null => {
+  const placeLeft = (): { top: number; left: number; placement: ResolvedPlacement; width: number } | null => {
     const top = Math.max(8, Math.min(box.top + box.height / 2 - 100, vh - 220));
     const left = box.left - BUBBLE_GAP - BUBBLE_WIDTH;
     if (left < 8) return null;
     return { top, left, placement: 'left', width: BUBBLE_WIDTH };
   };
-  const placeRight = (): { top: number; left: number; placement: Anchor; width: number } | null => {
+  const placeRight = (): { top: number; left: number; placement: ResolvedPlacement; width: number } | null => {
     const top = Math.max(8, Math.min(box.top + box.height / 2 - 100, vh - 220));
     const left = box.right + BUBBLE_GAP;
     if (left + BUBBLE_WIDTH > vw - 8) return null;

@@ -33,12 +33,33 @@
 import type { ToolContext, ToolDefinition } from './types';
 import { getProposal } from './serverStore';
 import type { MembershipRole } from '../tenant/contract';
+import { peut as rbacPeut, type Affectation, type Perimetre } from './rbac';
 
-export type PermissionCode = 'FORBIDDEN' | 'SELF_APPROVAL' | 'NO_MEMBERSHIP_ROLE';
+export type PermissionCode = 'FORBIDDEN' | 'SELF_APPROVAL' | 'NO_MEMBERSHIP_ROLE' | 'HORS_PERIMETRE';
 
 export type PermissionResult =
   | { ok: true }
   | { ok: false; code: PermissionCode; error: string };
+
+// CONTRAT (campagne 2026-08-23, FIX_RBAC)
+// -----------------------------------------
+// `rbac.ts` décrit un modèle de sécurité par périmètre (workspace/sandbox)
+// mais n'était appelé par aucun adaptateur de production — `assertPermission`
+// ne recevait jamais de `Perimetre` ni d'`Affectation` (cf. `_audit/AUDIT_RBAC.md`
+// finding #1). `ContextePerimetre` est une extension ADDITIVE de `ToolContext` :
+// les deux champs sont optionnels, donc tout `ToolContext` existant reste
+// valide tel quel — aucun appelant actuel n'a besoin d'être touché, et le
+// comportement d'`assertPermission` ne change PAS quand ces champs sont
+// absents. C'est précisément la contrainte dure du brief : le refus/octroi
+// pour un appel sans périmètre reste celui d'avant ce chantier.
+export interface ContextePerimetre extends ToolContext {
+  /** Périmètre (workspace/sandbox) dans lequel l'appel s'exécute. Absent =
+   *  gate rbac non évaluée, comportement historique inchangé. */
+  perimetre?: Perimetre;
+  /** Table d'affectations à consulter pour ce périmètre. Absent = traité
+   *  comme une liste vide (aucune affectation ⇒ `peut()` refuse). */
+  affectations?: readonly Affectation[];
+}
 
 /** Matrice rôle × catégorie. Conservée explicite (pas de tableau
  *  magique) pour qu'une revue de code la valide d'un coup d'œil. */
@@ -95,20 +116,52 @@ export function assertMembershipRolePresent(
   };
 }
 
-/** Applique les deux gardes. Rend `{ ok: true }` ou un refus
+/** Applique les gardes. Rend `{ ok: true }` ou un refus
  *  structuré. Les adaptateurs traduisent en enveloppe `ok:false`. */
 export async function assertPermission(
-  ctx: ToolContext,
+  ctx: ContextePerimetre,
   tool: ToolDefinition,
   args: Record<string, unknown> | undefined,
 ): Promise<PermissionResult> {
-  // Gate 1 — rôle vs catégorie.
+  // Gate 1 — rôle vs catégorie. INCHANGÉ : ce gate ignore les périmètres,
+  // c'est le socle qui existait avant ce chantier. Un appel qui ne fournit
+  // pas de `perimetre` s'arrête entièrement ici (ou passe), exactement
+  // comme avant — c'est la contrainte dure du brief.
   if (!canRole(tool.category, ctx.role)) {
     return {
       ok: false,
       code: 'FORBIDDEN',
       error: `Rôle "${ctx.role}" insuffisant pour la catégorie "${tool.category}" de l'outil "${tool.name}".`,
     };
+  }
+
+  // Gate rbac (périmètre) — évaluée UNIQUEMENT si l'appelant a fourni un
+  // `perimetre`. C'est ce qui manquait pour que le modèle de `rbac.ts` soit
+  // réellement appliqué (cf. `_audit/AUDIT_RBAC.md` finding #1) : avant ce
+  // changement, `peut()` n'était consultée par aucun chemin d'exécution.
+  //
+  // Les deux gates se CUMULENT, elles ne se remplacent jamais : le gate 1
+  // a déjà eu l'occasion de refuser ci-dessus (et si il a refusé, on n'
+  // atteint jamais cette ligne). Ici, on ajoute une seconde condition — si
+  // le périmètre refuse, c'est ce refus, plus strict, qui gagne, même si le
+  // gate 1 avait laissé passer (ex. un `member` autorisé à écrire en
+  // général mais qui tente d'écrire dans un périmètre où son affectation ne
+  // le permet pas, ou pas du tout affecté).
+  if (ctx.perimetre) {
+    const verdict = rbacPeut(
+      ctx.actorId,
+      ctx.tenantId,
+      ctx.perimetre,
+      tool.category,
+      ctx.affectations ?? [],
+    );
+    if (!verdict.autorise) {
+      return {
+        ok: false,
+        code: 'HORS_PERIMETRE',
+        error: `Refus de périmètre (${verdict.motif}) : ${verdict.detail}`,
+      };
+    }
   }
 
   // Gate 2 — anti-auto-approbation pour scenario.approve.
@@ -137,7 +190,7 @@ export async function assertPermission(
 
 /** Variante jetant. Pratique pour in-app et pour les tests. */
 export async function assertPermissionOrThrow(
-  ctx: ToolContext,
+  ctx: ContextePerimetre,
   tool: ToolDefinition,
   args: Record<string, unknown> | undefined,
 ): Promise<void> {

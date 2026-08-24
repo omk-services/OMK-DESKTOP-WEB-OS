@@ -145,9 +145,11 @@ class InMemoryBackend implements MembershipBackend {
 
   static __newId(): string {
     // UUID v4-like (sans dépendance crypto) — suffisant pour les tests.
-    const hex = (n: number) =>
+    // Le paramètre positionnel n'a jamais influencé la valeur générée
+    // (toujours appelé avec 0) : supprimé plutôt que laissé mort.
+    const hex = () =>
       Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0');
-    return `${hex(0)}${hex(0)}-${hex(0)}-4${hex(0).slice(1)}-${hex(0)}-${hex(0)}${hex(0)}${hex(0)}`;
+    return `${hex()}${hex()}-${hex()}-4${hex().slice(1)}-${hex()}-${hex()}${hex()}${hex()}`;
   }
 
   async list(tenantId: TenantId): Promise<MembershipRecord[]> {

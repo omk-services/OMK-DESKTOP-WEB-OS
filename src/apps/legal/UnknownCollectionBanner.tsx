@@ -6,6 +6,7 @@
  *  Brief FIX-7 : pas d'exception, pas de throw — on *dit* ce qui manque.
  *  Style volontairement sobre (rouge sobre, bordure pointillée) pour
  *  distinguer sans alarmer — l'utilisateur lit, ne panique pas. */
+import type { JSX } from 'react';
 import type { CollectionStatus } from './useCmsCollectionStatus';
 
 export function UnknownCollectionBanner({

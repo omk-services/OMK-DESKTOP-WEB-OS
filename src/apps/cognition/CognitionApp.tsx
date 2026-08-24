@@ -310,7 +310,6 @@ const CADENCE_LABEL: Record<CadenceValue, string> = {
 };
 
 function RoutinesSection(): import('react').ReactNode {
-  const collection = useCmsStore((s) => s.collections[ROUTINE_COLLECTION]);
   const items = useCmsStore((s) => s.items[ROUTINE_COLLECTION]) ?? [];
   const addItem = useCmsStore((s) => s.addItem);
   const updateItem = useCmsStore((s) => s.updateItem);

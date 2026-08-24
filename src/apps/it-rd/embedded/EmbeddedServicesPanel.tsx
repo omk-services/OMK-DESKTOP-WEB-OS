@@ -11,7 +11,7 @@
  */
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Server, ExternalLink, RotateCw } from 'lucide-react';
+import { X, Server, ExternalLink } from 'lucide-react';
 import { SERVICES } from './services';
 import { ServiceFrame } from './ServiceFrame';
 

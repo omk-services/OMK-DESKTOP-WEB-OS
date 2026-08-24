@@ -23,8 +23,8 @@
  *  une erreur explicite au lieu de produire un `undefined` qui voyage.
  */
 
-import type { MembershipBackend, MembershipRecord } from './memberships';
-import type { OrgId, TenantId } from '../tenant/contract';
+import type { MembershipBackend } from './memberships';
+import type { MembershipRecord, OrgId, TenantId } from '../tenant/contract';
 import { isValidOrgId, toOrgId } from '../tenant/contract';
 import { supabase, supabaseConfigured } from '../supabase';
 

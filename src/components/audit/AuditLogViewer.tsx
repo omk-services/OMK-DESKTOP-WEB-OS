@@ -34,7 +34,10 @@ export interface AuditLogViewerProps {
   tenantId?: string;
 }
 
-export function AuditLogViewer({ tenantId = 'demo' }: AuditLogViewerProps): JSX.Element {
+// Pas d'annotation de retour : React 19 a retire le namespace global `JSX`,
+// et TypeScript infere le type correctement. Ecrire `React.JSX.Element` ici
+// obligerait a importer React uniquement pour un type.
+export function AuditLogViewer({ tenantId = 'demo' }: AuditLogViewerProps) {
   const [rows, setRows] = useState<AuditEventRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -12,7 +12,6 @@ import { AppDetailOverlay } from '../../components/cms/AppDetailOverlay';
 import { GrowthDetailPage, type GrowthDetailItem } from './GrowthDetailPage';
 import { registerItemDetail } from '../../components/cms/itemDetailRegistry';
 import { GrowthItemDetail } from './GrowthItemDetail';
-import { CMSCardList } from '../_ui/CMSCardList';
 import { FleetItemGrid } from '../_ui/FleetItemCard';
 import { seedGrowthCms } from './seed';
 import { useShellStore } from '../../stores/shell.store';
@@ -99,28 +98,6 @@ function Funnel() {
 
 /* ═══ Acquisition, Strategie, Partenariats, AEO — typed shapes ═══ */
 
-interface StrategieItem extends Record<string, unknown> {
-  id: string;
-  name: string;
-  phase: string;
-  objective: string;
-  duration: string;
-  criteria: string;
-  state: string;
-  focus: string;
-}
-
-interface AeoItem extends Record<string, unknown> {
-  id: string;
-  query: string;
-  intent: string;
-  position: string;
-  cited: string;
-  trackedSince: string;
-  history: string;
-  competitor: string;
-}
-
 /** Verdict → tone (for the badge on acquisition cards). */
 const ACQ_VERDICT_TONE: Record<string, 'ok' | 'warn' | 'danger'> = {
   'invest more': 'ok',
@@ -132,21 +109,6 @@ const ACQ_VERDICT_ACCENT: Record<string, string> = {
   'invest more': '#16a34a',
   'hold steady': '#f59e0b',
   'cut or rework': '#dc2626',
-};
-
-/** Phase → tone (strategie). */
-const STRAT_PHASE_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
-  Launch: 'accent',
-  Scale: 'warn',
-  Optimize: 'ok',
-  Pivot: 'danger',
-};
-
-const STRAT_PHASE_ACCENT: Record<string, string> = {
-  Launch: '#1d4ed8',
-  Scale: '#f59e0b',
-  Optimize: '#16a34a',
-  Pivot: '#dc2626',
 };
 
 /** State → tone (partenariats). */
@@ -162,23 +124,6 @@ const PARTNER_STATE_ACCENT: Record<string, string> = {
   'en discussion': '#f59e0b',
   actif: '#16a34a',
   dormant: '#dc2626',
-};
-
-/** Position → tone (AEO). */
-const AEO_POSITION_TONE: Record<string, 'accent' | 'ok' | 'warn' | 'danger' | 'neutral'> = {
-  'cited · #1': 'ok',
-  'cited · #2': 'accent',
-  'cited · top 3': 'accent',
-  'cited · top 5': 'warn',
-  'not cited': 'danger',
-};
-
-const AEO_POSITION_ACCENT: Record<string, string> = {
-  'cited · #1': '#16a34a',
-  'cited · #2': '#1d4ed8',
-  'cited · top 3': '#1d4ed8',
-  'cited · top 5': '#f59e0b',
-  'not cited': '#dc2626',
 };
 
 export function GrowthApp() {

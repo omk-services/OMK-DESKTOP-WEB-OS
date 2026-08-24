@@ -8,12 +8,13 @@ import { appTools } from './app';
 import { scenarioTools } from './scenario';
 import { saasBuilderTools } from './saasBuilder';
 import { corpusTools } from './corpus';
+import { domainTools } from './domain';
 
 let _registered = false;
 
 export function registerAll(): void {
   if (_registered) return;
-  for (const t of [...collectionTools, ...appTools, ...scenarioTools, ...saasBuilderTools, ...corpusTools]) {
+  for (const t of [...collectionTools, ...appTools, ...scenarioTools, ...saasBuilderTools, ...corpusTools, ...domainTools]) {
     register(t);
   }
   _registered = true;

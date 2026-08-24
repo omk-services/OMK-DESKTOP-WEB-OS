@@ -32,7 +32,6 @@ export function TopBar(): import('react').ReactNode {
   const [time, setTime] = useState(new Date());
   const bootClean = useShellStore((s) => s.bootClean);
   const openApp = useShellStore((s) => s.openApp);
-  const addToast = useShellStore((s) => s.addToast);
   const userHidden = useAppVisibility((s) => s.hidden);
   const session = useSession((s) => s.session);
   const sessionLoading = useSession((s) => s.loading);

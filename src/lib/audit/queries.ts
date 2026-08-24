@@ -107,15 +107,16 @@ export async function listAuditEvents(
         };
       };
     };
-    // Construction impérative pour rester portable sur les types du SDK.
-    let q = client.from('audit_events').select('*');
-    q = q.eq('org_id', orgId) as typeof q;
-    q = q.order('created_at', { ascending: false }) as typeof q;
-    const finalQ = (q as unknown as { limit: (n: number) => Promise<{
-      data: Array<Record<string, unknown>> | null;
-      error: { message: string } | null;
-    }> }).limit(limit);
-    const { data, error } = await finalQ;
+    // Chaîne fluide plutôt que réaffectation sur `let q` : chaque étape a un
+    // type de retour distinct (`select` → `eq` → `order` → `limit`), et
+    // `typeof q` figeait le type au premier maillon — d'où les faux
+    // positifs `TS2352`/`TS2339` sur les maillons suivants.
+    const { data, error } = await client
+      .from('audit_events')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
     if (error || !data) return [];
     return data.map((row) => ({
       id: String(row.id ?? ''),

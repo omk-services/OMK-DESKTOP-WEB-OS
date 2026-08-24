@@ -34,7 +34,7 @@ import { useShellStore } from '../stores/shell.store';
 import { useSession } from '../stores/session.store';
 import { useMembershipsStore, selectMembersFor } from '../stores/memberships.store';
 import { InviteMember } from './InviteMember';
-import type { TenantId, MembershipRole } from '../lib/tenant/contract';
+import type { TenantId } from '../lib/tenant/contract';
 import { createBranch } from '../lib/workspace/branches';
 import { peutCreerBranche } from '../lib/workspace/permissions';
 import type { MembershipRole as WorkspaceMembershipRole } from '../lib/workspace/types';
