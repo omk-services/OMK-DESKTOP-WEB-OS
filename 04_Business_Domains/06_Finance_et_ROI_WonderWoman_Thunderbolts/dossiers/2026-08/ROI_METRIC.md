@@ -62,40 +62,82 @@ $1 500/an, et le RARC total serait $19 020/an, pas $2 520/an. **Cet
 écart doit être tranché par le capitaine avant que ce chiffre serve à
 une décision.**
 
-## Le seuil de viabilité — nommé comme non résolu, pas inventé
+## Le seuil de viabilité — fixé par le capitaine le 2026-08-26
 
-Aucun seuil de viabilité chiffré n'existe dans `00_Summers_CEO/ROCKS.md`
-ni ailleurs dans le corpus vérifié. Ce sprint ne peut pas en fabriquer
-un sans device — un seuil inventé serait le même défaut qu'un coût
-inventé en S1.
+Aucun seuil de viabilité chiffré n'existait dans `00_Summers_CEO/ROCKS.md`
+ni ailleurs dans le corpus vérifié au moment de la publication initiale
+de ce document. Le capitaine l'a fixé directement, en dehors du calcul
+cout/temps envisagé ci-dessus — la voie retenue n'a pas eu besoin d'un
+taux horaire de remplacement.
 
-**Ce qui manque précisément pour en fixer un** : un coût de référence
-non nul. Avec le coût d'infrastructure confirmé à 0 €/mois, la seule
-base possible pour un seuil de viabilité réel est le **coût du temps
-de l'architecte**, explicitement hors périmètre depuis S1 par choix
-du capitaine, pas par oubli.
+**Seuil : 100 nouveaux clients par mois, ni plus ni moins.** Au-delà,
+liste d'attente. En deçà, l'offre reste ouverte mais n'est pas jugée
+viable au sens de ce document.
 
-**Proposition non ratifiée, à valider ou rejeter par le capitaine** :
-fixer le seuil au moment où le RARC couvrirait un taux horaire de
-remplacement modeste (à définir) sur le temps effectivement engagé.
-Tant que ce taux n'est pas fixé, tout seuil affiché ici serait une
-invention déguisée en mesure — donc aucun n'est affiché.
+### Le modèle par cohorte de tarification
 
-## Ce que ce sprint établit malgré tout
+La décision résout au passage l'écart nommé dans `PRICING.md` (« le
+produit réel n'est pas à un seul prix ») : plancher, cible et haut ne
+sont **pas trois prix simultanés du même tier**, mais un **prix de
+cohorte selon le mois d'inscription** — un modèle de tarification
+« vintage », standard en SaaS à forte croissance, qui récompense les
+premiers inscrits :
 
-Il n'a pas produit de seuil, mais il a produit une **métrique
-mesurable et une méthode de calcul reproductible** (RARC), avec sa
-source exacte et sa fréquence de revue. C'est un résultat vérifiable
-au sens de `SPRINTS.md` : *« un résultat est vérifiable s'il porte un
-nombre, un chemin de fichier, ou une commande »* — le RARC en porte
-un ($2 520/an, avec son incertitude nommée), la méthode en porte un
+| Cohorte (mois d'inscription) | Prix appliqué | Persiste au renouvellement ? |
+|---|---|---|
+| Août, Septembre 2026 | **Plancher $300/an** (prix de lancement) | **Oui** — conservé à vie pour ces cohortes, pas seulement en année 1 |
+| Octobre, Novembre, Décembre 2026 | **Cible $420/an** | Oui, au même tarif que la cohorte |
+| Liste d'attente / pré-inscriptions | **Haut $504/an** | Oui, au même tarif que la cohorte |
+
+### Exemple travaillé — la cohorte d'août
+
+```
+100 clients x $300/an (plancher, prix de lancement)     = $30 000
+- distribution d'affiliation (100 x $50/filleul JaaS)   =  $5 000
+= bénéfice net de la cohorte d'août                      = $25 000
+```
+
+Le taux d'affiliation de $50/filleul n'est pas inventé pour ce calcul —
+il correspond exactement au barème JaaS déjà présent dans le corpus
+(domaine 01, palier de remboursement à 6 filleuls = $300). Les deux
+chiffres du capitaine ($30 000 et $5 000) sont donc **cohérents avec
+une doctrine antérieure**, pas une invention isolée.
+
+### Une ambiguïté à noter, pas à trancher ici
+
+Le JaaS étant un plan **annuel** ($300/an), les $30 000 de la cohorte
+d'août représentent la valeur contractuelle annuelle ajoutée par cette
+cohorte (encaissée à l'inscription), pas un revenu qui se reproduit
+chaque mois à partir des mêmes 100 clients. Si un nouveau lot de 100
+clients s'inscrit chaque mois au même rythme, le RARC cumulé croît
+d'environ $25 000 de bénéfice net par mois de cohorte ajoutée — mais
+ce n'est vérifiable qu'une fois plusieurs mois de cohortes réellement
+inscrites, pas encore le cas au 2026-08-26 (RARC réel mesuré plus haut
+= $2 520/an, sur 1 client signé, pas 100).
+
+## Ce que ce sprint établit
+
+Une **métrique mesurable et une méthode de calcul reproductible**
+(RARC), avec sa source exacte et sa fréquence de revue, **et un seuil
+de viabilité fixé par le capitaine** (100 clients/mois). C'est un
+résultat vérifiable au sens de `SPRINTS.md` : *« un résultat est
+vérifiable s'il porte un nombre, un chemin de fichier, ou une
+commande »* — le RARC en porte un ($2 520/an, avec son incertitude
+nommée), le seuil en porte un (100/mois, $25 000 net par cohorte
+pleine), la méthode en porte un
 (le champ `signé:` dans un chemin de fichier précis).
 
 ## Ce qui reste hors périmètre
 
-- Le seuil de viabilité chiffré, faute d'un coût de temps fixé —
-  voir ci-dessus.
 - La résolution de l'écart PaaS année 1 / année 2 ($1 500/an vs
   $18 000/an) — à trancher par le capitaine avant tout usage du RARC
   dans une décision de prix ou d'investissement.
-- L'affiliation, toujours non enregistrée (`002_ARCHITECTE_NIVEAU_ZERO.md`).
+- La structure d'affiliation **coach-à-CEO** pour la phase White-Label
+  (`002_ARCHITECTE_NIVEAU_ZERO.md`) reste non enregistrée — sans lien
+  avec le taux $50/filleul JaaS utilisé ci-dessus, qui est un programme
+  de parrainage candidat déjà documenté, pas la structure d'affiliation
+  du pathway N0.
+- Le RARC réel mesuré ($2 520/an) reste très inférieur au seuil de
+  viabilité tel qu'illustré par la cohorte d'août ($25 000/mois net,
+  à 100 clients) — l'écart entre 1 client signé et 100 clients/mois
+  n'est pas comblé par ce document, seulement mesuré.

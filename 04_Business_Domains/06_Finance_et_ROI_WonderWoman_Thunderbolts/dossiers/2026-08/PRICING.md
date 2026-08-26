@@ -43,13 +43,25 @@ que The OMK Office occupe aujourd'hui (voir
 | **Prix cible** | **$420/an** (plancher × 1,4, coefficient S2 appliqué à la borne basse ratifiée) | Reste **sous** la borne haute ratifiée du Tier 1 ($500/an) — cohérent, pas un dépassement de doctrine |
 | **Prix haut** | **$504/an** (cible × 1,2) | Légèrement au-dessus de la borne haute ratifiée ($500/an) — écart de 0,8 %, dans la marge d'arrondi, pas un signal à traiter |
 
-**Ce que cet ancrage ne résout pas** : le produit réel de The OMK Office
-n'est pas à un seul prix mais à trois tiers distincts et déjà signés —
-JaaS $300/an, BaaS $720/an + 25 % de bénéfices, PaaS $1 500/mois
-(année 2). Les trois lignes plancher/cible/haut de ce document
-s'appliquent **au Tier 1 (JaaS) seulement** ; BaaS et PaaS sont des
-tiers de produit différents, pas des points sur la même courbe
-plancher→cible→haut, et ce document ne les recalcule pas.
+**Résolu par le capitaine le 2026-08-26** (voir `ROI_METRIC.md`,
+« Le seuil de viabilité ») : plancher, cible et haut ne sont **pas
+trois prix simultanés du même produit** — ils sont un **prix de
+cohorte selon le mois d'inscription**, un modèle « vintage » qui
+récompense les premiers inscrits :
+
+| Cohorte | Prix | Persiste au renouvellement |
+|---|---|---|
+| Août + Septembre 2026 | Plancher $300/an | Oui, à vie pour ces cohortes |
+| Octobre à Décembre 2026 | Cible $420/an | Oui |
+| Liste d'attente / pré-inscriptions | Haut $504/an | Oui |
+
+Ce que ce document appelait encore « les trois tiers distincts JaaS /
+BaaS / PaaS » reste vrai en parallèle — les trois lignes plancher/
+cible/haut ci-dessus s'appliquent au tier JaaS uniquement ; BaaS
+($720/an + 25 %) et PaaS ($1 500/mois année 2) restent des tiers de
+produit séparés, non recalculés ici. Les deux mécanismes coexistent :
+un client choisit d'abord un tier de produit (JaaS/BaaS/PaaS), puis,
+pour le tier JaaS, son prix dépend de sa cohorte d'inscription.
 
 ## Ce que le coût nul révèle sur la marge
 
