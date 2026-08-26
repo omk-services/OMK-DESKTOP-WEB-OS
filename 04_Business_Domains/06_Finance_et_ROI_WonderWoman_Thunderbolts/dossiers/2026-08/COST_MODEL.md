@@ -43,14 +43,25 @@ première version de ce document.
 | Render (déploiement candidat pour Omnigent, non actif sur Coach OS) | **0 €** — tier gratuit | Fixe tant que free tier | Déclaration directe de l'utilisateur, 2026-08-26 : « Render… Gratuit ». Aucun service Render effectivement déployé pour Coach OS à ce jour (voir `_runtime/bridge/deploy/render.yaml`, vide) | — rien à revoir tant que non provisionné |
 | Octopus Deploy (`coachos.octopus.app`, espace `Default`) | **0 €** — tier gratuit | Fixe tant que free tier | Capture d'écran 2026-08-26 : espace `Default`, aucun projet créé, aucune mention de facturation visible | 2026-09-26 — revoir si des projets/environnements de déploiement y sont créés |
 | AgentRouter (`agentrouter.org`, compte `github_428047`) | **0 € consommé**, $175,00 de crédit Anthropic non utilisé | Variable (pay-as-you-go), actuellement à $0 | Capture d'écran dashboard 2026-08-26 : Current balance $175.00, Consumption $0.00, Number of Requests 0 | 2026-09-26 — métrique de retour : requêtes exécutées / crédit consommé, actuellement 0/0 |
-| OpenRouter (`openrouter.ai`, canal `ori` pour Claude Code / harnais routés) | **non confirmé** — **distinct d'AgentRouter, ne pas confondre** | Variable (pay-as-you-go) | Le mode serveur d'Ori exige un compte OpenRouter propre (`ori login`, OAuth). Aucun relevé de solde OpenRouter mesuré — le $175 ci-dessus est un crédit AgentRouter, une plateforme différente | à fixer dès accès au dashboard openrouter.ai (pas agentrouter.org) |
+| OpenRouter (`openrouter.ai`, compte `amdkn777@gmail.com`) — **usage attribuable à Coach OS uniquement** | **$0,035/mois** (clé `OAuth: ori`, dernier usage 2026-08-24) | Variable (pay-as-you-go) | Mesuré en direct le 2026-08-26 : dashboard `openrouter.ai/workspaces/default/keys`, colonne « Key usage » de la clé nommée `OAuth: ori` — la seule des 13 clés du compte réellement liée au harnais Ori de Coach OS. Compte à $28,28 de solde disponible au total (pay-as-you-go), $63 achetés cumulés (10 $ le 2026-01-31, 26 $ le 2026-03-09, 27 $ le 2026-04-06) | 2026-09-26 — métrique de retour : usage clé `ori` / plafond mensuel affiché $5 |
+| ~~OpenRouter — solde de compte global~~ | ~~$28,28 disponibles~~ **hors périmètre** | — | Le solde et les 12 autres clés (`9Router`, `Claude Code`, `Window Hermes Workspace`, `Agent Space 0`, `CC Cache test`, `Free Router CC`, etc.) servent d'autres outils personnels que Coach OS — mélanger ce total au coût de l'offre gonflerait artificiellement un poste qui n'appartient pas à ce périmètre | — |
 | GitHub (`omk-services/OMK-DESKTOP-WEB-OS`) | **0 €** (hypothèse) | Fixe si confirmé | Dépôt et Actions CI utilisés dans les limites gratuites observées (jobs < 2 min, dépôt privé sous organisation) — aucune facture GitHub vue | à confirmer par le propriétaire de l'organisation |
 | Nom de domaine / DNS dédié | **aucun** | — | Aucun domaine personnalisé trouvé câblé (URLs `*.vercel.app` uniquement) | — |
 
-**Total mensuel confirmé : 0 €/mois.** Six postes sur huit sont
-maintenant confirmés à zéro, un poste actif est clos (MiniMax), et un
-seul reste réellement non confirmé : **OpenRouter (openrouter.ai)**,
-distinct du crédit AgentRouter déjà mesuré à $0 consommé.
+**Total mensuel confirmé : $0,035/mois** (≈ 0,03 €). **Tous les postes
+sont maintenant mesurés — plus aucun « non confirmé ».** MiniMax est
+clos, six postes sont à zéro, et le seul poste variable (OpenRouter,
+attribuable spécifiquement à la clé `ori`) pèse trois centimes et demi
+par mois à ce jour.
+
+⚠ **Alerte de sécurité au passage de cette mesure** : la capture
+d'écran fournie pour vérifier ce poste a exposé en clair la valeur
+complète d'une clé API OpenRouter (nommée « Free Router CC »). Cette
+valeur n'a été copiée nulle part dans ce document ni dans aucun autre
+fichier du dépôt — seul son existence est notée ici. **Cette clé doit
+être révoquée** (`openrouter.ai/workspaces/default/keys`) puisqu'elle a
+circulé en clair dans une capture, indépendamment de son usage réel
+($0,000 à ce jour).
 
 **Ce que ce zéro veut dire, et ce qu'il ne veut pas dire.** L'infrastructure
 technique actuelle de Coach OS coûte $0/mois parce qu'elle tourne
@@ -71,11 +82,15 @@ encore de date ni de seuil chiffré dans ce document.
 
 ## Ce que le sprint 2 doit résoudre en premier
 
+**Tous les postes sont désormais mesurés — le blocage « accès aux
+dashboards » est levé.** Il en reste un autre, structurel celui-là.
+
 `PRICING.md` (S2) calcule le prix plancher comme coût complet / N
-clients. **Avec un coût complet confirmé à 0 €, cette formule dégénère** :
-prix plancher = 0, quel que soit N. Ce n'est pas une erreur de calcul,
-c'est le calcul honnête d'un coût réellement nul sur l'infrastructure
-technique — mais un prix plancher à 0 € n'a aucun sens commercial.
+clients. **Avec un coût complet confirmé à $0,035/mois, cette formule
+dégénère** : prix plancher ≈ 0, quel que soit N. Ce n'est pas une
+erreur de calcul, c'est le calcul honnête d'un coût réellement quasi
+nul sur l'infrastructure technique — mais un prix plancher à 0 € n'a
+aucun sens commercial.
 
 Le sprint 2 doit donc faire l'un des deux, explicitement, pas en
 silence :
@@ -87,6 +102,4 @@ silence :
    perçue, ou un ancrage sur `ADR-AAAS-PRICING-001` (tiers déjà
    ratifiés, $300-500/an pour le tier 1) plutôt que sur un coût nul.
 
-Le seul poste réellement non résolu reste **OpenRouter (openrouter.ai)** —
-à mesurer avant de clore ce sprint, distinct du crédit AgentRouter déjà
-confirmé à $0 consommé.
+**S1 est clos.** Zéro poste « non confirmé » restant.
