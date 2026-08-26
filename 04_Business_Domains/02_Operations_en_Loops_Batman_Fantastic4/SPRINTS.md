@@ -19,7 +19,7 @@ Il n'est ni résumé ni réécrit. Un sprint qui ne se rattache pas à ce rock n
 
 | S | Semaine | Résultat vérifiable le vendredi | Techniciens engagés | Tenu ? | Motif si non |
 |---|---|---|---|---|---|
-| 1 | 03–07 août | `00_Parcours_Livraison/01_Inventaire_Etapes.md` existe, contient ≥ 5 étapes, chacune avec **nom**, **intrant** (au moins un artefact ou événement déclencheur) et **extrant** (au moins un artefact produit ou événement de sortie). Le chemin est listé dans le rapport. | MrFantastic | | |
+| 1 | 03–07 août | `00_Parcours_Livraison/01_Inventaire_Etapes.md` existe, contient ≥ 5 étapes, chacune avec **nom**, **intrant** (au moins un artefact ou événement déclencheur) et **extrant** (au moins un artefact produit ou événement de sortie). Le chemin est listé dans le rapport. | MrFantastic | **Oui**, 2026-08-26 | Hors fenêtre calendaire, comme Finance. Le pipeline JaaS (ingestion candidat, dispatch) n'existe pas dans le code — vérifié par recherche directe, zéro trace. Les 5 étapes inventoriées décrivent le parcours réellement exécuté aujourd'hui pour livrer l'offre du Master Agreement 001 (mesure → décision → conception → vérification → publication), chacune avec un commit réel comme preuve, pas un exemple hypothétique. |
 | 2 | 10–14 août | `00_Parcours_Livraison/02_Boucles_avec_Conditions.md` existe, contient une ligne par étape du sprint 1, chacune portant **condition d'entrée** (vérifiable par oui/non), **condition d'arrêt** (déclencheur terminal explicite) et **responsable de boucle** (rôle, pas un nom de personne). La commande `grep -c "condition d'arrêt" 00_Parcours_Livraison/02_Boucles_avec_Conditions.md` retourne ≥ 5. | MrFantastic, InvisibleWoman | | |
 | 3 | 17–21 août | `00_Parcours_Livraison/03_Run_Canari.md` existe, consigne **un run** du parcours sur un cas factice déclaré, avec timestamp de début et de fin (format ISO 8601), nombre d'étapes franchies (chiffre), nombre d'incidents captés (chiffre), et statut `exécuté une fois : oui/non` par étape. Aucun statut ne peut être `oui` si la condition d'arrêt n'a pas été atteinte. | HumanTorch, TheThing, InvisibleWoman | | |
 | 4 | 24–28 août | `00_Parcours_Livraison/04_Preuve_Sortie.md` existe, agrège les preuves par étape (références aux fichiers S1-S3) et conclut par une **preuve de sortie globale** du parcours : commande ou chemin qui démontre, sans dépendre d'un nom de personne, que le rock du mois est atteint (statut `rock atteint : oui/non`). | InvisibleWoman, TheThing | | |
@@ -51,7 +51,7 @@ Un fait par ligne. Pas d'arbitrage — l'arbitrage est à Summers.
 
 | Date | Fait | Motif |
 |---|---|---|
-|  |  |  |
+| 2026-08-26 | Le pipeline produit JaaS (ingestion de profil candidat, multi-dispatch vers recruteurs, moteur d'affiliation) décrit dans la vision Gemini du capitaine n'existe dans AUCUN code du dépôt — vérifié par recherche directe dans `src/apps/people/` et `src/lib/cms/`. Ce n'est pas un défaut d'Operations : la spécification produit relève du domaine 3, le code relève du domaine 7. Signalé ici parce que S1 l'a découvert en cherchant le vrai parcours de livraison. | Si le capitaine veut lancer JaaS comme produit réel, c'est un chantier de code neuf, pas une activation de fonctionnalité existante. |
 
 **Veto Batman (rappel, cycle suivant) :** toute procédure engagée par le rock qui n'a pas
 de condition d'arrêt écrite sera consignée ici. Au 02 août 2026, le rock hérité contient
