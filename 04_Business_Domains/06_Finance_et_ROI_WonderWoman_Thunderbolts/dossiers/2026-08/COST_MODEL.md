@@ -43,25 +43,30 @@ première version de ce document.
 | Render (déploiement candidat pour Omnigent, non actif sur Coach OS) | **0 €** — tier gratuit | Fixe tant que free tier | Déclaration directe de l'utilisateur, 2026-08-26 : « Render… Gratuit ». Aucun service Render effectivement déployé pour Coach OS à ce jour (voir `_runtime/bridge/deploy/render.yaml`, vide) | — rien à revoir tant que non provisionné |
 | Octopus Deploy (`coachos.octopus.app`, espace `Default`) | **0 €** — tier gratuit | Fixe tant que free tier | Capture d'écran 2026-08-26 : espace `Default`, aucun projet créé, aucune mention de facturation visible | 2026-09-26 — revoir si des projets/environnements de déploiement y sont créés |
 | AgentRouter (`agentrouter.org`, compte `github_428047`) | **0 € consommé**, $175,00 de crédit Anthropic non utilisé | Variable (pay-as-you-go), actuellement à $0 | Capture d'écran dashboard 2026-08-26 : Current balance $175.00, Consumption $0.00, Number of Requests 0 | 2026-09-26 — métrique de retour : requêtes exécutées / crédit consommé, actuellement 0/0 |
-| OpenRouter (`openrouter.ai`, compte `amdkn777@gmail.com`) — **usage attribuable à Coach OS uniquement** | **$0,035/mois** (clé `OAuth: ori`, dernier usage 2026-08-24) | Variable (pay-as-you-go) | Mesuré en direct le 2026-08-26 : dashboard `openrouter.ai/workspaces/default/keys`, colonne « Key usage » de la clé nommée `OAuth: ori` — la seule des 13 clés du compte réellement liée au harnais Ori de Coach OS. Compte à $28,28 de solde disponible au total (pay-as-you-go), $63 achetés cumulés (10 $ le 2026-01-31, 26 $ le 2026-03-09, 27 $ le 2026-04-06) | 2026-09-26 — métrique de retour : usage clé `ori` / plafond mensuel affiché $5 |
+| OpenRouter (`openrouter.ai`, compte `amdkn777@gmail.com`) — **usage attribuable à Coach OS uniquement** | **0 € — aucune clé active** | Variable (pay-as-you-go) | Mesuré le 2026-08-25 : $0,035 sur la clé `OAuth: ori`, seule des 13 clés du compte liée à Coach OS. **Toutes les clés purgées par l'utilisateur le 2026-08-26** (« No API keys yet » confirmé par capture), suite à l'alerte de sécurité ci-dessous — pas seulement la clé exposée, l'ensemble du trousseau. Le coût réel est donc redescendu à zéro, mais **Ori n'a plus d'identifiant OpenRouter valide** : `ori login` devra régénérer une clé avant tout usage réel | dès la prochaine invocation d'Ori — le coût ne pourra être remesuré qu'après recréation d'une clé |
 | ~~OpenRouter — solde de compte global~~ | ~~$28,28 disponibles~~ **hors périmètre** | — | Le solde et les 12 autres clés (`9Router`, `Claude Code`, `Window Hermes Workspace`, `Agent Space 0`, `CC Cache test`, `Free Router CC`, etc.) servent d'autres outils personnels que Coach OS — mélanger ce total au coût de l'offre gonflerait artificiellement un poste qui n'appartient pas à ce périmètre | — |
 | GitHub (`omk-services/OMK-DESKTOP-WEB-OS`) | **0 €** (hypothèse) | Fixe si confirmé | Dépôt et Actions CI utilisés dans les limites gratuites observées (jobs < 2 min, dépôt privé sous organisation) — aucune facture GitHub vue | à confirmer par le propriétaire de l'organisation |
 | Nom de domaine / DNS dédié | **aucun** | — | Aucun domaine personnalisé trouvé câblé (URLs `*.vercel.app` uniquement) | — |
 
-**Total mensuel confirmé : $0,035/mois** (≈ 0,03 €). **Tous les postes
-sont maintenant mesurés — plus aucun « non confirmé ».** MiniMax est
-clos, six postes sont à zéro, et le seul poste variable (OpenRouter,
-attribuable spécifiquement à la clé `ori`) pèse trois centimes et demi
-par mois à ce jour.
+**Total mensuel confirmé : 0 €/mois.** Huit postes sur huit sont à
+zéro — MiniMax clos, six déjà gratuits, et OpenRouter revenu à zéro
+non pas par mesure d'usage mais par purge complète du trousseau de
+clés.
 
-⚠ **Alerte de sécurité au passage de cette mesure** : la capture
-d'écran fournie pour vérifier ce poste a exposé en clair la valeur
-complète d'une clé API OpenRouter (nommée « Free Router CC »). Cette
-valeur n'a été copiée nulle part dans ce document ni dans aucun autre
-fichier du dépôt — seul son existence est notée ici. **Cette clé doit
-être révoquée** (`openrouter.ai/workspaces/default/keys`) puisqu'elle a
-circulé en clair dans une capture, indépendamment de son usage réel
-($0,000 à ce jour).
+⚠ **Alerte de sécurité, résolue** : la capture fournie pour vérifier
+le poste OpenRouter avait exposé en clair la valeur complète d'une
+clé API (nommée « Free Router CC »). Cette valeur n'a été copiée nulle
+part dans ce document ni ailleurs dans le dépôt. **L'utilisateur a
+purgé l'intégralité des 13 clés du compte le 2026-08-26** — au-delà de
+la seule clé exposée, éliminant par la même occasion toute clé liée à
+d'autres outils personnels (9Router, Claude Code, Hermes Workspace…).
+
+**Conséquence opérationnelle, pas seulement financière** : la clé
+`OAuth: ori` faisant partie du lot purgé, **le harnais Ori de Coach OS
+n'a plus d'identifiant OpenRouter valide**. Toute prochaine invocation
+d'Ori déclenchera `ori login` pour régénérer une clé — ce n'est pas un
+défaut, c'est le comportement attendu après une purge volontaire, mais
+il faut le savoir avant de supposer qu'Ori fonctionne encore tel quel.
 
 **Ce que ce zéro veut dire, et ce qu'il ne veut pas dire.** L'infrastructure
 technique actuelle de Coach OS coûte $0/mois parce qu'elle tourne
