@@ -17,7 +17,7 @@ Si cette ligne est vide, aucun sprint ne s'ouvre. Un sprint sans rock est du tra
 
 | S | Semaine | Résultat vérifiable le vendredi | Techniciens engagés | Tenu ? | Motif si non |
 |---|---|---|---|---|---|
-| 1 | 2026-08-04 → 2026-08-08 | `OFFRE_SPEC_v0.md` posé à `squad/01_CaptainAmerica_Vision/OFFRE_SPEC_v0.md` avec quatre sections nommées — `1. Nom de l'offre`, `2. Promesse (une phrase)`, `3. Entrées (ce que le client apporte)`, `4. Sorties (ce que le coaché obtient)` — et un verdict `dépend d'une personne nommée : oui/non` à la fin de chaque section, signé `CaptainAmerica`. | CaptainAmerica (Vision), BlackWidow (Specs) | | |
+| 1 | 2026-08-04 → 2026-08-08 | `OFFRE_SPEC_v0.md` posé à `squad/01_CaptainAmerica_Vision/OFFRE_SPEC_v0.md` avec quatre sections nommées — `1. Nom de l'offre`, `2. Promesse (une phrase)`, `3. Entrées (ce que le client apporte)`, `4. Sorties (ce que le coaché obtient)` — et un verdict `dépend d'une personne nommée : oui/non` à la fin de chaque section, signé `CaptainAmerica`. | CaptainAmerica (Vision), BlackWidow (Specs) | **Oui**, 2026-08-27 | Le livrable est complet (4 sections, verdicts, signature), hors fenêtre calendaire comme les autres domaines. Mais le **rock du mois n'est pas atteint** : la section « Entrées », transcrite mot pour mot du Master Agreement 001, décrit un rôle (immersion FDE) tenu aujourd'hui par une seule personne — verdict `oui` sur cette section. 3 sections sur 4 ne nomment personne, 1 sur 4 le fait structurellement. Nommé plutôt qu'arrondi en succès. |
 | 2 | 2026-08-11 → 2026-08-15 | `ARCHITECTURE_v0.md` posé à `squad/02_IronMan_Architecture/ARCHITECTURE_v0.md` listant **3 à 5 modules** de l'offre (un par ligne), chacun avec ses `entrée`, `sortie`, `dépendance amont`, `dépendance aval`, et un champ `personne nommée requise : non`. Verdict : aucun module n'a `oui` dans ce dernier champ. | IronMan (Architecture), Thor (PowerFeatures) | | |
 | 3 | 2026-08-18 → 2026-08-22 | Deux artefacts posés : `UX_FLOW_v0.md` à `squad/06_Hawkeye_UX/UX_FLOW_v0.md` listant **5 étapes numérotées** du parcours coaché (de l'entrée à la sortie de l'offre), et `DS_TOKENS_v0.json` à `squad/07_ScarletWitch_DesignSystem/DS_TOKENS_v0.json` contenant au minimum `couleurs`, `typographie`, `espacement` (≥ 5 entrées par clé). | Hawkeye (UX), ScarletWitch (DesignSystem) | | |
 | 4 | 2026-08-25 → 2026-08-29 | `ACCEPTANCE_v0.md` posé à `squad/05_BlackWidow_Specs/ACCEPTANCE_v0.md` listant **un critère d'acceptation par sortie du S2**, chaque critère formulé `Étant donné … Quand … Alors …`, et `QA_REPORT_v0.md` posé à `squad/04_Hulk_QA/QA_REPORT_v0.md` reprenant chaque critère avec un statut `passé / échoué / bloqué` et un verdict final `0 critère dépend d'une personne nommée` (sinon remontée à Summers). | BlackWidow (Specs), Hulk (QA) | | |
@@ -40,7 +40,7 @@ Un fait par ligne. Pas d'arbitrage — l'arbitrage est à Summers.
 
 | Date | Fait | Motif |
 |---|---|---|
-| | | |
+| 2026-08-27 | La section « Entrées » de `OFFRE_SPEC_v0.md` dépend structurellement d'une personne nommée (le rôle FDE, tenu par l'architecte). Le rock « offre reproductible, ne dépendant d'aucune personne nommée » n'est donc pas atteint tant que la méthode de collecte des entrées (immersion FDE) n'est pas reformulée en un processus reproductible — formulaire, audit structuré, questionnaire. Touche aussi le domaine 2 (parcours de livraison) et le domaine 1 (mandat de rôle). | Rock non atteint sur un point précis, nommé plutôt qu'arrondi. |
 
 ## Mois clos
 
