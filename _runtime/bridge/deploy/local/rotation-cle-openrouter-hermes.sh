@@ -14,6 +14,16 @@
 
 set -euo pipefail
 
+# Sans ca, un lancement direct de bash.exe (ex: `& "...bash.exe" script.sh`
+# depuis PowerShell) demarre un shell non-login qui ne charge PAS
+# /etc/profile — date/grep/awk deviennent introuvables meme s'ils
+# existent juste a cote de bash.exe. Mesure du 2026-08-27 : le premier
+# essai a avorte a la ligne `date` sans toucher le fichier.
+case ":$PATH:" in
+  *:/usr/bin:*) ;;
+  *) export PATH="/usr/bin:/mingw64/bin:$PATH" ;;
+esac
+
 ENV_FILE="/c/Users/amado/AppData/Local/hermes/.env"
 
 if [ ! -f "$ENV_FILE" ]; then

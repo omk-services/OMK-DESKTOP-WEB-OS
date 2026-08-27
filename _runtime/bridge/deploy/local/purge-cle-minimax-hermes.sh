@@ -15,6 +15,20 @@
 
 set -euo pipefail
 
+# Meme piege que le script OpenRouter : un bash.exe lance directement en
+# argument (non-login) ne charge pas /etc/profile, donc grep devient
+# introuvable et `if ! grep ...` prend le mauvais chemin en silence —
+# exactement le defaut "l'instrument accuse le mauvais coupable".
+case ":$PATH:" in
+  *:/usr/bin:*) ;;
+  *) export PATH="/usr/bin:/mingw64/bin:$PATH" ;;
+esac
+
+# Garde explicite : si grep manque encore malgre le PATH corrige, on
+# s'arrete bruyamment plutot que de laisser `if ! grep` prendre le
+# mauvais chemin et conclure "rien a faire" a tort.
+command -v grep >/dev/null 2>&1 || { echo "grep introuvable — environnement bash casse, corrige le PATH avant de relancer." >&2; exit 1; }
+
 ENV_FILE="/c/Users/amado/AppData/Local/hermes/.env"
 
 if [ ! -f "$ENV_FILE" ]; then
