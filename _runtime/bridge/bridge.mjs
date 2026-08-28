@@ -128,6 +128,69 @@ function sondeCibleFS(invocation) {
   };
 }
 
+// --- Sonde WSL -------------------------------------------------------------
+// Une sonde ne mesure que le systeme d'ou elle part. Le sondage du 2026-08-24
+// tournait uniquement cote Windows et declarait `dsh`, `prime-agent`,
+// `opencode` et `grok` introuvables : ils sont installes en Linux, dans WSL,
+// et repondent. Conclure "non installe" depuis un seul cote d'une frontiere
+// WSL est une erreur de methode, pas une donnee.
+//
+// Piege : `wsl -- <chemin>` demarre un shell NON-login (ni .bashrc ni
+// .profile), donc ~/.local/bin manque au PATH -- c'est precisement ce qui
+// rendait ces harnais invisibles a Ori. On prefixe donc le PATH nous-memes.
+
+const WSL_DISTRO = process.env.COACH_OS_WSL_DISTRO || 'Ubuntu-24.04';
+
+function wslDisponible() {
+  if (process.platform !== 'win32') return false;
+  try {
+    execFileSync('wsl.exe', ['-d', WSL_DISTRO, '--', 'true'], {
+      timeout: 20000, windowsHide: true, stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function sortieWsl(args, timeout = 20000) {
+  // wsl.exe emet ses propres messages en UTF-16 ; la sortie du programme
+  // Linux est en UTF-8. Retirer les octets nuls rend les deux lisibles.
+  return execFileSync('wsl.exe', args, {
+    timeout, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'],
+  }).toString('utf8').replace(/\0/g, '').trim();
+}
+
+function sondeCibleWSL(cible) {
+  if (!cible || !/^[a-z0-9][a-z0-9._-]*$/i.test(cible)) {
+    return { joignable: false, chemin: null, motif: 'cible non sondable cote WSL (pas un identifiant)' };
+  }
+  try {
+    const chemin = sortieWsl([
+      '-d', WSL_DISTRO, '--', 'sh', '-c',
+      // `|| true` est indispensable : `command -v` sort en code 1 quand il ne
+      // trouve rien, ce qui ferait lever execFileSync et transformerait une
+      // absence banale en "sonde en echec". Un instrument qui confond
+      // "absent" et "je n ai pas pu regarder" accuse le mauvais coupable.
+      `export PATH="$HOME/.local/bin:$PATH"; command -v ${cible} 2>/dev/null || true`,
+    ]).split(/\r?\n/)[0].trim();
+    if (chemin) return { joignable: true, chemin, motif: `trouve dans WSL ${WSL_DISTRO}` };
+    return { joignable: false, chemin: null, motif: `absent du PATH de WSL ${WSL_DISTRO}` };
+  } catch (e) {
+    return { joignable: false, chemin: null, motif: `sonde WSL en echec (${e.code || 'erreur'})` };
+  }
+}
+
+function obtenirVersionWSL(chemin) {
+  try {
+    const out = sortieWsl(['-d', WSL_DISTRO, '--', chemin, '--version'], 15000)
+      .split(/\r?\n/)[0].trim();
+    return out.slice(0, 100) || null;
+  } catch {
+    return null;
+  }
+}
+
 function sondeHttp(url) {
   return new Promise((res) => {
     let u;
@@ -162,19 +225,51 @@ function obtenirVersion(chemin) {
 /** Sonde tous les harnais. Async a cause des harnais http. */
 async function sonderTout() {
   const resultats = [];
+  // Un seul test d'existence de WSL pour tout le run : le faire par harnais
+  // couterait une vingtaine de demarrages de VM pour la meme reponse.
+  const wslOk = wslDisponible();
   for (const h of HARNAIS) {
     const type = h.invocation.type;
     let r;
     if (type === 'sdk') {
-      r = { joignable: null, chemin: null, motif: 'type sdk, non sondable en ligne de commande' };
+      // Un point d'entree sdk n'est pas une ligne de commande cote Windows,
+      // mais il peut tres bien exister comme binaire dans WSL (cas mesure de
+      // prime-agent) : on tente donc quand meme ce cote-la.
+      const w = wslOk ? sondeCibleWSL(h.invocation.cible) : { joignable: false, chemin: null, motif: 'WSL indisponible' };
+      r = w.joignable
+        ? { ...w, windows: { joignable: false, chemin: null, motif: 'type sdk, non sondable cote Windows' }, wsl: w, cote: 'wsl' }
+        : { joignable: null, chemin: null, motif: 'type sdk, non sondable en ligne de commande',
+            windows: { joignable: null, chemin: null, motif: 'type sdk' }, wsl: w, cote: 'aucun' };
     } else if (type === 'http') {
-      r = await sondeHttp(h.invocation.cible);
+      const w = await sondeHttp(h.invocation.cible);
+      r = { ...w, windows: w, wsl: { joignable: null, chemin: null, motif: 'type http, hors frontiere WSL' },
+            cote: w.joignable ? 'reseau' : 'aucun' };
     } else {
-      r = sondeCibleFS(h.invocation);
+      const win = sondeCibleFS(h.invocation);
+      const wsl = wslOk ? sondeCibleWSL(h.invocation.cible) : { joignable: false, chemin: null, motif: 'WSL indisponible' };
+      const cote = win.joignable && wsl.joignable ? 'les-deux'
+                 : win.joignable ? 'windows'
+                 : wsl.joignable ? 'wsl'
+                 : 'aucun';
+      // Windows d'abord quand les deux repondent : le bridge s'execute sous
+      // Windows, un chemin natif y est invocable sans traverser la frontiere.
+      const gagnant = win.joignable ? win : (wsl.joignable ? wsl : win);
+      r = {
+        joignable: win.joignable || wsl.joignable,
+        chemin: gagnant.chemin,
+        motif: cote === 'les-deux'
+          ? `present des deux cotes (Windows: ${win.chemin} | WSL: ${wsl.chemin})`
+          : cote === 'aucun'
+            ? `introuvable des deux cotes (Windows: ${win.motif} | WSL: ${wsl.motif})`
+            : gagnant.motif,
+        windows: win, wsl, cote,
+      };
     }
     let version = null;
-    if (r.joignable === true && (type === 'cli' || type === 'desktop')) {
-      version = obtenirVersion(r.chemin || h.invocation.cible);
+    if (r.joignable === true && (type === 'cli' || type === 'desktop' || type === 'sdk')) {
+      version = r.cote === 'wsl' && r.chemin
+        ? obtenirVersionWSL(r.chemin)
+        : obtenirVersion(r.chemin || h.invocation.cible);
     }
     resultats.push({ id: h.id, ...r, version });
   }
@@ -249,7 +344,20 @@ function reconcilier(resultats) {
     } else {
       h.note = `${noteBase} | sonde ${AUJOURDHUI} : ${r.motif}`.replace(/^\| /, '');
     }
-    h.sonde = { joignable: r.joignable, chemin: r.chemin, motif: r.motif, version: r.version, sonde_le: AUJOURDHUI };
+    // Les cinq premieres cles sont celles de l'ancien format : les consommateurs
+    // existants (dont invocableRapide) continuent de fonctionner sans changement.
+    // `cote`, `windows` et `wsl` s'y ajoutent pour qu'on ne puisse plus relire
+    // "introuvable" sans savoir de quel cote de la frontiere on a regarde.
+    h.sonde = {
+      joignable: r.joignable,
+      chemin: r.chemin,
+      motif: r.motif,
+      version: r.version,
+      sonde_le: AUJOURDHUI,
+      cote: r.cote || null,
+      windows: r.windows || null,
+      wsl: r.wsl || null,
+    };
   }
 }
 
