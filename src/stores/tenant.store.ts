@@ -98,12 +98,39 @@ export const useTenantStore = create<TenantState & TenantActions>((set, get) => 
   bootstrap: async (): Promise<void> => {
     set({ isLoading: true, error: null });
     try {
-      // Phase 3 hook: read memberships from Supabase and populate knownTenants.
-      // Today there is no auth UI, so this is a no-op beyond confirming the
-      // persisted tenant is still valid.
-      const persisted = readPersistedTenant();
+      let persisted = readPersistedTenant();
+      const newKnownTenants = [{ tenantId: TENANT_DEMO_COACH, displayName: 'demo-coach' }];
+
+      const { supabase, supabaseConfigured } = await import('../lib/supabase');
+      if (supabaseConfigured) {
+        const { maybeUseSupabaseMembershipBackend } = await import('../lib/auth/backend.supabase');
+        maybeUseSupabaseMembershipBackend();
+
+        const { data: sessionData } = await supabase.auth.getSession();
+
+        if (sessionData?.session?.user) {
+          const userId = sessionData.session.user.id;
+          const { listerTenantsPourUser } = await import('../lib/auth/memberships');
+          const tenantsResult = await listerTenantsPourUser(userId);
+
+          if (tenantsResult.ok && tenantsResult.tenants.length > 0) {
+            newKnownTenants.length = 0;
+            newKnownTenants.push(...tenantsResult.tenants.map(t => ({
+              tenantId: t,
+              displayName: t // fallback displayName
+            })));
+
+            if (!newKnownTenants.some(t => t.tenantId === persisted)) {
+              persisted = newKnownTenants[0].tenantId;
+            }
+          }
+        }
+      }
+
       set({
         activeTenantId: persisted,
+        knownTenants: newKnownTenants,
+        displayName: newKnownTenants.find(t => t.tenantId === persisted)?.displayName ?? persisted,
         isLoading: false,
       });
     } catch (err) {
@@ -116,6 +143,14 @@ export const useTenantStore = create<TenantState & TenantActions>((set, get) => 
 
   switchTenant: async (next: TenantId): Promise<void> => {
     set({ isLoading: true, error: null });
+
+    const previousTenantId = get().activeTenantId;
+    if (previousTenantId !== next) {
+      // Lazy import pour eviter dependance circulaire (tenant.store <-> cms.store)
+      const { useCmsStore } = await import('../lib/cms/cms.store');
+      useCmsStore.getState().purge(previousTenantId);
+    }
+
     persistTenant(next);
     set({
       activeTenantId: next,

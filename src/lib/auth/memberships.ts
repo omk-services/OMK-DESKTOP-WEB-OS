@@ -52,6 +52,8 @@ import {
   MEMBERSHIP_MAX_OWNERS,
   MULTIPLE_ACTIVE_POLICY,
 } from '../../../_config/cms/memberships';
+import { supabase, supabaseConfigured } from '../supabase';
+
 
 /* ──────────────────────────────────────────────────────────────────────────
  * Résultats taggués
@@ -613,12 +615,27 @@ export async function listerTenantsPourUser(
   // Côté Supabase, on ferait `select distinct org_id where user_id = $1 and status = 'active'`.
   const seen = new Set<string>();
   const allCollections: TenantId[] = [];
-  const known = _backend instanceof InMemoryBackend ? _backend.__knownTenants() : [];
-  for (const t of known) {
-    const rows = await _backend.list(t);
-    if (rows.some((m) => m.userId === userId && m.status === 'active') && !seen.has(t)) {
-      seen.add(t);
-      allCollections.push(t);
+  if (_backend instanceof InMemoryBackend) {
+    const known = _backend.__knownTenants();
+    for (const t of known) {
+      const rows = await _backend.list(t);
+      if (rows.some((m) => m.userId === userId && m.status === 'active') && !seen.has(t)) {
+        seen.add(t);
+        allCollections.push(t);
+      }
+    }
+  } else if (supabaseConfigured) {
+    const { data, error } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+    if (error) return { ok: false, raison: error.message };
+    for (const row of data || []) {
+      if (!seen.has(row.org_id)) {
+        seen.add(row.org_id);
+        allCollections.push(row.org_id as TenantId);
+      }
     }
   }
   return { ok: true, tenants: allCollections };
